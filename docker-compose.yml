@@ -58,11 +58,9 @@ services:
       - eyed-net
 
   nginx:
-    image: nginx:1.27-alpine
+    image: ghcr.io/ignaciolondono/eyedbio-nginx:latest
+    pull_policy: always
     container_name: eyed-bio-nginx
-    configs:
-      - source: eyed_nginx_conf
-        target: /etc/nginx/nginx.conf
     ports:
       - "${APP_PORT:-9090}:9090"
     volumes:
@@ -90,7 +88,3 @@ volumes:
 networks:
   eyed-net:
     name: eyed-bio-net
-
-configs:
-  eyed_nginx_conf:
-    file: ./nginx/nginx.conf

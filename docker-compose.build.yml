@@ -5,3 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile
     image: ghcr.io/ignaciolondono/eyedbio:latest
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: ghcr.io/ignaciolondono/eyedbio-nginx:latest
