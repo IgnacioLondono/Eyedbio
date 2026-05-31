@@ -239,20 +239,20 @@ function DashboardContent() {
           tab === "account" ? "lg:grid-cols-1" : "lg:grid-cols-2"
         }`}
       >
-        <div className="relative z-20 min-w-0">
-          <div className="flex gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6 overflow-x-auto">
+        <div className="relative z-20 min-w-0 w-full max-w-2xl">
+          <div className="grid grid-cols-5 gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6 w-full max-w-xl">
             {tabs.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex shrink-0 items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                className={`flex items-center justify-center gap-1 py-2.5 px-1 rounded-lg text-[11px] sm:text-xs font-medium transition-all ${
                   tab === t.id
                     ? "bg-purple-600 text-white shadow-lg"
                     : "text-white/50 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <t.icon className="w-4 h-4 shrink-0" />
-                {t.label}
+                <t.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="truncate">{t.label}</span>
               </button>
             ))}
           </div>
@@ -525,25 +525,6 @@ function DashboardContent() {
         </div>
       </div>
 
-      <style jsx global>{`
-        .input-field {
-          width: 100%;
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          border-radius: 0.75rem;
-          padding: 0.75rem 1rem;
-          color: white;
-          font-size: 0.875rem;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        .input-field:focus {
-          border-color: rgba(168, 85, 247, 0.5);
-        }
-        .input-field option {
-          background: #1a1a2e;
-        }
-      `}</style>
     </div>
   );
 }

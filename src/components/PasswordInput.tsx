@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, KeyRound } from "lucide-react";
 
 interface Props {
   id?: string;
@@ -11,6 +11,7 @@ interface Props {
   autoComplete?: string;
   required?: boolean;
   minLength?: number;
+  variant?: "auth" | "dashboard";
 }
 
 export default function PasswordInput({
@@ -21,8 +22,11 @@ export default function PasswordInput({
   autoComplete,
   required,
   minLength,
+  variant = "auth",
 }: Props) {
   const [visible, setVisible] = useState(false);
+  const inputClass = variant === "dashboard" ? "input-field" : "auth-input";
+  const paddingLeft = variant === "dashboard" ? "pl-10" : "";
 
   return (
     <div className="relative">
@@ -35,15 +39,22 @@ export default function PasswordInput({
         autoComplete={autoComplete}
         required={required}
         minLength={minLength}
-        className="auth-input pr-11"
+        className={`${inputClass} w-full pr-11 ${paddingLeft}`}
       />
+      {variant === "dashboard" && (
+        <KeyRound
+          className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400/70 pointer-events-none z-[1]"
+          aria-hidden
+        />
+      )}
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-[1] p-0.5 text-white/45 hover:text-white/80 transition-colors"
         aria-label={visible ? "Ocultar contraseña" : "Mostrar contraseña"}
+        tabIndex={-1}
       >
-        {visible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        {visible ? <EyeOff className="w-4 h-4" strokeWidth={2} /> : <Eye className="w-4 h-4" strokeWidth={2} />}
       </button>
     </div>
   );

@@ -115,7 +115,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
     : "";
 
   return (
-    <form onSubmit={handleSave} className="space-y-6">
+    <form onSubmit={handleSave} className="space-y-6 max-w-lg">
       <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
         <div className="flex items-start gap-3 mb-4">
           <div className="p-2 rounded-lg bg-purple-500/15 text-purple-400">
@@ -131,7 +131,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
 
         {memberSince && (
           <div className="flex items-center gap-2 text-xs text-white/35 mb-5 pb-4 border-b border-white/5">
-            <CalendarDays className="w-3.5 h-3.5" />
+            <CalendarDays className="w-3.5 h-3.5 shrink-0" />
             Miembro desde {memberSince}
           </div>
         )}
@@ -140,7 +140,6 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
           <div>
             <label className="block text-sm text-white/60 mb-2">Email</label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
               <input
                 type="email"
                 value={email}
@@ -148,25 +147,32 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 className="input-field pl-10"
                 required
               />
+              <Mail
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400/70 pointer-events-none z-[1]"
+                aria-hidden
+              />
             </div>
           </div>
 
           <div>
             <label className="block text-sm text-white/60 mb-2">Nombre de usuario</label>
-            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl overflow-hidden focus-within:border-purple-500/50 transition-colors">
-              <span className="pl-3 pr-1 text-white/30 text-sm font-mono whitespace-nowrap">
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35 text-xs font-mono pointer-events-none z-[1]">
                 eyed.bio/
               </span>
-              <AtSign className="w-4 h-4 text-white/25 shrink-0" />
               <input
                 type="text"
                 value={username}
                 onChange={(e) =>
                   setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))
                 }
-                className="flex-1 bg-transparent py-3 pr-3 pl-1 text-white outline-none font-mono text-sm"
+                className="input-field pl-[5.5rem] pr-10 font-mono text-sm"
                 required
                 minLength={3}
+              />
+              <AtSign
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400/70 pointer-events-none z-[1]"
+                aria-hidden
               />
             </div>
             <p className="text-[11px] text-white/30 mt-1.5">
@@ -196,6 +202,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
             onChange={setCurrentPassword}
             autoComplete="current-password"
             required
+            variant="dashboard"
           />
         </div>
 
@@ -207,6 +214,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
             placeholder="Mínimo 8 caracteres"
             autoComplete="new-password"
             minLength={8}
+            variant="dashboard"
           />
         </div>
 
@@ -218,6 +226,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
               onChange={setConfirmPassword}
               autoComplete="new-password"
               minLength={8}
+              variant="dashboard"
             />
           </div>
         )}
