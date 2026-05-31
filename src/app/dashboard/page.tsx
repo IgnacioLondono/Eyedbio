@@ -6,8 +6,6 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ExternalLink,
-  Plus,
-  Trash2,
   Save,
   UserRound,
   Palette,
@@ -18,22 +16,19 @@ import {
 } from "lucide-react";
 import {
   Profile,
-  SocialLink,
-  SocialPlatform,
   BackgroundEffect,
   BackgroundType,
   NameEffect,
 } from "@/types/profile";
 import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
-import { createEmptyLink } from "@/lib/profile-mapper";
 import { resolveBackgroundType } from "@/lib/media-config";
-import { PLATFORM_CONFIG } from "@/lib/platforms";
 import ProfileCard from "@/components/ProfileCard";
 import BackgroundEffects from "@/components/BackgroundEffects";
 import BackgroundMedia from "@/components/BackgroundMedia";
 import FileUpload from "@/components/FileUpload";
 import Logo from "@/components/Logo";
 import AccountSettings from "@/components/AccountSettings";
+import LinkEditor from "@/components/LinkEditor";
 
 type Tab = "general" | "links" | "media" | "appearance" | "account";
 
@@ -148,23 +143,6 @@ function DashboardContent() {
     } finally {
       setSaving(false);
     }
-  };
-
-  const addLink = () => {
-    if (!profile) return;
-    update({ links: [...profile.links, createEmptyLink()] });
-  };
-
-  const updateLink = (id: string, partial: Partial<SocialLink>) => {
-    if (!profile) return;
-    update({
-      links: profile.links.map((l) => (l.id === id ? { ...l, ...partial } : l)),
-    });
-  };
-
-  const removeLink = (id: string) => {
-    if (!profile) return;
-    update({ links: profile.links.filter((l) => l.id !== id) });
   };
 
   if (!profile) {
@@ -295,61 +273,10 @@ function DashboardContent() {
             )}
 
             {tab === "links" && (
-              <>
-                {profile.links.length === 0 && (
-                  <p className="text-white/40 text-sm text-center py-2">
-                    Pulsa el botón de abajo para añadir tu primer enlace.
-                  </p>
-                )}
-                {profile.links.map((link) => (
-                  <div
-                    key={link.id}
-                    className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-3"
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <select
-                        value={link.platform}
-                        onChange={(e) =>
-                          updateLink(link.id, {
-                            platform: e.target.value as SocialPlatform,
-                          })
-                        }
-                        className="input-field flex-1"
-                      >
-                        {Object.entries(PLATFORM_CONFIG).map(([key, cfg]) => (
-                          <option key={key} value={key}>
-                            {cfg.label}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={() => removeLink(link.id)}
-                        className="p-2 text-red-400/60 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors shrink-0"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      value={link.url}
-                      onChange={(e) => updateLink(link.id, { url: e.target.value })}
-                      placeholder={
-                        link.platform === "email"
-                          ? "mailto:tu@email.com"
-                          : "https://..."
-                      }
-                      className="input-field"
-                    />
-                  </div>
-                ))}
-                <button
-                  onClick={addLink}
-                  className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-white/10 rounded-xl text-white/40 hover:text-white hover:border-purple-500/30 hover:bg-purple-500/5 transition-all text-sm"
-                >
-                  <Plus className="w-4 h-4" />
-                  Añadir enlace
-                </button>
-              </>
+              <LinkEditor
+                links={profile.links}
+                onChange={(links) => update({ links })}
+              />
             )}
 
             {tab === "media" && (
