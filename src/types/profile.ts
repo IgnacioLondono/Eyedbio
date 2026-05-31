@@ -23,6 +23,9 @@ export interface ProfileSettings {
   backgroundUrl: string;
   backgroundEffect: BackgroundEffect;
   accentColor: string;
+  cardColor: string;
+  cardColorSecondary: string;
+  textColor: string;
   profileOpacity: number;
   profileBlur: number;
   glowUsername: boolean;
@@ -48,9 +51,12 @@ export interface Profile {
 }
 
 export const DEFAULT_SETTINGS: ProfileSettings = {
-  backgroundUrl: "https://images.unsplash.com/photo-1614850523459-c2f4c699c982?w=1920&q=80",
+  backgroundUrl: "",
   backgroundEffect: "stars",
   accentColor: "#a855f7",
+  cardColor: "#ffffff",
+  cardColorSecondary: "#a855f7",
+  textColor: "#ffffff",
   profileOpacity: 0.15,
   profileBlur: 20,
   glowUsername: true,

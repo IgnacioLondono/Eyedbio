@@ -1,3 +1,5 @@
+import type { BackgroundType } from "@/types/profile";
+
 export type UploadKind = "avatar" | "background" | "audio";
 
 export const UPLOAD_LIMITS: Record<UploadKind, number> = {
@@ -161,4 +163,10 @@ export function isUploadAllowed(kind: UploadKind, file: Pick<File, "name" | "typ
   if (ext && ALLOWED_EXTENSIONS[kind].includes(ext)) return true;
 
   return false;
+}
+
+export function detectBackgroundTypeFromUrl(url: string): BackgroundType {
+  if (/\.(mp4|webm|mov)(\?|$)/i.test(url)) return "video";
+  if (/\.gif(\?|$)/i.test(url)) return "gif";
+  return "image";
 }

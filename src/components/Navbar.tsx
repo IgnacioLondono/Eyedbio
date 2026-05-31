@@ -14,7 +14,7 @@ export default function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Logo href={isLoggedIn ? "/dashboard" : "/"} />
+        <Logo href="/" />
 
         <div className="hidden md:flex items-center gap-8">
           {!isLoggedIn && (

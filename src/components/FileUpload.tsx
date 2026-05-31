@@ -1,18 +1,121 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Upload, Loader2, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Upload, Loader2, X, ImageIcon, Film, Image as ImageLucide } from "lucide-react";
 import { BackgroundType } from "@/types/profile";
-import { ACCEPT_ATTR, UploadKind } from "@/lib/media-config";
+import { ACCEPT_ATTR, UploadKind, detectBackgroundTypeFromUrl } from "@/lib/media-config";
 
 interface Props {
   kind: UploadKind;
   label: string;
   hint?: string;
   currentUrl?: string;
+  mediaType?: BackgroundType;
   accept?: string;
   onUploaded: (url: string, backgroundType?: BackgroundType) => void;
   onClear?: () => void;
+}
+
+function resolveBackgroundMediaType(
+  url: string,
+  mediaType?: BackgroundType
+): BackgroundType {
+  if (mediaType) return mediaType;
+  return detectBackgroundTypeFromUrl(url);
+}
+
+function MediaTypeBadge({ type }: { type: BackgroundType }) {
+  const labels: Record<BackgroundType, string> = {
+    image: "Imagen",
+    gif: "GIF",
+    video: "Video",
+  };
+
+  const icons: Record<BackgroundType, typeof ImageLucide> = {
+    image: ImageLucide,
+    gif: ImageLucide,
+    video: Film,
+  };
+
+  const Icon = icons[type];
+
+  return (
+    <span className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/60 text-white text-[10px] font-medium">
+      <Icon className="w-3 h-3" />
+      {labels[type]}
+    </span>
+  );
+}
+
+function MediaPreview({
+  kind,
+  currentUrl,
+  mediaType,
+}: {
+  kind: UploadKind;
+  currentUrl: string;
+  mediaType?: BackgroundType;
+}) {
+  const [broken, setBroken] = useState(false);
+  const resolvedType = resolveBackgroundMediaType(currentUrl, mediaType);
+  const isVideo = resolvedType === "video";
+
+  useEffect(() => {
+    setBroken(false);
+  }, [currentUrl]);
+
+  if (kind === "avatar") {
+    if (broken) {
+      return (
+        <div className="w-20 h-20 mx-auto my-3 rounded-full bg-white/5 flex items-center justify-center">
+          <ImageIcon className="w-8 h-8 text-white/30" />
+        </div>
+      );
+    }
+    return (
+      <img
+        src={currentUrl}
+        alt="Avatar"
+        className="w-20 h-20 object-cover mx-auto my-3 rounded-full"
+        onError={() => setBroken(true)}
+      />
+    );
+  }
+
+  if (kind === "background") {
+    if (broken && !isVideo) {
+      return (
+        <div className="h-40 bg-gradient-to-br from-[#1a1033] via-[#0a0a0f] to-[#1e1b4b] flex items-center justify-center">
+          <ImageIcon className="w-8 h-8 text-white/30" />
+        </div>
+      );
+    }
+    return (
+      <div className="relative h-40">
+        {isVideo ? (
+          <video
+            src={currentUrl}
+            className="w-full h-full object-cover"
+            muted
+            loop
+            autoPlay
+            playsInline
+            onError={() => setBroken(true)}
+          />
+        ) : (
+          <img
+            src={currentUrl}
+            alt="Fondo"
+            className="w-full h-full object-cover"
+            onError={() => setBroken(true)}
+          />
+        )}
+        <MediaTypeBadge type={resolvedType} />
+      </div>
+    );
+  }
+
+  return null;
 }
 
 export default function FileUpload({
@@ -20,13 +123,16 @@ export default function FileUpload({
   label,
   hint,
   currentUrl,
+  mediaType,
   accept,
   onUploaded,
   onClear,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState("");
+  const isBackground = kind === "background";
 
   const handleFile = async (file: File) => {
     setError("");
@@ -54,27 +160,22 @@ export default function FileUpload({
     }
   };
 
-  const isVideo = currentUrl?.match(/\.(mp4|webm|mov)(\?|$)/i);
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
+  };
+
   const isAudio = kind === "audio";
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm text-white/60">{label}</label>
+      {label && <label className="block text-sm text-white/60">{label}</label>}
 
       {currentUrl && (
         <div className="relative rounded-xl overflow-hidden border border-white/10 bg-white/5">
-          {kind === "avatar" && (
-            <img src={currentUrl} alt="Avatar" className="w-20 h-20 object-cover mx-auto my-3 rounded-full" />
-          )}
-          {kind === "background" && (
-            <div className="h-28">
-              {isVideo ? (
-                <video src={currentUrl} className="w-full h-full object-cover" muted loop autoPlay playsInline />
-              ) : (
-                <img src={currentUrl} alt="Fondo" className="w-full h-full object-cover" />
-              )}
-            </div>
-          )}
+          <MediaPreview kind={kind} currentUrl={currentUrl} mediaType={mediaType} />
           {isAudio && (
             <div className="p-4">
               <audio src={currentUrl} controls className="w-full h-8" />
@@ -84,7 +185,7 @@ export default function FileUpload({
             <button
               type="button"
               onClick={onClear}
-              className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white"
+              className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white z-10"
               aria-label="Quitar archivo"
             >
               <X className="w-3.5 h-3.5" />
@@ -93,19 +194,44 @@ export default function FileUpload({
         </div>
       )}
 
-      <button
-        type="button"
-        disabled={uploading}
-        onClick={() => inputRef.current?.click()}
-        className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-white/10 rounded-xl text-white/50 hover:text-white hover:border-purple-500/30 hover:bg-purple-500/5 transition-all text-sm disabled:opacity-50"
+      <div
+        onDragOver={(e) => {
+          if (!isBackground) return;
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={isBackground ? handleDrop : undefined}
       >
-        {uploading ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
-        ) : (
-          <Upload className="w-4 h-4" />
-        )}
-        {uploading ? "Subiendo..." : currentUrl ? "Cambiar archivo" : "Subir archivo"}
-      </button>
+        <button
+          type="button"
+          disabled={uploading}
+          onClick={() => inputRef.current?.click()}
+          className={`w-full flex flex-col items-center justify-center gap-2 py-5 border border-dashed rounded-xl text-white/50 hover:text-white hover:border-purple-500/30 hover:bg-purple-500/5 transition-all text-sm disabled:opacity-50 ${
+            dragOver ? "border-purple-500/50 bg-purple-500/10 text-white" : "border-white/10"
+          }`}
+        >
+          {uploading ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <Upload className="w-5 h-5" />
+          )}
+          <span>
+            {uploading
+              ? "Subiendo..."
+              : currentUrl
+                ? "Cambiar archivo"
+                : isBackground
+                  ? "Subir imagen, GIF o video"
+                  : "Subir archivo"}
+          </span>
+          {isBackground && !uploading && (
+            <span className="text-[11px] text-white/30">
+              Arrastra aquí o haz clic · JPG, PNG, WebP, GIF, MP4, WebM, MOV
+            </span>
+          )}
+        </button>
+      </div>
 
       <input
         ref={inputRef}

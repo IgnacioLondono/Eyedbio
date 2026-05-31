@@ -301,7 +301,7 @@ export default function LandingPage() {
 
       <footer className="border-t border-white/5 py-12 px-6">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <Logo href={null} size="sm" />
+          <Logo href="/" size="sm" />
           <p className="text-white/30 text-sm">
             © 2026 Eyed.bio — Todos los derechos reservados.
           </p>

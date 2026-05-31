@@ -10,6 +10,8 @@ interface Props {
   accentColor: string;
   glowIcons: boolean;
   monochromeIcons: boolean;
+  compact?: boolean;
+  mutedColor?: string;
 }
 
 export default function SocialLinks({
@@ -17,10 +19,14 @@ export default function SocialLinks({
   accentColor,
   glowIcons,
   monochromeIcons,
+  compact = false,
+  mutedColor = "rgba(255,255,255,0.3)",
 }: Props) {
   if (links.length === 0) {
     return (
-      <p className="text-white/30 text-sm italic">Sin enlaces aún</p>
+      <p className="text-sm italic" style={{ color: mutedColor }}>
+        Sin enlaces aún
+      </p>
     );
   }
 
@@ -28,12 +34,17 @@ export default function SocialLinks({
 
   if (visibleLinks.length === 0) {
     return (
-      <p className="text-white/30 text-sm italic">Sin enlaces aún</p>
+      <p className="text-sm italic" style={{ color: mutedColor }}>
+        Sin enlaces aún
+      </p>
     );
   }
 
+  const iconSize = compact ? "w-9 h-9" : "w-12 h-12";
+  const gap = compact ? "gap-2" : "gap-3";
+
   return (
-    <div className="flex flex-wrap justify-center gap-3">
+    <div className={`flex flex-wrap justify-center ${gap}`}>
       {visibleLinks.map((link, i) => {
         const config = PLATFORM_CONFIG[link.platform];
         const color = monochromeIcons ? accentColor : config.color;
@@ -44,13 +55,13 @@ export default function SocialLinks({
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 + i * 0.08 }}
+            initial={compact ? false : { opacity: 0, scale: 0.5 }}
+            animate={compact ? undefined : { opacity: 1, scale: 1 }}
+            transition={compact ? undefined : { delay: 0.3 + i * 0.08 }}
             whileHover={{ scale: 1.15, y: -2 }}
             whileTap={{ scale: 0.95 }}
             title={link.label ?? config.label}
-            className="flex items-center justify-center w-12 h-12 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors"
+            className={`flex items-center justify-center ${iconSize} rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors`}
             style={{
               color,
               filter: glowIcons ? `drop-shadow(0 0 8px ${color})` : undefined,

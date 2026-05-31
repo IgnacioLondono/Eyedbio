@@ -29,18 +29,30 @@ export default function BackgroundEffects({ effect, contained = false }: Props) 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationId: number;
+    let animationId = 0;
     let particles: Particle[] = [];
+    let running = false;
 
     const resize = () => {
       const width = contained ? canvas.offsetWidth : window.innerWidth;
       const height = contained ? canvas.offsetHeight : window.innerHeight;
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = Math.max(width, 1);
+      canvas.height = Math.max(height, 1);
     };
 
     const initParticles = () => {
-      const count = effect === "stars" ? 120 : effect === "snow" ? 80 : 100;
+      const count = contained
+        ? effect === "stars"
+          ? 50
+          : effect === "snow"
+            ? 35
+            : 45
+        : effect === "stars"
+          ? 120
+          : effect === "snow"
+            ? 80
+            : 100;
+
       particles = Array.from({ length: count }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -52,6 +64,8 @@ export default function BackgroundEffects({ effect, contained = false }: Props) 
     };
 
     const draw = () => {
+      if (!running) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       particles.forEach((p) => {
@@ -92,25 +106,36 @@ export default function BackgroundEffects({ effect, contained = false }: Props) 
       animationId = requestAnimationFrame(draw);
     };
 
-    resize();
-    initParticles();
-    draw();
+    const start = () => {
+      resize();
+      if (canvas.width <= 1 || canvas.height <= 1) {
+        requestAnimationFrame(start);
+        return;
+      }
+      initParticles();
+      running = true;
+      draw();
+    };
+
+    start();
 
     const handleResize = () => {
       resize();
-      if (canvas.width > 0 && canvas.height > 0) {
+      if (canvas.width > 1 && canvas.height > 1) {
         initParticles();
       }
     };
 
     window.addEventListener("resize", handleResize);
+    const observeTarget = contained ? canvas.parentElement : null;
     const observer =
-      contained && typeof ResizeObserver !== "undefined"
+      contained && observeTarget && typeof ResizeObserver !== "undefined"
         ? new ResizeObserver(handleResize)
         : null;
-    observer?.observe(canvas);
+    if (observeTarget) observer?.observe(observeTarget);
 
     return () => {
+      running = false;
       cancelAnimationFrame(animationId);
       window.removeEventListener("resize", handleResize);
       observer?.disconnect();
@@ -122,7 +147,7 @@ export default function BackgroundEffects({ effect, contained = false }: Props) 
   return (
     <canvas
       ref={canvasRef}
-      className={`${contained ? "absolute inset-0" : "fixed inset-0"} pointer-events-none z-10`}
+      className={`${contained ? "absolute inset-0 h-full w-full" : "fixed inset-0"} pointer-events-none z-[1]`}
       aria-hidden="true"
     />
   );

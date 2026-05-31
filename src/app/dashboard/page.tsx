@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ExternalLink,
   Plus,
@@ -23,6 +24,7 @@ import {
   BackgroundType,
 } from "@/types/profile";
 import { createEmptyLink } from "@/lib/profile-mapper";
+import { detectBackgroundTypeFromUrl } from "@/lib/media-config";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
 import ProfileCard from "@/components/ProfileCard";
 import BackgroundEffects from "@/components/BackgroundEffects";
@@ -32,9 +34,35 @@ import Logo from "@/components/Logo";
 
 type Tab = "general" | "links" | "media" | "appearance";
 
+const VALID_TABS: Tab[] = ["general", "links", "media", "appearance"];
+
+function parseTab(value: string | null): Tab {
+  if (value && VALID_TABS.includes(value as Tab)) return value as Tab;
+  return "general";
+}
+
+function DashboardLoading() {
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
+
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [tab, setTab] = useState<Tab>("general");
+  const [tab, setTabState] = useState<Tab>(() => parseTab(searchParams.get("tab")));
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -48,6 +76,15 @@ export default function DashboardPage() {
       .then(setProfile)
       .catch(() => setError("No se pudo cargar el perfil"));
   }, []);
+
+  useEffect(() => {
+    setTabState(parseTab(searchParams.get("tab")));
+  }, [searchParams]);
+
+  const setTab = (nextTab: Tab) => {
+    setTabState(nextTab);
+    router.replace(`${pathname}?tab=${nextTab}`, { scroll: false });
+  };
 
   const update = (partial: Partial<Profile>) => {
     if (!profile) return;
@@ -134,7 +171,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <header className="border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Logo href="/dashboard" size="sm" title="Inicio del editor" />
+          <Logo href="/" size="sm" />
 
           <div className="flex items-center gap-2">
             <Link
@@ -176,12 +213,12 @@ export default function DashboardPage() {
 
       <div className="max-w-7xl mx-auto px-6 py-8 grid lg:grid-cols-2 gap-8 items-start">
         <div className="relative z-20 min-w-0">
-          <div className="flex gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6 overflow-x-auto">
+          <div className="grid grid-cols-4 gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6">
             {tabs.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex-1 min-w-[80px] flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                   tab === t.id
                     ? "bg-purple-600 text-white shadow-lg"
                     : "text-white/50 hover:text-white hover:bg-white/5"
@@ -284,28 +321,43 @@ export default function DashboardPage() {
 
             {tab === "media" && (
               <>
-                <FileUpload
-                  kind="background"
-                  label="Fondo (imagen, GIF o video)"
-                  hint="Imágenes, GIFs, MP4, WebM o MOV · máx. 50MB"
-                  currentUrl={profile.settings.backgroundUrl}
-                  onUploaded={(url, backgroundType) => {
-                    updateSettings({ backgroundUrl: url });
-                    if (backgroundType) update({ backgroundType });
-                  }}
-                />
-                <Field label="URL del fondo (alternativa)">
-                  <input
-                    type="url"
-                    value={profile.settings.backgroundUrl}
-                    onChange={(e) => {
-                      updateSettings({ backgroundUrl: e.target.value });
-                      update({ backgroundType: "image" });
-                    }}
-                    className="input-field"
-                    placeholder="https://..."
-                  />
-                </Field>
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-white">Fondo del perfil</h3>
+                    <p className="text-xs text-white/40 mt-1 mb-3">
+                      Sube tu propia imagen, GIF animado o video de fondo. Se verá detrás de tu
+                      tarjeta en el perfil público.
+                    </p>
+                    <FileUpload
+                      kind="background"
+                      label=""
+                      hint="Máximo 50 MB · Recuerda pulsar Guardar después de subir"
+                      currentUrl={profile.settings.backgroundUrl}
+                      mediaType={profile.backgroundType}
+                      onUploaded={(url, backgroundType) => {
+                        updateSettings({ backgroundUrl: url });
+                        if (backgroundType) update({ backgroundType });
+                      }}
+                      onClear={() => {
+                        updateSettings({ backgroundUrl: "" });
+                        update({ backgroundType: "image" });
+                      }}
+                    />
+                  </div>
+                  <Field label="O pega una URL externa">
+                    <input
+                      type="url"
+                      value={profile.settings.backgroundUrl}
+                      onChange={(e) => {
+                        const url = e.target.value;
+                        updateSettings({ backgroundUrl: url });
+                        update({ backgroundType: detectBackgroundTypeFromUrl(url) });
+                      }}
+                      className="input-field"
+                      placeholder="https://ejemplo.com/mi-fondo.mp4"
+                    />
+                  </Field>
+                </div>
                 <FileUpload
                   kind="audio"
                   label="Audio de fondo"
@@ -369,22 +421,35 @@ export default function DashboardPage() {
                   />
                 </Field>
 
-                <Field label="Color de acento">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="color"
-                      value={profile.settings.accentColor}
-                      onChange={(e) => updateSettings({ accentColor: e.target.value })}
-                      className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0"
-                    />
-                    <input
-                      type="text"
-                      value={profile.settings.accentColor}
-                      onChange={(e) => updateSettings({ accentColor: e.target.value })}
-                      className="input-field flex-1 font-mono text-sm"
-                    />
-                  </div>
-                </Field>
+                <p className="text-xs uppercase tracking-wider text-white/40 pt-2">
+                  Colores de la tarjeta
+                </p>
+
+                <ColorField
+                  label="Color principal"
+                  value={profile.settings.cardColor}
+                  onChange={(v) => updateSettings({ cardColor: v })}
+                />
+
+                {profile.settings.gradientEnabled && (
+                  <ColorField
+                    label="Color secundario (gradiente)"
+                    value={profile.settings.cardColorSecondary}
+                    onChange={(v) => updateSettings({ cardColorSecondary: v })}
+                  />
+                )}
+
+                <ColorField
+                  label="Color del texto"
+                  value={profile.settings.textColor}
+                  onChange={(v) => updateSettings({ textColor: v })}
+                />
+
+                <ColorField
+                  label="Color de acento (brillo y borde)"
+                  value={profile.settings.accentColor}
+                  onChange={(v) => updateSettings({ accentColor: v })}
+                />
 
                 <Toggle
                   label="Brillo en nombre"
@@ -411,21 +476,21 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="lg:sticky lg:top-20 lg:self-start relative z-10 min-w-0">
+        <div className="lg:sticky lg:top-20 lg:self-start relative z-10 min-w-0 w-full max-w-[340px] mx-auto lg:max-w-none">
           <p className="text-white/40 text-xs uppercase tracking-wider mb-4 text-center">
             Vista previa
           </p>
-          <div className="relative rounded-2xl overflow-hidden border border-white/10 aspect-[9/16] max-h-[700px] isolate">
+          <div className="relative w-full rounded-2xl overflow-hidden border border-white/10 aspect-[9/16] max-h-[min(700px,85vh)] isolate bg-[#0a0a0f]">
             <BackgroundMedia
               url={profile.settings.backgroundUrl}
               type={profile.backgroundType}
               contained
             />
-            <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+            <div className="absolute inset-0 bg-black/50 pointer-events-none z-[2]" />
             <BackgroundEffects effect={profile.settings.backgroundEffect} contained />
-            <div className="relative z-10 h-full flex items-center justify-center p-6 overflow-y-auto pointer-events-none">
-              <div className="pointer-events-auto w-full">
-                <ProfileCard profile={profile} />
+            <div className="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6 overflow-y-auto pointer-events-none">
+              <div className="pointer-events-auto w-full flex justify-center">
+                <ProfileCard profile={profile} compact />
               </div>
             </div>
           </div>
@@ -464,6 +529,35 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function ColorField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <Field label={label}>
+      <div className="flex items-center gap-3">
+        <input
+          type="color"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0 shrink-0"
+        />
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="input-field flex-1 font-mono text-sm"
+        />
+      </div>
+    </Field>
+  );
+}
+
 function Toggle({
   label,
   checked,
@@ -481,13 +575,13 @@ function Toggle({
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`w-10 h-6 rounded-full transition-colors relative ${
+        className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
           checked ? "bg-purple-600" : "bg-white/10"
         }`}
       >
         <span
-          className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${
-            checked ? "translate-x-5" : "translate-x-1"
+          className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+            checked ? "translate-x-6" : "translate-x-1"
           }`}
         />
       </button>

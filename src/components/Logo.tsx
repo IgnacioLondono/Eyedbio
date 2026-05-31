@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Eye } from "lucide-react";
 
 type LogoProps = {
@@ -19,9 +22,11 @@ export default function Logo({
   href = "/",
   showText = true,
   className = "",
-  title,
+  title = "Ir al inicio",
 }: LogoProps) {
+  const pathname = usePathname();
   const s = sizes[size];
+
   const inner = (
     <>
       <div
@@ -39,9 +44,18 @@ export default function Logo({
 
   const classes = `flex items-center gap-2 ${className}`;
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!href) return;
+    const target = href.split("#")[0] || "/";
+    if (pathname === target) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   if (href) {
     return (
-      <Link href={href} className={classes} title={title}>
+      <Link href={href} className={classes} title={title} onClick={handleClick}>
         {inner}
       </Link>
     );

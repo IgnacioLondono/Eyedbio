@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { saveUpload, UploadKind, validateUpload } from "@/lib/upload";
 
+export const maxDuration = 120;
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   const session = await auth();
   if (!session?.user?.id) {
