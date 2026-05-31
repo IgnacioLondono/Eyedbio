@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     "@prisma/adapter-pg",
     "@prisma/client",
     "prisma",
+    "sharp",
   ],
   experimental: {
     proxyClientMaxBodySize: "55mb",
