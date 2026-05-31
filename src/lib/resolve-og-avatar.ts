@@ -5,17 +5,37 @@ const UPLOAD_ROOT = process.env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads"
 
 const RASTER_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".gif"]);
 
-/** Convierte avatar a una fuente compatible con next/og (sin SVG). */
+async function fetchImageAsDataUrl(url: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(8000),
+      headers: { Accept: "image/*" },
+    });
+    if (!res.ok) return null;
+
+    const contentType = res.headers.get("content-type") ?? "image/png";
+    if (contentType.includes("svg")) return null;
+
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (buffer.length === 0) return null;
+
+    return `data:${contentType.split(";")[0]};base64,${buffer.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
+
+/** Convierte avatar a data URL para next/og (nunca URLs externas en runtime de Satori). */
 export async function resolveOgAvatarSrc(
   avatarUrl: string | undefined | null,
   siteBase: string
 ): Promise<string | null> {
   if (!avatarUrl?.trim()) return null;
 
-  const normalized = avatarUrl.trim();
+  let normalized = avatarUrl.trim();
 
   if (normalized.includes("dicebear.com") && normalized.includes("/svg")) {
-    return normalized.replace("/svg", "/png");
+    normalized = normalized.replace("/svg", "/png");
   }
 
   if (/\.svg(\?|$)/i.test(normalized)) {
@@ -43,14 +63,30 @@ export async function resolveOgAvatarSrc(
     } catch {
       const base = siteBase.replace(/\/$/, "");
       const publicPath = normalized.replace("/api/media", "/media");
-      return `${base}${publicPath}`;
+      return fetchImageAsDataUrl(`${base}${publicPath}`);
     }
   }
 
   if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
-    return normalized;
+    return fetchImageAsDataUrl(normalized);
   }
 
   const base = siteBase.replace(/\/$/, "");
-  return `${base}${normalized.startsWith("/") ? normalized : `/${normalized}`}`;
+  const absolute = `${base}${normalized.startsWith("/") ? normalized : `/${normalized}`}`;
+  return fetchImageAsDataUrl(absolute);
+}
+
+export async function resolveOgImageSrc(
+  imageUrl: string,
+  siteBase?: string
+): Promise<string | null> {
+  if (imageUrl.startsWith("data:")) return imageUrl;
+  if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
+    return fetchImageAsDataUrl(imageUrl);
+  }
+  if (siteBase) {
+    const base = siteBase.replace(/\/$/, "");
+    return fetchImageAsDataUrl(`${base}${imageUrl.startsWith("/") ? imageUrl : `/${imageUrl}`}`);
+  }
+  return null;
 }

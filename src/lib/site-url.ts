@@ -7,7 +7,16 @@ export function getSiteUrl(): string {
     "http://localhost:9090";
 
   if (raw.startsWith("http://") || raw.startsWith("https://")) {
-    return raw.replace(/\/$/, "");
+    let normalized = raw.replace(/\/$/, "");
+    try {
+      const { hostname } = new URL(normalized);
+      if (!isPrivateHost(hostname) && normalized.startsWith("http://")) {
+        normalized = normalized.replace(/^http:\/\//i, "https://");
+      }
+    } catch {
+      /* ignore */
+    }
+    return normalized;
   }
 
   return `https://${raw.replace(/\/$/, "")}`;
@@ -24,6 +33,35 @@ function isPrivateHost(host: string): boolean {
   );
 }
 
+function isPublicDomainHost(host: string): boolean {
+  const hostname = host.split(":")[0]?.toLowerCase() ?? "";
+  if (isPrivateHost(hostname)) return false;
+  if (/^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return false;
+  return hostname.includes(".");
+}
+
+function resolveProto(h: Headers, host: string): string {
+  const cfVisitor = h.get("cf-visitor");
+  if (cfVisitor) {
+    try {
+      const parsed = JSON.parse(cfVisitor) as { scheme?: string };
+      if (parsed.scheme === "https" || parsed.scheme === "http") {
+        return parsed.scheme;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  const forwardedProto = h.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  if (forwardedProto === "https" || forwardedProto === "http") {
+    return forwardedProto;
+  }
+
+  if (isPublicDomainHost(host)) return "https";
+  return isPrivateHost(host) ? "http" : "https";
+}
+
 /** Host real de la petición (Cloudflare, nginx). Prioriza dominio público sobre IP local. */
 export async function getSiteUrlFromHeaders(): Promise<string> {
   const { headers } = await import("next/headers");
@@ -38,18 +76,18 @@ export async function getSiteUrlFromHeaders(): Promise<string> {
     const envUrl = getSiteUrl();
     try {
       const envHost = new URL(envUrl).hostname;
-      if (!isPrivateHost(envHost)) return envUrl;
+      if (!isPrivateHost(envHost)) return envUrl.replace(/^http:\/\//i, "https://");
     } catch {
       /* ignore */
     }
   }
 
-  const forwardedProto = h.get("x-forwarded-proto")?.split(",")[0]?.trim();
-  const proto =
-    forwardedProto ||
-    (isPrivateHost(host) ? "http" : "https");
+  const hostname = host.split(":")[0];
+  const proto = resolveProto(h, host);
+  const port = host.includes(":") ? `:${host.split(":")[1]}` : "";
+  const publicPort = port === ":443" || port === ":80" ? "" : port;
 
-  return `${proto}://${host}`.replace(/\/$/, "");
+  return `${proto}://${hostname}${publicPort}`.replace(/\/$/, "");
 }
 
 export function absoluteUrl(path: string, base?: string): string {

@@ -45,6 +45,7 @@ ENV AUTH_TRUST_HOST="true"
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=9090
 
+COPY --from=builder /app/node_modules/next/dist/compiled/@vercel/og ./node_modules/next/dist/compiled/@vercel/og
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
