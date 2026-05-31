@@ -11,8 +11,8 @@ services:
       DATABASE_URL: file:/data/dev.db
       UPLOAD_DIR: /data/uploads
       PUBLIC_MEDIA_PREFIX: /media
-      AUTH_SECRET: ${AUTH_SECRET:?Define AUTH_SECRET en Portainer}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:?Define NEXTAUTH_URL en Portainer}
+      AUTH_SECRET: ${AUTH_SECRET:-kNGTnHIoXenFhVWwzCSW3LYJ+YKlTb2gW5Lx7XhYkvY=}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:9090}
       AUTH_TRUST_HOST: "true"
       HOSTNAME: 0.0.0.0
       PORT: 9090
@@ -27,7 +27,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 60s
+      start_period: 90s
     restart: unless-stopped
     networks:
       - eyed-net
