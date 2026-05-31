@@ -120,6 +120,20 @@ input[type="color"]::-webkit-color-swatch {
   background: #1a1a2e;
 }
 
+.input-field.input-field--left-icon {
+  padding-left: 2.75rem;
+}
+
+.input-field.input-field--username {
+  padding-left: 5.75rem;
+  padding-right: 2.75rem;
+}
+
+.input-field.input-field--password {
+  padding-left: 2.75rem;
+  padding-right: 2.75rem;
+}
+
 /* Ocultar botón nativo de mostrar contraseña (evita doble ojo) */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {

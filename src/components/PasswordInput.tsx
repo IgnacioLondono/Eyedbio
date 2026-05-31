@@ -25,8 +25,8 @@ export default function PasswordInput({
   variant = "auth",
 }: Props) {
   const [visible, setVisible] = useState(false);
-  const inputClass = variant === "dashboard" ? "input-field" : "auth-input";
-  const paddingLeft = variant === "dashboard" ? "pl-10" : "";
+  const inputClass =
+    variant === "dashboard" ? "input-field input-field--password" : "auth-input";
 
   return (
     <div className="relative">
@@ -39,7 +39,7 @@ export default function PasswordInput({
         autoComplete={autoComplete}
         required={required}
         minLength={minLength}
-        className={`${inputClass} w-full pr-11 ${paddingLeft}`}
+        className={`${inputClass} w-full`}
       />
       {variant === "dashboard" && (
         <KeyRound

@@ -144,7 +144,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="input-field pl-10"
+                className="input-field input-field--left-icon"
                 required
               />
               <Mail
@@ -166,7 +166,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 onChange={(e) =>
                   setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))
                 }
-                className="input-field pl-[5.5rem] pr-10 font-mono text-sm"
+                className="input-field input-field--username font-mono text-sm"
                 required
                 minLength={3}
               />
