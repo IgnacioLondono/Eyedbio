@@ -1,0 +1,57 @@
+services:
+  eyed-bio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eyed-bio-app
+    expose:
+      - "9090"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/data/dev.db
+      UPLOAD_DIR: /data/uploads
+      PUBLIC_MEDIA_PREFIX: /media
+      AUTH_SECRET: ${AUTH_SECRET:?Define AUTH_SECRET en Portainer}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:?Define NEXTAUTH_URL en Portainer}
+      AUTH_TRUST_HOST: "true"
+      HOSTNAME: 0.0.0.0
+      PORT: 9090
+    volumes:
+      - eyed-data:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"require('http').get('http://127.0.0.1:9090/api/stats',(r)=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))\"",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - eyed-net
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: eyed-bio-nginx
+    ports:
+      - "${APP_PORT:-9090}:9090"
+    volumes:
+      - eyed-data:/data:ro
+    depends_on:
+      eyed-bio:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - eyed-net
+
+volumes:
+  eyed-data:
+    name: eyed-bio-data
+
+networks:
+  eyed-net:
+    name: eyed-bio-net
