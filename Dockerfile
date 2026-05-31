@@ -3,11 +3,7 @@
 FROM node:20-bookworm-slim AS deps
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    make \
-    g++ \
-    openssl \
+RUN apt-get update && apt-get install -y --no-install-recommends openssl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package.json package-lock.json ./
@@ -24,7 +20,7 @@ RUN npx prisma generate
 
 COPY . .
 
-ENV DATABASE_URL="file:./dev.db"
+ENV DATABASE_URL="postgresql://eyedbio:eyedbio_secret@localhost:5432/eyedbio?schema=public"
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
@@ -39,7 +35,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends openssl \
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV DATABASE_URL="file:/data/dev.db"
 ENV UPLOAD_DIR="/data/uploads"
 ENV PUBLIC_MEDIA_PREFIX="/media"
 ENV AUTH_TRUST_HOST="true"

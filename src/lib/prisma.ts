@@ -1,19 +1,27 @@
 import "dotenv/config";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 import { PrismaClient } from "@/generated/prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient;
-  adapter: PrismaBetterSqlite3;
+  pool: Pool;
 };
 
 function createPrismaClient() {
-  const adapter = new PrismaBetterSqlite3({
-    url: process.env.DATABASE_URL ?? "file:./dev.db",
+  const pool = new Pool({
+    connectionString:
+      process.env.DATABASE_URL ??
+      "postgresql://eyedbio:eyedbio_secret@localhost:5432/eyedbio?schema=public",
   });
-  return new PrismaClient({ adapter });
+  const adapter = new PrismaPg(pool);
+  return { prisma: new PrismaClient({ adapter }), pool };
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
+if (!globalForPrisma.prisma) {
+  const created = createPrismaClient();
+  globalForPrisma.prisma = created.prisma;
+  globalForPrisma.pool = created.pool;
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export const prisma = globalForPrisma.prisma;
