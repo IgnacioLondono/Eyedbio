@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import CommunityDiscordLink from "@/components/CommunityDiscordLink";
 
 const statConfig = [
   { key: "profileViews" as const, label: "Visitas a perfiles", icon: Eye },
@@ -150,12 +151,15 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               {isLoggedIn ? (
-                <Link
-                  href="/dashboard"
-                  className="px-8 py-3.5 text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5"
-                >
-                  Ir al dashboard
-                </Link>
+                <>
+                  <Link
+                    href="/dashboard"
+                    className="px-8 py-3.5 text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5"
+                  >
+                    Ir al dashboard
+                  </Link>
+                  <CommunityDiscordLink />
+                </>
               ) : (
                 <>
                   <Link
@@ -170,6 +174,7 @@ export default function LandingPage() {
                   >
                     Iniciar sesión
                   </Link>
+                  <CommunityDiscordLink />
                 </>
               )}
             </div>
@@ -281,6 +286,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <CommunityDiscordLink variant="banner" />
 
       <section className="py-24 px-6">
         <div className="max-w-3xl mx-auto text-center">

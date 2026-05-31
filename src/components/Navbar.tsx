@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Logo from "@/components/Logo";
+import CommunityDiscordLink from "@/components/CommunityDiscordLink";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -17,6 +18,7 @@ export default function Navbar() {
         <Logo href="/" />
 
         <div className="hidden md:flex items-center gap-8">
+          <CommunityDiscordLink variant="header" />
           {!isLoggedIn && (
             <>
               <Link href="#features" className="text-white/60 hover:text-white text-sm transition-colors">
@@ -76,6 +78,7 @@ export default function Navbar() {
 
       {open && (
         <div className="md:hidden border-t border-white/5 bg-[#0a0a0f] px-6 py-4 space-y-3">
+          <CommunityDiscordLink variant="header" className="w-full justify-center" />
           {isLoggedIn ? (
             <>
               <Link

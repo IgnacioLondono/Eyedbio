@@ -30,6 +30,7 @@ import Logo from "@/components/Logo";
 import AccountSettings from "@/components/AccountSettings";
 import LinkEditor from "@/components/LinkEditor";
 import ShareProfileButton from "@/components/ShareProfileButton";
+import CommunityDiscordLink from "@/components/CommunityDiscordLink";
 
 type Tab = "general" | "links" | "media" | "appearance" | "account";
 
@@ -178,6 +179,7 @@ function DashboardContent() {
           <Logo href="/" size="sm" />
 
           <div className="flex items-center gap-2">
+            <CommunityDiscordLink variant="header" />
             <Link
               href={`/${profile.username}`}
               target="_blank"
