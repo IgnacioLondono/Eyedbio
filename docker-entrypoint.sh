@@ -43,4 +43,14 @@ while [ "$attempt" -le "$max_attempts" ]; do
 done
 
 echo "Starting Eyed.bio..."
-exec runuser -u nextjs -- "$@"
+exec runuser -u nextjs -- env \
+  DATABASE_URL="$DATABASE_URL" \
+  NODE_ENV="${NODE_ENV:-production}" \
+  HOSTNAME="${HOSTNAME:-0.0.0.0}" \
+  PORT="${PORT:-9090}" \
+  UPLOAD_DIR="${UPLOAD_DIR:-/data/uploads}" \
+  PUBLIC_MEDIA_PREFIX="${PUBLIC_MEDIA_PREFIX:-/media}" \
+  AUTH_SECRET="$AUTH_SECRET" \
+  NEXTAUTH_URL="$NEXTAUTH_URL" \
+  AUTH_TRUST_HOST="${AUTH_TRUST_HOST:-true}" \
+  "$@"
