@@ -1,8 +1,10 @@
 import { ImageResponse } from "next/og";
 import { getPublicProfile } from "@/lib/get-public-profile";
-import { absoluteMediaUrl, profilePublicUrl } from "@/lib/site-url";
+import { resolveOgAvatarSrc } from "@/lib/resolve-og-avatar";
+import { getSiteUrlFromHeaders, profilePublicUrl } from "@/lib/site-url";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 const size = { width: 1080, height: 1920 };
 
@@ -11,8 +13,9 @@ export async function GET(
   { params }: { params: Promise<{ username: string }> }
 ) {
   const { username } = await params;
+  const siteUrl = await getSiteUrlFromHeaders();
   const profile = await getPublicProfile(username);
-  const profileUrl = profilePublicUrl(username);
+  const profileUrl = profilePublicUrl(username, siteUrl);
 
   if (!profile) {
     return new ImageResponse(
@@ -37,7 +40,7 @@ export async function GET(
     );
   }
 
-  const avatarUrl = absoluteMediaUrl(profile.avatarUrl);
+  const avatarUrl = await resolveOgAvatarSrc(profile.avatarUrl, siteUrl);
   const accent = profile.settings.accentColor ?? "#a855f7";
   const bio =
     profile.bio.trim().slice(0, 100) || `Todos mis enlaces en un solo lugar`;

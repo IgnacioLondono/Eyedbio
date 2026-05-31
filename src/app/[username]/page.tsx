@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import ProfileView from "@/components/ProfileView";
 import { getPublicProfile } from "@/lib/get-public-profile";
-import { profileOgImageUrl, profilePublicUrl } from "@/lib/site-url";
+import {
+  getSiteUrlFromHeaders,
+  profileOgImageUrl,
+  profilePublicUrl,
+} from "@/lib/site-url";
+
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -10,6 +16,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
   const profile = await getPublicProfile(username);
+  const siteUrl = await getSiteUrlFromHeaders();
 
   if (!profile) {
     return {
@@ -22,10 +29,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description =
     profile.bio.trim() ||
     `Página link-in-bio de ${profile.displayName}. Enlaces, redes y más en Eyed.bio.`;
-  const url = profilePublicUrl(profile.username);
-  const ogImage = profileOgImageUrl(profile.username);
+  const url = profilePublicUrl(profile.username, siteUrl);
+  const ogImage = profileOgImageUrl(profile.username, siteUrl);
 
   return {
+    metadataBase: new URL(siteUrl),
     title,
     description,
     alternates: { canonical: url },
@@ -34,7 +42,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url,
       siteName: "Eyed.bio",
-      type: "profile",
+      type: "website",
       locale: "es_ES",
       images: [
         {

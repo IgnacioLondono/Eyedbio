@@ -36,6 +36,8 @@ services:
       PUBLIC_MEDIA_PREFIX: /media
       AUTH_SECRET: ${AUTH_SECRET:-kNGTnHIoXenFhVWwzCSW3LYJ+YKlTb2gW5Lx7XhYkvY=}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:9090}
+      # URL pública para vistas previa en Discord/WhatsApp (debe ser https://tu-dominio)
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-}
       # Correo real — opción A: Resend (recomendado, https://resend.com)
       RESEND_API_KEY: ${RESEND_API_KEY:-}
       RESEND_FROM: ${RESEND_FROM:-}
