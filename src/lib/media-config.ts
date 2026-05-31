@@ -170,3 +170,19 @@ export function detectBackgroundTypeFromUrl(url: string): BackgroundType {
   if (/\.gif(\?|$)/i.test(url)) return "gif";
   return "image";
 }
+
+/** Usa la extensión del URL cuando existe; evita tipos obsoletos (p. ej. video + imagen). */
+export function resolveBackgroundType(
+  url: string,
+  storedType?: BackgroundType
+): BackgroundType {
+  if (!url?.trim()) return storedType ?? "image";
+
+  const fromUrl = detectBackgroundTypeFromUrl(url);
+  const hasExtension = /\.(mp4|webm|mov|gif|jpe?g|png|webp)(\?|$)/i.test(url);
+
+  if (hasExtension) return fromUrl;
+  if (storedType === "video" && fromUrl === "image") return "image";
+
+  return storedType ?? fromUrl;
+}

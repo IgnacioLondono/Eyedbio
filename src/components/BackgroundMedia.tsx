@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { BackgroundType } from "@/types/profile";
+import { resolveBackgroundType } from "@/lib/media-config";
 
 interface Props {
   url: string;
@@ -16,10 +17,11 @@ export default function BackgroundMedia({ url, type, contained = false }: Props)
   const [broken, setBroken] = useState(false);
   const positionClass = contained ? "absolute inset-0 h-full w-full" : "fixed inset-0";
   const pointerClass = contained ? "pointer-events-none" : "";
+  const mediaType = resolveBackgroundType(url, type);
 
   useEffect(() => {
     setBroken(false);
-  }, [url]);
+  }, [url, type]);
 
   if (!url?.trim() || broken) {
     return (
@@ -30,9 +32,10 @@ export default function BackgroundMedia({ url, type, contained = false }: Props)
     );
   }
 
-  if (type === "video") {
+  if (mediaType === "video") {
     return (
       <video
+        key={url}
         className={`${positionClass} object-cover ${pointerClass}`}
         src={url}
         autoPlay
@@ -45,22 +48,13 @@ export default function BackgroundMedia({ url, type, contained = false }: Props)
     );
   }
 
-  if (type === "gif" || type === "image") {
-    return (
-      <img
-        src={url}
-        alt=""
-        className={`${positionClass} object-cover ${pointerClass}`}
-        onError={() => setBroken(true)}
-        aria-hidden="true"
-      />
-    );
-  }
-
   return (
-    <div
-      className={`${positionClass} bg-cover bg-center bg-no-repeat ${pointerClass} ${FALLBACK_CLASS}`}
-      style={{ backgroundImage: `url(${url})` }}
+    <img
+      key={url}
+      src={url}
+      alt=""
+      className={`${positionClass} object-cover ${pointerClass}`}
+      onError={() => setBroken(true)}
       aria-hidden="true"
     />
   );

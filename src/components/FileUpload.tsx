@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Upload, Loader2, X, ImageIcon, Film, Image as ImageLucide } from "lucide-react";
 import { BackgroundType } from "@/types/profile";
-import { ACCEPT_ATTR, UploadKind, detectBackgroundTypeFromUrl } from "@/lib/media-config";
+import { ACCEPT_ATTR, UploadKind, resolveBackgroundType } from "@/lib/media-config";
 
 interface Props {
   kind: UploadKind;
@@ -20,8 +20,7 @@ function resolveBackgroundMediaType(
   url: string,
   mediaType?: BackgroundType
 ): BackgroundType {
-  if (mediaType) return mediaType;
-  return detectBackgroundTypeFromUrl(url);
+  return resolveBackgroundType(url, mediaType);
 }
 
 function MediaTypeBadge({ type }: { type: BackgroundType }) {

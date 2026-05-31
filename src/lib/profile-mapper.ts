@@ -1,4 +1,5 @@
 import { Prisma, SocialLink as DbSocialLink, User } from "@/generated/prisma/client";
+import { resolveBackgroundType } from "@/lib/media-config";
 import {
   BackgroundType,
   DEFAULT_SETTINGS,
@@ -29,10 +30,13 @@ function parseBadges(raw: string): string[] {
 
 export function userToProfile(user: UserWithLinks): Profile {
   const storedSettings = parseSettings(user.settings);
+  const backgroundUrl =
+    user.backgroundUrl ?? storedSettings.backgroundUrl ?? DEFAULT_SETTINGS.backgroundUrl;
+
   const settings: ProfileSettings = {
     ...DEFAULT_SETTINGS,
     ...storedSettings,
-    backgroundUrl: user.backgroundUrl ?? storedSettings.backgroundUrl ?? DEFAULT_SETTINGS.backgroundUrl,
+    backgroundUrl,
   };
 
   return {
@@ -42,7 +46,10 @@ export function userToProfile(user: UserWithLinks): Profile {
     avatarUrl:
       user.avatarUrl ??
       `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
-    backgroundType: (user.backgroundType as BackgroundType) ?? "image",
+    backgroundType: resolveBackgroundType(
+      backgroundUrl,
+      (user.backgroundType as BackgroundType) ?? "image"
+    ),
     audioUrl: user.audioUrl ?? undefined,
     audioEnabled: user.audioEnabled,
     views: user.views,
@@ -62,13 +69,14 @@ export function userToProfile(user: UserWithLinks): Profile {
 
 export function profileToUpdateData(profile: Profile): Prisma.UserUpdateInput {
   const { backgroundUrl, ...restSettings } = profile.settings;
+  const backgroundType = resolveBackgroundType(backgroundUrl, profile.backgroundType);
 
   return {
     displayName: profile.displayName,
     bio: profile.bio,
     avatarUrl: profile.avatarUrl,
     backgroundUrl,
-    backgroundType: profile.backgroundType,
+    backgroundType,
     audioUrl: profile.audioUrl ?? null,
     audioEnabled: profile.audioEnabled,
     badges: JSON.stringify(profile.badges),

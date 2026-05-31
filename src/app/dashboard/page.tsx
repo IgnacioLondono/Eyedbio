@@ -24,7 +24,7 @@ import {
   BackgroundType,
 } from "@/types/profile";
 import { createEmptyLink } from "@/lib/profile-mapper";
-import { detectBackgroundTypeFromUrl } from "@/lib/media-config";
+import { resolveBackgroundType } from "@/lib/media-config";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
 import ProfileCard from "@/components/ProfileCard";
 import BackgroundEffects from "@/components/BackgroundEffects";
@@ -97,6 +97,27 @@ function DashboardContent() {
     setProfile({
       ...profile,
       settings: { ...profile.settings, ...partial },
+    });
+    setSaved(false);
+  };
+
+  const updateBackground = (url: string, backgroundType?: BackgroundType) => {
+    if (!profile) return;
+    const nextType = backgroundType ?? resolveBackgroundType(url, profile.backgroundType);
+    setProfile({
+      ...profile,
+      backgroundType: nextType,
+      settings: { ...profile.settings, backgroundUrl: url },
+    });
+    setSaved(false);
+  };
+
+  const clearBackground = () => {
+    if (!profile) return;
+    setProfile({
+      ...profile,
+      backgroundType: "image",
+      settings: { ...profile.settings, backgroundUrl: "" },
     });
     setSaved(false);
   };
@@ -334,25 +355,15 @@ function DashboardContent() {
                       hint="Máximo 50 MB · Recuerda pulsar Guardar después de subir"
                       currentUrl={profile.settings.backgroundUrl}
                       mediaType={profile.backgroundType}
-                      onUploaded={(url, backgroundType) => {
-                        updateSettings({ backgroundUrl: url });
-                        if (backgroundType) update({ backgroundType });
-                      }}
-                      onClear={() => {
-                        updateSettings({ backgroundUrl: "" });
-                        update({ backgroundType: "image" });
-                      }}
+                      onUploaded={(url, backgroundType) => updateBackground(url, backgroundType)}
+                      onClear={clearBackground}
                     />
                   </div>
                   <Field label="O pega una URL externa">
                     <input
                       type="url"
                       value={profile.settings.backgroundUrl}
-                      onChange={(e) => {
-                        const url = e.target.value;
-                        updateSettings({ backgroundUrl: url });
-                        update({ backgroundType: detectBackgroundTypeFromUrl(url) });
-                      }}
+                      onChange={(e) => updateBackground(e.target.value)}
                       className="input-field"
                       placeholder="https://ejemplo.com/mi-fondo.mp4"
                     />
