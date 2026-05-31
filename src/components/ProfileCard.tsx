@@ -11,6 +11,7 @@ import {
   getNameEffectStyle,
   resolveNameEffect,
 } from "@/lib/name-effects";
+import { getCardSurfaceStyle } from "@/lib/card-styles";
 import SocialLinks from "./SocialLinks";
 
 const BADGE_CONFIG: Record<string, { icon: typeof Crown; color: string; label: string }> = {
@@ -26,20 +27,12 @@ interface Props {
 
 export default function ProfileCard({ profile, compact = false }: Props) {
   const { settings } = profile;
-  const { cardColor, cardColorSecondary, textColor, profileOpacity } = settings;
+  const { textColor } = settings;
   const nameEffect = resolveNameEffect(settings);
   const nameEffectClass = getNameEffectClass(nameEffect);
   const nameEffectStyle = getNameEffectStyle(nameEffect, settings.accentColor, textColor);
   const avatarGlowStyle = getAvatarGlowStyle(nameEffect, settings.accentColor);
-
-  const cardStyle: React.CSSProperties = {
-    background: settings.gradientEnabled
-      ? `linear-gradient(135deg, ${hexToRgba(cardColor, profileOpacity)} 0%, ${hexToRgba(cardColorSecondary, profileOpacity)} 100%)`
-      : hexToRgba(cardColor, profileOpacity),
-    backdropFilter: `blur(${settings.profileBlur}px)`,
-    WebkitBackdropFilter: `blur(${settings.profileBlur}px)`,
-    borderColor: `${settings.accentColor}33`,
-  };
+  const cardStyle = getCardSurfaceStyle(settings);
 
   const avatarSize = compact ? "w-16 h-16" : "w-24 h-24";
   const nameSize = compact ? "text-lg" : "text-2xl";

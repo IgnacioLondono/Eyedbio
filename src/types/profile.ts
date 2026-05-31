@@ -7,6 +7,19 @@ export type SocialPlatform =
   | "twitch"
   | "github"
   | "spotify"
+  | "applemusic"
+  | "linkedin"
+  | "facebook"
+  | "telegram"
+  | "whatsapp"
+  | "soundcloud"
+  | "reddit"
+  | "pinterest"
+  | "threads"
+  | "snapchat"
+  | "kick"
+  | "steam"
+  | "email"
   | "website";
 
 export type BackgroundEffect = "none" | "snow" | "rain" | "stars";
@@ -35,6 +48,10 @@ export interface ProfileSettings {
   glowIcons: boolean;
   gradientEnabled: boolean;
   monochromeIcons: boolean;
+  transparentCard: boolean;
+  showCardBorder: boolean;
+  showCardShadow: boolean;
+  borderOpacity: number;
   cursorUrl?: string;
 }
 
@@ -66,4 +83,8 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
   glowIcons: false,
   gradientEnabled: true,
   monochromeIcons: false,
+  transparentCard: false,
+  showCardBorder: true,
+  showCardShadow: true,
+  borderOpacity: 0.2,
 };

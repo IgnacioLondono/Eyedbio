@@ -330,10 +330,14 @@ function DashboardContent() {
                       </button>
                     </div>
                     <input
-                      type="url"
+                      type="text"
                       value={link.url}
                       onChange={(e) => updateLink(link.id, { url: e.target.value })}
-                      placeholder="https://..."
+                      placeholder={
+                        link.platform === "email"
+                          ? "mailto:tu@email.com"
+                          : "https://..."
+                      }
                       className="input-field"
                     />
                   </div>
@@ -412,18 +416,24 @@ function DashboardContent() {
                   </select>
                 </Field>
 
-                <Field label={`Opacidad (${Math.round(profile.settings.profileOpacity * 100)}%)`}>
+                <Field label={`Opacidad del fondo (${Math.round(profile.settings.profileOpacity * 100)}%)`}>
                   <input
                     type="range"
                     min="0"
-                    max="0.5"
+                    max="1"
                     step="0.01"
                     value={profile.settings.profileOpacity}
                     onChange={(e) =>
                       updateSettings({ profileOpacity: parseFloat(e.target.value) })
                     }
                     className="w-full accent-purple-500"
+                    disabled={profile.settings.transparentCard}
                   />
+                  {profile.settings.transparentCard && (
+                    <p className="text-[11px] text-white/30 mt-1.5">
+                      Desactivado en modo transparente.
+                    </p>
+                  )}
                 </Field>
 
                 <Field label={`Blur (${profile.settings.profileBlur}px)`}>
@@ -441,6 +451,44 @@ function DashboardContent() {
                 </Field>
 
                 <p className="text-xs uppercase tracking-wider text-white/40 pt-2">
+                  Tarjeta
+                </p>
+
+                <Toggle
+                  label="Tarjeta transparente (sin color de fondo)"
+                  checked={profile.settings.transparentCard}
+                  onChange={(v) => updateSettings({ transparentCard: v })}
+                />
+                <Toggle
+                  label="Mostrar borde"
+                  checked={profile.settings.showCardBorder}
+                  onChange={(v) => updateSettings({ showCardBorder: v })}
+                />
+                <Toggle
+                  label="Mostrar sombra"
+                  checked={profile.settings.showCardShadow}
+                  onChange={(v) => updateSettings({ showCardShadow: v })}
+                />
+
+                {profile.settings.showCardBorder && (
+                  <Field
+                    label={`Opacidad del borde (${Math.round(profile.settings.borderOpacity * 100)}%)`}
+                  >
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={profile.settings.borderOpacity}
+                      onChange={(e) =>
+                        updateSettings({ borderOpacity: parseFloat(e.target.value) })
+                      }
+                      className="w-full accent-purple-500"
+                    />
+                  </Field>
+                )}
+
+                <p className="text-xs uppercase tracking-wider text-white/40 pt-2">
                   Colores de la tarjeta
                 </p>
 
@@ -448,6 +496,7 @@ function DashboardContent() {
                   label="Color principal"
                   value={profile.settings.cardColor}
                   onChange={(v) => updateSettings({ cardColor: v })}
+                  disabled={profile.settings.transparentCard}
                 />
 
                 {profile.settings.gradientEnabled && (
@@ -455,6 +504,7 @@ function DashboardContent() {
                     label="Color secundario (gradiente)"
                     value={profile.settings.cardColorSecondary}
                     onChange={(v) => updateSettings({ cardColorSecondary: v })}
+                    disabled={profile.settings.transparentCard}
                   />
                 )}
 
@@ -494,6 +544,7 @@ function DashboardContent() {
                   label="Gradiente en tarjeta"
                   checked={profile.settings.gradientEnabled}
                   onChange={(v) => updateSettings({ gradientEnabled: v })}
+                  disabled={profile.settings.transparentCard}
                 />
                 <Toggle
                   label="Iconos monocromáticos"
@@ -554,25 +605,29 @@ function ColorField({
   label,
   value,
   onChange,
+  disabled = false,
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }) {
   return (
     <Field label={label}>
-      <div className="flex items-center gap-3">
+      <div className={`flex items-center gap-3 ${disabled ? "opacity-40 pointer-events-none" : ""}`}>
         <input
           type="color"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="w-10 h-10 rounded-lg cursor-pointer bg-transparent border-0 shrink-0"
+          disabled={disabled}
         />
         <input
           type="text"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className="input-field flex-1 font-mono text-sm"
+          disabled={disabled}
         />
       </div>
     </Field>
@@ -583,18 +638,25 @@ function Toggle({
   label,
   checked,
   onChange,
+  disabled = false,
 }: {
   label: string;
   checked: boolean;
   onChange: (v: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+    <div
+      className={`flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5 ${
+        disabled ? "opacity-40" : ""
+      }`}
+    >
       <span className="text-sm text-white/70">{label}</span>
       <button
         type="button"
         role="switch"
         aria-checked={checked}
+        disabled={disabled}
         onClick={() => onChange(!checked)}
         className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
           checked ? "bg-purple-600" : "bg-white/10"
