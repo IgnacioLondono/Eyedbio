@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BackgroundType } from "@/types/profile";
 import { resolveBackgroundType } from "@/lib/media-config";
+import { getMediaSrc } from "@/lib/media-url";
 
 interface Props {
   url: string;
@@ -15,12 +16,15 @@ const FALLBACK_CLASS =
 
 export default function BackgroundMedia({ url, type, contained = false }: Props) {
   const [broken, setBroken] = useState(false);
+  const [useBackgroundCss, setUseBackgroundCss] = useState(false);
   const positionClass = contained ? "absolute inset-0 h-full w-full" : "fixed inset-0";
   const pointerClass = contained ? "pointer-events-none" : "";
   const mediaType = resolveBackgroundType(url, type);
+  const displayUrl = getMediaSrc(url);
 
   useEffect(() => {
     setBroken(false);
+    setUseBackgroundCss(false);
   }, [url, type]);
 
   if (!url?.trim() || broken) {
@@ -36,7 +40,7 @@ export default function BackgroundMedia({ url, type, contained = false }: Props)
     return (
       <video
         key={url}
-        className={`${positionClass} object-cover ${pointerClass}`}
+        className={`${positionClass} object-cover object-center ${pointerClass}`}
         src={url}
         autoPlay
         loop
@@ -48,14 +52,35 @@ export default function BackgroundMedia({ url, type, contained = false }: Props)
     );
   }
 
+  if (useBackgroundCss) {
+    return (
+      <div
+        key={`${url}-css`}
+        className={`${positionClass} bg-cover bg-center bg-no-repeat ${pointerClass}`}
+        style={{ backgroundImage: `url("${displayUrl}")` }}
+        aria-hidden="true"
+      />
+    );
+  }
+
   return (
-    <img
-      key={url}
-      src={url}
-      alt=""
-      className={`${positionClass} object-cover ${pointerClass}`}
-      onError={() => setBroken(true)}
-      aria-hidden="true"
-    />
+    <>
+      <img
+        key={displayUrl}
+        src={displayUrl}
+        alt=""
+        referrerPolicy="no-referrer"
+        decoding="async"
+        className={`${positionClass} object-cover object-center min-h-full min-w-full ${pointerClass}`}
+        onError={() => {
+          if (!useBackgroundCss) {
+            setUseBackgroundCss(true);
+            return;
+          }
+          setBroken(true);
+        }}
+        aria-hidden="true"
+      />
+    </>
   );
 }

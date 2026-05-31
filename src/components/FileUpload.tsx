@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Upload, Loader2, X, ImageIcon, Film, Image as ImageLucide } from "lucide-react";
 import { BackgroundType } from "@/types/profile";
 import { ACCEPT_ATTR, UploadKind, resolveBackgroundType } from "@/lib/media-config";
+import { getMediaSrc } from "@/lib/media-url";
 
 interface Props {
   kind: UploadKind;
@@ -58,6 +59,7 @@ function MediaPreview({
   const [broken, setBroken] = useState(false);
   const resolvedType = resolveBackgroundMediaType(currentUrl, mediaType);
   const isVideo = resolvedType === "video";
+  const displayUrl = getMediaSrc(currentUrl);
 
   useEffect(() => {
     setBroken(false);
@@ -73,8 +75,10 @@ function MediaPreview({
     }
     return (
       <img
-        src={currentUrl}
+        src={displayUrl}
         alt="Avatar"
+        referrerPolicy="no-referrer"
+        decoding="async"
         className="w-20 h-20 object-cover mx-auto my-3 rounded-full"
         onError={() => setBroken(true)}
       />
@@ -103,9 +107,11 @@ function MediaPreview({
           />
         ) : (
           <img
-            src={currentUrl}
+            src={displayUrl}
             alt="Fondo"
-            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+            decoding="async"
+            className="w-full h-full object-cover object-center"
             onError={() => setBroken(true)}
           />
         )}

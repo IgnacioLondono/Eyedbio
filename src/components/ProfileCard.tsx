@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Eye, Crown, CheckCircle, Star } from "lucide-react";
 import { Profile } from "@/types/profile";
 import { hexToRgba } from "@/lib/color-utils";
+import { getMediaSrc } from "@/lib/media-url";
 import SocialLinks from "./SocialLinks";
 
 const BADGE_CONFIG: Record<string, { icon: typeof Crown; color: string; label: string }> = {
@@ -70,9 +71,11 @@ export default function ProfileCard({ profile, compact = false }: Props) {
               }}
             >
               <img
-                src={profile.avatarUrl}
+                src={getMediaSrc(profile.avatarUrl)}
                 alt={profile.displayName}
-                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                decoding="async"
+                className="w-full h-full object-cover object-center"
               />
             </div>
           </AvatarWrapper>

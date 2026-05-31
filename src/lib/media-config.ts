@@ -51,6 +51,8 @@ export const BACKGROUND_MIMES = [
   "image/png",
   "image/webp",
   "image/gif",
+  "image/avif",
+  "image/bmp",
   "video/mp4",
   "video/webm",
   "video/quicktime",
@@ -62,6 +64,8 @@ export const BACKGROUND_EXTENSIONS = [
   ".png",
   ".webp",
   ".gif",
+  ".avif",
+  ".bmp",
   ".mp4",
   ".webm",
   ".mov",
@@ -72,9 +76,11 @@ export const AVATAR_MIMES = [
   "image/png",
   "image/webp",
   "image/gif",
+  "image/avif",
+  "image/bmp",
 ] as const;
 
-export const AVATAR_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif"] as const;
+export const AVATAR_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif", ".bmp"] as const;
 
 export const ALLOWED_MIMES: Record<UploadKind, readonly string[]> = {
   avatar: AVATAR_MIMES,
@@ -100,6 +106,8 @@ export const EXT_TO_MIME: Record<string, string> = {
   ".png": "image/png",
   ".webp": "image/webp",
   ".gif": "image/gif",
+  ".avif": "image/avif",
+  ".bmp": "image/bmp",
   ".mp4": "video/mp4",
   ".webm": "video/webm",
   ".mov": "video/quicktime",
@@ -179,7 +187,7 @@ export function resolveBackgroundType(
   if (!url?.trim()) return storedType ?? "image";
 
   const fromUrl = detectBackgroundTypeFromUrl(url);
-  const hasExtension = /\.(mp4|webm|mov|gif|jpe?g|png|webp)(\?|$)/i.test(url);
+  const hasExtension = /\.(mp4|webm|mov|gif|jpe?g|png|webp|avif|bmp)(\?|$)/i.test(url);
 
   if (hasExtension) return fromUrl;
   if (storedType === "video" && fromUrl === "image") return "image";
