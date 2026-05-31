@@ -1,0 +1,7 @@
+---
+description: Reglas para commits git en este proyecto
+alwaysApply: true
+---
+
+Nunca añadas `Co-authored-by: Cursor`, `Made-with: Cursor` ni ninguna atribución de Cursor en commits o PRs.
+Usa solo `git commit -m "mensaje"` sin trailers `--trailer` ni líneas de co-autor.
