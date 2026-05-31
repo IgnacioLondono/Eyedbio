@@ -6,6 +6,7 @@ type LogoProps = {
   href?: string | null;
   showText?: boolean;
   className?: string;
+  title?: string;
 };
 
 const sizes = {
@@ -18,6 +19,7 @@ export default function Logo({
   href = "/",
   showText = true,
   className = "",
+  title,
 }: LogoProps) {
   const s = sizes[size];
   const inner = (
@@ -39,7 +41,7 @@ export default function Logo({
 
   if (href) {
     return (
-      <Link href={href} className={classes}>
+      <Link href={href} className={classes} title={title}>
         {inner}
       </Link>
     );

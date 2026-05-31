@@ -8,7 +8,7 @@ import {
   Plus,
   Trash2,
   Save,
-  Eye,
+  UserRound,
   Palette,
   Link2,
   Settings,
@@ -134,15 +134,16 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <header className="border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Logo href="/" size="sm" />
+          <Logo href="/dashboard" size="sm" title="Inicio del editor" />
 
           <div className="flex items-center gap-2">
             <Link
               href={`/${profile.username}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white/60 hover:text-white border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
             >
-              <Eye className="w-3.5 h-3.5" />
+              <UserRound className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Ver perfil</span>
               <ExternalLink className="w-3 h-3" />
             </Link>

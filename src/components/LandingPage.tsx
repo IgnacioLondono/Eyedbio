@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 import {
   Sparkles,
   BarChart3,
@@ -91,18 +92,27 @@ type StatsResponse = {
 };
 
 export default function LandingPage() {
+  const { status } = useSession();
+  const isLoggedIn = status === "authenticated";
   const [stats, setStats] = useState<StatsResponse["formatted"] | null>(null);
   const [userCount, setUserCount] = useState(0);
 
   useEffect(() => {
     fetch("/api/stats")
-      .then((res) => res.json())
-      .then((data: StatsResponse) => {
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok || !data.formatted) {
+          throw new Error("Stats unavailable");
+        }
+        return data as StatsResponse;
+      })
+      .then((data) => {
         setStats(data.formatted);
         setUserCount(data.users);
       })
       .catch(() => {
         setStats({ users: "0", profileViews: "0", uploads: "0", links: "0" });
+        setUserCount(0);
       });
   }, []);
 
@@ -140,18 +150,29 @@ export default function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-              <Link
-                href="/signup"
-                className="px-8 py-3.5 text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5"
-              >
-                Registrarse gratis
-              </Link>
-              <Link
-                href="/login"
-                className="px-8 py-3.5 text-base font-medium border border-white/10 rounded-xl hover:bg-white/5 transition-all hover:-translate-y-0.5"
-              >
-                Iniciar sesión
-              </Link>
+              {isLoggedIn ? (
+                <Link
+                  href="/dashboard"
+                  className="px-8 py-3.5 text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5"
+                >
+                  Ir al dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link
+                    href="/signup"
+                    className="px-8 py-3.5 text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5"
+                  >
+                    Registrarse gratis
+                  </Link>
+                  <Link
+                    href="/login"
+                    className="px-8 py-3.5 text-base font-medium border border-white/10 rounded-xl hover:bg-white/5 transition-all hover:-translate-y-0.5"
+                  >
+                    Iniciar sesión
+                  </Link>
+                </>
+              )}
             </div>
 
             <div className="inline-flex items-center gap-0 bg-white/5 border border-white/10 rounded-xl overflow-hidden">
@@ -266,14 +287,14 @@ export default function LandingPage() {
           </h2>
           <p className="text-white/50 mb-8">
             {userCount > 0
-              ? `Únete a ${stats?.users ?? userCount} personas usando Eyed.bio.`
+              ? `Únete a ${stats?.users ?? String(userCount)} personas usando Eyed.bio.`
               : "Sé de los primeros en usar Eyed.bio."}
           </p>
           <Link
-            href="/signup"
+            href={isLoggedIn ? "/dashboard" : "/signup"}
             className="inline-block px-8 py-3.5 text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-xl shadow-purple-500/30"
           >
-            Crear mi perfil gratis
+            {isLoggedIn ? "Volver al dashboard" : "Crear mi perfil gratis"}
           </Link>
         </div>
       </section>
