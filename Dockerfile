@@ -26,6 +26,8 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
+RUN node -e "require('@prisma/adapter-pg'); require('pg'); console.log('Prisma PG deps OK')"
+
 FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 
