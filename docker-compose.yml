@@ -58,8 +58,10 @@ services:
       - eyed-net
 
   nginx:
-    image: ghcr.io/ignaciolondono/eyedbio-nginx:latest
-    pull_policy: always
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: eyed-bio-nginx:local
     container_name: eyed-bio-nginx
     ports:
       - "${APP_PORT:-9090}:9090"
