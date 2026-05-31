@@ -35,3 +35,7 @@ export function profilePublicUrl(username: string): string {
 export function profileOgImageUrl(username: string): string {
   return absoluteUrl(`/${username.toLowerCase()}/opengraph-image`);
 }
+
+export function profileStoryImageUrl(username: string): string {
+  return absoluteUrl(`/${username.toLowerCase()}/story-image`);
+}

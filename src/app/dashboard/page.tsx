@@ -245,8 +245,8 @@ function DashboardContent() {
                   <div>
                     <h3 className="text-sm font-medium text-white">Compartir perfil</h3>
                     <p className="text-xs text-white/40 mt-1">
-                      Al pegar tu enlace en Instagram, WhatsApp, X o Discord se verá una
-                      miniatura con tu foto, nombre y bio.
+                      Comparte en WhatsApp, X, Telegram o descarga una imagen para
+                      historias de Instagram, TikTok y WhatsApp Status.
                     </p>
                   </div>
                   <p className="text-xs font-mono text-purple-300/80 break-all">
