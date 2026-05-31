@@ -55,8 +55,6 @@ RUN mkdir -p /data/uploads \
     && chmod +x docker-entrypoint.sh \
     && chown -R nextjs:nodejs /app /data
 
-USER nextjs
-
 EXPOSE 9090
 
 VOLUME ["/data"]

@@ -2,9 +2,11 @@
 set -e
 
 mkdir -p /data/uploads
+chown -R nextjs:nodejs /data
 
 if [ -n "$DATABASE_URL" ]; then
-  npx prisma migrate deploy
+  echo "Running database migrations..."
+  runuser -u nextjs -- npx prisma migrate deploy
 fi
 
-exec "$@"
+exec runuser -u nextjs -- "$@"
