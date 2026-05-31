@@ -14,11 +14,16 @@ interface Props {
 const FALLBACK_CLASS =
   "bg-gradient-to-br from-[#1a1033] via-[#0a0a0f] to-[#1e1b4b]";
 
+const MEDIA_CLASS =
+  "absolute inset-0 h-full w-full min-h-full min-w-full object-cover object-center";
+
 export default function BackgroundMedia({ url, type, contained = false }: Props) {
   const [broken, setBroken] = useState(false);
   const [useBackgroundCss, setUseBackgroundCss] = useState(false);
-  const positionClass = contained ? "absolute inset-0 h-full w-full" : "fixed inset-0";
-  const pointerClass = contained ? "pointer-events-none" : "";
+  const shellClass = contained
+    ? "absolute inset-0 overflow-hidden"
+    : "fixed inset-0 z-0 h-[100dvh] w-screen overflow-hidden";
+  const pointerClass = contained ? "pointer-events-none" : "pointer-events-none";
   const mediaType = resolveBackgroundType(url, type);
   const displayUrl = getMediaSrc(url);
 
@@ -30,7 +35,7 @@ export default function BackgroundMedia({ url, type, contained = false }: Props)
   if (!url?.trim() || broken) {
     return (
       <div
-        className={`${positionClass} ${FALLBACK_CLASS} ${pointerClass}`}
+        className={`${shellClass} ${FALLBACK_CLASS} ${pointerClass}`}
         aria-hidden="true"
       />
     );
@@ -38,17 +43,18 @@ export default function BackgroundMedia({ url, type, contained = false }: Props)
 
   if (mediaType === "video") {
     return (
-      <video
-        key={url}
-        className={`${positionClass} object-cover object-center ${pointerClass}`}
-        src={url}
-        autoPlay
-        loop
-        muted
-        playsInline
-        onError={() => setBroken(true)}
-        aria-hidden="true"
-      />
+      <div className={`${shellClass} ${pointerClass}`} aria-hidden="true">
+        <video
+          key={url}
+          className={MEDIA_CLASS}
+          src={url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          onError={() => setBroken(true)}
+        />
+      </div>
     );
   }
 
@@ -56,22 +62,27 @@ export default function BackgroundMedia({ url, type, contained = false }: Props)
     return (
       <div
         key={`${url}-css`}
-        className={`${positionClass} bg-cover bg-center bg-no-repeat ${pointerClass}`}
-        style={{ backgroundImage: `url("${displayUrl}")` }}
+        className={`${shellClass} ${pointerClass}`}
+        style={{
+          backgroundImage: `url("${displayUrl}")`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
         aria-hidden="true"
       />
     );
   }
 
   return (
-    <>
+    <div className={`${shellClass} ${pointerClass}`} aria-hidden="true">
       <img
         key={displayUrl}
         src={displayUrl}
         alt=""
         referrerPolicy="no-referrer"
         decoding="async"
-        className={`${positionClass} object-cover object-center min-h-full min-w-full ${pointerClass}`}
+        className={MEDIA_CLASS}
         onError={() => {
           if (!useBackgroundCss) {
             setUseBackgroundCss(true);
@@ -79,8 +90,7 @@ export default function BackgroundMedia({ url, type, contained = false }: Props)
           }
           setBroken(true);
         }}
-        aria-hidden="true"
       />
-    </>
+    </div>
   );
 }

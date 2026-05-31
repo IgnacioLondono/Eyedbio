@@ -69,16 +69,16 @@ export default function ProfileView({ username }: Props) {
   const { settings } = profile;
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-6 overflow-hidden">
+    <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">
       <BackgroundMedia url={settings.backgroundUrl} type={profile.backgroundType} />
-      <div className="fixed inset-0 bg-black/50" />
+      <div className="fixed inset-0 z-[1] bg-black/50 pointer-events-none" />
       <BackgroundEffects effect={settings.backgroundEffect} />
       <ProfileAudio
         url={profile.audioUrl ?? ""}
         enabled={profile.audioEnabled}
         accentColor={settings.accentColor}
       />
-      <div className="relative z-20 w-full">
+      <div className="relative z-20 flex min-h-[100dvh] w-full items-center justify-center p-6">
         <ProfileCard profile={profile} />
       </div>
     </div>
