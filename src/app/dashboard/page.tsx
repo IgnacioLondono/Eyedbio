@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import {
-  Zap,
   ExternalLink,
   Plus,
   Trash2,
@@ -29,6 +28,7 @@ import ProfileCard from "@/components/ProfileCard";
 import BackgroundEffects from "@/components/BackgroundEffects";
 import BackgroundMedia from "@/components/BackgroundMedia";
 import FileUpload from "@/components/FileUpload";
+import Logo from "@/components/Logo";
 
 type Tab = "general" | "links" | "media" | "appearance";
 
@@ -134,14 +134,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <header className="border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
-              <Zap className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="font-bold text-sm">
-              Eyed<span className="text-purple-400">.bio</span>
-            </span>
-          </Link>
+          <Logo href="/" size="sm" />
 
           <div className="flex items-center gap-2">
             <Link

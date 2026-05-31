@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import Logo from "@/components/Logo";
 
 const statConfig = [
   { key: "profileViews" as const, label: "Visitas a perfiles", icon: Eye },
@@ -279,14 +280,7 @@ export default function LandingPage() {
 
       <footer className="border-t border-white/5 py-12 px-6">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
-              <Zap className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="font-bold text-white">
-              Eyed<span className="text-purple-400">.bio</span>
-            </span>
-          </div>
+          <Logo href={null} size="sm" />
           <p className="text-white/30 text-sm">
             © 2026 Eyed.bio — Todos los derechos reservados.
           </p>

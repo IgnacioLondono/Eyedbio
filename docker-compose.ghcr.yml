@@ -26,7 +26,10 @@ services:
       - "9090"
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-eyedbio}:${POSTGRES_PASSWORD:-eyedbio_secret}@postgres:5432/${POSTGRES_DB:-eyedbio}?schema=public
+      POSTGRES_USER: ${POSTGRES_USER:-eyedbio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eyedbio_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-eyedbio}
+      POSTGRES_HOST: postgres
       UPLOAD_DIR: /data/uploads
       PUBLIC_MEDIA_PREFIX: /media
       AUTH_SECRET: ${AUTH_SECRET:-kNGTnHIoXenFhVWwzCSW3LYJ+YKlTb2gW5Lx7XhYkvY=}

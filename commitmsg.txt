@@ -1,0 +1,1 @@
+Fix DB connection for signup, add eye logo and password confirmation.

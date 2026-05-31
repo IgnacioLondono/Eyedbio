@@ -4,7 +4,8 @@ import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Zap, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import Logo from "@/components/Logo";
 
 function LoginForm() {
   const router = useRouter();
@@ -45,14 +46,7 @@ function LoginForm() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <Link href="/" className="flex items-center gap-2 justify-center mb-8">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-white text-lg">
-            Eyed<span className="text-purple-400">.bio</span>
-          </span>
-        </Link>
+        <Logo href="/" className="justify-center mb-8" />
 
         <div className="p-8 rounded-2xl bg-white/[0.03] border border-white/5">
           <h1 className="text-2xl font-bold text-white mb-1">Iniciar sesión</h1>

@@ -4,13 +4,15 @@ import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Zap, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import Logo from "@/components/Logo";
 
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [username, setUsername] = useState(searchParams.get("username") ?? "");
   const [displayName, setDisplayName] = useState("");
   const [error, setError] = useState("");
@@ -20,6 +22,12 @@ function SignupForm() {
     e.preventDefault();
     setError("");
     setLoading(true);
+
+    if (password !== confirmPassword) {
+      setError("Las contraseñas no coinciden");
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -62,14 +70,7 @@ function SignupForm() {
       </div>
 
       <div className="relative w-full max-w-md">
-        <Link href="/" className="flex items-center gap-2 justify-center mb-8">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
-            <Zap className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-white text-lg">
-            Eyed<span className="text-purple-400">.bio</span>
-          </span>
-        </Link>
+        <Logo href="/" className="justify-center mb-8" />
 
         <div className="p-8 rounded-2xl bg-white/[0.03] border border-white/5">
           <h1 className="text-2xl font-bold text-white mb-1">Crea tu perfil</h1>
@@ -98,6 +99,19 @@ function SignupForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="input-field"
                 placeholder="Mínimo 8 caracteres"
+                minLength={8}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm text-white/60 mb-2">Confirmar contraseña</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="input-field"
+                placeholder="Repite tu contraseña"
                 minLength={8}
                 required
               />

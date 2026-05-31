@@ -67,9 +67,10 @@ export async function POST(request: Request) {
       { id: user.id, username: user.username, email: user.email },
       { status: 201 }
     );
-  } catch {
+  } catch (err) {
+    console.error("[register]", err);
     return NextResponse.json(
-      { error: "Error al crear la cuenta" },
+      { error: "Error al crear la cuenta. Revisa que la base de datos esté activa." },
       { status: 500 }
     );
   }
