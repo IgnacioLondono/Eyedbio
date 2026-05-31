@@ -1,0 +1,7 @@
+# Build local (desarrollo). Portainer usa imágenes preconstruidas de GHCR.
+services:
+  eyed-bio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ghcr.io/ignaciolondono/eyedbio:latest
