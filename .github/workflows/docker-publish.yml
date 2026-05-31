@@ -37,15 +37,3 @@ jobs:
             ghcr.io/ignaciolondono/eyedbio:${{ github.sha }}
           cache-from: type=gha,scope=eyedbio-app
           cache-to: type=gha,mode=max,scope=eyedbio-app
-
-      - name: Build and push nginx
-        uses: docker/build-push-action@v6
-        with:
-          context: ./nginx
-          file: ./nginx/Dockerfile
-          push: true
-          tags: |
-            ghcr.io/ignaciolondono/eyedbio-nginx:latest
-            ghcr.io/ignaciolondono/eyedbio-nginx:${{ github.sha }}
-          cache-from: type=gha,scope=eyedbio-nginx
-          cache-to: type=gha,mode=max,scope=eyedbio-nginx

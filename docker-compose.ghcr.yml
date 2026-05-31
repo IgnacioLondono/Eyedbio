@@ -19,10 +19,8 @@ services:
       - eyed-net
 
   eyed-bio:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: eyed-bio-app:local
+    image: ghcr.io/ignaciolondono/eyedbio:latest
+    pull_policy: always
     container_name: eyed-bio-app
     expose:
       - "9090"

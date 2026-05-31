@@ -3,6 +3,8 @@ node_modules
 .git
 .gitignore
 uploads
+*.db
+*.db-journal
 prisma/dev.db
 prisma/dev.db-journal
 .env
@@ -10,6 +12,9 @@ prisma/dev.db-journal
 !.env.example
 README.md
 docker-compose.yml
+docker-compose.ghcr.yml
 portainer.env.example
 *.md
 .cursor
+AGENTS.md
+CLAUDE.md

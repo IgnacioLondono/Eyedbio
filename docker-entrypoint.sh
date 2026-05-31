@@ -7,19 +7,24 @@ chown -R nextjs:nodejs /data
 if [ -n "$DATABASE_URL" ]; then
   echo "Running database migrations..."
   attempt=1
-  while [ "$attempt" -le 15 ]; do
+  max_attempts=20
+
+  while [ "$attempt" -le "$max_attempts" ]; do
     if node ./node_modules/prisma/build/index.js migrate deploy; then
       echo "Migrations completed."
       break
     fi
-    if [ "$attempt" -eq 15 ]; then
-      echo "Database migration failed after 15 attempts."
+
+    if [ "$attempt" -eq "$max_attempts" ]; then
+      echo "Database migration failed after ${max_attempts} attempts."
       exit 1
     fi
-    echo "Database not ready, retrying in 3s... ($attempt/15)"
+
+    echo "Database not ready, retrying in 3s... (${attempt}/${max_attempts})"
     attempt=$((attempt + 1))
     sleep 3
   done
 fi
 
+echo "Starting Eyed.bio..."
 exec runuser -u nextjs -- "$@"
