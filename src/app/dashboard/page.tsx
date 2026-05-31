@@ -230,6 +230,11 @@ export default function DashboardPage() {
 
             {tab === "links" && (
               <>
+                {profile.links.length === 0 && (
+                  <p className="text-white/40 text-sm text-center py-2">
+                    Pulsa el botón de abajo para añadir tu primer enlace.
+                  </p>
+                )}
                 {profile.links.map((link) => (
                   <div
                     key={link.id}

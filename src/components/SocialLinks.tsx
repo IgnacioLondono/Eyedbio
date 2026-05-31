@@ -24,9 +24,17 @@ export default function SocialLinks({
     );
   }
 
+  const visibleLinks = links.filter((link) => link.url.trim().length > 0);
+
+  if (visibleLinks.length === 0) {
+    return (
+      <p className="text-white/30 text-sm italic">Sin enlaces aún</p>
+    );
+  }
+
   return (
     <div className="flex flex-wrap justify-center gap-3">
-      {links.map((link, i) => {
+      {visibleLinks.map((link, i) => {
         const config = PLATFORM_CONFIG[link.platform];
         const color = monochromeIcons ? accentColor : config.color;
 

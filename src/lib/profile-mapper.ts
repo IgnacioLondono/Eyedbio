@@ -85,9 +85,20 @@ export function profileToUpdateData(profile: Profile): Prisma.UserUpdateInput {
   };
 }
 
+function createLinkId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    try {
+      return crypto.randomUUID();
+    } catch {
+      // HTTP (no HTTPS) en red local — randomUUID no disponible
+    }
+  }
+  return `link-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export function createEmptyLink(): SocialLink {
   return {
-    id: crypto.randomUUID(),
+    id: createLinkId(),
     platform: "discord",
     url: "",
   };
