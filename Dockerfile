@@ -44,12 +44,12 @@ ENV PORT=9090
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/src/generated ./src/generated
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
+COPY healthcheck.js ./healthcheck.js
 
 RUN mkdir -p /data/uploads \
     && chmod +x docker-entrypoint.sh \
@@ -58,6 +58,9 @@ RUN mkdir -p /data/uploads \
 EXPOSE 9090
 
 VOLUME ["/data"]
+
+HEALTHCHECK --interval=15s --timeout=10s --start-period=120s --retries=8 \
+  CMD ["node", "healthcheck.js"]
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]
