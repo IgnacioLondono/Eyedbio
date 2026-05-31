@@ -36,6 +36,12 @@ services:
       PUBLIC_MEDIA_PREFIX: /media
       AUTH_SECRET: ${AUTH_SECRET:-kNGTnHIoXenFhVWwzCSW3LYJ+YKlTb2gW5Lx7XhYkvY=}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:9090}
+      # SMTP opcional para recuperación de contraseña
+      # SMTP_HOST: ${SMTP_HOST:-}
+      # SMTP_PORT: ${SMTP_PORT:-587}
+      # SMTP_USER: ${SMTP_USER:-}
+      # SMTP_PASS: ${SMTP_PASS:-}
+      # SMTP_FROM: ${SMTP_FROM:-Eyed.bio <noreply@eyed.bio>}
       AUTH_TRUST_HOST: "true"
       HOSTNAME: 0.0.0.0
       PORT: "9090"

@@ -31,10 +31,11 @@ import BackgroundEffects from "@/components/BackgroundEffects";
 import BackgroundMedia from "@/components/BackgroundMedia";
 import FileUpload from "@/components/FileUpload";
 import Logo from "@/components/Logo";
+import AccountSettings from "@/components/AccountSettings";
 
-type Tab = "general" | "links" | "media" | "appearance";
+type Tab = "general" | "links" | "media" | "appearance" | "account";
 
-const VALID_TABS: Tab[] = ["general", "links", "media", "appearance"];
+const VALID_TABS: Tab[] = ["general", "links", "media", "appearance", "account"];
 
 function parseTab(value: string | null): Tab {
   if (value && VALID_TABS.includes(value as Tab)) return value as Tab;
@@ -182,10 +183,11 @@ function DashboardContent() {
   }
 
   const tabs: { id: Tab; label: string; icon: typeof Settings }[] = [
-    { id: "general", label: "General", icon: Settings },
+    { id: "general", label: "Perfil", icon: UserRound },
     { id: "links", label: "Enlaces", icon: Link2 },
     { id: "media", label: "Media", icon: Music },
     { id: "appearance", label: "Estilo", icon: Palette },
+    { id: "account", label: "Cuenta", icon: Settings },
   ];
 
   return (
@@ -232,14 +234,18 @@ function DashboardContent() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-6 py-8 grid lg:grid-cols-2 gap-8 items-start">
+      <div
+        className={`max-w-7xl mx-auto px-6 py-8 grid gap-8 items-start ${
+          tab === "account" ? "lg:grid-cols-1" : "lg:grid-cols-2"
+        }`}
+      >
         <div className="relative z-20 min-w-0">
-          <div className="grid grid-cols-4 gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6">
+          <div className="flex gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6 overflow-x-auto">
             {tabs.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
+                className={`flex shrink-0 items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all ${
                   tab === t.id
                     ? "bg-purple-600 text-white shadow-lg"
                     : "text-white/50 hover:text-white hover:bg-white/5"
@@ -484,10 +490,21 @@ function DashboardContent() {
                 />
               </>
             )}
+
+            {tab === "account" && (
+              <AccountSettings
+                profileUsername={profile.username}
+                onUsernameUpdated={(username) => update({ username })}
+              />
+            )}
           </div>
         </div>
 
-        <div className="lg:sticky lg:top-20 lg:self-start relative z-10 min-w-0 w-full max-w-[340px] mx-auto lg:max-w-none">
+        <div
+          className={`lg:sticky lg:top-20 lg:self-start relative z-10 min-w-0 w-full max-w-[340px] mx-auto lg:max-w-none ${
+            tab === "account" ? "hidden" : ""
+          }`}
+        >
           <p className="text-white/40 text-xs uppercase tracking-wider mb-4 text-center">
             Vista previa
           </p>

@@ -8,23 +8,35 @@ datasource db {
 }
 
 model User {
-  id             String       @id @default(cuid())
-  email          String       @unique
-  passwordHash   String
-  username       String       @unique
-  displayName    String
-  bio            String       @default("")
-  avatarUrl      String?
-  backgroundUrl  String?
-  backgroundType String       @default("image")
-  audioUrl       String?
-  audioEnabled   Boolean      @default(false)
-  views          Int          @default(0)
-  badges         String       @default("[]")
-  settings       String       @default("{}")
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  links          SocialLink[]
+  id                  String               @id @default(cuid())
+  email               String               @unique
+  passwordHash        String
+  username            String               @unique
+  displayName         String
+  bio                 String               @default("")
+  avatarUrl           String?
+  backgroundUrl       String?
+  backgroundType      String               @default("image")
+  audioUrl            String?
+  audioEnabled        Boolean              @default(false)
+  views               Int                  @default(0)
+  badges              String               @default("[]")
+  settings            String               @default("{}")
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  links               SocialLink[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model SocialLink {
