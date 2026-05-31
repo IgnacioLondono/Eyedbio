@@ -164,7 +164,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 type="text"
                 value={username}
                 onChange={(e) =>
-                  setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ""))
+                  setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))
                 }
                 className="input-field pl-[5.5rem] pr-10 font-mono text-sm"
                 required
@@ -176,7 +176,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
               />
             </div>
             <p className="text-[11px] text-white/30 mt-1.5">
-              Solo letras minúsculas, números, guiones y guiones bajos.
+              Solo letras y números (a–z, 0–9). Mínimo 3 caracteres.
             </p>
           </div>
         </div>

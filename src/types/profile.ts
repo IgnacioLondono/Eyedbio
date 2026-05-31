@@ -11,6 +11,7 @@ export type SocialPlatform =
 
 export type BackgroundEffect = "none" | "snow" | "rain" | "stars";
 export type BackgroundType = "image" | "video" | "gif";
+export type NameEffect = "none" | "glow" | "aura" | "neon" | "pulse" | "gradient";
 
 export interface SocialLink {
   id: string;
@@ -28,7 +29,9 @@ export interface ProfileSettings {
   textColor: string;
   profileOpacity: number;
   profileBlur: number;
-  glowUsername: boolean;
+  /** @deprecated Usar nameEffect */
+  glowUsername?: boolean;
+  nameEffect: NameEffect;
   glowIcons: boolean;
   gradientEnabled: boolean;
   monochromeIcons: boolean;
@@ -59,7 +62,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
   textColor: "#ffffff",
   profileOpacity: 0.15,
   profileBlur: 20,
-  glowUsername: true,
+  nameEffect: "glow",
   glowIcons: false,
   gradientEnabled: true,
   monochromeIcons: false,

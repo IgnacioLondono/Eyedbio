@@ -22,7 +22,9 @@ import {
   SocialPlatform,
   BackgroundEffect,
   BackgroundType,
+  NameEffect,
 } from "@/types/profile";
+import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
 import { createEmptyLink } from "@/lib/profile-mapper";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
@@ -468,11 +470,21 @@ function DashboardContent() {
                   onChange={(v) => updateSettings({ accentColor: v })}
                 />
 
-                <Toggle
-                  label="Brillo en nombre"
-                  checked={profile.settings.glowUsername}
-                  onChange={(v) => updateSettings({ glowUsername: v })}
-                />
+                <Field label="Efecto en el nombre">
+                  <select
+                    value={profile.settings.nameEffect}
+                    onChange={(e) =>
+                      updateSettings({ nameEffect: e.target.value as NameEffect })
+                    }
+                    className="input-field"
+                  >
+                    {NAME_EFFECT_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
                 <Toggle
                   label="Brillo en iconos"
                   checked={profile.settings.glowIcons}

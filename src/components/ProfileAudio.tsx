@@ -88,10 +88,10 @@ export default function ProfileAudio({ url, enabled, accentColor = "#a855f7" }: 
   return (
     <>
       <audio ref={audioRef} src={url} loop preload="auto" />
-      <div className="fixed bottom-6 right-6 z-30 flex items-center gap-2">
-        <div ref={panelRef} className="relative flex items-center">
+      <div className="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
+        <div ref={panelRef} className="relative flex flex-col items-end">
           {showVolume && (
-            <div className="absolute bottom-full right-0 mb-2 flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-black/50 backdrop-blur-md border border-white/10 shadow-xl min-w-[160px]">
+            <div className="mb-2 flex items-center gap-2 px-3 py-2.5 rounded-2xl bg-black/50 backdrop-blur-md border border-white/10 shadow-xl min-w-[160px]">
               {muted ? (
                 <VolumeX className="w-4 h-4 text-white/60 shrink-0" />
               ) : (

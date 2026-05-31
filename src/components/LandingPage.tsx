@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
-import Logo from "@/components/Logo";
 
 const statConfig = [
   { key: "profileViews" as const, label: "Visitas a perfiles", icon: Eye },
@@ -181,12 +180,15 @@ export default function LandingPage() {
               </span>
               <input
                 type="text"
-                placeholder="tu-nombre"
+                placeholder="tunombre"
                 className="bg-transparent px-2 py-3 text-white placeholder-white/30 outline-none w-40 font-mono text-sm"
+                onChange={(e) => {
+                  e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, "");
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     const val = (e.target as HTMLInputElement).value.trim();
-                    if (val) window.location.href = `/signup?username=${val}`;
+                    if (val) window.location.href = `/signup?username=${encodeURIComponent(val)}`;
                   }
                 }}
               />
@@ -299,19 +301,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-white/5 py-12 px-6">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <Logo href="/" size="sm" />
-          <p className="text-white/30 text-sm">
-            © 2026 Eyed.bio — Todos los derechos reservados.
-          </p>
-          <div className="flex gap-6 text-sm text-white/40">
-            <a href="#" className="hover:text-white transition-colors">Términos</a>
-            <a href="#" className="hover:text-white transition-colors">Privacidad</a>
-            <a href="#" className="hover:text-white transition-colors">Contacto</a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

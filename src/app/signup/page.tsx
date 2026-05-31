@@ -134,12 +134,17 @@ function SignupForm() {
               id="username"
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="tu-nombre"
+              onChange={(e) =>
+                setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))
+              }
+              placeholder="tunombre"
               className="flex-1 bg-transparent py-3 pr-3 text-white placeholder-white/20 outline-none font-mono text-sm"
               required
             />
           </div>
+          <p className="text-[11px] text-white/30 mt-1.5">
+            Solo letras y números (a–z, 0–9). Mínimo 3 caracteres.
+          </p>
         </div>
 
         <div>

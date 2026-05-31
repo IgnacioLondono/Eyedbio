@@ -1,5 +1,6 @@
 import { Prisma, SocialLink as DbSocialLink, User } from "@/generated/prisma/client";
 import { resolveBackgroundType } from "@/lib/media-config";
+import { resolveNameEffect } from "@/lib/name-effects";
 import {
   BackgroundType,
   DEFAULT_SETTINGS,
@@ -37,6 +38,7 @@ export function userToProfile(user: UserWithLinks): Profile {
     ...DEFAULT_SETTINGS,
     ...storedSettings,
     backgroundUrl,
+    nameEffect: resolveNameEffect(storedSettings),
   };
 
   return {

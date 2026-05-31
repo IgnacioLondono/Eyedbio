@@ -5,6 +5,12 @@ import { Eye, Crown, CheckCircle, Star } from "lucide-react";
 import { Profile } from "@/types/profile";
 import { hexToRgba } from "@/lib/color-utils";
 import { getMediaSrc } from "@/lib/media-url";
+import {
+  getAvatarGlowStyle,
+  getNameEffectClass,
+  getNameEffectStyle,
+  resolveNameEffect,
+} from "@/lib/name-effects";
 import SocialLinks from "./SocialLinks";
 
 const BADGE_CONFIG: Record<string, { icon: typeof Crown; color: string; label: string }> = {
@@ -21,6 +27,10 @@ interface Props {
 export default function ProfileCard({ profile, compact = false }: Props) {
   const { settings } = profile;
   const { cardColor, cardColorSecondary, textColor, profileOpacity } = settings;
+  const nameEffect = resolveNameEffect(settings);
+  const nameEffectClass = getNameEffectClass(nameEffect);
+  const nameEffectStyle = getNameEffectStyle(nameEffect, settings.accentColor, textColor);
+  const avatarGlowStyle = getAvatarGlowStyle(nameEffect, settings.accentColor);
 
   const cardStyle: React.CSSProperties = {
     background: settings.gradientEnabled
@@ -65,9 +75,7 @@ export default function ProfileCard({ profile, compact = false }: Props) {
               className={`${avatarSize} rounded-full overflow-hidden mx-auto`}
               style={{
                 border: `2px solid ${hexToRgba(textColor, 0.2)}`,
-                boxShadow: settings.glowUsername
-                  ? `0 0 30px ${settings.accentColor}66`
-                  : undefined,
+                ...avatarGlowStyle,
               }}
             >
               <img
@@ -82,12 +90,10 @@ export default function ProfileCard({ profile, compact = false }: Props) {
 
           <div className={`flex items-center justify-center gap-1.5 mb-0.5 flex-wrap ${compact ? "px-1" : "gap-2 mb-1"}`}>
             <h1
-              className={`${nameSize} font-bold break-all`}
+              className={`${nameSize} font-bold break-all ${nameEffectClass ?? ""}`}
               style={{
-                color: textColor,
-                textShadow: settings.glowUsername
-                  ? `0 0 20px ${settings.accentColor}`
-                  : undefined,
+                color: nameEffect === "gradient" ? undefined : textColor,
+                ...nameEffectStyle,
               }}
             >
               {profile.displayName}
@@ -113,7 +119,15 @@ export default function ProfileCard({ profile, compact = false }: Props) {
             })}
           </div>
 
-          <p className={`mb-1 ${compact ? "text-xs" : "text-sm"}`} style={{ color: hexToRgba(textColor, 0.6) }}>
+          <p
+            className={`mb-1 ${compact ? "text-xs" : "text-sm"} ${nameEffect !== "none" && nameEffect !== "gradient" ? nameEffectClass ?? "" : ""}`}
+            style={{
+              color: hexToRgba(textColor, 0.6),
+              ...(nameEffect !== "none" && nameEffect !== "gradient"
+                ? getNameEffectStyle(nameEffect, settings.accentColor, hexToRgba(textColor, 0.6))
+                : {}),
+            }}
+          >
             @{profile.username}
           </p>
 
