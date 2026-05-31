@@ -5,6 +5,7 @@ import { BackgroundEffect } from "@/types/profile";
 
 interface Props {
   effect: BackgroundEffect;
+  contained?: boolean;
 }
 
 interface Particle {
@@ -16,7 +17,7 @@ interface Particle {
   drift?: number;
 }
 
-export default function BackgroundEffects({ effect }: Props) {
+export default function BackgroundEffects({ effect, contained = false }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -32,8 +33,10 @@ export default function BackgroundEffects({ effect }: Props) {
     let particles: Particle[] = [];
 
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const width = contained ? canvas.offsetWidth : window.innerWidth;
+      const height = contained ? canvas.offsetHeight : window.innerHeight;
+      canvas.width = width;
+      canvas.height = height;
     };
 
     const initParticles = () => {
@@ -93,23 +96,33 @@ export default function BackgroundEffects({ effect }: Props) {
     initParticles();
     draw();
 
-    window.addEventListener("resize", () => {
+    const handleResize = () => {
       resize();
-      initParticles();
-    });
+      if (canvas.width > 0 && canvas.height > 0) {
+        initParticles();
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    const observer =
+      contained && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(handleResize)
+        : null;
+    observer?.observe(canvas);
 
     return () => {
       cancelAnimationFrame(animationId);
-      window.removeEventListener("resize", resize);
+      window.removeEventListener("resize", handleResize);
+      observer?.disconnect();
     };
-  }, [effect]);
+  }, [effect, contained]);
 
   if (effect === "none") return null;
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none z-10"
+      className={`${contained ? "absolute inset-0" : "fixed inset-0"} pointer-events-none z-10`}
       aria-hidden="true"
     />
   );

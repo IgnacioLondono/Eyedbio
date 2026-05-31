@@ -174,8 +174,8 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-6 py-8 grid lg:grid-cols-2 gap-8">
-        <div>
+      <div className="max-w-7xl mx-auto px-6 py-8 grid lg:grid-cols-2 gap-8 items-start">
+        <div className="relative z-20 min-w-0">
           <div className="flex gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6 overflow-x-auto">
             {tabs.map((t) => (
               <button
@@ -406,21 +406,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="lg:sticky lg:top-20 lg:self-start">
+        <div className="lg:sticky lg:top-20 lg:self-start relative z-10 min-w-0">
           <p className="text-white/40 text-xs uppercase tracking-wider mb-4 text-center">
             Vista previa
           </p>
-          <div className="relative rounded-2xl overflow-hidden border border-white/10 aspect-[9/16] max-h-[700px]">
-            <div className="absolute inset-0">
-              <BackgroundMedia
-                url={profile.settings.backgroundUrl}
-                type={profile.backgroundType}
-              />
-            </div>
-            <div className="absolute inset-0 bg-black/50" />
-            <BackgroundEffects effect={profile.settings.backgroundEffect} />
-            <div className="relative z-10 h-full flex items-center justify-center p-6 overflow-y-auto">
-              <ProfileCard profile={profile} />
+          <div className="relative rounded-2xl overflow-hidden border border-white/10 aspect-[9/16] max-h-[700px] isolate">
+            <BackgroundMedia
+              url={profile.settings.backgroundUrl}
+              type={profile.backgroundType}
+              contained
+            />
+            <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+            <BackgroundEffects effect={profile.settings.backgroundEffect} contained />
+            <div className="relative z-10 h-full flex items-center justify-center p-6 overflow-y-auto pointer-events-none">
+              <div className="pointer-events-auto w-full">
+                <ProfileCard profile={profile} />
+              </div>
             </div>
           </div>
         </div>
