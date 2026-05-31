@@ -43,6 +43,15 @@ while [ "$attempt" -le "$max_attempts" ]; do
 done
 
 echo "Starting Eyed.bio..."
+
+if [ -n "$RESEND_API_KEY" ]; then
+  echo "Email: Resend configurado"
+elif [ -n "$SMTP_HOST" ]; then
+  echo "Email: SMTP ${SMTP_HOST}:${SMTP_PORT:-587}"
+else
+  echo "Email: NO configurado — los códigos solo aparecerán en los logs"
+fi
+
 exec runuser -u nextjs -- env \
   DATABASE_URL="$DATABASE_URL" \
   NODE_ENV="${NODE_ENV:-production}" \
@@ -53,4 +62,12 @@ exec runuser -u nextjs -- env \
   AUTH_SECRET="$AUTH_SECRET" \
   NEXTAUTH_URL="$NEXTAUTH_URL" \
   AUTH_TRUST_HOST="${AUTH_TRUST_HOST:-true}" \
+  RESEND_API_KEY="${RESEND_API_KEY:-}" \
+  RESEND_FROM="${RESEND_FROM:-}" \
+  SMTP_HOST="${SMTP_HOST:-}" \
+  SMTP_PORT="${SMTP_PORT:-587}" \
+  SMTP_SECURE="${SMTP_SECURE:-false}" \
+  SMTP_USER="${SMTP_USER:-}" \
+  SMTP_PASS="${SMTP_PASS:-}" \
+  SMTP_FROM="${SMTP_FROM:-}" \
   "$@"
