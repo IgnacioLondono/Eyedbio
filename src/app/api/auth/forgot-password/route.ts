@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendPasswordResetEmail } from "@/lib/mail";
-import { createResetTokenValue, getResetExpiry } from "@/lib/password-reset";
+import { sendVerificationCodeEmail } from "@/lib/mail";
+import { createVerificationCode, getCodeExpiry } from "@/lib/password-reset";
 import { normalizeEmail, validateEmail } from "@/lib/validation";
 
 const GENERIC_MESSAGE =
-  "Si el email está registrado, recibirás un enlace para restablecer tu contraseña en unos minutos.";
+  "Si el email está registrado, recibirás un código de verificación de 6 dígitos.";
 
 export async function POST(request: Request) {
   try {
@@ -22,16 +22,16 @@ export async function POST(request: Request) {
     if (user) {
       await prisma.passwordResetToken.deleteMany({ where: { userId: user.id } });
 
-      const token = createResetTokenValue();
+      const code = createVerificationCode();
       await prisma.passwordResetToken.create({
         data: {
           userId: user.id,
-          token,
-          expiresAt: getResetExpiry(1),
+          token: code,
+          expiresAt: getCodeExpiry(15),
         },
       });
 
-      await sendPasswordResetEmail({ to: user.email, token });
+      await sendVerificationCodeEmail({ to: user.email, code });
     }
 
     return NextResponse.json({ message: GENERIC_MESSAGE });

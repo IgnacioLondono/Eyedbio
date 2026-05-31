@@ -1,17 +1,14 @@
-import { buildResetPasswordUrl } from "@/lib/password-reset";
-
-interface SendResetEmailOptions {
+interface SendCodeOptions {
   to: string;
-  token: string;
+  code: string;
 }
 
-export async function sendPasswordResetEmail({ to, token }: SendResetEmailOptions) {
-  const resetUrl = buildResetPasswordUrl(token);
+export async function sendVerificationCodeEmail({ to, code }: SendCodeOptions) {
   const smtpHost = process.env.SMTP_HOST;
 
   if (!smtpHost) {
-    console.info(`[Eyed.bio] Enlace de recuperación para ${to}: ${resetUrl}`);
-    return { sent: false, resetUrl };
+    console.info(`[Eyed.bio] Código de verificación para ${to}: ${code} (válido 15 min)`);
+    return { sent: false };
   }
 
   try {
@@ -29,28 +26,29 @@ export async function sendPasswordResetEmail({ to, token }: SendResetEmailOption
     await transporter.sendMail({
       from: process.env.SMTP_FROM ?? "Eyed.bio <noreply@eyed.bio>",
       to,
-      subject: "Restablece tu contraseña — Eyed.bio",
+      subject: "Tu código de verificación — Eyed.bio",
       text: [
-        "Recibimos una solicitud para restablecer tu contraseña en Eyed.bio.",
+        "Tu código para restablecer la contraseña en Eyed.bio:",
         "",
-        `Abre este enlace (válido 1 hora): ${resetUrl}`,
+        code,
         "",
-        "Si no solicitaste este cambio, ignora este mensaje.",
+        "Válido durante 15 minutos.",
+        "Si no solicitaste este código, ignora este mensaje.",
       ].join("\n"),
       html: `
         <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;color:#111">
           <h2 style="color:#7c3aed">Eyed.bio</h2>
-          <p>Recibimos una solicitud para restablecer tu contraseña.</p>
-          <p><a href="${resetUrl}" style="display:inline-block;background:#7c3aed;color:#fff;padding:12px 20px;border-radius:10px;text-decoration:none;font-weight:600">Restablecer contraseña</a></p>
-          <p style="color:#666;font-size:13px">El enlace expira en 1 hora. Si no fuiste tú, ignora este correo.</p>
+          <p>Tu código de verificación para restablecer la contraseña:</p>
+          <p style="font-size:32px;font-weight:700;letter-spacing:8px;color:#7c3aed;margin:24px 0">${code}</p>
+          <p style="color:#666;font-size:13px">Válido 15 minutos. Si no fuiste tú, ignora este correo.</p>
         </div>
       `,
     });
 
-    return { sent: true, resetUrl };
+    return { sent: true };
   } catch (err) {
-    console.error("[mail] Error enviando correo de recuperación:", err);
-    console.info(`[Eyed.bio] Enlace de recuperación (fallback) para ${to}: ${resetUrl}`);
-    return { sent: false, resetUrl };
+    console.error("[mail] Error enviando código:", err);
+    console.info(`[Eyed.bio] Código de verificación (fallback) para ${to}: ${code}`);
+    return { sent: false };
   }
 }

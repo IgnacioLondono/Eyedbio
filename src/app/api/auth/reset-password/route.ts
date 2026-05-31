@@ -1,17 +1,27 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { validatePassword } from "@/lib/validation";
+import {
+  isValidVerificationCode,
+  normalizeVerificationCode,
+} from "@/lib/password-reset";
+import { normalizeEmail, validateEmail, validatePassword } from "@/lib/validation";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const token = String(body.token ?? "").trim();
+    const email = normalizeEmail(String(body.email ?? ""));
+    const code = normalizeVerificationCode(String(body.code ?? ""));
     const password = String(body.password ?? "");
     const confirmPassword = String(body.confirmPassword ?? "");
 
-    if (!token) {
-      return NextResponse.json({ error: "Token inválido" }, { status: 400 });
+    const emailError = validateEmail(email);
+    if (emailError) {
+      return NextResponse.json({ error: emailError }, { status: 400 });
+    }
+
+    if (!isValidVerificationCode(code)) {
+      return NextResponse.json({ error: "Introduce un código de 6 dígitos válido" }, { status: 400 });
     }
 
     const passwordError = validatePassword(password);
@@ -23,14 +33,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Las contraseñas no coinciden" }, { status: 400 });
     }
 
-    const resetToken = await prisma.passwordResetToken.findUnique({
-      where: { token },
-      include: { user: true },
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json(
+        { error: "Código incorrecto o expirado. Solicita uno nuevo." },
+        { status: 400 }
+      );
+    }
+
+    const resetToken = await prisma.passwordResetToken.findFirst({
+      where: { userId: user.id, token: code },
     });
 
     if (!resetToken || resetToken.expiresAt < new Date()) {
       return NextResponse.json(
-        { error: "El enlace ha expirado o no es válido. Solicita uno nuevo." },
+        { error: "Código incorrecto o expirado. Solicita uno nuevo." },
         { status: 400 }
       );
     }
@@ -39,10 +56,10 @@ export async function POST(request: Request) {
 
     await prisma.$transaction([
       prisma.user.update({
-        where: { id: resetToken.userId },
+        where: { id: user.id },
         data: { passwordHash },
       }),
-      prisma.passwordResetToken.deleteMany({ where: { userId: resetToken.userId } }),
+      prisma.passwordResetToken.deleteMany({ where: { userId: user.id } }),
     ]);
 
     return NextResponse.json({ message: "Contraseña actualizada. Ya puedes iniciar sesión." });

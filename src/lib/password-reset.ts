@@ -1,18 +1,17 @@
-import { randomBytes } from "crypto";
+import { randomInt } from "crypto";
 
-export function createResetTokenValue(): string {
-  return randomBytes(32).toString("hex");
+export function createVerificationCode(): string {
+  return String(randomInt(100000, 1000000));
 }
 
-export function getResetExpiry(hours = 1): Date {
-  return new Date(Date.now() + hours * 60 * 60 * 1000);
+export function getCodeExpiry(minutes = 15): Date {
+  return new Date(Date.now() + minutes * 60 * 1000);
 }
 
-export function getAppBaseUrl(): string {
-  const url = process.env.NEXTAUTH_URL ?? process.env.APP_URL ?? "http://localhost:9090";
-  return url.replace(/\/$/, "");
+export function normalizeVerificationCode(raw: string): string {
+  return raw.replace(/\D/g, "").slice(0, 6);
 }
 
-export function buildResetPasswordUrl(token: string): string {
-  return `${getAppBaseUrl()}/reset-password?token=${encodeURIComponent(token)}`;
+export function isValidVerificationCode(code: string): boolean {
+  return /^\d{6}$/.test(code);
 }

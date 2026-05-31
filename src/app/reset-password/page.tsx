@@ -1,9 +1,9 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, KeyRound } from "lucide-react";
+import { KeyRound } from "lucide-react";
 import AuthLayout, {
   AuthError,
   AuthFooterLink,
@@ -14,12 +14,18 @@ import PasswordInput from "@/components/PasswordInput";
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token") ?? "";
 
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const emailParam = searchParams.get("email");
+    if (emailParam) setEmail(emailParam);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +36,7 @@ function ResetPasswordForm() {
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password, confirmPassword }),
+        body: JSON.stringify({ email, code, password, confirmPassword }),
       });
 
       const data = await res.json();
@@ -47,30 +53,49 @@ function ResetPasswordForm() {
     }
   };
 
-  if (!token) {
-    return (
-      <AuthLayout
-        title="Enlace inválido"
-        subtitle="Este enlace de recuperación no es válido. Solicita uno nuevo desde la página de login."
-        footer={<AuthFooterLink text="" linkText="Solicitar nuevo enlace" href="/forgot-password" />}
-      >
-        <Link
-          href="/forgot-password"
-          className="block w-full text-center py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-sm font-semibold transition-colors"
-        >
-          Ir a recuperar contraseña
-        </Link>
-      </AuthLayout>
-    );
-  }
-
   return (
     <AuthLayout
       title="Nueva contraseña"
-      subtitle="Elige una contraseña segura de al menos 8 caracteres."
-      footer={<AuthFooterLink text="¿Recuerdas tu contraseña?" linkText="Iniciar sesión" href="/login" />}
+      subtitle="Introduce el código de 6 dígitos que recibiste y tu nueva contraseña."
+      footer={
+        <AuthFooterLink text="¿No tienes código?" linkText="Solicitar uno" href="/forgot-password" />
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="auth-label">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="auth-input"
+            placeholder="tu@email.com"
+            autoComplete="email"
+            required
+          />
+        </div>
+
+        <div>
+          <label htmlFor="code" className="auth-label">
+            Código de verificación
+          </label>
+          <input
+            id="code"
+            type="text"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={6}
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+            className="auth-input text-center text-2xl font-mono tracking-[0.4em]"
+            placeholder="000000"
+            required
+          />
+        </div>
+
         <div>
           <label htmlFor="password" className="auth-label">
             Nueva contraseña
@@ -107,9 +132,15 @@ function ResetPasswordForm() {
           <>
             <KeyRound className="w-4 h-4" />
             Restablecer contraseña
-            <ArrowRight className="w-4 h-4" />
           </>
         </AuthSubmitButton>
+
+        <Link
+          href="/forgot-password"
+          className="block text-center text-sm text-purple-400 hover:text-purple-300 transition-colors"
+        >
+          Solicitar nuevo código
+        </Link>
       </form>
     </AuthLayout>
   );
