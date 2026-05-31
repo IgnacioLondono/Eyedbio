@@ -29,6 +29,7 @@ import FileUpload from "@/components/FileUpload";
 import Logo from "@/components/Logo";
 import AccountSettings from "@/components/AccountSettings";
 import LinkEditor from "@/components/LinkEditor";
+import ShareProfileButton from "@/components/ShareProfileButton";
 
 type Tab = "general" | "links" | "media" | "appearance" | "account";
 
@@ -240,6 +241,23 @@ function DashboardContent() {
           <div className="space-y-5">
             {tab === "general" && (
               <>
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-3">
+                  <div>
+                    <h3 className="text-sm font-medium text-white">Compartir perfil</h3>
+                    <p className="text-xs text-white/40 mt-1">
+                      Al pegar tu enlace en Instagram, WhatsApp, X o Discord se verá una
+                      miniatura con tu foto, nombre y bio.
+                    </p>
+                  </div>
+                  <p className="text-xs font-mono text-purple-300/80 break-all">
+                    eyed.bio/{profile.username}
+                  </p>
+                  <ShareProfileButton
+                    username={profile.username}
+                    displayName={profile.displayName}
+                    variant="inline"
+                  />
+                </div>
                 <Field label="Nombre para mostrar">
                   <input
                     type="text"

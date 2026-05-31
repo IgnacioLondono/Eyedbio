@@ -6,6 +6,7 @@ import BackgroundEffects from "@/components/BackgroundEffects";
 import BackgroundMedia from "@/components/BackgroundMedia";
 import ProfileAudio from "@/components/ProfileAudio";
 import ProfileCard from "@/components/ProfileCard";
+import ShareProfileButton from "@/components/ShareProfileButton";
 
 interface Props {
   username: string;
@@ -77,6 +78,10 @@ export default function ProfileView({ username }: Props) {
         url={profile.audioUrl ?? ""}
         enabled={profile.audioEnabled}
         accentColor={settings.accentColor}
+      />
+      <ShareProfileButton
+        username={profile.username}
+        displayName={profile.displayName}
       />
       <div className="relative z-20 flex min-h-[100dvh] w-full items-center justify-center p-6">
         <ProfileCard profile={profile} />
