@@ -35,6 +35,8 @@ model User {
   profileViewsAsViewer        ProfileView[] @relation("ProfileViewViewer")
   profileViewsAsProfileUser   ProfileView[] @relation("ProfileViewProfileUser")
   profileViewsAsGuest         ProfileViewGuest[]
+  reviewsWritten              ProfileReview[] @relation("ReviewsWritten")
+  reviewsReceived             ProfileReview[] @relation("ReviewsReceived")
 }
 
 model ProfileView {
@@ -80,6 +82,22 @@ model ProfileViewGuest {
 
   @@unique([profileUserId, guestId])
   @@index([profileUserId])
+}
+
+model ProfileReview {
+  id            String   @id @default(cuid())
+  reviewerId    String
+  reviewer      User     @relation("ReviewsWritten", fields: [reviewerId], references: [id], onDelete: Cascade)
+  profileUserId String
+  profileUser   User     @relation("ReviewsReceived", fields: [profileUserId], references: [id], onDelete: Cascade)
+  rating        Int
+  comment       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([reviewerId, profileUserId])
+  @@index([profileUserId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
 }
 
 model SocialLink {
