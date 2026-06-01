@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getUsernameChangeStatus } from "@/lib/account-config";
 import {
+  getUsernameChangeStatus,
   normalizeEmail,
   normalizeUsername,
   validateEmail,

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { Shield, Mail, AtSign, KeyRound, CalendarDays } from "lucide-react";
-import { USERNAME_CHANGE_COOLDOWN_DAYS } from "@/lib/account-config";
+import { USERNAME_CHANGE_COOLDOWN_DAYS } from "@/lib/validation";
 import PasswordInput from "@/components/PasswordInput";
 
 interface AccountData {
