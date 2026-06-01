@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
+import LandingStyleShowcase from "@/components/LandingStyleShowcase";
 
 const statConfig = [
   { key: "profileViews" as const, label: "Visitas a perfiles", icon: Eye },
@@ -33,8 +34,8 @@ const features = [
   },
   {
     icon: Palette,
-    title: "Personalización total",
-    desc: "Fondos, efectos, colores, blur y opacidad a tu gusto.",
+    title: "Compositor de estilos",
+    desc: "7 estructuras de tarjeta, 4 modos de enlaces y avatar — miles de combinaciones.",
   },
   {
     icon: Sparkles,
@@ -224,6 +225,8 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      <LandingStyleShowcase />
 
       <section id="features" className="py-24 px-6">
         <div className="max-w-5xl mx-auto">

@@ -1,4 +1,9 @@
 import { Prisma, SocialLink as DbSocialLink, User } from "@/generated/prisma/client";
+import {
+  resolveAvatarStyle,
+  resolveCardLayout,
+  resolveLinkStyle,
+} from "@/lib/card-layout-config";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { resolveNameEffect } from "@/lib/name-effects";
 import {
@@ -34,11 +39,14 @@ export function userToProfile(user: UserWithLinks): Profile {
   const backgroundUrl =
     user.backgroundUrl ?? storedSettings.backgroundUrl ?? DEFAULT_SETTINGS.backgroundUrl;
 
-  const settings: ProfileSettings = {
+  const merged: ProfileSettings = {
     ...DEFAULT_SETTINGS,
     ...storedSettings,
     backgroundUrl,
     nameEffect: resolveNameEffect(storedSettings),
+    cardLayout: resolveCardLayout(storedSettings),
+    linkStyle: resolveLinkStyle(storedSettings),
+    avatarStyle: resolveAvatarStyle(storedSettings),
   };
 
   return {
@@ -66,7 +74,7 @@ export function userToProfile(user: UserWithLinks): Profile {
         label: link.label ?? undefined,
         iconUrl: link.iconUrl ?? undefined,
       })),
-    settings,
+    settings: merged,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   };

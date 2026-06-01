@@ -41,6 +41,21 @@ export type BackgroundEffect =
 export type BackgroundType = "image" | "video" | "gif";
 export type NameEffect = "none" | "glow" | "aura" | "neon" | "pulse" | "gradient";
 
+/** Estructura / composición de la tarjeta de perfil */
+export type CardLayout =
+  | "classic"
+  | "hero"
+  | "split"
+  | "banner"
+  | "minimal"
+  | "stack"
+  | "glass";
+
+/** Cómo se muestran los enlaces sociales */
+export type LinkStyle = "icons" | "pills" | "row" | "chips";
+
+export type AvatarStyle = "circle" | "ring" | "rounded";
+
 export interface SocialLink {
   id: string;
   platform: SocialPlatform;
@@ -69,6 +84,9 @@ export interface ProfileSettings {
   showCardShadow: boolean;
   borderOpacity: number;
   cursorUrl?: string;
+  cardLayout: CardLayout;
+  linkStyle: LinkStyle;
+  avatarStyle: AvatarStyle;
 }
 
 export interface Profile {
@@ -106,4 +124,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
   showCardBorder: true,
   showCardShadow: true,
   borderOpacity: 0.2,
+  cardLayout: "classic",
+  linkStyle: "icons",
+  avatarStyle: "circle",
 };

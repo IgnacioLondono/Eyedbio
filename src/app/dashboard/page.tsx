@@ -32,6 +32,8 @@ import AccountSettings from "@/components/AccountSettings";
 import LinkEditor from "@/components/LinkEditor";
 import ShareProfileButton from "@/components/ShareProfileButton";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
+import CardLayoutPicker from "@/components/CardLayoutPicker";
+import { resolveLinkStyle } from "@/lib/card-layout-config";
 
 type Tab = "general" | "links" | "media" | "appearance" | "account";
 
@@ -512,6 +514,28 @@ function DashboardContent() {
                     className="w-full accent-purple-500"
                   />
                 </Field>
+
+                <p className="text-xs uppercase tracking-wider text-white/40 pt-2">
+                  Estructura y enlaces
+                </p>
+
+                <CardLayoutPicker
+                  cardLayout={profile.settings.cardLayout}
+                  linkStyle={profile.settings.linkStyle}
+                  avatarStyle={profile.settings.avatarStyle}
+                  onLayoutChange={(layout) =>
+                    updateSettings({
+                      cardLayout: layout,
+                      linkStyle: resolveLinkStyle({
+                        ...profile.settings,
+                        cardLayout: layout,
+                      }),
+                    })
+                  }
+                  onLinkStyleChange={(linkStyle) => updateSettings({ linkStyle })}
+                  onAvatarStyleChange={(avatarStyle) => updateSettings({ avatarStyle })}
+                  onApplySuggestions={(partial) => updateSettings(partial)}
+                />
 
                 <p className="text-xs uppercase tracking-wider text-white/40 pt-2">
                   Tarjeta
