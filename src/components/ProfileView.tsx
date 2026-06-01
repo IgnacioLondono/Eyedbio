@@ -68,6 +68,20 @@ export default function ProfileView({ username }: Props) {
     void loadProfile();
   }, [loadProfile]);
 
+  useEffect(() => {
+    if (profile) {
+      document.title = `${profile.displayName} (@${profile.username}) — Eyed.bio`;
+      return;
+    }
+    if (lockedProfile) {
+      document.title = `${lockedProfile.displayName} (@${lockedProfile.username}) — Eyed.bio`;
+      return;
+    }
+    if (!loading && !loadError) {
+      document.title = "Perfil no encontrado — Eyed.bio";
+    }
+  }, [profile, lockedProfile, loading, loadError]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">

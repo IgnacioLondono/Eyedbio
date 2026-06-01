@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ProfileView from "@/components/ProfileView";
-import { getPublicProfile } from "@/lib/get-public-profile";
+import { findProfileByUsername } from "@/lib/profile-query";
+import { userToProfile } from "@/lib/profile-mapper";
 import {
   getSiteUrlFromHeaders,
   profileOgImageUrl,
@@ -15,8 +16,15 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
-  const profile = await getPublicProfile(username);
   const siteUrl = await getSiteUrlFromHeaders();
+
+  let profile = null;
+  try {
+    const user = await findProfileByUsername(username);
+    if (user) profile = userToProfile(user);
+  } catch (err) {
+    console.error("[generateMetadata]", username, err);
+  }
 
   if (!profile) {
     return {
