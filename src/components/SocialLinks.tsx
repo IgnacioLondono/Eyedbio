@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { Globe } from "lucide-react";
 import { SocialLink, SocialPlatform } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
 import { PlatformIcon } from "@/components/PlatformIcons";
+import { getMediaSrc } from "@/lib/media-url";
 
 interface Props {
   links: SocialLink[];
@@ -12,6 +14,34 @@ interface Props {
   monochromeIcons: boolean;
   compact?: boolean;
   mutedColor?: string;
+}
+
+function LinkIcon({
+  link,
+  color,
+  compact,
+}: {
+  link: SocialLink;
+  color: string;
+  compact: boolean;
+}) {
+  const size = compact ? "w-4 h-4" : "w-5 h-5";
+
+  if (link.iconUrl) {
+    return (
+      <img
+        src={getMediaSrc(link.iconUrl)}
+        alt=""
+        className={`${size} object-contain`}
+      />
+    );
+  }
+
+  if (link.platform === "custom") {
+    return <Globe className={`${size} text-white/70`} style={{ color }} />;
+  }
+
+  return <PlatformIcon platform={link.platform as SocialPlatform} />;
 }
 
 export default function SocialLinks({
@@ -48,6 +78,7 @@ export default function SocialLinks({
       {visibleLinks.map((link, i) => {
         const config = PLATFORM_CONFIG[link.platform];
         const color = monochromeIcons ? accentColor : config.color;
+        const title = link.label ?? config.label;
 
         return (
           <motion.a
@@ -60,14 +91,14 @@ export default function SocialLinks({
             transition={compact ? undefined : { delay: 0.3 + i * 0.08 }}
             whileHover={{ scale: 1.15, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            title={link.label ?? config.label}
-            className={`flex items-center justify-center ${iconSize} rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors`}
+            title={title}
+            className={`flex items-center justify-center ${iconSize} rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors overflow-hidden`}
             style={{
-              color,
-              filter: glowIcons ? `drop-shadow(0 0 8px ${color})` : undefined,
+              color: link.iconUrl ? undefined : color,
+              filter: glowIcons && !link.iconUrl ? `drop-shadow(0 0 8px ${color})` : undefined,
             }}
           >
-            <PlatformIcon platform={link.platform as SocialPlatform} />
+            <LinkIcon link={link} color={color} compact={compact} />
           </motion.a>
         );
       })}

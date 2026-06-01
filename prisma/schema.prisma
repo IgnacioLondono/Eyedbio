@@ -47,5 +47,6 @@ model SocialLink {
   platform  String
   url       String
   label     String?
+  iconUrl   String?
   sortOrder Int     @default(0)
 }

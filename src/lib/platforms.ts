@@ -5,7 +5,7 @@ export const PLATFORM_CONFIG: Record<
   { label: string; color: string }
 > = {
   discord: { label: "Discord", color: "#5865F2" },
-  twitter: { label: "Twitter / X", color: "#1DA1F2" },
+  twitter: { label: "Twitter / X", color: "#ffffff" },
   instagram: { label: "Instagram", color: "#E4405F" },
   youtube: { label: "YouTube", color: "#FF0000" },
   tiktok: { label: "TikTok", color: "#ffffff" },
@@ -24,6 +24,15 @@ export const PLATFORM_CONFIG: Record<
   snapchat: { label: "Snapchat", color: "#FFFC00" },
   kick: { label: "Kick", color: "#53FC18" },
   steam: { label: "Steam", color: "#66C0F4" },
+  roblox: { label: "Roblox", color: "#ffffff" },
+  epicgames: { label: "Epic Games", color: "#ffffff" },
+  xbox: { label: "Xbox", color: "#107C10" },
+  playstation: { label: "PlayStation", color: "#0070D1" },
+  nintendo: { label: "Nintendo", color: "#E60012" },
+  minecraft: { label: "Minecraft", color: "#62B47A" },
+  battlenet: { label: "Battle.net", color: "#148EFF" },
+  riotgames: { label: "Riot Games", color: "#D32936" },
   email: { label: "Email", color: "#a855f7" },
   website: { label: "Website", color: "#a855f7" },
+  custom: { label: "Enlace personalizado", color: "#a855f7" },
 };

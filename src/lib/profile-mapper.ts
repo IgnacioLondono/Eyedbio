@@ -64,6 +64,7 @@ export function userToProfile(user: UserWithLinks): Profile {
         platform: link.platform as SocialPlatform,
         url: link.url,
         label: link.label ?? undefined,
+        iconUrl: link.iconUrl ?? undefined,
       })),
     settings,
     createdAt: user.createdAt.toISOString(),
@@ -91,6 +92,7 @@ export function profileToUpdateData(profile: Profile): Prisma.UserUpdateInput {
         platform: link.platform,
         url: link.url,
         label: link.label ?? null,
+        iconUrl: link.iconUrl ?? null,
         sortOrder: index,
       })),
     },
@@ -108,10 +110,10 @@ function createLinkId(): string {
   return `link-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
-export function createEmptyLink(): SocialLink {
+export function createEmptyLink(platform: SocialPlatform = "discord"): SocialLink {
   return {
     id: createLinkId(),
-    platform: "discord",
+    platform,
     url: "",
   };
 }

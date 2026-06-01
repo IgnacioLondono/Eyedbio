@@ -19,8 +19,17 @@ export type SocialPlatform =
   | "snapchat"
   | "kick"
   | "steam"
+  | "roblox"
+  | "epicgames"
+  | "xbox"
+  | "playstation"
+  | "nintendo"
+  | "minecraft"
+  | "battlenet"
+  | "riotgames"
   | "email"
-  | "website";
+  | "website"
+  | "custom";
 
 export type BackgroundEffect = "none" | "snow" | "rain" | "stars";
 export type BackgroundType = "image" | "video" | "gif";
@@ -31,6 +40,7 @@ export interface SocialLink {
   platform: SocialPlatform;
   url: string;
   label?: string;
+  iconUrl?: string;
 }
 
 export interface ProfileSettings {
