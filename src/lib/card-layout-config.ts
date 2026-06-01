@@ -1,4 +1,5 @@
-import type { CardLayout, LinkStyle, AvatarStyle, ProfileSettings } from "@/types/profile";
+import type { CardLayout, LinkStyle, AvatarStyle, Profile, ProfileSettings } from "@/types/profile";
+import { DEFAULT_SETTINGS } from "@/types/profile";
 
 export const CARD_LAYOUT_OPTIONS: {
   value: CardLayout;
@@ -124,4 +125,45 @@ export function suggestedSettingsForLayout(layout: CardLayout): Partial<ProfileS
     default:
       return {};
   }
+}
+
+const THUMBNAIL_LINKS: Profile["links"] = [
+  { id: "p1", platform: "discord", url: "https://eyed.bio", label: "Discord" },
+  { id: "p2", platform: "instagram", url: "https://eyed.bio" },
+  { id: "p3", platform: "github", url: "https://eyed.bio" },
+];
+
+/** Perfil estático para miniaturas del selector (misma tarjeta que la vista previa). */
+export function getLayoutThumbnailProfile(layout: CardLayout): Profile {
+  const suggestions = suggestedSettingsForLayout(layout);
+  const settings: ProfileSettings = {
+    ...DEFAULT_SETTINGS,
+    backgroundEffect: "none",
+    accentColor: "#a855f7",
+    textColor: "#ffffff",
+    cardColor: "#1a1a2e",
+    cardColorSecondary: "#4c1d95",
+    ...suggestions,
+    cardLayout: layout,
+    linkStyle: resolveLinkStyle({ cardLayout: layout, ...suggestions }),
+    profileOpacity:
+      layout === "minimal" ? 0 : (suggestions.profileOpacity ?? DEFAULT_SETTINGS.profileOpacity),
+    profileBlur:
+      layout === "minimal" ? 0 : (suggestions.profileBlur ?? DEFAULT_SETTINGS.profileBlur),
+  };
+
+  return {
+    username: "preview",
+    displayName: "Nombre",
+    bio: "Tu biografía",
+    avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=eyed-thumb",
+    backgroundType: "image",
+    audioEnabled: false,
+    audioStartTime: 0,
+    views: 999,
+    badges: [],
+    links: THUMBNAIL_LINKS,
+    createdAt: "",
+    settings,
+  };
 }

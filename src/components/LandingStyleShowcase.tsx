@@ -1,30 +1,66 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { Layers, Shuffle } from "lucide-react";
 import ProfileCard from "@/components/ProfileCard";
 import BackgroundEffects from "@/components/BackgroundEffects";
+import {
+  CARD_LAYOUT_OPTIONS,
+  LINK_STYLE_OPTIONS,
+  resolveCardLayout,
+  resolveLinkStyle,
+} from "@/lib/card-layout-config";
 import { LANDING_STYLE_DEMOS } from "@/lib/demo-profiles";
 
-const ROTATE_MS = 4500;
+const ROTATE_MS = 5000;
+const PAUSE_AFTER_MANUAL_MS = 14_000;
+
+function layoutLabel(layout: string): string {
+  return CARD_LAYOUT_OPTIONS.find((o) => o.value === layout)?.label ?? layout;
+}
+
+function linkLabel(style: string): string {
+  return LINK_STYLE_OPTIONS.find((o) => o.value === style)?.label ?? style;
+}
 
 export default function LandingStyleShowcase() {
   const [index, setIndex] = useState(0);
-  const demo = LANDING_STYLE_DEMOS[index];
+  const pausedRef = useRef(false);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
-    const t = setInterval(() => {
-      setIndex((i) => (i + 1) % LANDING_STYLE_DEMOS.length);
-    }, ROTATE_MS);
-    return () => clearInterval(t);
+  const demo = LANDING_STYLE_DEMOS[index];
+  const layout = resolveCardLayout(demo.settings);
+  const linkStyle = resolveLinkStyle(demo.settings);
+
+  const selectDemo = useCallback((next: number) => {
+    setIndex(next);
+    pausedRef.current = true;
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    resumeTimerRef.current = setTimeout(() => {
+      pausedRef.current = false;
+    }, PAUSE_AFTER_MANUAL_MS);
   }, []);
 
-  const comboCount =
-    7 * 4 * 3 *
-    6 *
-    2 *
-    2;
+  useEffect(() => {
+    const prefersReduced =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReduced) return;
+
+    const timer = setInterval(() => {
+      if (pausedRef.current) return;
+      setIndex((i) => (i + 1) % LANDING_STYLE_DEMOS.length);
+    }, ROTATE_MS);
+
+    return () => {
+      clearInterval(timer);
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+    };
+  }, []);
+
+  const comboCount = 7 * 4 * 3 * 6 * 2 * 2;
 
   return (
     <section className="relative py-20 px-4 overflow-hidden">
@@ -74,41 +110,46 @@ export default function LandingStyleShowcase() {
           </div>
 
           <div className="relative mx-auto w-full max-w-[300px]">
-            <div className="absolute -inset-4 bg-purple-600/20 blur-3xl rounded-full" />
-            <div className="relative aspect-[9/14] rounded-3xl border border-white/10 overflow-hidden bg-[#0a0a0f] shadow-2xl">
+            <div className="absolute -inset-4 bg-purple-600/20 blur-3xl rounded-full pointer-events-none" />
+            <div className="relative aspect-[9/14] rounded-3xl border border-white/10 overflow-hidden bg-[#0a0a0f] shadow-2xl isolate">
               <div
                 className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-[#0f0a1a] to-purple-950"
                 aria-hidden
               />
               <BackgroundEffects effect={demo.settings.backgroundEffect} contained />
-              <div className="absolute inset-0 flex items-center justify-center p-5 z-10">
-                <AnimatePresence mode="wait">
+              <div className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <div className="min-h-full flex items-center justify-center px-4 py-5">
                   <motion.div
-                    key={demo.username}
-                    initial={{ opacity: 0, y: 12 }}
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -12 }}
-                    transition={{ duration: 0.35 }}
-                    className="w-full"
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    className="w-full flex justify-center"
                   >
-                    <ProfileCard profile={demo} compact />
+                    <ProfileCard profile={demo} compact showcase />
                   </motion.div>
-                </AnimatePresence>
+                </div>
               </div>
             </div>
             <p className="text-center text-xs text-white/40 mt-4">
               Vista: <span className="text-purple-300">{demo.displayName}</span> ·{" "}
-              {demo.settings.cardLayout} / {demo.settings.linkStyle}
+              {layoutLabel(layout)} / {linkLabel(linkStyle)}
             </p>
-            <div className="flex justify-center gap-1.5 mt-3">
-              {LANDING_STYLE_DEMOS.map((_, i) => (
+            <div
+              className="flex justify-center gap-1.5 mt-3"
+              role="tablist"
+              aria-label="Estilos de ejemplo"
+            >
+              {LANDING_STYLE_DEMOS.map((item, i) => (
                 <button
-                  key={i}
+                  key={item.username}
                   type="button"
-                  aria-label={`Estilo ${i + 1}`}
-                  onClick={() => setIndex(i)}
-                  className={`h-1.5 rounded-full transition-all ${
-                    i === index ? "w-6 bg-purple-500" : "w-1.5 bg-white/20"
+                  role="tab"
+                  aria-selected={i === index}
+                  aria-label={`Estilo ${item.displayName}`}
+                  onClick={() => selectDemo(i)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === index ? "w-6 bg-purple-500" : "w-1.5 bg-white/20 hover:bg-white/40"
                   }`}
                 />
               ))}

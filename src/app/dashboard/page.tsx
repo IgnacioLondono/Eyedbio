@@ -33,7 +33,11 @@ import LinkEditor from "@/components/LinkEditor";
 import ShareProfileButton from "@/components/ShareProfileButton";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
 import CardLayoutPicker from "@/components/CardLayoutPicker";
-import { resolveLinkStyle } from "@/lib/card-layout-config";
+import {
+  resolveLinkStyle,
+  resolveCardLayout,
+  suggestedSettingsForLayout,
+} from "@/lib/card-layout-config";
 
 type Tab = "general" | "links" | "media" | "appearance" | "account";
 
@@ -112,11 +116,18 @@ function DashboardContent() {
     setIsDirty(true);
   };
 
-  const updateSettings = (partial: Partial<Profile["settings"]>) => {
-    if (!profile) return;
-    setProfile({
-      ...profile,
-      settings: { ...profile.settings, ...partial },
+  const updateSettings = (
+    partial:
+      | Partial<Profile["settings"]>
+      | ((current: Profile["settings"]) => Partial<Profile["settings"]>)
+  ) => {
+    setProfile((current) => {
+      if (!current) return current;
+      const patch = typeof partial === "function" ? partial(current.settings) : partial;
+      return {
+        ...current,
+        settings: { ...current.settings, ...patch },
+      };
     });
     setIsDirty(true);
   };
@@ -520,21 +531,25 @@ function DashboardContent() {
                 </p>
 
                 <CardLayoutPicker
-                  cardLayout={profile.settings.cardLayout}
-                  linkStyle={profile.settings.linkStyle}
+                  cardLayout={resolveCardLayout(profile.settings)}
+                  linkStyle={resolveLinkStyle(profile.settings)}
                   avatarStyle={profile.settings.avatarStyle}
-                  onLayoutChange={(layout) =>
-                    updateSettings({
-                      cardLayout: layout,
-                      linkStyle: resolveLinkStyle({
-                        ...profile.settings,
+                  onSelectLayout={(layout) =>
+                    updateSettings((s) => {
+                      const suggestions = suggestedSettingsForLayout(layout);
+                      return {
                         cardLayout: layout,
-                      }),
+                        ...suggestions,
+                        linkStyle: resolveLinkStyle({
+                          ...s,
+                          cardLayout: layout,
+                          ...suggestions,
+                        }),
+                      };
                     })
                   }
                   onLinkStyleChange={(linkStyle) => updateSettings({ linkStyle })}
                   onAvatarStyleChange={(avatarStyle) => updateSettings({ avatarStyle })}
-                  onApplySuggestions={(partial) => updateSettings(partial)}
                 />
 
                 <p className="text-xs uppercase tracking-wider text-white/40 pt-2">

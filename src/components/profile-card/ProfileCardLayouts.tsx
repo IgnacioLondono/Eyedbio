@@ -130,7 +130,7 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
           bannerSrc
             ? { backgroundImage: `url(${bannerSrc})` }
             : {
-                background: `linear-gradient(135deg, ${settings.accentColor}, ${hexToRgba(settings.cardColor, 0.9)})`,
+                background: `linear-gradient(135deg, ${settings.accentColor} 0%, ${hexToRgba(settings.cardColorSecondary || settings.accentColor, 0.85)} 50%, ${hexToRgba(settings.cardColor, 0.95)} 100%)`,
               }
         }
       >
@@ -230,14 +230,26 @@ export const CARD_LAYOUT_COMPONENTS = {
 export function ProfileCardMotionWrapper({
   profile,
   compact,
+  showcase,
   children,
   maxWidth,
 }: {
   profile: Profile;
   compact?: boolean;
+  showcase?: boolean;
   children: React.ReactNode;
   maxWidth?: string;
 }) {
+  if (showcase) {
+    return (
+      <div
+        className={`relative w-full mx-auto pointer-events-none select-none ${maxWidth ?? "max-w-[240px]"}`}
+      >
+        {children}
+      </div>
+    );
+  }
+
   if (compact) {
     return (
       <div className={`relative w-full mx-auto ${maxWidth ?? "max-w-[260px]"}`}>
