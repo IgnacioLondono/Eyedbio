@@ -18,6 +18,7 @@ model User {
   backgroundUrl       String?
   backgroundType      String               @default("image")
   audioUrl            String?
+  audioStartTime      Float                @default(0)
   audioEnabled        Boolean              @default(false)
   views               Int                  @default(0)
   badges              String               @default("[]")

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Upload, Loader2, X, ImageIcon, Film, Image as ImageLucide } from "lucide-react";
+import { Upload, Loader2, X, ImageIcon, Film, Image as ImageLucide, Music } from "lucide-react";
 import { BackgroundType } from "@/types/profile";
 import { ACCEPT_ATTR, UploadKind, resolveBackgroundType } from "@/lib/media-config";
 import { getMediaSrc } from "@/lib/media-url";
@@ -178,14 +178,26 @@ export default function FileUpload({
     <div className="space-y-2">
       {label && <label className="block text-sm text-white/60">{label}</label>}
 
-      {currentUrl && (
+      {currentUrl && isAudio && (
+        <div className="relative flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5">
+          <Music className="w-4 h-4 text-purple-400 shrink-0" />
+          <span className="text-sm text-white/60 truncate flex-1">Audio subido</span>
+          {onClear && (
+            <button
+              type="button"
+              onClick={onClear}
+              className="p-1.5 rounded-lg bg-black/40 text-white/70 hover:text-white shrink-0"
+              aria-label="Quitar audio"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
+      {currentUrl && !isAudio && (
         <div className="relative rounded-xl overflow-hidden border border-white/10 bg-white/5">
           <MediaPreview kind={kind} currentUrl={currentUrl} mediaType={mediaType} />
-          {isAudio && (
-            <div className="p-4">
-              <audio src={currentUrl} controls className="w-full h-8" />
-            </div>
-          )}
           {onClear && (
             <button
               type="button"

@@ -26,6 +26,7 @@ import ProfileCard from "@/components/ProfileCard";
 import BackgroundEffects from "@/components/BackgroundEffects";
 import BackgroundMedia from "@/components/BackgroundMedia";
 import FileUpload from "@/components/FileUpload";
+import AudioClipSelector from "@/components/AudioClipSelector";
 import Logo from "@/components/Logo";
 import AccountSettings from "@/components/AccountSettings";
 import LinkEditor from "@/components/LinkEditor";
@@ -331,11 +332,22 @@ function DashboardContent() {
                 <FileUpload
                   kind="audio"
                   label="Audio de fondo"
-                  hint="MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, AIFF, MIDI · máx. 25MB"
+                  hint="MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, AIFF, MIDI · máx. 25MB · 30 s en el perfil"
                   currentUrl={profile.audioUrl}
-                  onUploaded={(url) => update({ audioUrl: url, audioEnabled: true })}
-                  onClear={() => update({ audioUrl: undefined, audioEnabled: false })}
+                  onUploaded={(url) =>
+                    update({ audioUrl: url, audioEnabled: true, audioStartTime: 0 })
+                  }
+                  onClear={() =>
+                    update({ audioUrl: undefined, audioEnabled: false, audioStartTime: 0 })
+                  }
                 />
+                {profile.audioUrl && (
+                  <AudioClipSelector
+                    audioUrl={profile.audioUrl}
+                    startTime={profile.audioStartTime}
+                    onChange={(audioStartTime) => update({ audioStartTime })}
+                  />
+                )}
                 <Toggle
                   label="Reproducir audio en el perfil"
                   checked={profile.audioEnabled}

@@ -77,6 +77,7 @@ export default function ProfileView({ username }: Props) {
       <BackgroundEffects effect={settings.backgroundEffect} />
       <ProfileAudio
         url={profile.audioUrl ?? ""}
+        startTime={profile.audioStartTime}
         enabled={profile.audioEnabled}
         accentColor={settings.accentColor}
       />

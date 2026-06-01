@@ -62,6 +62,7 @@ export interface Profile {
   avatarUrl: string;
   backgroundType: BackgroundType;
   audioUrl?: string;
+  audioStartTime: number;
   audioEnabled: boolean;
   views: number;
   badges: string[];

@@ -53,6 +53,7 @@ export function userToProfile(user: UserWithLinks): Profile {
       (user.backgroundType as BackgroundType) ?? "image"
     ),
     audioUrl: user.audioUrl ?? undefined,
+    audioStartTime: user.audioStartTime ?? 0,
     audioEnabled: user.audioEnabled,
     views: user.views,
     badges: parseBadges(user.badges),
@@ -80,6 +81,7 @@ export function profileToUpdateData(profile: Profile): Prisma.UserUpdateInput {
     backgroundUrl,
     backgroundType,
     audioUrl: profile.audioUrl ?? null,
+    audioStartTime: profile.audioStartTime,
     audioEnabled: profile.audioEnabled,
     badges: JSON.stringify(profile.badges),
     settings: JSON.stringify(restSettings),
