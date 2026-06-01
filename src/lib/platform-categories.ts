@@ -29,6 +29,7 @@ export const PLATFORM_CATEGORIES: {
       "pinterest",
       "threads",
       "snapchat",
+      "kick",
     ],
   },
   {
@@ -44,7 +45,6 @@ export const PLATFORM_CATEGORIES: {
       "minecraft",
       "battlenet",
       "riotgames",
-      "kick",
     ],
   },
   {
