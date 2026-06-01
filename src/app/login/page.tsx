@@ -80,7 +80,9 @@ function LoginForm() {
       return;
     }
 
-    const session = await getSession();
+    const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
+    const session = sessionRes.ok ? await sessionRes.json() : await getSession();
+
     const destination =
       session?.user && isAdminRole(session.user.role)
         ? callbackUrl.startsWith("/admin")
@@ -88,8 +90,7 @@ function LoginForm() {
           : "/admin"
         : callbackUrl;
 
-    router.push(destination);
-    router.refresh();
+    window.location.href = destination;
   };
 
   if (step === "code") {

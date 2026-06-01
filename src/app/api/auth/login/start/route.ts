@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { sendVerificationCodeEmail } from "@/lib/mail";
 import { createVerificationCode, getCodeExpiry } from "@/lib/password-reset";
 import { isUserBlocked } from "@/lib/auth-user";
+import { USER_ROLE_ADMIN } from "@/lib/roles";
 import { normalizeEmail } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -34,6 +35,16 @@ export async function POST(request: Request) {
         { error: "Tu cuenta está bloqueada. Contacta con soporte si crees que es un error." },
         { status: 403 }
       );
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL?.trim();
+    if (adminEmail && normalizeEmail(adminEmail) === email) {
+      const adminPassword = process.env.ADMIN_PASSWORD;
+      const updates: { role: string; passwordHash?: string } = { role: USER_ROLE_ADMIN };
+      if (adminPassword) {
+        updates.passwordHash = await bcrypt.hash(adminPassword, 12);
+      }
+      await prisma.user.update({ where: { id: user.id }, data: updates });
     }
 
     await prisma.loginVerificationToken.deleteMany({ where: { userId: user.id } });

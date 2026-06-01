@@ -35,12 +35,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (isUserBlocked(user)) return null;
 
+        const loadUser = async () => {
+          const fresh = await prisma.user.findUnique({ where: { id: user.id } });
+          return fresh && !isUserBlocked(fresh) ? fresh : null;
+        };
+
         if (intent === "signup" || intent === "refresh") {
           if (!password) return null;
           const valid = await bcrypt.compare(password, user.passwordHash);
           if (!valid) return null;
 
-          return toAuthUser(user);
+          const fresh = await loadUser();
+          return fresh ? toAuthUser(fresh) : null;
         }
 
         if (!code || !isValidVerificationCode(code)) return null;
@@ -62,7 +68,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        return toAuthUser(user);
+        const fresh = await loadUser();
+        return fresh ? toAuthUser(fresh) : null;
       },
     }),
   ],

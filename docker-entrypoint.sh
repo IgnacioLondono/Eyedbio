@@ -42,12 +42,7 @@ while [ "$attempt" -le "$max_attempts" ]; do
   sleep 3
 done
 
-echo "Ensuring admin account..."
-if npx tsx ./scripts/ensure-admin.ts; then
-  echo "Admin bootstrap completed."
-else
-  echo "Admin bootstrap skipped or failed (check ADMIN_EMAIL / ADMIN_PASSWORD)."
-fi
+echo "Admin: se sincroniza al arrancar la app (ADMIN_EMAIL / ADMIN_PASSWORD)."
 
 echo "Starting Eyed.bio..."
 
