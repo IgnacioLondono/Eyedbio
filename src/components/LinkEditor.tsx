@@ -7,6 +7,7 @@ import { PLATFORM_CONFIG } from "@/lib/platforms";
 import { PLATFORM_CATEGORIES, getPlatformUrlPlaceholder } from "@/lib/platform-categories";
 import { PlatformIcon } from "@/components/PlatformIcons";
 import { createEmptyLink } from "@/lib/profile-mapper";
+import { MAX_SOCIAL_LINKS, canAddSocialLink } from "@/lib/links-config";
 import { ACCEPT_ATTR } from "@/lib/media-config";
 import { getMediaSrc } from "@/lib/media-url";
 
@@ -96,11 +97,15 @@ export default function LinkEditor({ links, onChange }: Props) {
     links.filter((l) => l.platform !== "custom").map((l) => l.platform)
   );
 
+  const atLinkLimit = !canAddSocialLink(links.length);
+
   const addLink = (platform: SocialPlatform) => {
+    if (atLinkLimit) return;
     onChange([...links, createEmptyLink(platform)]);
   };
 
   const addCustomLink = () => {
+    if (atLinkLimit) return;
     onChange([...links, createEmptyLink("custom")]);
   };
 
@@ -112,12 +117,20 @@ export default function LinkEditor({ links, onChange }: Props) {
     onChange(links.filter((l) => l.id !== id));
   };
 
-  const hasAvailablePlatforms = PLATFORM_CATEGORIES.some((category) =>
-    category.platforms.some((platform) => !usedPlatforms.has(platform))
-  );
+  const hasAvailablePlatforms =
+    !atLinkLimit &&
+    PLATFORM_CATEGORIES.some((category) =>
+      category.platforms.some((platform) => !usedPlatforms.has(platform))
+    );
 
   return (
     <div className="space-y-6">
+      <p className="text-xs text-white/40">
+        {links.length}/{MAX_SOCIAL_LINKS} enlaces
+        {atLinkLimit && (
+          <span className="text-amber-300/90"> · Límite alcanzado. Quita uno para añadir otro.</span>
+        )}
+      </p>
       {links.length === 0 ? (
         <p className="text-white/40 text-sm text-center py-2">
           Elige un icono abajo para añadir tu primer enlace.
@@ -232,7 +245,8 @@ export default function LinkEditor({ links, onChange }: Props) {
         <button
           type="button"
           onClick={addCustomLink}
-          className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] hover:bg-purple-500/10 hover:border-purple-500/30 transition-all text-left"
+          disabled={atLinkLimit}
+          className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] hover:bg-purple-500/10 hover:border-purple-500/30 transition-all text-left disabled:opacity-40 disabled:pointer-events-none"
         >
           <span className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 border border-white/10 shrink-0">
             <Globe className="w-5 h-5 text-white/60" />

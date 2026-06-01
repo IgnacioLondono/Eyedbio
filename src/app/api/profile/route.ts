@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { validateSocialLinksCount } from "@/lib/links-config";
 import { profileToUpdateData, userToProfile } from "@/lib/profile-mapper";
 import { Profile } from "@/types/profile";
 
@@ -30,6 +31,11 @@ export async function PATCH(request: Request) {
 
   try {
     const profile = (await request.json()) as Profile;
+
+    const linksError = validateSocialLinksCount(profile.links?.length ?? 0);
+    if (linksError) {
+      return NextResponse.json({ error: linksError }, { status: 400 });
+    }
 
     const user = await prisma.user.update({
       where: { id: session.user.id },
