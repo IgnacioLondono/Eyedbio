@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationCodeEmail } from "@/lib/mail";
 import { createVerificationCode, getCodeExpiry } from "@/lib/password-reset";
 import { isUserBlocked } from "@/lib/auth-user";
 import {
-  ensureAdminUserForLogin,
-  verifyLoginPassword,
+  getAdminEnvPassword,
+  isAdminConfigured,
+  isAdminEnvEmail,
+  syncAdminFromEnvIfEmail,
 } from "@/lib/admin-credentials";
 import { normalizeEmail } from "@/lib/validation";
 
@@ -24,16 +27,37 @@ export async function POST(request: Request) {
 
     let user = await prisma.user.findUnique({ where: { email } });
 
+    if (isAdminEnvEmail(email)) {
+      if (!isAdminConfigured()) {
+        console.error(
+          "[login/start] ADMIN_EMAIL coincide pero ADMIN_PASSWORD no está en el contenedor de la app"
+        );
+        return NextResponse.json(
+          {
+            error:
+              "Falta ADMIN_PASSWORD en el contenedor eyed-bio (no solo en nginx). Revisa las variables y redespliega.",
+          },
+          { status: 503 }
+        );
+      }
+
+      const synced = await syncAdminFromEnvIfEmail(email);
+      if (synced) user = synced;
+    }
+
     if (!user) {
-      user = await ensureAdminUserForLogin(email, password);
-      if (!user) {
-        return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
-      }
-    } else {
-      const valid = await verifyLoginPassword(user, email, password);
-      if (!valid) {
-        return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
-      }
+      return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
+    }
+
+    const valid = await bcrypt.compare(password, user.passwordHash);
+    if (!valid) {
+      console.warn("[login/start] Contraseña incorrecta", {
+        email,
+        isAdminEmail: isAdminEnvEmail(email),
+        adminEnvReady: isAdminConfigured(),
+        hasAdminPasswordInEnv: Boolean(getAdminEnvPassword()),
+      });
+      return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
     }
 
     if (isUserBlocked(user)) {
