@@ -27,6 +27,21 @@ model User {
   updatedAt           DateTime             @updatedAt
   links               SocialLink[]
   passwordResetTokens PasswordResetToken[]
+
+  profileViewsAsViewer        ProfileView[] @relation("ProfileViewViewer")
+  profileViewsAsProfileUser   ProfileView[] @relation("ProfileViewProfileUser")
+}
+
+model ProfileView {
+  id              String   @id @default(cuid())
+  viewerId        String
+  viewer          User     @relation("ProfileViewViewer", fields: [viewerId], references: [id], onDelete: Cascade)
+  profileUserId  String
+  profileUser    User     @relation("ProfileViewProfileUser", fields: [profileUserId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+
+  @@unique([viewerId, profileUserId])
+  @@index([profileUserId])
 }
 
 model PasswordResetToken {
