@@ -24,6 +24,8 @@ model User {
   badges              String               @default("[]")
   settings            String               @default("{}")
   usernameChangedAt   DateTime?
+  accessCodeEnabled   Boolean              @default(false)
+  accessCodeHash      String?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   links               SocialLink[]

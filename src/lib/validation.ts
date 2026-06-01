@@ -31,6 +31,21 @@ export function validatePassword(password: string): string | null {
   return null;
 }
 
+export function normalizeAccessCode(code: string): string {
+  return code.trim();
+}
+
+export function validateAccessCode(code: string): string | null {
+  const normalized = normalizeAccessCode(code);
+  if (!normalized) return "El código de acceso es obligatorio";
+  if (normalized.length < 4) return "El código debe tener al menos 4 caracteres";
+  if (normalized.length > 32) return "El código no puede superar 32 caracteres";
+  if (!/^[a-zA-Z0-9]+$/.test(normalized)) {
+    return "Solo letras y números en el código de acceso";
+  }
+  return null;
+}
+
 /** Días entre cambios de nombre de usuario público. */
 export const USERNAME_CHANGE_COOLDOWN_DAYS = 14;
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
-import { Shield, Mail, AtSign, KeyRound, CalendarDays, ArrowRight } from "lucide-react";
+import { Shield, Mail, AtSign, KeyRound, CalendarDays, ArrowRight, Lock } from "lucide-react";
 import { USERNAME_CHANGE_COOLDOWN_DAYS } from "@/lib/validation";
 import PasswordInput from "@/components/PasswordInput";
 
@@ -12,6 +12,8 @@ interface AccountData {
   createdAt: string;
   canChangeUsername: boolean;
   nextUsernameChangeAt: string | null;
+  accessCodeEnabled: boolean;
+  hasAccessCode: boolean;
 }
 
 interface Props {
@@ -32,6 +34,8 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [accessCodeEnabled, setAccessCodeEnabled] = useState(false);
+  const [accessCode, setAccessCode] = useState("");
 
   useEffect(() => {
     fetch("/api/account")
@@ -43,6 +47,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
         setAccount(data);
         setEmail(data.email);
         setUsername(data.username);
+        setAccessCodeEnabled(data.accessCodeEnabled);
       })
       .catch(() => setError("No se pudo cargar la configuración de la cuenta"))
       .finally(() => setLoading(false));
@@ -50,6 +55,10 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
 
   const usernameWillChange =
     account !== null && username !== account.username && username.length >= 3;
+
+  const accessCodeSettingsChanged =
+    account !== null &&
+    (accessCodeEnabled !== account.accessCodeEnabled || accessCode.length > 0);
 
   const submitChanges = async () => {
     if (!account) return;
@@ -59,13 +68,17 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
     setSaving(true);
 
     try {
-      const payload: Record<string, string> = { currentPassword };
+      const payload: Record<string, string | boolean> = { currentPassword };
 
       if (email !== account.email) payload.email = email;
       if (username !== account.username) payload.username = username;
       if (newPassword) {
         payload.newPassword = newPassword;
         payload.confirmPassword = confirmPassword;
+      }
+      if (accessCodeSettingsChanged) {
+        payload.accessCodeEnabled = accessCodeEnabled;
+        if (accessCode) payload.accessCode = accessCode;
       }
 
       const res = await fetch("/api/account", {
@@ -86,6 +99,8 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      setAccessCode("");
+      setAccessCodeEnabled(data.accessCodeEnabled);
       setSuccess(data.message ?? "Cuenta actualizada");
       setShowUsernameConfirm(false);
 
@@ -224,16 +239,71 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 </p>
               )}
             </div>
+        </div>
+      </div>
+
+      <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-purple-500/15 text-purple-400">
+            <Lock className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white">Código de acceso al perfil</h3>
+            <p className="text-xs text-white/40 mt-0.5">
+              Quien visite tu perfil público deberá introducir este código para verlo.
+            </p>
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-purple-500/15 text-purple-400">
-              <KeyRound className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-white">Seguridad</h3>
+        <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+          <span className="text-sm text-white/70">Activar código de acceso</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={accessCodeEnabled}
+            onClick={() => setAccessCodeEnabled((prev) => !prev)}
+            className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+              accessCodeEnabled ? "bg-purple-600" : "bg-white/10"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                accessCodeEnabled ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        {accessCodeEnabled && (
+          <div>
+            <label className="block text-sm text-white/60 mb-2">
+              {account?.hasAccessCode ? "Nuevo código (opcional)" : "Código de acceso"}
+            </label>
+            <input
+              type="password"
+              value={accessCode}
+              onChange={(e) => setAccessCode(e.target.value.replace(/\s/g, ""))}
+              placeholder={account?.hasAccessCode ? "Deja vacío para mantener el actual" : "Mínimo 4 caracteres"}
+              className="input-field w-full font-mono tracking-wider"
+              autoComplete="new-password"
+              minLength={account?.hasAccessCode ? undefined : 4}
+              maxLength={32}
+              required={accessCodeEnabled && !account?.hasAccessCode}
+            />
+            <p className="text-[11px] text-white/30 mt-1.5">
+              Solo letras y números (4–32 caracteres). Compártelo solo con quien quieras que vea tu perfil.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-purple-500/15 text-purple-400">
+            <KeyRound className="w-4 h-4" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white">Seguridad</h3>
               <p className="text-xs text-white/40 mt-0.5">
                 Confirma con tu contraseña actual. Deja en blanco si no quieres cambiarla.
               </p>

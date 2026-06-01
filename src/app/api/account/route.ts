@@ -2,10 +2,13 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { hashAccessCode } from "@/lib/profile-access";
 import {
   getUsernameChangeStatus,
+  normalizeAccessCode,
   normalizeEmail,
   normalizeUsername,
+  validateAccessCode,
   validateEmail,
   validatePassword,
   validateUsername,
@@ -24,6 +27,8 @@ export async function GET() {
       username: true,
       createdAt: true,
       usernameChangedAt: true,
+      accessCodeEnabled: true,
+      accessCodeHash: true,
     },
   });
 
@@ -40,6 +45,8 @@ export async function GET() {
     usernameChangedAt: user.usernameChangedAt?.toISOString() ?? null,
     canChangeUsername: canChange,
     nextUsernameChangeAt: nextChangeAt?.toISOString() ?? null,
+    accessCodeEnabled: user.accessCodeEnabled,
+    hasAccessCode: Boolean(user.accessCodeHash),
   });
 }
 
@@ -57,6 +64,10 @@ export async function PATCH(request: Request) {
       body.username !== undefined ? normalizeUsername(String(body.username)) : undefined;
     const newPassword = body.newPassword ? String(body.newPassword) : undefined;
     const confirmPassword = body.confirmPassword ? String(body.confirmPassword) : undefined;
+    const accessCodeEnabled =
+      body.accessCodeEnabled !== undefined ? Boolean(body.accessCodeEnabled) : undefined;
+    const accessCode =
+      body.accessCode !== undefined ? normalizeAccessCode(String(body.accessCode)) : undefined;
 
     if (!currentPassword) {
       return NextResponse.json(
@@ -80,6 +91,8 @@ export async function PATCH(request: Request) {
       username?: string;
       passwordHash?: string;
       usernameChangedAt?: Date;
+      accessCodeEnabled?: boolean;
+      accessCodeHash?: string | null;
     } = {};
 
     if (email !== undefined && email !== user.email) {
@@ -130,6 +143,34 @@ export async function PATCH(request: Request) {
       updates.passwordHash = await bcrypt.hash(newPassword, 12);
     }
 
+    if (accessCodeEnabled !== undefined || accessCode !== undefined) {
+      if (accessCodeEnabled === false) {
+        updates.accessCodeEnabled = false;
+        updates.accessCodeHash = null;
+      } else if (accessCodeEnabled === true) {
+        updates.accessCodeEnabled = true;
+        if (accessCode) {
+          const accessCodeError = validateAccessCode(accessCode);
+          if (accessCodeError) {
+            return NextResponse.json({ error: accessCodeError }, { status: 400 });
+          }
+          updates.accessCodeHash = await hashAccessCode(accessCode);
+        } else if (!user.accessCodeHash) {
+          return NextResponse.json(
+            { error: "Introduce un código de acceso para activar la protección" },
+            { status: 400 }
+          );
+        }
+      } else if (accessCode) {
+        const accessCodeError = validateAccessCode(accessCode);
+        if (accessCodeError) {
+          return NextResponse.json({ error: accessCodeError }, { status: 400 });
+        }
+        updates.accessCodeHash = await hashAccessCode(accessCode);
+        updates.accessCodeEnabled = true;
+      }
+    }
+
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: "No hay cambios para guardar" }, { status: 400 });
     }
@@ -141,6 +182,8 @@ export async function PATCH(request: Request) {
         username: true,
         createdAt: true,
         usernameChangedAt: true,
+        accessCodeEnabled: true,
+        accessCodeHash: true,
       },
       data: updates,
     });
@@ -154,6 +197,8 @@ export async function PATCH(request: Request) {
       usernameChangedAt: updated.usernameChangedAt?.toISOString() ?? null,
       canChangeUsername: usernameStatus.canChange,
       nextUsernameChangeAt: usernameStatus.nextChangeAt?.toISOString() ?? null,
+      accessCodeEnabled: updated.accessCodeEnabled,
+      hasAccessCode: Boolean(updated.accessCodeHash),
       message: "Cuenta actualizada correctamente",
     });
   } catch {
