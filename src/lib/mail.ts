@@ -1,8 +1,11 @@
 import { describeMailConfig, getMailConfig } from "@/lib/mail-config";
 
+export type VerificationEmailPurpose = "reset" | "login";
+
 interface SendCodeOptions {
   to: string;
   code: string;
+  purpose?: VerificationEmailPurpose;
 }
 
 interface SendResult {
@@ -10,26 +13,47 @@ interface SendResult {
   error?: string;
 }
 
-const SUBJECT = "Tu código de verificación — Eyed.bio";
+function getCopy(purpose: VerificationEmailPurpose) {
+  if (purpose === "login") {
+    return {
+      subject: "Tu código de acceso — Eyed.bio",
+      intro: "Tu código para iniciar sesión en Eyed.bio:",
+      htmlIntro: "Tu código de acceso para iniciar sesión:",
+      ignore:
+        "Si no intentaste iniciar sesión, ignora este mensaje y cambia tu contraseña.",
+    };
+  }
 
-function buildTextBody(code: string): string {
+  return {
+    subject: "Tu código de verificación — Eyed.bio",
+    intro: "Tu código para restablecer la contraseña en Eyed.bio:",
+    htmlIntro: "Tu código de verificación para restablecer la contraseña:",
+    ignore: "Si no solicitaste este código, ignora este mensaje.",
+  };
+}
+
+function buildTextBody(code: string, purpose: VerificationEmailPurpose): string {
+  const copy = getCopy(purpose);
   return [
-    "Tu código para restablecer la contraseña en Eyed.bio:",
+    copy.intro,
     "",
     code,
     "",
     "Válido durante 15 minutos.",
-    "Si no solicitaste este código, ignora este mensaje.",
+    "Revisa también la carpeta de spam si no lo ves en la bandeja de entrada.",
+    copy.ignore,
   ].join("\n");
 }
 
-function buildHtmlBody(code: string): string {
+function buildHtmlBody(code: string, purpose: VerificationEmailPurpose): string {
+  const copy = getCopy(purpose);
   return `
     <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;color:#111">
       <h2 style="color:#7c3aed">Eyed.bio</h2>
-      <p>Tu código de verificación para restablecer la contraseña:</p>
+      <p>${copy.htmlIntro}</p>
       <p style="font-size:32px;font-weight:700;letter-spacing:8px;color:#7c3aed;margin:24px 0">${code}</p>
-      <p style="color:#666;font-size:13px">Válido 15 minutos. Si no fuiste tú, ignora este correo.</p>
+      <p style="color:#666;font-size:13px">Válido 15 minutos. Si no ves el correo, revisa spam.</p>
+      <p style="color:#666;font-size:13px">${copy.ignore}</p>
     </div>
   `;
 }
@@ -37,9 +61,11 @@ function buildHtmlBody(code: string): string {
 async function sendViaResend(
   to: string,
   code: string,
+  purpose: VerificationEmailPurpose,
   apiKey: string,
   from: string
 ): Promise<SendResult> {
+  const copy = getCopy(purpose);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -49,9 +75,9 @@ async function sendViaResend(
     body: JSON.stringify({
       from,
       to: [to],
-      subject: SUBJECT,
-      text: buildTextBody(code),
-      html: buildHtmlBody(code),
+      subject: copy.subject,
+      text: buildTextBody(code, purpose),
+      html: buildHtmlBody(code, purpose),
     }),
   });
 
@@ -69,6 +95,7 @@ async function sendViaResend(
 async function sendViaSmtp(
   to: string,
   code: string,
+  purpose: VerificationEmailPurpose,
   smtp: NonNullable<ReturnType<typeof getMailConfig>["smtp"]>
 ): Promise<SendResult> {
   if (!smtp.user || !smtp.pass) {
@@ -78,6 +105,7 @@ async function sendViaSmtp(
     };
   }
 
+  const copy = getCopy(purpose);
   const nodemailer = await import("nodemailer");
   const transporter = nodemailer.createTransport({
     host: smtp.host,
@@ -97,9 +125,9 @@ async function sendViaSmtp(
   await transporter.sendMail({
     from: smtp.from,
     to,
-    subject: SUBJECT,
-    text: buildTextBody(code),
-    html: buildHtmlBody(code),
+    subject: copy.subject,
+    text: buildTextBody(code, purpose),
+    html: buildHtmlBody(code, purpose),
   });
 
   return { sent: true };
@@ -108,15 +136,17 @@ async function sendViaSmtp(
 export async function sendVerificationCodeEmail({
   to,
   code,
+  purpose = "reset",
 }: SendCodeOptions): Promise<SendResult> {
   const config = getMailConfig();
+  const label = purpose === "login" ? "acceso" : "verificación";
 
   if (config.provider === "none") {
     console.warn(
       `[Eyed.bio] Email no configurado (${describeMailConfig()}). ` +
         "Define RESEND_API_KEY o SMTP_HOST en Portainer."
     );
-    console.info(`[Eyed.bio] Código de verificación para ${to}: ${code} (válido 15 min)`);
+    console.info(`[Eyed.bio] Código de ${label} para ${to}: ${code} (válido 15 min)`);
     return {
       sent: false,
       error: "Servidor de correo no configurado",
@@ -126,13 +156,13 @@ export async function sendVerificationCodeEmail({
   try {
     const result =
       config.provider === "resend" && config.resend
-        ? await sendViaResend(to, code, config.resend.apiKey, config.resend.from)
+        ? await sendViaResend(to, code, purpose, config.resend.apiKey, config.resend.from)
         : config.provider === "smtp" && config.smtp
-          ? await sendViaSmtp(to, code, config.smtp)
+          ? await sendViaSmtp(to, code, purpose, config.smtp)
           : { sent: false, error: "Proveedor de correo inválido" };
 
     if (result.sent) {
-      console.info(`[Eyed.bio] Código enviado a ${to} vía ${describeMailConfig()}`);
+      console.info(`[Eyed.bio] Código de ${label} enviado a ${to} vía ${describeMailConfig()}`);
       return result;
     }
 

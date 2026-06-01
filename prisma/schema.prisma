@@ -29,7 +29,8 @@ model User {
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   links               SocialLink[]
-  passwordResetTokens PasswordResetToken[]
+  passwordResetTokens       PasswordResetToken[]
+  loginVerificationTokens   LoginVerificationToken[]
 
   profileViewsAsViewer        ProfileView[] @relation("ProfileViewViewer")
   profileViewsAsProfileUser   ProfileView[] @relation("ProfileViewProfileUser")
@@ -48,6 +49,17 @@ model ProfileView {
 }
 
 model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model LoginVerificationToken {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

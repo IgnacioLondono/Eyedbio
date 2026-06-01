@@ -4,40 +4,77 @@ import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import AuthLayout, {
   AuthError,
   AuthFooterLink,
   AuthSubmitButton,
+  AuthSuccess,
 } from "@/components/AuthLayout";
 import PasswordInput from "@/components/PasswordInput";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [step, setStep] = useState<"credentials" | "code">("credentials");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
 
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const resetSuccess = searchParams.get("reset") === "success";
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const requestCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/auth/login/start", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Email o contraseña incorrectos");
+        return;
+      }
+
+      setInfo(
+        data.message ??
+          "Código enviado. Revisa tu bandeja de entrada y la carpeta de spam."
+      );
+      setStep("code");
+      setCode("");
+    } catch {
+      setError("Error de conexión. Inténtalo de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     const result = await signIn("credentials", {
       email,
-      password,
+      code,
+      intent: "login",
       redirect: false,
     });
 
     setLoading(false);
 
     if (result?.error) {
-      setError("Email o contraseña incorrectos");
+      setError("Código incorrecto o expirado. Solicita uno nuevo.");
       return;
     }
 
@@ -45,15 +82,99 @@ function LoginForm() {
     router.refresh();
   };
 
+  if (step === "code") {
+    return (
+      <AuthLayout
+        title="Código de acceso"
+        subtitle={`Introduce el código de 6 dígitos enviado a ${email}. Revisa también spam.`}
+        footer={
+          <AuthFooterLink text="¿No tienes cuenta?" linkText="Regístrate gratis" href="/signup" />
+        }
+      >
+        <form onSubmit={verifyCode} className="space-y-5">
+          <div>
+            <label htmlFor="code" className="auth-label">
+              Código de acceso
+            </label>
+            <input
+              id="code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              className="auth-input text-center text-2xl font-mono tracking-[0.4em]"
+              placeholder="000000"
+              required
+            />
+          </div>
+
+          <AuthError message={error} />
+          <AuthSuccess message={info} />
+
+          <AuthSubmitButton loading={loading} loadingText="Verificando...">
+            <>
+              <ShieldCheck className="w-4 h-4" />
+              Entrar
+            </>
+          </AuthSubmitButton>
+
+          <button
+            type="button"
+            disabled={loading}
+            onClick={async () => {
+              setError("");
+              setLoading(true);
+              try {
+                const res = await fetch("/api/auth/login/start", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ email, password }),
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                  setError(data.error ?? "No se pudo reenviar el código");
+                  return;
+                }
+                setInfo("Nuevo código enviado. Revisa también spam.");
+              } catch {
+                setError("Error de conexión");
+              } finally {
+                setLoading(false);
+              }
+            }}
+            className="w-full text-sm text-purple-400 hover:text-purple-300 transition-colors disabled:opacity-50"
+          >
+            Reenviar código
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setStep("credentials");
+              setCode("");
+              setError("");
+              setInfo("");
+            }}
+            className="w-full text-sm text-white/40 hover:text-white transition-colors"
+          >
+            ← Volver a email y contraseña
+          </button>
+        </form>
+      </AuthLayout>
+    );
+  }
+
   return (
     <AuthLayout
       title="Bienvenido de nuevo"
-      subtitle="Inicia sesión para editar tu perfil, enlaces y apariencia."
+      subtitle="Inicia sesión con tu email y contraseña. Te enviaremos un código de acceso por correo."
       footer={
         <AuthFooterLink text="¿No tienes cuenta?" linkText="Regístrate gratis" href="/signup" />
       }
     >
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={requestCode} className="space-y-5">
         {resetSuccess && (
           <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-emerald-300 text-sm">
             Contraseña actualizada. Ya puedes iniciar sesión.
@@ -99,9 +220,9 @@ function LoginForm() {
 
         <AuthError message={error} />
 
-        <AuthSubmitButton loading={loading} loadingText="Entrando...">
+        <AuthSubmitButton loading={loading} loadingText="Enviando código...">
           <>
-            Entrar
+            Enviar código de acceso
             <ArrowRight className="w-4 h-4" />
           </>
         </AuthSubmitButton>

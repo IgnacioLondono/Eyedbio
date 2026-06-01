@@ -112,6 +112,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
         await signIn("credentials", {
           email: data.email,
           password: newPassword || currentPassword,
+          intent: "refresh",
           redirect: false,
         });
       }

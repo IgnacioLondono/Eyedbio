@@ -50,6 +50,7 @@ function SignupForm() {
       const result = await signIn("credentials", {
         email,
         password,
+        intent: "signup",
         redirect: false,
       });
 
