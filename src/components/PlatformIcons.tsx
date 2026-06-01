@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { SocialPlatform } from "@/types/profile";
 
 function Icon({ children }: { children: ReactNode }) {
@@ -197,7 +197,7 @@ const WebsiteIcon = () => (
   </svg>
 );
 
-const PLATFORM_ICONS: Record<SocialPlatform, () => JSX.Element> = {
+const PLATFORM_ICONS: Record<SocialPlatform, () => ReactElement> = {
   discord: DiscordIcon,
   twitter: TwitterIcon,
   instagram: InstagramIcon,
@@ -241,3 +241,13 @@ export function PlatformIcon({ platform }: { platform: SocialPlatform }) {
     </span>
   );
 }
+
+export {
+  DiscordIcon,
+  FacebookIcon,
+  InstagramIcon,
+  TelegramIcon,
+  TikTokIcon,
+  TwitterIcon,
+  WhatsAppIcon,
+};
