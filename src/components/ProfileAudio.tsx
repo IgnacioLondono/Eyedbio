@@ -11,9 +11,15 @@ interface Props {
   startTime?: number;
   enabled: boolean;
   accentColor?: string;
+  variant?: "floating" | "card";
 }
 
-export default function ProfileAudio({ url, startTime = 0, enabled }: Props) {
+export default function ProfileAudio({
+  url,
+  startTime = 0,
+  enabled,
+  variant = "floating",
+}: Props) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [volume, setVolume] = useState(0.7);
   const [duration, setDuration] = useState(0);
@@ -108,15 +114,36 @@ export default function ProfileAudio({ url, startTime = 0, enabled }: Props) {
 
   const muted = volume === 0;
 
+  const controlsShell =
+    variant === "card"
+      ? "group flex items-center rounded-lg bg-black/35 backdrop-blur-md border border-white/10 text-white/75 hover:text-white transition-all duration-300 ease-out overflow-hidden"
+      : `group flex items-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/70 hover:text-white transition-all duration-300 ease-out overflow-hidden ${
+          isTouchDevice && showVolume ? "pr-3" : ""
+        }`;
+
+  const sliderReveal =
+    variant === "card"
+      ? isTouchDevice
+        ? showVolume
+          ? "w-[88px] opacity-100"
+          : "w-0 opacity-0"
+        : "w-0 opacity-0 group-hover:w-[88px] group-hover:opacity-100 group-hover:pr-2"
+      : isTouchDevice
+        ? showVolume
+          ? "w-[130px] opacity-100"
+          : "w-0 opacity-0"
+        : "w-0 opacity-0 group-hover:w-[130px] group-hover:opacity-100 group-hover:pr-3";
+
+  const wrapperClass =
+    variant === "card" ? "" : "fixed bottom-6 right-6 z-30";
+
+  const buttonPadding = variant === "card" ? "p-2 shrink-0" : "p-3 sm:p-2.5 shrink-0";
+
   return (
     <>
       <audio ref={audioRef} src={url} preload="auto" playsInline />
-      <div className="fixed bottom-6 right-6 z-30">
-        <div
-          className={`group flex items-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/70 hover:text-white transition-all duration-300 ease-out overflow-hidden ${
-            isTouchDevice && showVolume ? "pr-3" : ""
-          }`}
-        >
+      <div className={wrapperClass}>
+        <div className={controlsShell}>
           <button
             type="button"
             onClick={() => {
@@ -126,19 +153,13 @@ export default function ProfileAudio({ url, startTime = 0, enabled }: Props) {
               }
               setShowVolume(true);
             }}
-            className="p-3 sm:p-2.5 shrink-0"
+            className={buttonPadding}
             aria-label={muted ? "Activar sonido" : "Ajustar volumen"}
           >
             {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
           </button>
           <div
-            className={`flex items-center gap-2 transition-all duration-300 ease-out overflow-hidden ${
-              isTouchDevice
-                ? showVolume
-                  ? "w-[130px] opacity-100"
-                  : "w-0 opacity-0"
-                : "w-0 opacity-0 group-hover:w-[130px] group-hover:opacity-100 group-hover:pr-3"
-            }`}
+            className={`flex items-center gap-1.5 transition-all duration-300 ease-out overflow-hidden ${sliderReveal}`}
           >
             <input
               type="range"
@@ -147,12 +168,14 @@ export default function ProfileAudio({ url, startTime = 0, enabled }: Props) {
               step="0.01"
               value={volume}
               onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-              className="flex-1 min-w-0 h-1.5 accent-purple-500 cursor-pointer"
+              className="flex-1 min-w-0 h-1 accent-purple-500 cursor-pointer"
               aria-label="Volumen"
             />
-            <span className="text-[10px] text-white/50 w-7 text-right tabular-nums shrink-0">
-              {Math.round(volume * 100)}
-            </span>
+            {variant !== "card" && (
+              <span className="text-[10px] text-white/50 w-7 text-right tabular-nums shrink-0">
+                {Math.round(volume * 100)}
+              </span>
+            )}
           </div>
         </div>
       </div>

@@ -7,13 +7,14 @@ import {
   profileUnlockCookieName,
   verifyProfileUnlockToken,
 } from "@/lib/profile-access";
+import { PROFILE_UNLOCK_HEADER } from "@/lib/profile-unlock-client";
 import { LockedPublicProfile } from "@/types/public-profile";
 
 interface Props {
   params: Promise<{ username: string }>;
 }
 
-export async function GET(_request: Request, { params }: Props) {
+export async function GET(request: Request, { params }: Props) {
   const { username } = await params;
   const normalizedUsername = username.toLowerCase();
 
@@ -39,7 +40,9 @@ export async function GET(_request: Request, { params }: Props) {
 
   if (!isOwner && user.accessCodeEnabled && user.accessCodeHash) {
     const cookieStore = await cookies();
-    const unlockToken = cookieStore.get(profileUnlockCookieName(normalizedUsername))?.value;
+    const cookieToken = cookieStore.get(profileUnlockCookieName(normalizedUsername))?.value;
+    const headerToken = request.headers.get(PROFILE_UNLOCK_HEADER) ?? undefined;
+    const unlockToken = cookieToken ?? headerToken;
     const unlocked = verifyProfileUnlockToken(unlockToken, user.id, normalizedUsername);
 
     if (!unlocked) {

@@ -5,12 +5,11 @@ import { Profile } from "@/types/profile";
 import { isLockedPublicProfile, LockedPublicProfile } from "@/types/public-profile";
 import BackgroundEffects from "@/components/BackgroundEffects";
 import BackgroundMedia from "@/components/BackgroundMedia";
-import ProfileAudio from "@/components/ProfileAudio";
 import ProfileCard from "@/components/ProfileCard";
-import ShareProfileButton from "@/components/ShareProfileButton";
 import ClaimProfileCta from "@/components/ClaimProfileCta";
 import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/ProfileAccessGate";
+import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
 
 interface Props {
   username: string;
@@ -33,7 +32,10 @@ export default function ProfileView({ username }: Props) {
     setLoadError(null);
 
     try {
-      const res = await fetch(`/api/profile/${username}`);
+      const res = await fetch(`/api/profile/${username}`, {
+        credentials: "same-origin",
+        headers: profileUnlockRequestHeaders(username),
+      });
       if (res.status === 404) {
         setProfile(null);
         return;
@@ -141,20 +143,10 @@ export default function ProfileView({ username }: Props) {
       <BackgroundMedia url={settings.backgroundUrl} type={profile.backgroundType} />
       <div className="fixed inset-0 z-[1] bg-black/50 pointer-events-none" />
       <BackgroundEffects effect={settings.backgroundEffect} />
-      <ProfileAudio
-        url={profile.audioUrl ?? ""}
-        startTime={profile.audioStartTime}
-        enabled={profile.audioEnabled}
-        accentColor={settings.accentColor}
-      />
-      <ShareProfileButton
-        username={profile.username}
-        displayName={profile.displayName}
-      />
       <ProfileQuickNavButton profileUsername={profile.username} />
       <ClaimProfileCta />
       <div className="relative z-20 flex min-h-[100dvh] w-full items-center justify-center p-6 pb-28">
-        <ProfileCard profile={profile} />
+        <ProfileCard profile={profile} showControls />
       </div>
     </div>
   );

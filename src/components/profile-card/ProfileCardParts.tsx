@@ -14,6 +14,52 @@ import { resolveAvatarStyle } from "@/lib/card-layout-config";
 import { BADGE_CONFIG } from "@/lib/badges";
 import { t as translate } from "@/lib/i18n";
 import type { AvatarStyle } from "@/types/profile";
+import type { LucideIcon } from "lucide-react";
+
+const BADGE_PILL_STYLES: Record<string, string> = {
+  owner:
+    "bg-gradient-to-br from-amber-400/25 via-yellow-500/15 to-orange-600/20 border-amber-400/35 text-amber-100",
+  verified:
+    "bg-gradient-to-br from-blue-500/25 via-sky-500/15 to-cyan-500/20 border-blue-400/35 text-blue-100",
+  premium:
+    "bg-gradient-to-br from-orange-500/25 via-amber-500/15 to-yellow-500/20 border-orange-400/35 text-orange-100",
+  og: "bg-gradient-to-br from-purple-500/25 via-violet-500/15 to-fuchsia-500/20 border-purple-400/35 text-purple-100",
+};
+
+function ProfileBadge({
+  badge,
+  icon: Icon,
+  color,
+  label,
+  compact,
+  glowIcons,
+}: {
+  badge: string;
+  icon: LucideIcon;
+  color: string;
+  label: string;
+  compact: boolean;
+  glowIcons?: boolean;
+}) {
+  const pillClass = BADGE_PILL_STYLES[badge] ?? "bg-white/10 border-white/20 text-white/85";
+  const size = compact ? "h-[18px] w-[18px]" : "h-5 w-5";
+  const iconSize = compact ? "w-2.5 h-2.5" : "w-3 h-3";
+
+  return (
+    <span
+      title={label}
+      aria-label={label}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full border ${size} ${pillClass}`}
+      style={
+        glowIcons
+          ? { boxShadow: `0 0 10px ${hexToRgba(color, 0.45)}` }
+          : undefined
+      }
+    >
+      <Icon className={iconSize} strokeWidth={2.25} />
+    </span>
+  );
+}
 
 function avatarShapeClass(style: AvatarStyle): string {
   switch (style) {
@@ -131,21 +177,17 @@ export function ProfileNameBlock({
         {profile.badges.map((badge) => {
           const config = BADGE_CONFIG[badge];
           if (!config) return null;
-          const Icon = config.icon;
           const label = translate(profile.locale, `badges.${config.labelKey}`);
           return (
-            <span
+            <ProfileBadge
               key={badge}
-              title={label}
-              className="inline-flex shrink-0"
-              style={{
-                filter: settings.glowIcons
-                  ? `drop-shadow(0 0 6px ${config.color})`
-                  : undefined,
-              }}
-            >
-              <Icon className={scale.badge} style={{ color: config.color }} />
-            </span>
+              badge={badge}
+              icon={config.icon}
+              color={config.color}
+              label={label}
+              compact={scale.compact}
+              glowIcons={settings.glowIcons}
+            />
           );
         })}
       </div>

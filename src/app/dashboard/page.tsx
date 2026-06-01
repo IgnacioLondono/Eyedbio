@@ -42,10 +42,22 @@ import {
 type Tab = "general" | "links" | "media" | "appearance" | "account";
 
 const VALID_TABS: Tab[] = ["general", "links", "media", "appearance", "account"];
+const DASHBOARD_TAB_STORAGE_KEY = "eyed-dashboard-tab";
 
 function parseTab(value: string | null): Tab {
   if (value && VALID_TABS.includes(value as Tab)) return value as Tab;
   return "general";
+}
+
+function readStoredDashboardTab(): Tab | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = localStorage.getItem(DASHBOARD_TAB_STORAGE_KEY);
+    if (stored && VALID_TABS.includes(stored as Tab)) return stored as Tab;
+  } catch {
+    /* ignore */
+  }
+  return null;
 }
 
 function DashboardLoading() {
@@ -69,7 +81,11 @@ function DashboardContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [tab, setTabState] = useState<Tab>(() => parseTab(searchParams.get("tab")));
+  const [tab, setTabState] = useState<Tab>(() => {
+    const fromUrl = parseTab(searchParams.get("tab"));
+    if (searchParams.get("tab")) return fromUrl;
+    return readStoredDashboardTab() ?? fromUrl;
+  });
   const [isDirty, setIsDirty] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -105,8 +121,21 @@ function DashboardContent() {
     setTabState(parseTab(searchParams.get("tab")));
   }, [searchParams]);
 
+  useEffect(() => {
+    if (searchParams.get("tab")) return;
+    const stored = readStoredDashboardTab();
+    if (stored) {
+      router.replace(`${pathname}?tab=${stored}`, { scroll: false });
+    }
+  }, [pathname, router, searchParams]);
+
   const setTab = (nextTab: Tab) => {
     setTabState(nextTab);
+    try {
+      localStorage.setItem(DASHBOARD_TAB_STORAGE_KEY, nextTab);
+    } catch {
+      /* ignore */
+    }
     router.replace(`${pathname}?tab=${nextTab}`, { scroll: false });
   };
 

@@ -15,6 +15,7 @@ import {
   ProfileNameBlock,
   ProfileViews,
 } from "./ProfileCardParts";
+import { CardToolbarSlot } from "./ProfileCardToolbar";
 
 export interface LayoutProps {
   profile: Profile;
@@ -37,7 +38,11 @@ function CardShell({
   const cardStyle = getCardSurfaceStyle(profile.settings);
   const pad = noPadding ? "" : compact ? "p-3" : "p-5";
   return (
-    <div className={`rounded-2xl border shadow-2xl ${pad} ${className}`} style={cardStyle}>
+    <div
+      className={`relative rounded-2xl border shadow-2xl ${pad} ${className}`}
+      style={cardStyle}
+    >
+      <CardToolbarSlot />
       {children}
     </div>
   );
@@ -131,9 +136,10 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
 
   return (
     <div
-      className="rounded-2xl border overflow-hidden w-full"
+      className="relative rounded-2xl border overflow-hidden w-full"
       style={frameStyle}
     >
+      <CardToolbarSlot />
       <div
         className={`${bannerH} w-full relative bg-cover bg-center shrink-0`}
         style={
@@ -181,9 +187,10 @@ export function LayoutMinimal({ profile, compact }: LayoutProps) {
 
   return (
     <div
-      className={`rounded-2xl ${compact ? "p-2" : "p-4"} text-center`}
+      className={`relative rounded-2xl ${compact ? "p-2" : "p-4"} text-center`}
       style={minimalStyle}
     >
+      <CardToolbarSlot />
       <ProfileAvatar
         profile={profile}
         scale={scale}

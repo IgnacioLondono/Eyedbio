@@ -50,7 +50,7 @@ export async function POST(request: Request, { params }: Props) {
     }
 
     const token = signProfileUnlockToken(user.id, normalizedUsername);
-    const response = NextResponse.json({ unlocked: true });
+    const response = NextResponse.json({ unlocked: true, token });
     response.cookies.set(profileUnlockCookieName(normalizedUsername), token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

@@ -14,7 +14,7 @@ import {
 interface Props {
   username: string;
   displayName?: string;
-  variant?: "floating" | "inline";
+  variant?: "floating" | "inline" | "card";
 }
 
 type ShareChannel = "whatsapp" | "twitter" | "telegram" | "facebook" | "story";
@@ -205,7 +205,9 @@ export default function ShareProfileButton({
   const triggerClass =
     variant === "inline"
       ? "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-sm font-medium transition-colors"
-      : "fixed top-6 left-6 z-30 flex items-center gap-2 px-3 py-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/80 hover:text-white transition-all text-xs font-medium";
+      : variant === "card"
+        ? "p-2 rounded-lg bg-black/35 backdrop-blur-md border border-white/10 text-white/75 hover:text-white hover:bg-black/50 transition-colors"
+        : "fixed top-6 left-6 z-30 flex items-center gap-2 px-3 py-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/80 hover:text-white transition-all text-xs font-medium";
 
   return (
     <>
@@ -241,7 +243,7 @@ export default function ShareProfileButton({
           aria-label="Compartir perfil"
         >
           <Share2 className="w-4 h-4" />
-          Compartir
+          {variant === "floating" ? "Compartir" : null}
         </button>
       )}
 

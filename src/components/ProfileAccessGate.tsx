@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Lock, Loader2 } from "lucide-react";
 import { LockedPublicProfile } from "@/types/public-profile";
+import { storeProfileUnlockToken } from "@/lib/profile-unlock-client";
 
 interface Props {
   profile: LockedPublicProfile;
@@ -22,6 +23,7 @@ export default function ProfileAccessGate({ profile, onUnlocked }: Props) {
     try {
       const res = await fetch(`/api/profile/${profile.username}/unlock`, {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
       });
@@ -30,6 +32,10 @@ export default function ProfileAccessGate({ profile, onUnlocked }: Props) {
       if (!res.ok) {
         setError(data.error ?? "Código incorrecto");
         return;
+      }
+
+      if (typeof data.token === "string") {
+        storeProfileUnlockToken(profile.username, data.token);
       }
 
       onUnlocked();
