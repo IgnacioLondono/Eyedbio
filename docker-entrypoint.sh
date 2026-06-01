@@ -42,7 +42,10 @@ while [ "$attempt" -le "$max_attempts" ]; do
   sleep 3
 done
 
-echo "Admin: se sincroniza al arrancar la app (ADMIN_EMAIL / ADMIN_PASSWORD)."
+if [ -f /data/admin.env ]; then
+  echo "Admin: se leerá /data/admin.env si faltan variables en el entorno."
+fi
+echo "Admin: se sincroniza al arrancar (ADMIN_EMAIL / ADMIN_PASSWORD o /data/admin.env)."
 
 echo "Starting Eyed.bio..."
 

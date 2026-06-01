@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import { ensureAdminEnvLoaded } from "@/lib/load-admin-env";
 import { prisma } from "@/lib/prisma";
 import { USER_ROLE_ADMIN } from "@/lib/roles";
 import { normalizeEmail, normalizeUsername, validateUsername } from "@/lib/validation";
@@ -18,11 +19,13 @@ function readEnvValue(value: string | undefined): string | null {
 }
 
 export function getAdminEnvEmail(): string | null {
+  ensureAdminEnvLoaded();
   const raw = readEnvValue(process.env.ADMIN_EMAIL);
   return raw ? normalizeEmail(raw) : null;
 }
 
 export function getAdminEnvPassword(): string | null {
+  ensureAdminEnvLoaded();
   return readEnvValue(process.env.ADMIN_PASSWORD);
 }
 

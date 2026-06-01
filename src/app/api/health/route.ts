@@ -5,6 +5,7 @@ import {
   isAdminConfigured,
   maskAdminEmail,
 } from "@/lib/admin-credentials";
+import { ensureAdminEnvLoaded } from "@/lib/load-admin-env";
 import { describeMailConfig, isMailConfigured } from "@/lib/mail-config";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +22,7 @@ export async function GET() {
       reviewsTable = "missing_migration";
     }
 
+    ensureAdminEnvLoaded();
     const adminEmail = getAdminEnvEmail();
 
     return NextResponse.json({
