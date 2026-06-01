@@ -1,6 +1,6 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { safeRevalidateTag } from "@/lib/cache-utils";
 import { profileCacheTag } from "@/lib/cached-profile";
 import { prisma } from "@/lib/prisma";
 import { validateSocialLinksCount } from "@/lib/links-config";
@@ -61,7 +61,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
 
-    revalidateTag(profileCacheTag(result.profile.username), "max");
+    safeRevalidateTag(profileCacheTag(result.profile.username));
 
     return NextResponse.json(result.profile);
   } catch {

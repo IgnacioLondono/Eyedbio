@@ -5,8 +5,11 @@ import {
   REVIEW_RATING_MAX,
   REVIEW_RATING_MIN,
 } from "@/lib/reviews-config";
+import { isPrismaSchemaMismatch } from "@/lib/prisma-errors";
 import { prisma } from "@/lib/prisma";
 import { ProfileReview, ReviewSummary, ReviewUserSnippet } from "@/types/review";
+
+const EMPTY_SUMMARY: ReviewSummary = { averageRating: 0, count: 0 };
 
 type ReviewerFields = Pick<User, "username" | "displayName" | "avatarUrl">;
 
@@ -69,19 +72,24 @@ export function validateReviewComment(comment: string | null): string | null {
 }
 
 export async function getReviewSummary(profileUserId: string): Promise<ReviewSummary> {
-  const agg = await prisma.profileReview.aggregate({
-    where: { profileUserId },
-    _avg: { rating: true },
-    _count: { _all: true },
-  });
+  try {
+    const agg = await prisma.profileReview.aggregate({
+      where: { profileUserId },
+      _avg: { rating: true },
+      _count: { _all: true },
+    });
 
-  const count = agg._count._all;
-  const averageRating =
-    count > 0 && agg._avg.rating != null
-      ? Math.round(agg._avg.rating * 10) / 10
-      : 0;
+    const count = agg._count._all;
+    const averageRating =
+      count > 0 && agg._avg.rating != null
+        ? Math.round(agg._avg.rating * 10) / 10
+        : 0;
 
-  return { averageRating, count };
+    return { averageRating, count };
+  } catch (err) {
+    if (isPrismaSchemaMismatch(err)) return EMPTY_SUMMARY;
+    throw err;
+  }
 }
 
 const reviewInclude = {
@@ -91,6 +99,27 @@ const reviewInclude = {
 } as const;
 
 export async function fetchProfileReviews(
+  profileUserId: string,
+  options: { cursor?: string; limit: number; viewerId?: string }
+) {
+  const { cursor, limit, viewerId } = options;
+
+  try {
+    return await fetchProfileReviewsQuery(profileUserId, { cursor, limit, viewerId });
+  } catch (err) {
+    if (isPrismaSchemaMismatch(err)) {
+      return {
+        summary: EMPTY_SUMMARY,
+        reviews: [],
+        nextCursor: null,
+        myReview: null,
+      };
+    }
+    throw err;
+  }
+}
+
+async function fetchProfileReviewsQuery(
   profileUserId: string,
   options: { cursor?: string; limit: number; viewerId?: string }
 ) {
@@ -137,21 +166,26 @@ export async function fetchProfileReviews(
 }
 
 export async function fetchRecentReviews(limit = LANDING_RECENT_REVIEWS_LIMIT) {
-  const rows = await prisma.profileReview.findMany({
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-    take: limit,
-    include: {
-      ...reviewInclude,
-      profileUser: {
-        select: { username: true, displayName: true, avatarUrl: true },
+  try {
+    const rows = await prisma.profileReview.findMany({
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: limit,
+      include: {
+        ...reviewInclude,
+        profileUser: {
+          select: { username: true, displayName: true, avatarUrl: true },
+        },
       },
-    },
-  });
+    });
 
-  return rows.map((row) =>
-    mapReview({
-      ...row,
-      profileUser: row.profileUser,
-    })
-  );
+    return rows.map((row) =>
+      mapReview({
+        ...row,
+        profileUser: row.profileUser,
+      })
+    );
+  } catch (err) {
+    if (isPrismaSchemaMismatch(err)) return [];
+    throw err;
+  }
 }

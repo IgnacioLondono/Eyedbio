@@ -73,15 +73,27 @@ function DashboardContent() {
 
   useEffect(() => {
     fetch("/api/profile")
-      .then((res) => {
-        if (!res.ok) throw new Error("No autorizado");
+      .then(async (res) => {
+        if (res.status === 401) throw new Error("SESSION_EXPIRED");
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(
+            typeof data.error === "string" ? data.error : "Error del servidor al cargar el perfil"
+          );
+        }
         return res.json();
       })
       .then((data) => {
         setProfile(data);
         setIsDirty(false);
       })
-      .catch(() => setError("No se pudo cargar el perfil"));
+      .catch((err) => {
+        if (err instanceof Error && err.message === "SESSION_EXPIRED") {
+          setError("Tu sesión expiró. Vuelve a iniciar sesión.");
+          return;
+        }
+        setError(err instanceof Error ? err.message : "No se pudo cargar el perfil");
+      });
   }, []);
 
   useEffect(() => {

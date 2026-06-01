@@ -1,5 +1,5 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
+import { safeRevalidateTag } from "@/lib/cache-utils";
 import { profileCacheTag } from "@/lib/cached-profile";
 import bcrypt from "bcryptjs";
 import { auth } from "@/lib/auth";
@@ -198,9 +198,9 @@ export async function PATCH(request: Request) {
       updates.accessCodeHash !== undefined;
 
     if (profileFieldsChanged) {
-      revalidateTag(profileCacheTag(user.username), "max");
+      safeRevalidateTag(profileCacheTag(user.username));
       if (updates.username !== undefined) {
-        revalidateTag(profileCacheTag(updates.username), "max");
+        safeRevalidateTag(profileCacheTag(updates.username));
       }
     }
 

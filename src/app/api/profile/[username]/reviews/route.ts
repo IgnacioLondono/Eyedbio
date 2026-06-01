@@ -1,6 +1,7 @@
-import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { safeRevalidateTag } from "@/lib/cache-utils";
+import { isPrismaSchemaMismatch } from "@/lib/prisma-errors";
 import { prisma } from "@/lib/prisma";
 import {
   fetchProfileReviews,
@@ -48,7 +49,15 @@ export async function GET(request: Request, { params }: Props) {
     });
 
     return NextResponse.json(data);
-  } catch {
+  } catch (err) {
+    if (isPrismaSchemaMismatch(err)) {
+      return NextResponse.json({
+        summary: { averageRating: 0, count: 0 },
+        reviews: [],
+        nextCursor: null,
+        myReview: null,
+      });
+    }
     return NextResponse.json(
       { error: "No se pudieron cargar las reseñas" },
       { status: 500 }
@@ -112,7 +121,7 @@ export async function POST(request: Request, { params }: Props) {
       },
     });
 
-    revalidateTag("recent-profile-reviews", "max");
+    safeRevalidateTag("recent-profile-reviews");
 
     const data = await fetchProfileReviews(profileUser.id, {
       limit: REVIEW_PAGE_SIZE,
@@ -123,7 +132,16 @@ export async function POST(request: Request, { params }: Props) {
       review: mapReview(review),
       ...data,
     });
-  } catch {
+  } catch (err) {
+    if (isPrismaSchemaMismatch(err)) {
+      return NextResponse.json(
+        {
+          error:
+            "Las reseñas no están disponibles todavía. El administrador debe ejecutar las migraciones de base de datos.",
+        },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ error: "No se pudo guardar la reseña" }, { status: 500 });
   }
 }
@@ -149,7 +167,7 @@ export async function DELETE(_request: Request, { params }: Props) {
       },
     });
 
-    revalidateTag("recent-profile-reviews", "max");
+    safeRevalidateTag("recent-profile-reviews");
 
     const data = await fetchProfileReviews(profileUser.id, {
       limit: REVIEW_PAGE_SIZE,
@@ -157,7 +175,13 @@ export async function DELETE(_request: Request, { params }: Props) {
     });
 
     return NextResponse.json(data);
-  } catch {
+  } catch (err) {
+    if (isPrismaSchemaMismatch(err)) {
+      return NextResponse.json(
+        { error: "Las reseñas no están disponibles en el servidor." },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ error: "No se pudo eliminar la reseña" }, { status: 500 });
   }
 }

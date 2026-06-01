@@ -47,17 +47,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (!code || !isValidVerificationCode(code)) return null;
 
-        const loginToken = await prisma.loginVerificationToken.findFirst({
-          where: {
-            userId: user.id,
-            token: code,
-            expiresAt: { gt: new Date() },
-          },
-        });
+        try {
+          const loginToken = await prisma.loginVerificationToken.findFirst({
+            where: {
+              userId: user.id,
+              token: code,
+              expiresAt: { gt: new Date() },
+            },
+          });
 
-        if (!loginToken) return null;
+          if (!loginToken) return null;
 
-        await prisma.loginVerificationToken.delete({ where: { id: loginToken.id } });
+          await prisma.loginVerificationToken.delete({ where: { id: loginToken.id } });
+        } catch (err) {
+          console.error("[auth] login verification lookup failed:", err);
+          return null;
+        }
 
         return {
           id: user.id,
