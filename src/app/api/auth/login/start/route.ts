@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationCodeEmail } from "@/lib/mail";
 import { createVerificationCode, getCodeExpiry } from "@/lib/password-reset";
 import { isUserBlocked } from "@/lib/auth-user";
-import { USER_ROLE_ADMIN } from "@/lib/roles";
+import {
+  ensureAdminUserForLogin,
+  verifyLoginPassword,
+} from "@/lib/admin-credentials";
 import { normalizeEmail } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -20,14 +22,18 @@ export async function POST(request: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
-    }
+    let user = await prisma.user.findUnique({ where: { email } });
 
-    const valid = await bcrypt.compare(password, user.passwordHash);
-    if (!valid) {
-      return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
+    if (!user) {
+      user = await ensureAdminUserForLogin(email, password);
+      if (!user) {
+        return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
+      }
+    } else {
+      const valid = await verifyLoginPassword(user, email, password);
+      if (!valid) {
+        return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
+      }
     }
 
     if (isUserBlocked(user)) {
@@ -35,16 +41,6 @@ export async function POST(request: Request) {
         { error: "Tu cuenta está bloqueada. Contacta con soporte si crees que es un error." },
         { status: 403 }
       );
-    }
-
-    const adminEmail = process.env.ADMIN_EMAIL?.trim();
-    if (adminEmail && normalizeEmail(adminEmail) === email) {
-      const adminPassword = process.env.ADMIN_PASSWORD;
-      const updates: { role: string; passwordHash?: string } = { role: USER_ROLE_ADMIN };
-      if (adminPassword) {
-        updates.passwordHash = await bcrypt.hash(adminPassword, 12);
-      }
-      await prisma.user.update({ where: { id: user.id }, data: updates });
     }
 
     await prisma.loginVerificationToken.deleteMany({ where: { userId: user.id } });
