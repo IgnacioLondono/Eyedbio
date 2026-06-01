@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
-import { getCachedProfileUser } from "@/lib/cached-profile";
+import { findProfileByUsername } from "@/lib/profile-query";
 import { userToProfile } from "@/lib/profile-mapper";
 import {
   profileUnlockCookieName,
@@ -17,7 +17,16 @@ export async function GET(_request: Request, { params }: Props) {
   const { username } = await params;
   const normalizedUsername = username.toLowerCase();
 
-  const user = await getCachedProfileUser(normalizedUsername);
+  let user;
+  try {
+    user = await findProfileByUsername(normalizedUsername);
+  } catch (err) {
+    console.error("[profile GET]", normalizedUsername, err);
+    return NextResponse.json(
+      { error: "Error al cargar el perfil. Inténtalo de nuevo." },
+      { status: 503 }
+    );
+  }
 
   if (!user) {
     return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });

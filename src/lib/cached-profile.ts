@@ -1,22 +1,21 @@
 import { unstable_cache } from "next/cache";
-import { prisma } from "@/lib/prisma";
-import { SocialLink, User } from "@/generated/prisma/client";
+import { findProfileByUsername, ProfileUserWithLinks } from "@/lib/profile-query";
 
-export type CachedProfileUser = User & { links: SocialLink[] };
+export type CachedProfileUser = ProfileUserWithLinks;
 
 export function profileCacheTag(username: string): string {
   return `profile-${username.toLowerCase()}`;
 }
 
+/**
+ * Caché solo para lecturas no críticas (OG, etc.).
+ * No usar para decidir si un perfil existe en la API pública.
+ */
 export function getCachedProfileUser(username: string): Promise<CachedProfileUser | null> {
   const normalized = username.toLowerCase();
 
   return unstable_cache(
-    async () =>
-      prisma.user.findUnique({
-        where: { username: normalized },
-        include: { links: true },
-      }),
+    async () => findProfileByUsername(normalized),
     [`profile-user-${normalized}`],
     {
       revalidate: 60,
