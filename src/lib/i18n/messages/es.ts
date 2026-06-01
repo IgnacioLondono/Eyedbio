@@ -1,67 +1,3 @@
-export const es = {
-  common: {
-    save: "Guardar",
-    cancel: "Cancelar",
-    loading: "Cargando…",
-    error: "Error",
-    share: "Compartir",
-  },
-  signup: {
-    title: "Crea tu perfil",
-    subtitle: "Regístrate gratis y personaliza tu página en minutos.",
-    language: "Idioma",
-    email: "Email",
-    password: "Contraseña",
-    confirmPassword: "Confirmar contraseña",
-    username: "Nombre de usuario",
-    displayName: "Nombre para mostrar",
-    submit: "Crear cuenta",
-    hasAccount: "¿Ya tienes cuenta?",
-    login: "Inicia sesión",
-    passwordMismatch: "Las contraseñas no coinciden",
-    connectionError: "Error de conexión",
-  },
-  account: {
-    language: "Idioma",
-    languageHint: "Afecta al panel y textos de tu perfil público.",
-    languageSaved: "Idioma actualizado",
-    memberSince: "Miembro desde",
-  },
-  profile: {
-    visits: "visitas",
-    noLinks: "Sin enlaces aún",
-    notFound: "Perfil no encontrado",
-    welcomeBio: "¡Bienvenidos a mi sitio web!",
-  },
-  dashboard: {
-    tabs: {
-      general: "General",
-      links: "Enlaces",
-      media: "Media",
-      appearance: "Estilo",
-      account: "Cuenta",
-    },
-    preview: "Vista previa",
-    save: "Guardar cambios",
-    saved: "Guardado",
-    backgroundEffect: "Efecto de fondo",
-    effectCategory: "Categoría",
-  },
-  badges: {
-    owner: "Owner",
-    verified: "Verificado",
-    premium: "Premium",
-    og: "OG",
-  },
-  admin: {
-    verify: "Verificar",
-    unverify: "Quitar verificado",
-    setOwner: "Corona owner",
-    removeOwner: "Quitar owner",
-    badges: "Insignias",
-  },
-} as const satisfies Messages;
-
 export interface Messages {
   common: {
     save: string;
@@ -69,6 +5,56 @@ export interface Messages {
     loading: string;
     error: string;
     share: string;
+    close: string;
+    retry: string;
+    email: string;
+    password: string;
+    bio: string;
+    showPassword: string;
+    hidePassword: string;
+  };
+  nav: {
+    features: string;
+    faq: string;
+    login: string;
+    signup: string;
+    myProfile: string;
+    dashboard: string;
+    menu: string;
+  };
+  landing: {
+    heroBadge: string;
+    heroTitle: string;
+    heroTitleHighlight: string;
+    heroSubtitle: string;
+    goDashboard: string;
+    signupFree: string;
+    claim: string;
+    usernamePlaceholder: string;
+    statsProfileViews: string;
+    statsUsers: string;
+    statsUploads: string;
+    statsLinks: string;
+    featuresTitle: string;
+    featuresTitleHighlight: string;
+    featuresSubtitle: string;
+    faqTitle: string;
+    ctaTitle: string;
+    ctaJoin: string;
+    ctaFirst: string;
+    ctaButtonLoggedIn: string;
+    ctaButtonGuest: string;
+    showcaseBadge: string;
+    showcaseTitle: string;
+    showcaseTitleHighlight: string;
+    showcaseSubtitle: string;
+    showcaseBullet1: string;
+    showcaseBullet2: string;
+    showcaseBullet3: string;
+    showcaseViewLabel: string;
+    showcaseTabsLabel: string;
+    features: readonly { title: string; desc: string }[];
+    faqs: readonly { q: string; a: string }[];
   };
   signup: {
     title: string;
@@ -84,18 +70,146 @@ export interface Messages {
     login: string;
     passwordMismatch: string;
     connectionError: string;
+    signInFailed: string;
+    passwordRepeat: string;
+  };
+  auth: {
+    loginTitle: string;
+    loginSubtitle: string;
+    codeTitle: string;
+    codeSubtitle: string;
+    codeLabel: string;
+    codePlaceholder: string;
+    verify: string;
+    verifying: string;
+    resendCode: string;
+    resendFailed: string;
+    resendSuccess: string;
+    backToCredentials: string;
+    sendCode: string;
+    sendingCode: string;
+    forgotPassword: string;
+    noAccount: string;
+    signupLink: string;
+    wrongCredentials: string;
+    wrongCode: string;
+    connectionError: string;
+    resetSuccess: string;
+    blockedNotice: string;
+    forgotTitle: string;
+    forgotSubtitle: string;
+    forgotSubmit: string;
+    forgotSending: string;
+    forgotBack: string;
+    resetTitle: string;
+    resetSubtitle: string;
+    resetSubmit: string;
+    resetSaving: string;
+    newPassword: string;
+    confirmNewPassword: string;
+    forgotCodeTitle: string;
+    forgotCodeSubtitle: string;
+    verificationCode: string;
+    resetPassword: string;
+    requestAnotherCode: string;
+    forgotEmailLabel: string;
+    sendVerificationCode: string;
+    rememberPassword: string;
+    backToLogin: string;
+    resetFailed: string;
+    passwordRepeat: string;
+    codeSentSuccess: string;
+    sendCodeFailed: string;
+    noCode: string;
+    requestCode: string;
+    resetSubtitleWithCode: string;
   };
   account: {
     language: string;
     languageHint: string;
     languageSaved: string;
     memberSince: string;
+    accountDataTitle: string;
+    accountDataHint: string;
+    username: string;
+    usernameHint: string;
+    usernameLocked: string;
+    accessCodeTitle: string;
+    accessCodeHint: string;
+    accessCodeEnable: string;
+    accessCodeNew: string;
+    accessCodeSet: string;
+    accessCodeKeep: string;
+    accessCodePlaceholder: string;
+    accessCodeRules: string;
+    securityTitle: string;
+    securityHint: string;
+    currentPassword: string;
+    newPasswordOptional: string;
+    confirmNewPassword: string;
+    passwordMin: string;
+    saveAccount: string;
+    savingAccount: string;
+    loadError: string;
+    saveError: string;
+    updated: string;
+    usernameConfirmTitle: string;
+    usernameConfirmBody: string;
+    usernameCurrent: string;
+    usernameNew: string;
+    usernameCooldown: string;
+    usernameConfirmYes: string;
   };
   profile: {
     visits: string;
     noLinks: string;
     notFound: string;
+    notFoundTitle: string;
+    notFoundHint: string;
+    createProfile: string;
     welcomeBio: string;
+    loadError: string;
+    connectionError: string;
+    pageTitleNotFound: string;
+  };
+  accessGate: {
+    protected: string;
+    hint: string;
+    codePlaceholder: string;
+    codeLabel: string;
+    wrongCode: string;
+    connectionError: string;
+    submit: string;
+    verifying: string;
+  };
+  claimCta: {
+    title: string;
+    subtitle: string;
+    signup: string;
+    login: string;
+  };
+  quickNav: {
+    dashboard: string;
+    home: string;
+  };
+  share: {
+    shareProfile: string;
+    share: string;
+    copyLink: string;
+    linkCopied: string;
+    title: string;
+    close: string;
+    stories: string;
+    storiesHint: string;
+    link: string;
+    copied: string;
+    storyHint: string;
+    storyHelp: string;
+    chatsHelp: string;
+    storyHelpBody: string;
+    chatsHelpBody: string;
+    moreOptions: string;
+    shareText: string;
   };
   dashboard: {
     tabs: {
@@ -105,12 +219,113 @@ export interface Messages {
       appearance: string;
       account: string;
     };
-    preview: string;
+    viewProfile: string;
     save: string;
+    saving: string;
     saved: string;
+    signOut: string;
+    preview: string;
+    sessionExpired: string;
+    goLogin: string;
+    loadError: string;
+    saveError: string;
+    conflictError: string;
+    unsavedTitle: string;
+    unsavedBody: string;
+    keepEditing: string;
+    viewWithoutSave: string;
+    saveAndView: string;
+    shareTitle: string;
+    shareHint: string;
+    displayName: string;
+    bioPlaceholder: string;
+    avatarLabel: string;
+    avatarHint: string;
+    backgroundTitle: string;
+    backgroundHint: string;
+    backgroundHintSave: string;
+    externalUrl: string;
+    externalUrlPlaceholder: string;
+    bannerTitle: string;
+    bannerHint: string;
+    bannerUrl: string;
+    bannerUrlPlaceholder: string;
+    bannerFileHint: string;
+    audioLabel: string;
+    audioHint: string;
+    playAudio: string;
     backgroundEffect: string;
     effectCategory: string;
+    opacityLabel: string;
+    opacityDisabled: string;
+    blurLabel: string;
+    structureLinks: string;
+    cardSection: string;
+    colorsSection: string;
+    transparentCard: string;
+    showBorder: string;
+    showShadow: string;
+    borderOpacity: string;
+    primaryColor: string;
+    secondaryColor: string;
+    textColor: string;
+    accentColor: string;
+    nameEffect: string;
+    glowIcons: string;
+    gradientCard: string;
+    monochromeIcons: string;
   };
+  linkEditor: {
+    count: string;
+    limitReached: string;
+    empty: string;
+    visibleName: string;
+    remove: string;
+    linkFor: string;
+    uploadIcon: string;
+    changeIcon: string;
+    customTitle: string;
+    customHint: string;
+    uploadError: string;
+  };
+  fileUpload: {
+    upload: string;
+    uploading: string;
+    remove: string;
+    uploadError: string;
+    image: string;
+    gif: string;
+    video: string;
+    avatarAlt: string;
+    bannerAlt: string;
+    backgroundAlt: string;
+    audioUploaded: string;
+    removeAudio: string;
+    removeFile: string;
+    changeFile: string;
+    uploadBanner: string;
+    uploadBackground: string;
+    uploadingPercent: string;
+    dragHint: string;
+  };
+  cardPicker: {
+    structure: string;
+    structureAria: string;
+    linkMode: string;
+    linkModeAria: string;
+    avatar: string;
+    avatarAria: string;
+  };
+  cardLayouts: Record<
+    string,
+    { label: string; description: string }
+  >;
+  linkStyles: Record<
+    string,
+    { label: string; description: string }
+  >;
+  avatarStyles: Record<string, { label: string }>;
+  nameEffects: Record<string, string>;
   badges: {
     owner: string;
     verified: string;
@@ -125,3 +340,427 @@ export interface Messages {
     badges: string;
   };
 }
+
+export const es: Messages = {
+  common: {
+    save: "Guardar",
+    cancel: "Cancelar",
+    loading: "Cargando…",
+    error: "Error",
+    share: "Compartir",
+    close: "Cerrar",
+    retry: "Reintentar",
+    email: "Email",
+    password: "Contraseña",
+    bio: "Bio",
+    showPassword: "Mostrar contraseña",
+    hidePassword: "Ocultar contraseña",
+  },
+  nav: {
+    features: "Características",
+    faq: "FAQ",
+    login: "Iniciar sesión",
+    signup: "Registrarse gratis",
+    myProfile: "Mi perfil",
+    dashboard: "Dashboard",
+    menu: "Menú",
+  },
+  landing: {
+    heroBadge: "La plataforma link-in-bio moderna",
+    heroTitle: "Todo lo que quieres,",
+    heroTitleHighlight: "aquí mismo.",
+    heroSubtitle:
+      "Eyed.bio es tu plataforma para páginas link-in-bio modernas, personalizables y con efectos visuales increíbles.",
+    goDashboard: "Ir al dashboard",
+    signupFree: "Registrarse gratis",
+    claim: "Reclamar",
+    usernamePlaceholder: "tunombre",
+    statsProfileViews: "Visitas a perfiles",
+    statsUsers: "Usuarios",
+    statsUploads: "Archivos subidos",
+    statsLinks: "Enlaces creados",
+    featuresTitle: "Crea páginas",
+    featuresTitleHighlight: "increíbles",
+    featuresSubtitle:
+      "Personaliza cada detalle de tu perfil con efectos, colores y animaciones que reflejen tu estilo.",
+    faqTitle: "Preguntas frecuentes",
+    ctaTitle: "Todo lo que quieres, aquí mismo.",
+    ctaJoin: "Únete a {count} personas usando Eyed.bio.",
+    ctaFirst: "Sé de los primeros en usar Eyed.bio.",
+    ctaButtonLoggedIn: "Volver al dashboard",
+    ctaButtonGuest: "Crear mi perfil gratis",
+    showcaseBadge: "Compositor de estilos",
+    showcaseTitle: "Miles de combinaciones,",
+    showcaseTitleHighlight: "un solo perfil.",
+    showcaseSubtitle:
+      "Elige estructura, modo de enlaces y avatar. Cambia colores, efectos y fondo en el panel.",
+    showcaseBullet1:
+      "7 estructuras — clásica, hero, lateral, banner, minimal, stack y cristal.",
+    showcaseBullet2: "4 modos de enlaces — iconos, botones, fila y chips.",
+    showcaseBullet3: "Más de {count} combinaciones visuales distintas.",
+    showcaseViewLabel: "Vista:",
+    showcaseTabsLabel: "Estilos de ejemplo",
+    features: [
+      {
+        title: "Todos tus enlaces",
+        desc: "Centraliza Discord, Instagram, YouTube y más en una sola página.",
+      },
+      {
+        title: "Compositor de estilos",
+        desc: "7 estructuras de tarjeta, 4 modos de enlaces y avatar — miles de combinaciones.",
+      },
+      {
+        title: "Efectos visuales",
+        desc: "Nieve, lluvia, estrellas y animaciones para destacar.",
+      },
+      {
+        title: "Analytics",
+        desc: "Contador de visitas integrado para medir tu alcance.",
+      },
+      {
+        title: "Sin anuncios",
+        desc: "Experiencia limpia, rápida y sin tracking invasivo.",
+      },
+      {
+        title: "Configuración rápida",
+        desc: "Crea tu perfil en menos de un minuto y compártelo al instante.",
+      },
+    ],
+    faqs: [
+      {
+        q: "¿Qué es Eyed.bio?",
+        a: "Eyed.bio es una plataforma link-in-bio que te permite compartir todos tus enlaces, redes sociales y proyectos en una página personalizable y estética.",
+      },
+      {
+        q: "¿Es gratis?",
+        a: "Sí, Eyed.bio es completamente gratis. Regístrate, personaliza tu perfil y compártelo sin coste alguno.",
+      },
+      {
+        q: "¿Qué puedo hacer con Eyed.bio?",
+        a: "Crea una bio page personalizada que enlace todas tus redes, sitios web y proyectos. Sube fondos animados, audio y foto de perfil.",
+      },
+      {
+        q: "¿Por qué usar Eyed.bio?",
+        a: "Eyed.bio es rápido, estético y está diseñado para creadores que valoran el diseño. Sin anuncios — solo una experiencia limpia y moderna.",
+      },
+      {
+        q: "¿Cuánto tarda la configuración?",
+        a: "Menos de un minuto. Regístrate, añade tus enlaces, personaliza tu página y empieza a compartir al instante.",
+      },
+    ],
+  },
+  signup: {
+    title: "Crea tu perfil",
+    subtitle: "Regístrate gratis y personaliza tu página en minutos.",
+    language: "Idioma",
+    email: "Email",
+    password: "Contraseña",
+    confirmPassword: "Confirmar contraseña",
+    username: "Nombre de usuario",
+    displayName: "Nombre para mostrar",
+    submit: "Crear cuenta",
+    hasAccount: "¿Ya tienes cuenta?",
+    login: "Inicia sesión",
+    passwordMismatch: "Las contraseñas no coinciden",
+    connectionError: "Error de conexión",
+    signInFailed: "Cuenta creada, pero falló el inicio de sesión. Prueba en /login",
+    passwordRepeat: "Repite tu contraseña",
+  },
+  auth: {
+    loginTitle: "Bienvenido de nuevo",
+    loginSubtitle:
+      "Inicia sesión con tu email y contraseña. Te enviaremos un código de acceso por correo.",
+    codeTitle: "Código de acceso",
+    codeSubtitle: "Introduce el código de 6 dígitos enviado a {email}. Revisa también spam.",
+    codeLabel: "Código de acceso",
+    codePlaceholder: "000000",
+    verify: "Entrar",
+    verifying: "Verificando...",
+    resendCode: "Reenviar código",
+    resendFailed: "No se pudo reenviar el código",
+    resendSuccess: "Nuevo código enviado. Revisa también spam.",
+    backToCredentials: "← Volver a email y contraseña",
+    sendCode: "Enviar código de acceso",
+    sendingCode: "Enviando código...",
+    forgotPassword: "¿Olvidaste tu contraseña?",
+    noAccount: "¿No tienes cuenta?",
+    signupLink: "Regístrate gratis",
+    wrongCredentials: "Email o contraseña incorrectos",
+    wrongCode: "Código incorrecto o expirado. Solicita uno nuevo.",
+    connectionError: "Error de conexión. Inténtalo de nuevo.",
+    resetSuccess: "Contraseña actualizada. Ya puedes iniciar sesión.",
+    blockedNotice: "Tu cuenta está bloqueada. Si crees que es un error, contacta con soporte.",
+    forgotTitle: "Recuperar contraseña",
+    forgotSubtitle: "Te enviaremos un enlace para restablecer tu contraseña.",
+    forgotSubmit: "Enviar enlace",
+    forgotSending: "Enviando...",
+    forgotBack: "Volver al inicio de sesión",
+    resetTitle: "Nueva contraseña",
+    resetSubtitle: "Elige una contraseña segura para tu cuenta.",
+    resetSubmit: "Guardar contraseña",
+    resetSaving: "Guardando...",
+    newPassword: "Nueva contraseña",
+    confirmNewPassword: "Confirmar contraseña",
+    forgotCodeTitle: "Introduce el código",
+    forgotCodeSubtitle: "Hemos enviado un código de 6 dígitos a {email}. Revisa también spam.",
+    verificationCode: "Código de verificación",
+    resetPassword: "Restablecer contraseña",
+    requestAnotherCode: "← Solicitar otro código",
+    forgotEmailLabel: "Email de tu cuenta",
+    sendVerificationCode: "Enviar código de verificación",
+    rememberPassword: "¿Recuerdas tu contraseña?",
+    backToLogin: "Volver al login",
+    resetFailed: "No se pudo restablecer la contraseña",
+    passwordRepeat: "Repite la contraseña",
+    codeSentSuccess:
+      "Código enviado. Revisa tu bandeja de entrada y, si no lo ves, la carpeta de spam.",
+    sendCodeFailed: "No se pudo enviar el código",
+    noCode: "¿No tienes código?",
+    requestCode: "Solicitar uno",
+    resetSubtitleWithCode: "Introduce el código de 6 dígitos que recibiste y tu nueva contraseña.",
+  },
+  account: {
+    language: "Idioma",
+    languageHint: "Afecta al panel y textos de tu perfil público.",
+    languageSaved: "Idioma actualizado",
+    memberSince: "Miembro desde",
+    accountDataTitle: "Datos de la cuenta",
+    accountDataHint:
+      "Cambia tu email, usuario público o contraseña. Necesitas tu contraseña actual.",
+    username: "Nombre de usuario",
+    usernameHint:
+      "Solo letras y números (a–z, 0–9). Mínimo 3 caracteres. Puedes cambiarlo cada {days} días.",
+    usernameLocked: "Podrás cambiar tu usuario de nuevo el {date}.",
+    accessCodeTitle: "Código de acceso al perfil",
+    accessCodeHint: "Quien visite tu perfil público deberá introducir este código para verlo.",
+    accessCodeEnable: "Activar código de acceso",
+    accessCodeNew: "Nuevo código (opcional)",
+    accessCodeSet: "Código de acceso",
+    accessCodeKeep: "Deja vacío para mantener el actual",
+    accessCodePlaceholder: "Mínimo 4 caracteres",
+    accessCodeRules:
+      "Solo letras y números (4–32 caracteres). Compártelo solo con quien quieras que vea tu perfil.",
+    securityTitle: "Seguridad",
+    securityHint:
+      "Confirma con tu contraseña actual. Deja en blanco si no quieres cambiarla.",
+    currentPassword: "Contraseña actual",
+    newPasswordOptional: "Nueva contraseña (opcional)",
+    confirmNewPassword: "Confirmar nueva contraseña",
+    passwordMin: "Mínimo 8 caracteres",
+    saveAccount: "Guardar cambios de cuenta",
+    savingAccount: "Guardando cuenta...",
+    loadError: "No se pudo cargar la configuración de la cuenta",
+    saveError: "Error al guardar",
+    updated: "Cuenta actualizada",
+    usernameConfirmTitle: "¿Cambiar nombre de usuario?",
+    usernameConfirmBody:
+      "Tu enlace público cambiará. Quien use el anterior ya no llegará a tu perfil.",
+    usernameCurrent: "Actual",
+    usernameNew: "Nuevo",
+    usernameCooldown: "Solo podrás volver a cambiarlo dentro de {days} días.",
+    usernameConfirmYes: "Sí, cambiar usuario",
+  },
+  profile: {
+    visits: "visitas",
+    noLinks: "Sin enlaces aún",
+    notFound: "Perfil no encontrado",
+    notFoundTitle: "Este perfil no existe",
+    notFoundHint: "Comprueba el enlace o el nombre de usuario (@{username})",
+    createProfile: "Crear mi perfil",
+    welcomeBio: "¡Bienvenidos a mi sitio web!",
+    loadError: "No se pudo cargar el perfil",
+    connectionError: "Error de conexión. Comprueba tu red e inténtalo de nuevo.",
+    pageTitleNotFound: "Perfil no encontrado — Eyed.bio",
+  },
+  accessGate: {
+    protected: "Perfil protegido",
+    hint: "Introduce el código de acceso para ver este perfil.",
+    codePlaceholder: "Código de acceso",
+    codeLabel: "Código de acceso",
+    wrongCode: "Código incorrecto",
+    connectionError: "Error de conexión. Inténtalo de nuevo.",
+    submit: "Entrar al perfil",
+    verifying: "Verificando...",
+  },
+  claimCta: {
+    title: "Reclama tu perfil",
+    subtitle: "Crea tu página link-in-bio gratis en Eyed.bio",
+    signup: "Crear cuenta",
+    login: "Iniciar sesión",
+  },
+  quickNav: {
+    dashboard: "Volver al dashboard",
+    home: "Ir al inicio",
+  },
+  share: {
+    shareProfile: "Compartir perfil",
+    share: "Compartir",
+    copyLink: "Copiar enlace",
+    linkCopied: "Enlace copiado",
+    title: "Compartir perfil",
+    close: "Cerrar",
+    stories: "Historias",
+    storiesHint: "IG, TikTok, WhatsApp",
+    link: "Enlace",
+    copied: "Copiado",
+    storyHint:
+      "Imagen guardada. Ábrela en Instagram, TikTok o WhatsApp y publícala en tu historia. También puedes pegar el enlace con sticker de enlace en Instagram.",
+    storyHelp: "Historias:",
+    chatsHelp: "Chats:",
+    storyHelpBody: "descarga la imagen vertical con QR.",
+    chatsHelpBody: "al enviar el enlace se muestra tu foto y bio como vista previa.",
+    moreOptions: "Más opciones del dispositivo",
+    shareText: "Mira mi perfil en Eyed.bio",
+  },
+  dashboard: {
+    tabs: {
+      general: "Perfil",
+      links: "Enlaces",
+      media: "Media",
+      appearance: "Estilo",
+      account: "Cuenta",
+    },
+    viewProfile: "Ver perfil",
+    save: "Guardar",
+    saving: "Guardando...",
+    saved: "Guardado ✓",
+    signOut: "Cerrar sesión",
+    preview: "Vista previa",
+    sessionExpired: "Tu sesión expiró. Vuelve a iniciar sesión.",
+    goLogin: "Ir a iniciar sesión",
+    loadError: "No se pudo cargar el perfil",
+    saveError: "Error al guardar",
+    conflictError: "El perfil cambió en otra pestaña. Recarga la página antes de guardar.",
+    unsavedTitle: "Tienes cambios sin guardar",
+    unsavedBody:
+      "Guarda tu perfil antes de verlo público para que los visitantes vean la versión actualizada.",
+    keepEditing: "Seguir editando",
+    viewWithoutSave: "Ver sin guardar",
+    saveAndView: "Guardar y ver",
+    shareTitle: "Compartir perfil",
+    shareHint:
+      "Comparte en WhatsApp, X, Telegram o descarga una imagen para historias de Instagram, TikTok y WhatsApp Status.",
+    displayName: "Nombre para mostrar",
+    bioPlaceholder: "Cuéntanos sobre ti...",
+    avatarLabel: "Foto de perfil",
+    avatarHint: "JPG, PNG, WebP o GIF · máx. 5MB",
+    backgroundTitle: "Fondo del perfil",
+    backgroundHint:
+      "Sube tu propia imagen, GIF animado o video de fondo. Se verá detrás de tu tarjeta en el perfil público.",
+    backgroundHintSave: "Máximo 50 MB · Recuerda pulsar Guardar después de subir",
+    externalUrl: "O pega una URL externa",
+    externalUrlPlaceholder: "https://ejemplo.com/mi-fondo.mp4",
+    bannerTitle: "Banner de la tarjeta",
+    bannerHint:
+      "Imagen horizontal para la cabecera del layout Banner. Independiente del fondo de pantalla.",
+    bannerUrl: "O pega una URL del banner",
+    bannerUrlPlaceholder: "https://ejemplo.com/mi-banner.jpg",
+    bannerFileHint: "JPG, PNG, WEBP o GIF · máx. 10 MB",
+    audioLabel: "Audio de fondo",
+    audioHint:
+      "MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, AIFF, MIDI · máx. 25MB · 30 s en el perfil",
+    playAudio: "Reproducir audio en el perfil",
+    backgroundEffect: "Efecto de fondo",
+    effectCategory: "Categoría",
+    opacityLabel: "Opacidad del fondo ({percent}%)",
+    opacityDisabled: "Desactivado en modo transparente.",
+    blurLabel: "Blur ({px}px)",
+    structureLinks: "Estructura y enlaces",
+    cardSection: "Tarjeta",
+    colorsSection: "Colores de la tarjeta",
+    transparentCard: "Tarjeta transparente (sin color de fondo)",
+    showBorder: "Mostrar borde",
+    showShadow: "Mostrar sombra",
+    borderOpacity: "Opacidad del borde ({percent}%)",
+    primaryColor: "Color principal",
+    secondaryColor: "Color secundario (gradiente)",
+    textColor: "Color del texto",
+    accentColor: "Color de acento (brillo y borde)",
+    nameEffect: "Efecto en el nombre",
+    glowIcons: "Brillo en iconos",
+    gradientCard: "Gradiente en tarjeta",
+    monochromeIcons: "Iconos monocromáticos",
+  },
+  linkEditor: {
+    count: "{count}/{max} enlaces",
+    limitReached: " · Límite alcanzado. Quita uno para añadir otro.",
+    empty: "Elige un icono abajo para añadir tu primer enlace.",
+    visibleName: "Nombre visible (opcional)",
+    remove: "Quitar {label}",
+    linkFor: "Enlace de {label}",
+    uploadIcon: "Subir icono personalizado",
+    changeIcon: "Cambiar icono",
+    customTitle: "Añadir URL personalizada",
+    customHint: "Usa tu propia URL y elige un icono que encaje.",
+    uploadError: "Error al subir",
+  },
+  fileUpload: {
+    upload: "Subir archivo",
+    uploading: "Subiendo...",
+    remove: "Quitar",
+    uploadError: "Error al subir",
+    image: "Imagen",
+    gif: "GIF",
+    video: "Video",
+    avatarAlt: "Avatar",
+    bannerAlt: "Banner",
+    backgroundAlt: "Fondo",
+    audioUploaded: "Audio subido",
+    removeAudio: "Quitar audio",
+    removeFile: "Quitar archivo",
+    changeFile: "Cambiar archivo",
+    uploadBanner: "Subir imagen de banner",
+    uploadBackground: "Subir imagen, GIF o video",
+    uploadingPercent: "Subiendo… {percent}%",
+    dragHint: "Arrastra aquí o haz clic · JPG, PNG, WebP, GIF, MP4, WebM, MOV",
+  },
+  cardPicker: {
+    structure: "Estructura",
+    structureAria: "Estructura de tarjeta",
+    linkMode: "Modo de enlaces",
+    linkModeAria: "Modo de enlaces",
+    avatar: "Avatar",
+    avatarAria: "Estilo de avatar",
+  },
+  cardLayouts: {
+    classic: { label: "Clásica", description: "Centrada, avatar arriba e iconos en cuadrícula." },
+    hero: { label: "Hero", description: "Avatar grande, nombre destacado y fila de iconos." },
+    split: { label: "Lateral", description: "Avatar a la izquierda y texto al lado." },
+    banner: { label: "Banner", description: "Cabecera visual con avatar superpuesto." },
+    minimal: { label: "Minimal", description: "Poco contenedor; contenido flotando sobre el fondo." },
+    stack: { label: "Stack", description: "Enlaces anchos tipo botón debajo del perfil." },
+    glass: { label: "Cristal", description: "Panel ancho con pie dividido (visitas + redes)." },
+  },
+  linkStyles: {
+    icons: { label: "Iconos", description: "Cuadrícula de iconos con hover." },
+    pills: { label: "Botones", description: "Lista vertical de enlaces con etiqueta." },
+    row: { label: "Fila", description: "Iconos en una sola fila compacta." },
+    chips: { label: "Chips", description: "Píldoras pequeñas con icono y nombre." },
+  },
+  avatarStyles: {
+    circle: { label: "Circular" },
+    ring: { label: "Anillo" },
+    rounded: { label: "Redondeado" },
+  },
+  nameEffects: {
+    none: "Ninguno",
+    glow: "Brillo",
+    aura: "Aura",
+    neon: "Neón",
+    pulse: "Pulso",
+    gradient: "Gradiente",
+  },
+  badges: {
+    owner: "Owner",
+    verified: "Verificado",
+    premium: "Premium",
+    og: "OG",
+  },
+  admin: {
+    verify: "Verificar",
+    unverify: "Quitar verificado",
+    setOwner: "Corona owner",
+    removeOwner: "Quitar owner",
+    badges: "Insignias",
+  },
+};

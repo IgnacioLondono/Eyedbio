@@ -10,6 +10,7 @@ import { createEmptyLink } from "@/lib/profile-mapper";
 import { MAX_SOCIAL_LINKS, canAddSocialLink } from "@/lib/links-config";
 import { ACCEPT_ATTR } from "@/lib/media-config";
 import { getMediaSrc } from "@/lib/media-url";
+import { useI18n } from "@/components/LocaleProvider";
 
 interface Props {
   links: SocialLink[];
@@ -23,6 +24,7 @@ function LinkIconPreview({
   link: SocialLink;
   onUploaded: (url: string) => void;
 }) {
+  const { t } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -42,11 +44,11 @@ function LinkIconPreview({
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Error al subir");
+      if (!res.ok) throw new Error(data.error ?? t("linkEditor.uploadError"));
 
       onUploaded(data.url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al subir");
+      setError(err instanceof Error ? err.message : t("linkEditor.uploadError"));
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -60,7 +62,7 @@ function LinkIconPreview({
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
         className="relative flex items-center justify-center w-14 h-14 rounded-xl bg-white/5 border border-white/10 hover:border-purple-500/40 hover:bg-purple-500/10 transition-colors overflow-hidden disabled:opacity-50"
-        aria-label="Subir icono personalizado"
+        aria-label={t("linkEditor.uploadIcon")}
       >
         {uploading ? (
           <Loader2 className="w-5 h-5 animate-spin text-white/50" />
@@ -75,7 +77,7 @@ function LinkIconPreview({
         )}
       </button>
       <span className="text-[10px] text-white/35">
-        {link.iconUrl ? "Cambiar icono" : "Subir icono"}
+        {link.iconUrl ? t("linkEditor.changeIcon") : t("linkEditor.uploadIcon")}
       </span>
       <input
         ref={inputRef}
@@ -93,6 +95,7 @@ function LinkIconPreview({
 }
 
 export default function LinkEditor({ links, onChange }: Props) {
+  const { t, tVars } = useI18n();
   const usedPlatforms = new Set(
     links.filter((l) => l.platform !== "custom").map((l) => l.platform)
   );
@@ -126,14 +129,14 @@ export default function LinkEditor({ links, onChange }: Props) {
   return (
     <div className="space-y-6">
       <p className="text-xs text-white/40">
-        {links.length}/{MAX_SOCIAL_LINKS} enlaces
+        {tVars("linkEditor.count", { count: links.length, max: MAX_SOCIAL_LINKS })}
         {atLinkLimit && (
-          <span className="text-amber-300/90"> · Límite alcanzado. Quita uno para añadir otro.</span>
+          <span className="text-amber-300/90">{t("linkEditor.limitReached")}</span>
         )}
       </p>
       {links.length === 0 ? (
         <p className="text-white/40 text-sm text-center py-2">
-          Elige un icono abajo para añadir tu primer enlace.
+          {t("linkEditor.empty")}
         </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -155,16 +158,16 @@ export default function LinkEditor({ links, onChange }: Props) {
                       type="text"
                       value={link.label ?? ""}
                       onChange={(e) => updateLink(link.id, { label: e.target.value || undefined })}
-                      placeholder="Nombre visible (opcional)"
+                      placeholder={t("linkEditor.visibleName")}
                       className="input-field text-xs py-1.5 mt-1.5"
-                      aria-label={`Nombre visible para ${config.label}`}
+                      aria-label={t("linkEditor.visibleName")}
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => removeLink(link.id)}
                     className="p-1.5 text-red-400/60 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors shrink-0"
-                    aria-label={`Quitar ${config.label}`}
+                    aria-label={tVars("linkEditor.remove", { label: config.label })}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -190,7 +193,7 @@ export default function LinkEditor({ links, onChange }: Props) {
                   onChange={(e) => updateLink(link.id, { url: e.target.value })}
                   placeholder={getPlatformUrlPlaceholder(link.platform)}
                   className="input-field w-full text-sm mt-3"
-                  aria-label={`Enlace de ${config.label}`}
+                  aria-label={tVars("linkEditor.linkFor", { label: config.label })}
                 />
               </div>
             );
@@ -252,9 +255,9 @@ export default function LinkEditor({ links, onChange }: Props) {
             <Globe className="w-5 h-5 text-white/60" />
           </span>
           <span className="min-w-0">
-            <span className="block text-sm font-medium text-white">Añadir URL personalizada</span>
+            <span className="block text-sm font-medium text-white">{t("linkEditor.customTitle")}</span>
             <span className="block text-xs text-white/40 mt-0.5">
-              Usa tu propia URL y elige un icono que encaje.
+              {t("linkEditor.customHint")}
             </span>
           </span>
         </button>

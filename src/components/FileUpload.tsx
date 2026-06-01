@@ -5,6 +5,7 @@ import { Upload, Loader2, X, ImageIcon, Film, Image as ImageLucide, Music } from
 import { BackgroundType } from "@/types/profile";
 import { ACCEPT_ATTR, UploadKind, resolveBackgroundType } from "@/lib/media-config";
 import { getMediaSrc } from "@/lib/media-url";
+import { useI18n } from "@/components/LocaleProvider";
 
 interface Props {
   kind: UploadKind;
@@ -25,10 +26,11 @@ function resolveBackgroundMediaType(
 }
 
 function MediaTypeBadge({ type }: { type: BackgroundType }) {
+  const { t } = useI18n();
   const labels: Record<BackgroundType, string> = {
-    image: "Imagen",
-    gif: "GIF",
-    video: "Video",
+    image: t("fileUpload.image"),
+    gif: t("fileUpload.gif"),
+    video: t("fileUpload.video"),
   };
 
   const icons: Record<BackgroundType, typeof ImageLucide> = {
@@ -56,6 +58,7 @@ function MediaPreview({
   currentUrl: string;
   mediaType?: BackgroundType;
 }) {
+  const { t } = useI18n();
   const [broken, setBroken] = useState(false);
   const resolvedType = resolveBackgroundMediaType(currentUrl, mediaType);
   const isVideo = resolvedType === "video";
@@ -76,7 +79,7 @@ function MediaPreview({
     return (
       <img
         src={displayUrl}
-        alt="Avatar"
+        alt={t("fileUpload.avatarAlt")}
         referrerPolicy="no-referrer"
         decoding="async"
         className="w-20 h-20 object-cover mx-auto my-3 rounded-full"
@@ -96,7 +99,7 @@ function MediaPreview({
     return (
       <img
         src={displayUrl}
-        alt="Banner"
+        alt={t("fileUpload.bannerAlt")}
         referrerPolicy="no-referrer"
         decoding="async"
         className="w-full h-24 object-cover object-center"
@@ -128,7 +131,7 @@ function MediaPreview({
         ) : (
           <img
             src={displayUrl}
-            alt="Fondo"
+            alt={t("fileUpload.backgroundAlt")}
             referrerPolicy="no-referrer"
             decoding="async"
             className="w-full h-full object-cover object-center"
@@ -153,6 +156,7 @@ export default function FileUpload({
   onUploaded,
   onClear,
 }: Props) {
+  const { t, tVars } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
@@ -189,14 +193,14 @@ export default function FileUpload({
             resolve({ url: data.url, backgroundType: data.backgroundType });
             return;
           }
-          reject(new Error(data.error ?? "Error al subir"));
+          reject(new Error(data.error ?? t("fileUpload.uploadError")));
         } catch {
-          reject(new Error("Error al subir"));
+          reject(new Error(t("fileUpload.uploadError")));
         }
       });
 
-      xhr.addEventListener("error", () => reject(new Error("Error de conexión")));
-      xhr.addEventListener("abort", () => reject(new Error("Subida cancelada")));
+      xhr.addEventListener("error", () => reject(new Error(t("fileUpload.uploadError"))));
+      xhr.addEventListener("abort", () => reject(new Error(t("fileUpload.uploadError"))));
 
       xhr.open("POST", "/api/upload");
       xhr.send(formData);
@@ -211,7 +215,7 @@ export default function FileUpload({
       const data = await uploadFile(file, setProgress);
       onUploaded(data.url, data.backgroundType);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al subir");
+      setError(err instanceof Error ? err.message : t("fileUpload.uploadError"));
     } finally {
       setUploading(false);
       setProgress(null);
@@ -235,13 +239,13 @@ export default function FileUpload({
       {currentUrl && isAudio && (
         <div className="relative flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5">
           <Music className="w-4 h-4 text-purple-400 shrink-0" />
-          <span className="text-sm text-white/60 truncate flex-1">Audio subido</span>
+          <span className="text-sm text-white/60 truncate flex-1">{t("fileUpload.audioUploaded")}</span>
           {onClear && (
             <button
               type="button"
               onClick={onClear}
               className="p-1.5 rounded-lg bg-black/40 text-white/70 hover:text-white shrink-0"
-              aria-label="Quitar audio"
+              aria-label={t("fileUpload.removeAudio")}
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -257,7 +261,7 @@ export default function FileUpload({
               type="button"
               onClick={onClear}
               className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white z-10"
-              aria-label="Quitar archivo"
+              aria-label={t("fileUpload.removeFile")}
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -290,15 +294,15 @@ export default function FileUpload({
           <span>
             {uploading
               ? progress !== null
-                ? `Subiendo… ${progress}%`
-                : "Subiendo..."
+                ? tVars("fileUpload.uploadingPercent", { percent: progress })
+                : t("fileUpload.uploading")
               : currentUrl
-                ? "Cambiar archivo"
+                ? t("fileUpload.changeFile")
                 : isBanner
-                  ? "Subir imagen de banner"
+                  ? t("fileUpload.uploadBanner")
                   : isBackground
-                    ? "Subir imagen, GIF o video"
-                    : "Subir archivo"}
+                    ? t("fileUpload.uploadBackground")
+                    : t("fileUpload.upload")}
           </span>
           {uploading && progress !== null && (
             <div className="w-full max-w-[200px] h-1 rounded-full bg-white/10 overflow-hidden">
@@ -310,7 +314,7 @@ export default function FileUpload({
           )}
           {isBackground && !uploading && (
             <span className="text-[11px] text-white/30">
-              Arrastra aquí o haz clic · JPG, PNG, WebP, GIF, MP4, WebM, MOV
+              {t("fileUpload.dragHint")}
             </span>
           )}
         </button>

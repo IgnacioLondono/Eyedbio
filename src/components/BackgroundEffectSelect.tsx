@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default function BackgroundEffectSelect({ value, onChange }: Props) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const listId = useId();
@@ -68,7 +68,7 @@ export default function BackgroundEffectSelect({ value, onChange }: Props) {
         <div
           id={listId}
           role="listbox"
-          aria-label="Efecto de fondo"
+          aria-label={t("dashboard.backgroundEffect")}
           className="absolute z-50 mt-1.5 w-full max-h-[min(320px,50vh)] overflow-y-auto rounded-xl border border-white/10 bg-[#12121a] shadow-xl shadow-black/40 [scrollbar-width:thin]"
         >
           {BACKGROUND_EFFECT_CATEGORIES.map((category, index) => (

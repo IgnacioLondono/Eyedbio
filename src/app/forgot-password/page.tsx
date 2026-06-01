@@ -8,11 +8,12 @@ import AuthLayout, {
   AuthError,
   AuthFooterLink,
   AuthSubmitButton,
-  AuthSuccess,
 } from "@/components/AuthLayout";
 import PasswordInput from "@/components/PasswordInput";
+import { useI18n } from "@/components/LocaleProvider";
 
 function ForgotPasswordForm() {
+  const { t, tVars } = useI18n();
   const router = useRouter();
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -20,13 +21,11 @@ function ForgotPasswordForm() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const requestCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
     setLoading(true);
 
     try {
@@ -38,16 +37,13 @@ function ForgotPasswordForm() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "No se pudo enviar el código");
+        setError(data.error ?? t("auth.sendCodeFailed"));
         return;
       }
 
-      setSuccess(
-        "Código enviado. Revisa tu bandeja de entrada y, si no lo ves, la carpeta de spam."
-      );
       setStep("code");
     } catch {
-      setError("Error de conexión. Inténtalo de nuevo.");
+      setError(t("auth.connectionError"));
     } finally {
       setLoading(false);
     }
@@ -67,13 +63,13 @@ function ForgotPasswordForm() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "No se pudo restablecer la contraseña");
+        setError(data.error ?? t("auth.resetFailed"));
         return;
       }
 
       router.push("/login?reset=success");
     } catch {
-      setError("Error de conexión. Inténtalo de nuevo.");
+      setError(t("auth.connectionError"));
     } finally {
       setLoading(false);
     }
@@ -82,14 +78,20 @@ function ForgotPasswordForm() {
   if (step === "code") {
     return (
       <AuthLayout
-        title="Introduce el código"
-        subtitle={`Hemos enviado un código de 6 dígitos a ${email}. Revisa también spam.`}
-        footer={<AuthFooterLink text="¿Recuerdas tu contraseña?" linkText="Volver al login" href="/login" />}
+        title={t("auth.forgotCodeTitle")}
+        subtitle={tVars("auth.forgotCodeSubtitle", { email })}
+        footer={
+          <AuthFooterLink
+            text={t("auth.rememberPassword")}
+            linkText={t("auth.backToLogin")}
+            href="/login"
+          />
+        }
       >
         <form onSubmit={resetPassword} className="space-y-5">
           <div>
             <label htmlFor="code" className="auth-label">
-              Código de verificación
+              {t("auth.verificationCode")}
             </label>
             <input
               id="code"
@@ -100,20 +102,20 @@ function ForgotPasswordForm() {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               className="auth-input text-center text-2xl font-mono tracking-[0.4em]"
-              placeholder="000000"
+              placeholder={t("auth.codePlaceholder")}
               required
             />
           </div>
 
           <div>
             <label htmlFor="password" className="auth-label">
-              Nueva contraseña
+              {t("auth.newPassword")}
             </label>
             <PasswordInput
               id="password"
               value={password}
               onChange={setPassword}
-              placeholder="Mínimo 8 caracteres"
+              placeholder={t("account.passwordMin")}
               autoComplete="new-password"
               required
               minLength={8}
@@ -122,13 +124,13 @@ function ForgotPasswordForm() {
 
           <div>
             <label htmlFor="confirmPassword" className="auth-label">
-              Confirmar contraseña
+              {t("auth.confirmNewPassword")}
             </label>
             <PasswordInput
               id="confirmPassword"
               value={confirmPassword}
               onChange={setConfirmPassword}
-              placeholder="Repite la contraseña"
+              placeholder={t("auth.passwordRepeat")}
               autoComplete="new-password"
               required
               minLength={8}
@@ -137,10 +139,10 @@ function ForgotPasswordForm() {
 
           <AuthError message={error} />
 
-          <AuthSubmitButton loading={loading} loadingText="Guardando...">
+          <AuthSubmitButton loading={loading} loadingText={t("auth.resetSaving")}>
             <>
               <KeyRound className="w-4 h-4" />
-              Restablecer contraseña
+              {t("auth.resetPassword")}
             </>
           </AuthSubmitButton>
 
@@ -152,11 +154,10 @@ function ForgotPasswordForm() {
               setPassword("");
               setConfirmPassword("");
               setError("");
-              setSuccess("");
             }}
             className="w-full text-sm text-white/40 hover:text-white transition-colors"
           >
-            ← Solicitar otro código
+            {t("auth.requestAnotherCode")}
           </button>
         </form>
       </AuthLayout>
@@ -165,14 +166,20 @@ function ForgotPasswordForm() {
 
   return (
     <AuthLayout
-      title="Recuperar contraseña"
-      subtitle="Te enviaremos un código de 6 dígitos. Si no llega, revisa la carpeta de spam."
-      footer={<AuthFooterLink text="¿Recuerdas tu contraseña?" linkText="Volver al login" href="/login" />}
+      title={t("auth.forgotTitle")}
+      subtitle={t("auth.forgotSubtitle")}
+      footer={
+        <AuthFooterLink
+          text={t("auth.rememberPassword")}
+          linkText={t("auth.backToLogin")}
+          href="/login"
+        />
+      }
     >
       <form onSubmit={requestCode} className="space-y-5">
         <div>
           <label htmlFor="email" className="auth-label">
-            Email de tu cuenta
+            {t("auth.forgotEmailLabel")}
           </label>
           <div className="relative">
             <input
@@ -194,10 +201,10 @@ function ForgotPasswordForm() {
 
         <AuthError message={error} />
 
-        <AuthSubmitButton loading={loading} loadingText="Enviando...">
+        <AuthSubmitButton loading={loading} loadingText={t("auth.forgotSending")}>
           <>
             <ShieldCheck className="w-4 h-4" />
-            Enviar código de verificación
+            {t("auth.sendVerificationCode")}
           </>
         </AuthSubmitButton>
 
@@ -206,7 +213,7 @@ function ForgotPasswordForm() {
           className="flex items-center justify-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Volver al inicio de sesión
+          {t("auth.forgotBack")}
         </Link>
       </form>
     </AuthLayout>

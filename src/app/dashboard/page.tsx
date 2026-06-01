@@ -20,7 +20,9 @@ import {
   NameEffect,
 } from "@/types/profile";
 import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
+import { getMessages } from "@/lib/i18n";
 import { resolveBackgroundType } from "@/lib/media-config";
+import { useI18n } from "@/components/LocaleProvider";
 import ProfileCard from "@/components/ProfileCard";
 import BackgroundEffects from "@/components/BackgroundEffects";
 import BackgroundEffectSelect from "@/components/BackgroundEffectSelect";
@@ -77,6 +79,7 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
+  const { t, tVars, locale, setLocale } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -93,13 +96,17 @@ function DashboardContent() {
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
 
   useEffect(() => {
+    if (profile?.locale) void setLocale(profile.locale, false);
+  }, [profile?.locale, setLocale]);
+
+  useEffect(() => {
     fetch("/api/profile")
       .then(async (res) => {
         if (res.status === 401) throw new Error("SESSION_EXPIRED");
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           throw new Error(
-            typeof data.error === "string" ? data.error : "Error del servidor al cargar el perfil"
+            typeof data.error === "string" ? data.error : t("dashboard.loadError")
           );
         }
         return res.json();
@@ -110,10 +117,10 @@ function DashboardContent() {
       })
       .catch((err) => {
         if (err instanceof Error && err.message === "SESSION_EXPIRED") {
-          setError("Tu sesión expiró. Vuelve a iniciar sesión.");
+          setError(t("dashboard.sessionExpired"));
           return;
         }
-        setError(err instanceof Error ? err.message : "No se pudo cargar el perfil");
+        setError(err instanceof Error ? err.message : t("dashboard.loadError"));
       });
   }, []);
 
@@ -196,12 +203,9 @@ function DashboardContent() {
 
       const data = await res.json();
       if (res.status === 409) {
-        throw new Error(
-          data.error ??
-            "El perfil cambió en otra pestaña. Recarga la página antes de guardar."
-        );
+        throw new Error(data.error ?? t("dashboard.conflictError"));
       }
-      if (!res.ok) throw new Error(data.error ?? "Error al guardar");
+      if (!res.ok) throw new Error(data.error ?? t("dashboard.saveError"));
 
       setProfile(data);
       setIsDirty(false);
@@ -209,7 +213,7 @@ function DashboardContent() {
       setTimeout(() => setJustSaved(false), 2000);
       return true;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error al guardar");
+      setError(err instanceof Error ? err.message : t("dashboard.saveError"));
       return false;
     } finally {
       setSaving(false);
@@ -242,7 +246,7 @@ function DashboardContent() {
           <>
             <p className="text-white/50 text-sm">{error}</p>
             <Link href="/login" className="text-purple-400 text-sm hover:underline">
-              Ir a iniciar sesión
+              {t("dashboard.goLogin")}
             </Link>
           </>
         ) : (
@@ -252,12 +256,14 @@ function DashboardContent() {
     );
   }
 
+  const nameEffectLabels = getMessages(locale).nameEffects;
+
   const tabs: { id: Tab; label: string; icon: typeof Settings }[] = [
-    { id: "general", label: "Perfil", icon: UserRound },
-    { id: "links", label: "Enlaces", icon: Link2 },
-    { id: "media", label: "Media", icon: Music },
-    { id: "appearance", label: "Estilo", icon: Palette },
-    { id: "account", label: "Cuenta", icon: Settings },
+    { id: "general", label: t("dashboard.tabs.general"), icon: UserRound },
+    { id: "links", label: t("dashboard.tabs.links"), icon: Link2 },
+    { id: "media", label: t("dashboard.tabs.media"), icon: Music },
+    { id: "appearance", label: t("dashboard.tabs.appearance"), icon: Palette },
+    { id: "account", label: t("dashboard.tabs.account"), icon: Settings },
   ];
 
   return (
@@ -280,7 +286,7 @@ function DashboardContent() {
               }`}
             >
               <UserRound className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Ver perfil</span>
+              <span className="hidden sm:inline">{t("dashboard.viewProfile")}</span>
               <ExternalLink className="w-3 h-3" />
             </Link>
             <button
@@ -289,12 +295,12 @@ function DashboardContent() {
               className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-lg transition-colors"
             >
               <Save className="w-3.5 h-3.5" />
-              {justSaved ? "Guardado ✓" : saving ? "Guardando..." : "Guardar"}
+              {justSaved ? t("dashboard.saved") : saving ? t("dashboard.saving") : t("dashboard.save")}
             </button>
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className="p-1.5 text-white/40 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
-              title="Cerrar sesión"
+              title={t("dashboard.signOut")}
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -321,15 +327,14 @@ function DashboardContent() {
             type="button"
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowUnsavedModal(false)}
-            aria-label="Cerrar"
+            aria-label={t("common.close")}
           />
           <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#12121a] p-6 shadow-2xl">
             <h2 id="unsaved-title" className="text-lg font-semibold text-white">
-              Tienes cambios sin guardar
+              {t("dashboard.unsavedTitle")}
             </h2>
             <p className="mt-2 text-sm text-white/50 leading-relaxed">
-              Guarda tu perfil antes de verlo público para que los visitantes vean la versión
-              actualizada.
+              {t("dashboard.unsavedBody")}
             </p>
             <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
               <button
@@ -337,7 +342,7 @@ function DashboardContent() {
                 onClick={() => setShowUnsavedModal(false)}
                 className="px-4 py-2.5 text-sm text-white/70 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
               >
-                Seguir editando
+                {t("dashboard.keepEditing")}
               </button>
               <button
                 type="button"
@@ -347,7 +352,7 @@ function DashboardContent() {
                 }}
                 className="px-4 py-2.5 text-sm border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
               >
-                Ver sin guardar
+                {t("dashboard.viewWithoutSave")}
               </button>
               <button
                 type="button"
@@ -355,7 +360,7 @@ function DashboardContent() {
                 disabled={saving}
                 className="px-4 py-2.5 text-sm font-medium bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-lg transition-colors"
               >
-                {saving ? "Guardando..." : "Guardar y ver"}
+                {saving ? t("dashboard.saving") : t("dashboard.saveAndView")}
               </button>
             </div>
           </div>
@@ -369,18 +374,18 @@ function DashboardContent() {
       >
         <div className="relative z-20 min-w-0 w-full max-w-2xl">
           <div className="grid grid-cols-5 gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6 w-full max-w-xl">
-            {tabs.map((t) => (
+            {tabs.map((tabItem) => (
               <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
+                key={tabItem.id}
+                onClick={() => setTab(tabItem.id)}
                 className={`flex items-center justify-center gap-1 py-2.5 px-1 rounded-lg text-[11px] sm:text-xs font-medium transition-all ${
-                  tab === t.id
+                  tab === tabItem.id
                     ? "bg-purple-600 text-white shadow-lg"
                     : "text-white/50 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <t.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span className="truncate">{t.label}</span>
+                <tabItem.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="truncate">{tabItem.label}</span>
               </button>
             ))}
           </div>
@@ -390,10 +395,9 @@ function DashboardContent() {
               <>
                 <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-3">
                   <div>
-                    <h3 className="text-sm font-medium text-white">Compartir perfil</h3>
+                    <h3 className="text-sm font-medium text-white">{t("dashboard.shareTitle")}</h3>
                     <p className="text-xs text-white/40 mt-1">
-                      Comparte en WhatsApp, X, Telegram o descarga una imagen para
-                      historias de Instagram, TikTok y WhatsApp Status.
+                      {t("dashboard.shareHint")}
                     </p>
                   </div>
                   <p className="text-xs font-mono text-purple-300/80 break-all">
@@ -405,7 +409,7 @@ function DashboardContent() {
                     variant="inline"
                   />
                 </div>
-                <Field label="Nombre para mostrar">
+                <Field label={t("dashboard.displayName")}>
                   <input
                     type="text"
                     value={profile.displayName}
@@ -413,19 +417,19 @@ function DashboardContent() {
                     className="input-field"
                   />
                 </Field>
-                <Field label="Bio">
+                <Field label={t("common.bio")}>
                   <textarea
                     value={profile.bio}
                     onChange={(e) => update({ bio: e.target.value })}
                     rows={3}
                     className="input-field resize-none"
-                    placeholder="Cuéntanos sobre ti..."
+                    placeholder={t("dashboard.bioPlaceholder")}
                   />
                 </Field>
                 <FileUpload
                   kind="avatar"
-                  label="Foto de perfil"
-                  hint="JPG, PNG, WebP o GIF · máx. 5MB"
+                  label={t("dashboard.avatarLabel")}
+                  hint={t("dashboard.avatarHint")}
                   currentUrl={profile.avatarUrl}
                   onUploaded={(url) => update({ avatarUrl: url })}
                   onClear={() =>
@@ -448,28 +452,27 @@ function DashboardContent() {
               <>
                 <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
                   <div>
-                    <h3 className="text-sm font-medium text-white">Fondo del perfil</h3>
+                    <h3 className="text-sm font-medium text-white">{t("dashboard.backgroundTitle")}</h3>
                     <p className="text-xs text-white/40 mt-1 mb-3">
-                      Sube tu propia imagen, GIF animado o video de fondo. Se verá detrás de tu
-                      tarjeta en el perfil público.
+                      {t("dashboard.backgroundHint")}
                     </p>
                     <FileUpload
                       kind="background"
                       label=""
-                      hint="Máximo 50 MB · Recuerda pulsar Guardar después de subir"
+                      hint={t("dashboard.backgroundHintSave")}
                       currentUrl={profile.settings.backgroundUrl}
                       mediaType={profile.backgroundType}
                       onUploaded={(url, backgroundType) => updateBackground(url, backgroundType)}
                       onClear={clearBackground}
                     />
                   </div>
-                  <Field label="O pega una URL externa">
+                  <Field label={t("dashboard.externalUrl")}>
                     <input
                       type="url"
                       value={profile.settings.backgroundUrl}
                       onChange={(e) => updateBackground(e.target.value)}
                       className="input-field"
-                      placeholder="https://ejemplo.com/mi-fondo.mp4"
+                      placeholder={t("dashboard.externalUrlPlaceholder")}
                     />
                   </Field>
                 </div>
@@ -477,27 +480,26 @@ function DashboardContent() {
                 {resolveCardLayout(profile.settings) === "banner" && (
                   <div className="p-4 rounded-xl bg-white/[0.03] border border-purple-500/20 space-y-3">
                     <div>
-                      <h3 className="text-sm font-medium text-white">Banner de la tarjeta</h3>
+                      <h3 className="text-sm font-medium text-white">{t("dashboard.bannerTitle")}</h3>
                       <p className="text-xs text-white/40 mt-1 mb-3">
-                        Imagen horizontal para la cabecera del layout Banner. Independiente del
-                        fondo de pantalla.
+                        {t("dashboard.bannerHint")}
                       </p>
                       <FileUpload
                         kind="banner"
                         label=""
-                        hint="JPG, PNG, WEBP o GIF · máx. 10 MB"
+                        hint={t("dashboard.bannerFileHint")}
                         currentUrl={profile.settings.bannerUrl}
                         onUploaded={(url) => updateSettings({ bannerUrl: url })}
                         onClear={() => updateSettings({ bannerUrl: "" })}
                       />
                     </div>
-                    <Field label="O pega una URL del banner">
+                    <Field label={t("dashboard.bannerUrl")}>
                       <input
                         type="url"
                         value={profile.settings.bannerUrl ?? ""}
                         onChange={(e) => updateSettings({ bannerUrl: e.target.value })}
                         className="input-field"
-                        placeholder="https://ejemplo.com/mi-banner.jpg"
+                        placeholder={t("dashboard.bannerUrlPlaceholder")}
                       />
                     </Field>
                   </div>
@@ -505,8 +507,8 @@ function DashboardContent() {
 
                 <FileUpload
                   kind="audio"
-                  label="Audio de fondo"
-                  hint="MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, AIFF, MIDI · máx. 25MB · 30 s en el perfil"
+                  label={t("dashboard.audioLabel")}
+                  hint={t("dashboard.audioHint")}
                   currentUrl={profile.audioUrl}
                   onUploaded={(url) =>
                     update({ audioUrl: url, audioEnabled: true, audioStartTime: 0 })
@@ -523,7 +525,7 @@ function DashboardContent() {
                   />
                 )}
                 <Toggle
-                  label="Reproducir audio en el perfil"
+                  label={t("dashboard.playAudio")}
                   checked={profile.audioEnabled}
                   onChange={(v) => update({ audioEnabled: v })}
                 />
@@ -532,14 +534,18 @@ function DashboardContent() {
 
             {tab === "appearance" && (
               <>
-                <Field label="Efecto de fondo">
+                <Field label={t("dashboard.backgroundEffect")}>
                   <BackgroundEffectSelect
                     value={profile.settings.backgroundEffect}
                     onChange={(backgroundEffect) => updateSettings({ backgroundEffect })}
                   />
                 </Field>
 
-                <Field label={`Opacidad del fondo (${Math.round(profile.settings.profileOpacity * 100)}%)`}>
+                <Field
+                  label={tVars("dashboard.opacityLabel", {
+                    percent: Math.round(profile.settings.profileOpacity * 100),
+                  })}
+                >
                   <input
                     type="range"
                     min="0"
@@ -554,12 +560,14 @@ function DashboardContent() {
                   />
                   {profile.settings.transparentCard && (
                     <p className="text-[11px] text-white/30 mt-1.5">
-                      Desactivado en modo transparente.
+                      {t("dashboard.opacityDisabled")}
                     </p>
                   )}
                 </Field>
 
-                <Field label={`Blur (${profile.settings.profileBlur}px)`}>
+                <Field
+                  label={tVars("dashboard.blurLabel", { px: profile.settings.profileBlur })}
+                >
                   <input
                     type="range"
                     min="0"
@@ -574,7 +582,7 @@ function DashboardContent() {
                 </Field>
 
                 <p className="text-xs uppercase tracking-wider text-white/40 pt-2">
-                  Estructura y enlaces
+                  {t("dashboard.structureLinks")}
                 </p>
 
                 <CardLayoutPicker
@@ -600,28 +608,30 @@ function DashboardContent() {
                 />
 
                 <p className="text-xs uppercase tracking-wider text-white/40 pt-2">
-                  Tarjeta
+                  {t("dashboard.cardSection")}
                 </p>
 
                 <Toggle
-                  label="Tarjeta transparente (sin color de fondo)"
+                  label={t("dashboard.transparentCard")}
                   checked={profile.settings.transparentCard}
                   onChange={(v) => updateSettings({ transparentCard: v })}
                 />
                 <Toggle
-                  label="Mostrar borde"
+                  label={t("dashboard.showBorder")}
                   checked={profile.settings.showCardBorder}
                   onChange={(v) => updateSettings({ showCardBorder: v })}
                 />
                 <Toggle
-                  label="Mostrar sombra"
+                  label={t("dashboard.showShadow")}
                   checked={profile.settings.showCardShadow}
                   onChange={(v) => updateSettings({ showCardShadow: v })}
                 />
 
                 {profile.settings.showCardBorder && (
                   <Field
-                    label={`Opacidad del borde (${Math.round(profile.settings.borderOpacity * 100)}%)`}
+                    label={tVars("dashboard.borderOpacity", {
+                      percent: Math.round(profile.settings.borderOpacity * 100),
+                    })}
                   >
                     <input
                       type="range"
@@ -638,11 +648,11 @@ function DashboardContent() {
                 )}
 
                 <p className="text-xs uppercase tracking-wider text-white/40 pt-2">
-                  Colores de la tarjeta
+                  {t("dashboard.colorsSection")}
                 </p>
 
                 <ColorField
-                  label="Color principal"
+                  label={t("dashboard.primaryColor")}
                   value={profile.settings.cardColor}
                   onChange={(v) => updateSettings({ cardColor: v })}
                   disabled={profile.settings.transparentCard}
@@ -650,7 +660,7 @@ function DashboardContent() {
 
                 {profile.settings.gradientEnabled && (
                   <ColorField
-                    label="Color secundario (gradiente)"
+                    label={t("dashboard.secondaryColor")}
                     value={profile.settings.cardColorSecondary}
                     onChange={(v) => updateSettings({ cardColorSecondary: v })}
                     disabled={profile.settings.transparentCard}
@@ -658,18 +668,18 @@ function DashboardContent() {
                 )}
 
                 <ColorField
-                  label="Color del texto"
+                  label={t("dashboard.textColor")}
                   value={profile.settings.textColor}
                   onChange={(v) => updateSettings({ textColor: v })}
                 />
 
                 <ColorField
-                  label="Color de acento (brillo y borde)"
+                  label={t("dashboard.accentColor")}
                   value={profile.settings.accentColor}
                   onChange={(v) => updateSettings({ accentColor: v })}
                 />
 
-                <Field label="Efecto en el nombre">
+                <Field label={t("dashboard.nameEffect")}>
                   <select
                     value={profile.settings.nameEffect}
                     onChange={(e) =>
@@ -679,24 +689,24 @@ function DashboardContent() {
                   >
                     {NAME_EFFECT_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
-                        {opt.label}
+                        {nameEffectLabels[opt.value] ?? opt.value}
                       </option>
                     ))}
                   </select>
                 </Field>
                 <Toggle
-                  label="Brillo en iconos"
+                  label={t("dashboard.glowIcons")}
                   checked={profile.settings.glowIcons}
                   onChange={(v) => updateSettings({ glowIcons: v })}
                 />
                 <Toggle
-                  label="Gradiente en tarjeta"
+                  label={t("dashboard.gradientCard")}
                   checked={profile.settings.gradientEnabled}
                   onChange={(v) => updateSettings({ gradientEnabled: v })}
                   disabled={profile.settings.transparentCard}
                 />
                 <Toggle
-                  label="Iconos monocromáticos"
+                  label={t("dashboard.monochromeIcons")}
                   checked={profile.settings.monochromeIcons}
                   onChange={(v) => updateSettings({ monochromeIcons: v })}
                 />
@@ -718,7 +728,7 @@ function DashboardContent() {
           }`}
         >
           <p className="text-white/40 text-xs uppercase tracking-wider mb-4 text-center">
-            Vista previa
+            {t("dashboard.preview")}
           </p>
           <div className="relative w-full rounded-2xl overflow-hidden border border-white/10 aspect-[9/16] max-h-[min(700px,85vh)] isolate bg-[#0a0a0f]">
             <BackgroundMedia

@@ -9,7 +9,13 @@ import {
   useState,
 } from "react";
 import { useSession } from "next-auth/react";
-import { t as translate, readLocaleCookie, writeLocaleCookie } from "@/lib/i18n";
+import {
+  t as translate,
+  tVars as translateVars,
+  readLocaleCookie,
+  writeLocaleCookie,
+  detectBrowserLocale,
+} from "@/lib/i18n";
 import type { AppLocale } from "@/lib/i18n/types";
 import { parseLocale } from "@/lib/i18n/types";
 
@@ -17,6 +23,7 @@ interface LocaleContextValue {
   locale: AppLocale;
   setLocale: (locale: AppLocale, persist?: boolean) => Promise<void>;
   t: (path: string) => string;
+  tVars: (path: string, vars: Record<string, string | number>) => string;
 }
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
@@ -26,12 +33,17 @@ export function LocaleProvider({
   initialLocale,
 }: {
   children: React.ReactNode;
-  initialLocale?: AppLocale;
+  initialLocale: AppLocale;
 }) {
   const { status } = useSession();
-  const [locale, setLocaleState] = useState<AppLocale>(
-    initialLocale ?? readLocaleCookie() ?? "es"
-  );
+  const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
+
+  // Sin cookie explícita: alinear con navigator si difiere del Accept-Language del SSR
+  useEffect(() => {
+    if (readLocaleCookie()) return;
+    const browser = detectBrowserLocale();
+    setLocaleState((current) => (current === browser ? current : browser));
+  }, []);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -73,6 +85,8 @@ export function LocaleProvider({
       locale,
       setLocale,
       t: (path: string) => translate(locale, path),
+      tVars: (path: string, vars: Record<string, string | number>) =>
+        translateVars(locale, path, vars),
     }),
     [locale, setLocale]
   );
@@ -83,10 +97,13 @@ export function LocaleProvider({
 export function useI18n() {
   const ctx = useContext(LocaleContext);
   if (!ctx) {
+    const fallback = detectBrowserLocale();
     return {
-      locale: "es" as AppLocale,
+      locale: fallback,
       setLocale: async () => {},
-      t: (path: string) => translate("es", path),
+      t: (path: string) => translate(fallback, path),
+      tVars: (path: string, vars: Record<string, string | number>) =>
+        translateVars(fallback, path, vars),
     };
   }
   return ctx;
@@ -94,10 +111,12 @@ export function useI18n() {
 
 /** Usa el locale del perfil público cuando está disponible. */
 export function useProfileLocale(profileLocale?: AppLocale) {
-  const { locale: uiLocale, t } = useI18n();
+  const { locale: uiLocale } = useI18n();
   const locale = profileLocale ?? uiLocale;
   return {
     locale,
     t: (path: string) => translate(locale, path),
+    tVars: (path: string, vars: Record<string, string | number>) =>
+      translateVars(locale, path, vars),
   };
 }

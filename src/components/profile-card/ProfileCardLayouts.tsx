@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Profile } from "@/types/profile";
 import { hexToRgba } from "@/lib/color-utils";
 import { getMediaSrc } from "@/lib/media-url";
-import { getCardSurfaceStyle, getCardFrameStyle, getCardBodySurfaceStyle } from "@/lib/card-styles";
+import { getCardSurfaceStyle, getCardFrameStyle } from "@/lib/card-styles";
 import { resolveLinkStyle } from "@/lib/card-layout-config";
 import ProfileLinksDisplay from "./ProfileLinksDisplay";
 import {
@@ -126,7 +126,7 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
   const { settings } = profile;
   const frameStyle = getCardFrameStyle(settings);
-  const bodyStyle = getCardBodySurfaceStyle(settings);
+  const glassStyle = getCardSurfaceStyle(settings);
   const bannerH = compact ? "h-[76px]" : "h-[112px]";
   const bannerSrc = settings.bannerUrl?.trim()
     ? getMediaSrc(settings.bannerUrl)
@@ -136,12 +136,20 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
 
   return (
     <div
-      className="relative rounded-2xl border overflow-hidden w-full"
+      className="relative rounded-2xl border overflow-hidden w-full isolate"
       style={frameStyle}
     >
-      <CardToolbarSlot />
+      {/* Capa única de vidrio/blur en toda la tarjeta — evita el corte entre banner y cuerpo */}
       <div
-        className={`${bannerH} w-full relative bg-cover bg-center shrink-0`}
+        className="absolute inset-0 pointer-events-none"
+        style={glassStyle}
+        aria-hidden
+      />
+
+      <CardToolbarSlot />
+
+      <div
+        className={`relative z-10 ${bannerH} w-full bg-cover bg-center shrink-0`}
         style={
           bannerSrc
             ? { backgroundImage: `url(${bannerSrc})` }
@@ -150,14 +158,20 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
               }
         }
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/45" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/50" />
+        <div
+          className="absolute bottom-0 inset-x-0 h-6 pointer-events-none"
+          style={{
+            background: settings.transparentCard
+              ? "linear-gradient(to bottom, transparent, rgba(0,0,0,0.12))"
+              : `linear-gradient(to bottom, transparent, ${hexToRgba(settings.cardColor, settings.profileOpacity * 0.85)})`,
+          }}
+          aria-hidden
+        />
       </div>
 
-      <div
-        className={`relative border-t border-white/10 ${compact ? "px-3.5 pb-3.5" : "px-5 pb-5"}`}
-        style={bodyStyle}
-      >
-        <div className={`relative z-10 flex justify-center ${overlap} mb-1`}>
+      <div className={`relative z-10 ${compact ? "px-3.5 pb-3.5" : "px-5 pb-5"}`}>
+        <div className={`relative flex justify-center ${overlap} mb-1`}>
           <ProfileAvatar
             profile={profile}
             scale={scale}

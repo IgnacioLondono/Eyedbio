@@ -10,8 +10,10 @@ import AuthLayout, {
   AuthSubmitButton,
 } from "@/components/AuthLayout";
 import PasswordInput from "@/components/PasswordInput";
+import { useI18n } from "@/components/LocaleProvider";
 
 function ResetPasswordForm() {
+  const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -41,13 +43,13 @@ function ResetPasswordForm() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "No se pudo restablecer la contraseña");
+        setError(data.error ?? t("auth.resetFailed"));
         return;
       }
 
       router.push("/login?reset=success");
     } catch {
-      setError("Error de conexión. Inténtalo de nuevo.");
+      setError(t("auth.connectionError"));
     } finally {
       setLoading(false);
     }
@@ -55,16 +57,20 @@ function ResetPasswordForm() {
 
   return (
     <AuthLayout
-      title="Nueva contraseña"
-      subtitle="Introduce el código de 6 dígitos que recibiste y tu nueva contraseña."
+      title={t("auth.resetTitle")}
+      subtitle={t("auth.resetSubtitleWithCode")}
       footer={
-        <AuthFooterLink text="¿No tienes código?" linkText="Solicitar uno" href="/forgot-password" />
+        <AuthFooterLink
+          text={t("auth.noCode")}
+          linkText={t("auth.requestCode")}
+          href="/forgot-password"
+        />
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label htmlFor="email" className="auth-label">
-            Email
+            {t("common.email")}
           </label>
           <input
             id="email"
@@ -80,7 +86,7 @@ function ResetPasswordForm() {
 
         <div>
           <label htmlFor="code" className="auth-label">
-            Código de verificación
+            {t("auth.verificationCode")}
           </label>
           <input
             id="code"
@@ -91,20 +97,20 @@ function ResetPasswordForm() {
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
             className="auth-input text-center text-2xl font-mono tracking-[0.4em]"
-            placeholder="000000"
+            placeholder={t("auth.codePlaceholder")}
             required
           />
         </div>
 
         <div>
           <label htmlFor="password" className="auth-label">
-            Nueva contraseña
+            {t("auth.newPassword")}
           </label>
           <PasswordInput
             id="password"
             value={password}
             onChange={setPassword}
-            placeholder="Mínimo 8 caracteres"
+            placeholder={t("account.passwordMin")}
             autoComplete="new-password"
             required
             minLength={8}
@@ -113,13 +119,13 @@ function ResetPasswordForm() {
 
         <div>
           <label htmlFor="confirmPassword" className="auth-label">
-            Confirmar contraseña
+            {t("auth.confirmNewPassword")}
           </label>
           <PasswordInput
             id="confirmPassword"
             value={confirmPassword}
             onChange={setConfirmPassword}
-            placeholder="Repite la contraseña"
+            placeholder={t("auth.passwordRepeat")}
             autoComplete="new-password"
             required
             minLength={8}
@@ -128,10 +134,10 @@ function ResetPasswordForm() {
 
         <AuthError message={error} />
 
-        <AuthSubmitButton loading={loading} loadingText="Guardando...">
+        <AuthSubmitButton loading={loading} loadingText={t("auth.resetSaving")}>
           <>
             <KeyRound className="w-4 h-4" />
-            Restablecer contraseña
+            {t("auth.resetPassword")}
           </>
         </AuthSubmitButton>
 
@@ -139,7 +145,7 @@ function ResetPasswordForm() {
           href="/forgot-password"
           className="block text-center text-sm text-purple-400 hover:text-purple-300 transition-colors"
         >
-          Solicitar nuevo código
+          {t("auth.requestAnotherCode")}
         </Link>
       </form>
     </AuthLayout>

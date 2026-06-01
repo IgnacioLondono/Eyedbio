@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Providers from "@/components/Providers";
+import { resolveServerLocale } from "@/lib/i18n/server-locale";
 import "./globals.css";
 
 const inter = Inter({
@@ -14,15 +15,17 @@ export const metadata: Metadata = {
     "Crea páginas link-in-bio personalizables con Eyed.bio. Efectos visuales, analytics y diseño moderno. Gratis y sin anuncios.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialLocale = await resolveServerLocale();
+
   return (
-    <html lang="es" className={`${inter.variable} h-full antialiased`}>
+    <html lang={initialLocale} className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
-        <Providers>{children}</Providers>
+        <Providers initialLocale={initialLocale}>{children}</Providers>
       </body>
     </html>
   );

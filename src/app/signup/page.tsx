@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -10,15 +10,15 @@ import AuthLayout, {
   AuthSubmitButton,
 } from "@/components/AuthLayout";
 import PasswordInput from "@/components/PasswordInput";
+import { useI18n } from "@/components/LocaleProvider";
 import { getMessages } from "@/lib/i18n";
-import { writeLocaleCookie } from "@/lib/i18n";
-import type { AppLocale } from "@/lib/i18n/types";
 import { APP_LOCALES, LOCALE_LABELS } from "@/lib/i18n/types";
+import type { AppLocale } from "@/lib/i18n/types";
 
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [locale, setLocale] = useState<AppLocale>("es");
+  const { locale, setLocale } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,11 +29,6 @@ function SignupForm() {
 
   const m = getMessages(locale).signup;
   const footer = getMessages(locale).signup;
-
-  useEffect(() => {
-    writeLocaleCookie(locale);
-    document.documentElement.lang = locale;
-  }, [locale]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,11 +63,7 @@ function SignupForm() {
       });
 
       if (result?.error) {
-        setError(
-          locale === "en"
-            ? "Account created, but sign-in failed. Try /login"
-            : "Cuenta creada, pero falló el inicio de sesión. Prueba en /login"
-        );
+        setError(m.signInFailed);
         setLoading(false);
         return;
       }
@@ -101,7 +92,7 @@ function SignupForm() {
           <select
             id="locale"
             value={locale}
-            onChange={(e) => setLocale(e.target.value as AppLocale)}
+            onChange={(e) => void setLocale(e.target.value as AppLocale)}
             className="auth-input"
           >
             {APP_LOCALES.map((code) => (
@@ -151,7 +142,7 @@ function SignupForm() {
             id="confirmPassword"
             value={confirmPassword}
             onChange={setConfirmPassword}
-            placeholder={locale === "en" ? "Repeat your password" : "Repite tu contraseña"}
+            placeholder={m.passwordRepeat}
             autoComplete="new-password"
             required
             minLength={8}

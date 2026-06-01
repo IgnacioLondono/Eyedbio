@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Lock, Loader2 } from "lucide-react";
 import { LockedPublicProfile } from "@/types/public-profile";
 import { storeProfileUnlockToken } from "@/lib/profile-unlock-client";
+import { useI18n } from "@/components/LocaleProvider";
 
 interface Props {
   profile: LockedPublicProfile;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function ProfileAccessGate({ profile, onUnlocked }: Props) {
+  const { t } = useI18n();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -30,7 +32,7 @@ export default function ProfileAccessGate({ profile, onUnlocked }: Props) {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Código incorrecto");
+        setError(data.error ?? t("accessGate.wrongCode"));
         return;
       }
 
@@ -40,7 +42,7 @@ export default function ProfileAccessGate({ profile, onUnlocked }: Props) {
 
       onUnlocked();
     } catch {
-      setError("Error de conexión. Inténtalo de nuevo.");
+      setError(t("accessGate.connectionError"));
     } finally {
       setLoading(false);
     }
@@ -59,11 +61,9 @@ export default function ProfileAccessGate({ profile, onUnlocked }: Props) {
 
         <div className="mt-6 flex items-center justify-center gap-2 text-purple-300/90">
           <Lock className="w-4 h-4" />
-          <span className="text-sm font-medium">Perfil protegido</span>
+          <span className="text-sm font-medium">{t("accessGate.protected")}</span>
         </div>
-        <p className="mt-2 text-xs text-white/40 leading-relaxed">
-          Introduce el código de acceso para ver este perfil.
-        </p>
+        <p className="mt-2 text-xs text-white/40 leading-relaxed">{t("accessGate.hint")}</p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-3 text-left">
           <input
@@ -72,12 +72,12 @@ export default function ProfileAccessGate({ profile, onUnlocked }: Props) {
             autoComplete="off"
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\s/g, ""))}
-            placeholder="Código de acceso"
+            placeholder={t("accessGate.codePlaceholder")}
             className="input-field w-full text-center font-mono tracking-widest"
             required
             minLength={4}
             maxLength={32}
-            aria-label="Código de acceso"
+            aria-label={t("accessGate.codeLabel")}
           />
 
           {error && (
@@ -94,10 +94,10 @@ export default function ProfileAccessGate({ profile, onUnlocked }: Props) {
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Verificando...
+                {t("accessGate.verifying")}
               </>
             ) : (
-              "Entrar al perfil"
+              t("accessGate.submit")
             )}
           </button>
         </form>

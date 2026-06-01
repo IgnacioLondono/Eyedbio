@@ -10,6 +10,8 @@ import {
   TwitterIcon,
   WhatsAppIcon,
 } from "@/components/PlatformIcons";
+import { useI18n } from "@/components/LocaleProvider";
+import { getMessages } from "@/lib/i18n";
 
 interface Props {
   username: string;
@@ -19,51 +21,53 @@ interface Props {
 
 type ShareChannel = "whatsapp" | "twitter" | "telegram" | "facebook" | "story";
 
-const CHANNELS: {
-  id: ShareChannel;
-  label: string;
-  hint?: string;
-  Icon: ComponentType | LucideIcon;
-  color: string;
-}[] = [
-  {
-    id: "story",
-    label: "Historias",
-    hint: "IG, TikTok, WhatsApp",
-    Icon: Smartphone,
-    color: "#a855f7",
-  },
-  {
-    id: "whatsapp",
-    label: "WhatsApp",
-    Icon: WhatsAppIcon,
-    color: "#25D366",
-  },
-  {
-    id: "twitter",
-    label: "X",
-    Icon: TwitterIcon,
-    color: "#ffffff",
-  },
-  {
-    id: "telegram",
-    label: "Telegram",
-    Icon: TelegramIcon,
-    color: "#26A5E4",
-  },
-  {
-    id: "facebook",
-    label: "Facebook",
-    Icon: FacebookIcon,
-    color: "#1877F2",
-  },
-];
-
 export default function ShareProfileButton({
   username,
   displayName,
   variant = "floating",
 }: Props) {
+  const { t, locale } = useI18n();
+  const shareMsg = getMessages(locale).share;
+
+  const CHANNELS: {
+    id: ShareChannel;
+    label: string;
+    hint?: string;
+    Icon: ComponentType | LucideIcon;
+    color: string;
+  }[] = [
+    {
+      id: "story",
+      label: shareMsg.stories,
+      hint: shareMsg.storiesHint,
+      Icon: Smartphone,
+      color: "#a855f7",
+    },
+    {
+      id: "whatsapp",
+      label: "WhatsApp",
+      Icon: WhatsAppIcon,
+      color: "#25D366",
+    },
+    {
+      id: "twitter",
+      label: "X",
+      Icon: TwitterIcon,
+      color: "#ffffff",
+    },
+    {
+      id: "telegram",
+      label: "Telegram",
+      Icon: TelegramIcon,
+      color: "#26A5E4",
+    },
+    {
+      id: "facebook",
+      label: "Facebook",
+      Icon: FacebookIcon,
+      color: "#1877F2",
+    },
+  ];
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [storyHint, setStoryHint] = useState(false);
@@ -80,7 +84,7 @@ export default function ShareProfileButton({
       : `/${username}/story-image`;
 
   const shareTitle = displayName ? `${displayName} (@${username})` : `@${username}`;
-  const shareText = `Mira mi perfil en Eyed.bio`;
+  const shareText = t("share.shareText");
 
   const copyLink = useCallback(async () => {
     try {
@@ -217,10 +221,10 @@ export default function ShareProfileButton({
             type="button"
             onClick={() => setOpen(true)}
             className={triggerClass}
-            aria-label="Compartir perfil"
+            aria-label={t("share.shareProfile")}
           >
             <Share2 className="w-4 h-4" />
-            Compartir perfil
+            {t("share.shareProfile")}
           </button>
           <button
             type="button"
@@ -232,7 +236,7 @@ export default function ShareProfileButton({
             ) : (
               <Link2 className="w-4 h-4" />
             )}
-            {copied ? "Enlace copiado" : "Copiar enlace"}
+            {copied ? t("share.linkCopied") : t("share.copyLink")}
           </button>
         </div>
       ) : (
@@ -240,10 +244,10 @@ export default function ShareProfileButton({
           type="button"
           onClick={() => setOpen(true)}
           className={triggerClass}
-          aria-label="Compartir perfil"
+          aria-label={t("share.shareProfile")}
         >
           <Share2 className="w-4 h-4" />
-          {variant === "floating" ? "Compartir" : null}
+          {variant === "floating" ? t("share.share") : null}
         </button>
       )}
 
@@ -252,19 +256,19 @@ export default function ShareProfileButton({
           className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4"
           role="dialog"
           aria-modal="true"
-          aria-label="Compartir perfil"
+          aria-label={t("share.shareProfile")}
         >
           <button
             type="button"
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setOpen(false)}
-            aria-label="Cerrar"
+            aria-label={t("share.close")}
           />
 
           <div className="relative w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl bg-[#12121a] border border-white/10 shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
               <div>
-                <h3 className="text-base font-semibold text-white">Compartir perfil</h3>
+                <h3 className="text-base font-semibold text-white">{t("share.title")}</h3>
                 <p className="text-xs text-white/40 mt-0.5 truncate max-w-[260px]">
                   eyed.bio/{username}
                 </p>
@@ -273,7 +277,7 @@ export default function ShareProfileButton({
                 type="button"
                 onClick={() => setOpen(false)}
                 className="p-2 rounded-lg hover:bg-white/5 text-white/50 hover:text-white transition-colors"
-                aria-label="Cerrar"
+                aria-label={t("share.close")}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -321,7 +325,7 @@ export default function ShareProfileButton({
                     )}
                   </span>
                   <span className="text-xs font-medium text-white/90">
-                    {copied ? "Copiado" : "Enlace"}
+                    {copied ? t("share.copied") : t("share.link")}
                   </span>
                 </button>
               </div>
@@ -329,20 +333,16 @@ export default function ShareProfileButton({
               {storyHint && (
                 <div className="flex items-start gap-3 p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
                   <Download className="w-4 h-4 text-purple-300 shrink-0 mt-0.5" />
-                  <p className="text-xs text-purple-100/90 leading-relaxed">
-                    Imagen guardada. Ábrela en Instagram, TikTok o WhatsApp y
-                    publícala en tu historia. También puedes pegar el enlace con
-                    sticker de enlace en Instagram.
-                  </p>
+                  <p className="text-xs text-purple-100/90 leading-relaxed">{t("share.storyHint")}</p>
                 </div>
               )}
 
               <div className="rounded-xl bg-white/[0.03] border border-white/5 p-4 space-y-3">
                 <p className="text-xs text-white/50 leading-relaxed">
-                  <span className="text-white/70 font-medium">Historias:</span> descarga
-                  la imagen vertical con QR.{" "}
-                  <span className="text-white/70 font-medium">Chats:</span> al enviar el
-                  enlace se muestra tu foto y bio como vista previa.
+                  <span className="text-white/70 font-medium">{t("share.storyHelp")}</span>{" "}
+                  {t("share.storyHelpBody")}{" "}
+                  <span className="text-white/70 font-medium">{t("share.chatsHelp")}</span>{" "}
+                  {t("share.chatsHelpBody")}
                 </p>
                 <div className="flex items-center gap-3 text-white/30">
                   <InstagramIcon />
@@ -358,7 +358,7 @@ export default function ShareProfileButton({
                   className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-medium transition-colors"
                 >
                   <Share2 className="w-4 h-4" />
-                  Más opciones del dispositivo
+                  {t("share.moreOptions")}
                 </button>
               )}
             </div>

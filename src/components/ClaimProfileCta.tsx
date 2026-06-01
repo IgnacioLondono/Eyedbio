@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Sparkles } from "lucide-react";
+import { useI18n } from "@/components/LocaleProvider";
 
 export default function ClaimProfileCta() {
   const { status } = useSession();
+  const { t } = useI18n();
 
   if (status !== "unauthenticated") return null;
 
@@ -15,22 +17,20 @@ export default function ClaimProfileCta() {
         <span className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/20 text-purple-300">
           <Sparkles className="h-4 w-4" />
         </span>
-        <p className="mt-3 text-sm font-semibold text-white">Reclama tu perfil</p>
-        <p className="mt-1 text-xs leading-relaxed text-white/50">
-          Crea tu página link-in-bio gratis en Eyed.bio
-        </p>
+        <p className="mt-3 text-sm font-semibold text-white">{t("claimCta.title")}</p>
+        <p className="mt-1 text-xs leading-relaxed text-white/50">{t("claimCta.subtitle")}</p>
         <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
           <Link
             href="/signup"
             className="inline-flex items-center justify-center rounded-lg bg-purple-600 px-3.5 py-2 text-xs font-medium text-white transition-colors hover:bg-purple-500"
           >
-            Crear cuenta
+            {t("claimCta.signup")}
           </Link>
           <Link
             href="/login?callbackUrl=/dashboard"
             className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-medium text-white/90 transition-colors hover:bg-white/10"
           >
-            Iniciar sesión
+            {t("claimCta.login")}
           </Link>
         </div>
       </div>

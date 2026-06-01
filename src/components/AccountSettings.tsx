@@ -6,6 +6,7 @@ import { Shield, Mail, AtSign, KeyRound, CalendarDays, ArrowRight, Lock } from "
 import { USERNAME_CHANGE_COOLDOWN_DAYS } from "@/lib/validation";
 import PasswordInput from "@/components/PasswordInput";
 import { useI18n } from "@/components/LocaleProvider";
+import { formatLocaleDate } from "@/lib/i18n";
 import { APP_LOCALES, LOCALE_LABELS } from "@/lib/i18n/types";
 import type { AppLocale } from "@/lib/i18n/types";
 
@@ -26,7 +27,7 @@ interface Props {
 }
 
 export default function AccountSettings({ profileUsername, onUsernameUpdated }: Props) {
-  const { locale, setLocale, t } = useI18n();
+  const { locale, setLocale, t, tVars } = useI18n();
   const [account, setAccount] = useState<AccountData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,7 +56,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
         setAccessCodeEnabled(data.accessCodeEnabled);
         if (data.locale) void setLocale(data.locale, false);
       })
-      .catch(() => setError("No se pudo cargar la configuración de la cuenta"))
+      .catch(() => setError(t("account.loadError")))
       .finally(() => setLoading(false));
   }, []);
 
@@ -95,7 +96,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Error al guardar");
+        setError(data.error ?? t("account.saveError"));
         return;
       }
 
@@ -107,7 +108,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
       setConfirmPassword("");
       setAccessCode("");
       setAccessCodeEnabled(data.accessCodeEnabled);
-      setSuccess(data.message ?? "Cuenta actualizada");
+      setSuccess(data.message ?? t("account.updated"));
       setShowUsernameConfirm(false);
 
       if (data.username !== profileUsername) {
@@ -123,7 +124,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
         });
       }
     } catch {
-      setError("Error de conexión");
+      setError(t("auth.connectionError"));
     } finally {
       setSaving(false);
     }
@@ -151,7 +152,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
   }
 
   const memberSince = account?.createdAt
-    ? new Date(account.createdAt).toLocaleDateString("es-ES", {
+    ? formatLocaleDate(locale, account.createdAt, {
         year: "numeric",
         month: "long",
         day: "numeric",
@@ -164,7 +165,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
     username === account.username;
 
   const nextUsernameChangeLabel = account?.nextUsernameChangeAt
-    ? new Date(account.nextUsernameChangeAt).toLocaleDateString("es-ES", {
+    ? formatLocaleDate(locale, account.nextUsernameChangeAt, {
         day: "numeric",
         month: "long",
         year: "numeric",
@@ -209,9 +210,9 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
               <Shield className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-white">Datos de la cuenta</h3>
+              <h3 className="text-sm font-semibold text-white">{t("account.accountDataTitle")}</h3>
               <p className="text-xs text-white/40 mt-0.5">
-                Cambia tu email, usuario público o contraseña. Necesitas tu contraseña actual.
+                {t("account.accountDataHint")}
               </p>
             </div>
           </div>
@@ -225,7 +226,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-white/60 mb-2">Email</label>
+              <label className="block text-sm text-white/60 mb-2">{t("common.email")}</label>
               <div className="relative">
                 <input
                   type="email"
@@ -242,7 +243,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
             </div>
 
             <div>
-              <label className="block text-sm text-white/60 mb-2">Nombre de usuario</label>
+              <label className="block text-sm text-white/60 mb-2">{t("account.username")}</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/35 text-xs font-mono pointer-events-none z-[1]">
                   eyed.bio/
@@ -264,12 +265,11 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 />
               </div>
               <p className="text-[11px] text-white/30 mt-1.5">
-                Solo letras y números (a–z, 0–9). Mínimo 3 caracteres. Puedes cambiarlo cada{" "}
-                {USERNAME_CHANGE_COOLDOWN_DAYS} días.
+                {tVars("account.usernameHint", { days: USERNAME_CHANGE_COOLDOWN_DAYS })}
               </p>
               {usernameLocked && nextUsernameChangeLabel && (
                 <p className="text-[11px] text-amber-300/90 mt-1.5">
-                  Podrás cambiar tu usuario de nuevo el {nextUsernameChangeLabel}.
+                  {tVars("account.usernameLocked", { date: nextUsernameChangeLabel })}
                 </p>
               )}
             </div>
@@ -282,15 +282,15 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
             <Lock className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Código de acceso al perfil</h3>
+            <h3 className="text-sm font-semibold text-white">{t("account.accessCodeTitle")}</h3>
             <p className="text-xs text-white/40 mt-0.5">
-              Quien visite tu perfil público deberá introducir este código para verlo.
+              {t("account.accessCodeHint")}
             </p>
           </div>
         </div>
 
         <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
-          <span className="text-sm text-white/70">Activar código de acceso</span>
+          <span className="text-sm text-white/70">{t("account.accessCodeEnable")}</span>
           <button
             type="button"
             role="switch"
@@ -311,13 +311,17 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
         {accessCodeEnabled && (
           <div>
             <label className="block text-sm text-white/60 mb-2">
-              {account?.hasAccessCode ? "Nuevo código (opcional)" : "Código de acceso"}
+              {account?.hasAccessCode ? t("account.accessCodeNew") : t("account.accessCodeSet")}
             </label>
             <input
               type="password"
               value={accessCode}
               onChange={(e) => setAccessCode(e.target.value.replace(/\s/g, ""))}
-              placeholder={account?.hasAccessCode ? "Deja vacío para mantener el actual" : "Mínimo 4 caracteres"}
+              placeholder={
+                account?.hasAccessCode
+                  ? t("account.accessCodeKeep")
+                  : t("account.accessCodePlaceholder")
+              }
               className="input-field w-full font-mono tracking-wider"
               autoComplete="new-password"
               minLength={account?.hasAccessCode ? undefined : 4}
@@ -325,7 +329,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
               required={accessCodeEnabled && !account?.hasAccessCode}
             />
             <p className="text-[11px] text-white/30 mt-1.5">
-              Solo letras y números (4–32 caracteres). Compártelo solo con quien quieras que vea tu perfil.
+              {t("account.accessCodeRules")}
             </p>
           </div>
         )}
@@ -337,15 +341,15 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
             <KeyRound className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-white">Seguridad</h3>
+            <h3 className="text-sm font-semibold text-white">{t("account.securityTitle")}</h3>
               <p className="text-xs text-white/40 mt-0.5">
-                Confirma con tu contraseña actual. Deja en blanco si no quieres cambiarla.
+                {t("account.securityHint")}
               </p>
             </div>
           </div>
 
           <div>
-            <label className="block text-sm text-white/60 mb-2">Contraseña actual</label>
+            <label className="block text-sm text-white/60 mb-2">{t("account.currentPassword")}</label>
             <PasswordInput
               value={currentPassword}
               onChange={setCurrentPassword}
@@ -356,11 +360,11 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
           </div>
 
           <div>
-            <label className="block text-sm text-white/60 mb-2">Nueva contraseña (opcional)</label>
+            <label className="block text-sm text-white/60 mb-2">{t("account.newPasswordOptional")}</label>
             <PasswordInput
               value={newPassword}
               onChange={setNewPassword}
-              placeholder="Mínimo 8 caracteres"
+              placeholder={t("account.passwordMin")}
               autoComplete="new-password"
               minLength={8}
               variant="dashboard"
@@ -369,7 +373,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
 
           {newPassword && (
             <div>
-              <label className="block text-sm text-white/60 mb-2">Confirmar nueva contraseña</label>
+              <label className="block text-sm text-white/60 mb-2">{t("account.confirmNewPassword")}</label>
               <PasswordInput
                 value={confirmPassword}
                 onChange={setConfirmPassword}
@@ -397,7 +401,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
           disabled={saving}
           className="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-sm font-semibold transition-colors"
         >
-          {saving ? "Guardando cuenta..." : "Guardar cambios de cuenta"}
+          {saving ? t("account.savingAccount") : t("account.saveAccount")}
         </button>
       </form>
 
@@ -412,32 +416,32 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
             type="button"
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => !saving && setShowUsernameConfirm(false)}
-            aria-label="Cerrar"
+            aria-label={t("common.close")}
           />
           <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#12121a] p-6 shadow-2xl">
             <h2 id="username-confirm-title" className="text-lg font-semibold text-white">
-              ¿Cambiar nombre de usuario?
+              {t("account.usernameConfirmTitle")}
             </h2>
             <p className="mt-2 text-sm text-white/50 leading-relaxed">
-              Tu enlace público cambiará. Quien use el anterior ya no llegará a tu perfil.
+              {t("account.usernameConfirmBody")}
             </p>
 
             <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] uppercase tracking-wider text-white/35">Actual</p>
+                <p className="text-[10px] uppercase tracking-wider text-white/35">{t("account.usernameCurrent")}</p>
                 <p className="text-sm font-mono text-white/60 truncate">
                   eyed.bio/{previousUsername}
                 </p>
               </div>
               <ArrowRight className="w-4 h-4 text-white/30 shrink-0" aria-hidden />
               <div className="min-w-0 flex-1 text-right">
-                <p className="text-[10px] uppercase tracking-wider text-purple-300/80">Nuevo</p>
+                <p className="text-[10px] uppercase tracking-wider text-purple-300/80">{t("account.usernameNew")}</p>
                 <p className="text-sm font-mono text-purple-200 truncate">eyed.bio/{username}</p>
               </div>
             </div>
 
             <p className="mt-3 text-xs text-amber-300/90 leading-relaxed">
-              Solo podrás volver a cambiarlo dentro de {USERNAME_CHANGE_COOLDOWN_DAYS} días.
+              {tVars("account.usernameCooldown", { days: USERNAME_CHANGE_COOLDOWN_DAYS })}
             </p>
 
             {error && (
@@ -453,7 +457,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 onClick={() => setShowUsernameConfirm(false)}
                 className="px-4 py-2.5 text-sm text-white/70 hover:text-white rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50"
               >
-                Cancelar
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
@@ -461,7 +465,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 onClick={() => void submitChanges()}
                 className="px-4 py-2.5 text-sm font-medium bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-lg transition-colors"
               >
-                {saving ? "Guardando..." : "Sí, cambiar usuario"}
+                {saving ? t("account.savingAccount") : t("account.usernameConfirmYes")}
               </button>
             </div>
           </div>

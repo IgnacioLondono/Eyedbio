@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { House } from "lucide-react";
+import { useI18n } from "@/components/LocaleProvider";
 
 interface Props {
   profileUsername: string;
@@ -10,12 +11,13 @@ interface Props {
 
 export default function ProfileQuickNavButton({ profileUsername }: Props) {
   const { data: session } = useSession();
+  const { t } = useI18n();
 
   const isOwner =
     (session?.user?.username ?? "").toLowerCase() === profileUsername.toLowerCase();
 
   const href = isOwner ? "/dashboard" : "/";
-  const label = isOwner ? "Volver al dashboard" : "Ir al inicio";
+  const label = isOwner ? t("quickNav.dashboard") : t("quickNav.home");
 
   return (
     <Link

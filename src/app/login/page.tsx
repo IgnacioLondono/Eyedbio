@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import { getSession, signIn } from "next-auth/react";
 import { isAdminRole } from "@/lib/roles";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import AuthLayout, {
@@ -13,9 +13,10 @@ import AuthLayout, {
   AuthSuccess,
 } from "@/components/AuthLayout";
 import PasswordInput from "@/components/PasswordInput";
+import { useI18n } from "@/components/LocaleProvider";
 
 function LoginForm() {
-  const router = useRouter();
+  const { t, tVars } = useI18n();
   const searchParams = useSearchParams();
   const [step, setStep] = useState<"credentials" | "code">("credentials");
   const [email, setEmail] = useState("");
@@ -44,18 +45,15 @@ function LoginForm() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Email o contraseña incorrectos");
+        setError(data.error ?? t("auth.wrongCredentials"));
         return;
       }
 
-      setInfo(
-        data.message ??
-          "Código enviado. Revisa tu bandeja de entrada y la carpeta de spam."
-      );
+      setInfo(data.message ?? t("auth.codeSentSuccess"));
       setStep("code");
       setCode("");
     } catch {
-      setError("Error de conexión. Inténtalo de nuevo.");
+      setError(t("auth.connectionError"));
     } finally {
       setLoading(false);
     }
@@ -76,7 +74,7 @@ function LoginForm() {
     setLoading(false);
 
     if (result?.error) {
-      setError("Código incorrecto o expirado. Solicita uno nuevo.");
+      setError(t("auth.wrongCode"));
       return;
     }
 
@@ -96,16 +94,16 @@ function LoginForm() {
   if (step === "code") {
     return (
       <AuthLayout
-        title="Código de acceso"
-        subtitle={`Introduce el código de 6 dígitos enviado a ${email}. Revisa también spam.`}
+        title={t("auth.codeTitle")}
+        subtitle={tVars("auth.codeSubtitle", { email })}
         footer={
-          <AuthFooterLink text="¿No tienes cuenta?" linkText="Regístrate gratis" href="/signup" />
+          <AuthFooterLink text={t("auth.noAccount")} linkText={t("auth.signupLink")} href="/signup" />
         }
       >
         <form onSubmit={verifyCode} className="space-y-5">
           <div>
             <label htmlFor="code" className="auth-label">
-              Código de acceso
+              {t("auth.codeLabel")}
             </label>
             <input
               id="code"
@@ -116,7 +114,7 @@ function LoginForm() {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               className="auth-input text-center text-2xl font-mono tracking-[0.4em]"
-              placeholder="000000"
+              placeholder={t("auth.codePlaceholder")}
               required
             />
           </div>
@@ -124,10 +122,10 @@ function LoginForm() {
           <AuthError message={error} />
           <AuthSuccess message={info} />
 
-          <AuthSubmitButton loading={loading} loadingText="Verificando...">
+          <AuthSubmitButton loading={loading} loadingText={t("auth.verifying")}>
             <>
               <ShieldCheck className="w-4 h-4" />
-              Entrar
+              {t("auth.verify")}
             </>
           </AuthSubmitButton>
 
@@ -145,19 +143,19 @@ function LoginForm() {
                 });
                 const data = await res.json();
                 if (!res.ok) {
-                  setError(data.error ?? "No se pudo reenviar el código");
+                  setError(data.error ?? t("auth.resendFailed"));
                   return;
                 }
-                setInfo("Nuevo código enviado. Revisa también spam.");
+                setInfo(t("auth.resendSuccess"));
               } catch {
-                setError("Error de conexión");
+                setError(t("auth.connectionError"));
               } finally {
                 setLoading(false);
               }
             }}
             className="w-full text-sm text-purple-400 hover:text-purple-300 transition-colors disabled:opacity-50"
           >
-            Reenviar código
+            {t("auth.resendCode")}
           </button>
 
           <button
@@ -170,7 +168,7 @@ function LoginForm() {
             }}
             className="w-full text-sm text-white/40 hover:text-white transition-colors"
           >
-            ← Volver a email y contraseña
+            {t("auth.backToCredentials")}
           </button>
         </form>
       </AuthLayout>
@@ -179,28 +177,28 @@ function LoginForm() {
 
   return (
     <AuthLayout
-      title="Bienvenido de nuevo"
-      subtitle="Inicia sesión con tu email y contraseña. Te enviaremos un código de acceso por correo."
+      title={t("auth.loginTitle")}
+      subtitle={t("auth.loginSubtitle")}
       footer={
-        <AuthFooterLink text="¿No tienes cuenta?" linkText="Regístrate gratis" href="/signup" />
+        <AuthFooterLink text={t("auth.noAccount")} linkText={t("auth.signupLink")} href="/signup" />
       }
     >
       <form onSubmit={requestCode} className="space-y-5">
         {resetSuccess && (
           <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-emerald-300 text-sm">
-            Contraseña actualizada. Ya puedes iniciar sesión.
+            {t("auth.resetSuccess")}
           </div>
         )}
 
         {blockedNotice && (
           <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-amber-200 text-sm">
-            Tu cuenta está bloqueada. Si crees que es un error, contacta con soporte.
+            {t("auth.blockedNotice")}
           </div>
         )}
 
         <div>
           <label htmlFor="email" className="auth-label">
-            Email
+            {t("common.email")}
           </label>
           <input
             id="email"
@@ -217,13 +215,13 @@ function LoginForm() {
         <div>
           <div className="flex items-center justify-between mb-2">
             <label htmlFor="password" className="auth-label mb-0">
-              Contraseña
+              {t("common.password")}
             </label>
             <Link
               href="/forgot-password"
               className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
             >
-              ¿Olvidaste tu contraseña?
+              {t("auth.forgotPassword")}
             </Link>
           </div>
           <PasswordInput
@@ -237,9 +235,9 @@ function LoginForm() {
 
         <AuthError message={error} />
 
-        <AuthSubmitButton loading={loading} loadingText="Enviando código...">
+        <AuthSubmitButton loading={loading} loadingText={t("auth.sendingCode")}>
           <>
-            Enviar código de acceso
+            {t("auth.sendCode")}
             <ArrowRight className="w-4 h-4" />
           </>
         </AuthSubmitButton>
