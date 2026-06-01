@@ -23,6 +23,7 @@ model User {
   views               Int                  @default(0)
   badges              String               @default("[]")
   settings            String               @default("{}")
+  usernameChangedAt   DateTime?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   links               SocialLink[]

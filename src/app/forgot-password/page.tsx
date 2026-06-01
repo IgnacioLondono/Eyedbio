@@ -42,7 +42,9 @@ function ForgotPasswordForm() {
         return;
       }
 
-      setSuccess(data.message);
+      setSuccess(
+        "Código enviado. Revisa tu bandeja de entrada y, si no lo ves, la carpeta de spam."
+      );
       setStep("code");
     } catch {
       setError("Error de conexión. Inténtalo de nuevo.");
@@ -164,7 +166,7 @@ function ForgotPasswordForm() {
   return (
     <AuthLayout
       title="Recuperar contraseña"
-      subtitle="Te enviaremos un código de verificación de 6 dígitos a tu email."
+      subtitle="Te enviaremos un código de 6 dígitos. Si no llega, revisa la carpeta de spam."
       footer={<AuthFooterLink text="¿Recuerdas tu contraseña?" linkText="Volver al login" href="/login" />}
     >
       <form onSubmit={requestCode} className="space-y-5">
@@ -191,7 +193,6 @@ function ForgotPasswordForm() {
         </div>
 
         <AuthError message={error} />
-        <AuthSuccess message={success} />
 
         <AuthSubmitButton loading={loading} loadingText="Enviando...">
           <>

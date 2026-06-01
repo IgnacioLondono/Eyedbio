@@ -135,32 +135,64 @@ export default function FileUpload({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState("");
   const isBackground = kind === "background";
 
-  const handleFile = async (file: File) => {
-    setError("");
-    setUploading(true);
-
-    try {
+  const uploadFile = (
+    file: File,
+    onProgress: (percent: number) => void
+  ): Promise<{ url: string; backgroundType?: BackgroundType }> =>
+    new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
       const formData = new FormData();
       formData.append("file", file);
       formData.append("kind", kind);
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          onProgress(Math.round((event.loaded / event.total) * 100));
+        }
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Error al subir");
+      xhr.addEventListener("load", () => {
+        try {
+          const data = JSON.parse(xhr.responseText) as {
+            url?: string;
+            backgroundType?: BackgroundType;
+            error?: string;
+          };
+          if (xhr.status >= 200 && xhr.status < 300 && data.url) {
+            resolve({ url: data.url, backgroundType: data.backgroundType });
+            return;
+          }
+          reject(new Error(data.error ?? "Error al subir"));
+        } catch {
+          reject(new Error("Error al subir"));
+        }
+      });
 
+      xhr.addEventListener("error", () => reject(new Error("Error de conexión")));
+      xhr.addEventListener("abort", () => reject(new Error("Subida cancelada")));
+
+      xhr.open("POST", "/api/upload");
+      xhr.send(formData);
+    });
+
+  const handleFile = async (file: File) => {
+    setError("");
+    setUploading(true);
+    setProgress(0);
+
+    try {
+      const data = await uploadFile(file, setProgress);
       onUploaded(data.url, data.backgroundType);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al subir");
     } finally {
       setUploading(false);
+      setProgress(null);
       if (inputRef.current) inputRef.current.value = "";
     }
   };
@@ -235,13 +267,23 @@ export default function FileUpload({
           )}
           <span>
             {uploading
-              ? "Subiendo..."
+              ? progress !== null
+                ? `Subiendo… ${progress}%`
+                : "Subiendo..."
               : currentUrl
                 ? "Cambiar archivo"
                 : isBackground
                   ? "Subir imagen, GIF o video"
                   : "Subir archivo"}
           </span>
+          {uploading && progress !== null && (
+            <div className="w-full max-w-[200px] h-1 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full bg-purple-500 transition-[width] duration-150"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          )}
           {isBackground && !uploading && (
             <span className="text-[11px] text-white/30">
               Arrastra aquí o haz clic · JPG, PNG, WebP, GIF, MP4, WebM, MOV

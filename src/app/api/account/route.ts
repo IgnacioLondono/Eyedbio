@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getUsernameChangeStatus } from "@/lib/account-config";
 import {
   normalizeEmail,
   normalizeUsername,
@@ -22,6 +23,7 @@ export async function GET() {
       email: true,
       username: true,
       createdAt: true,
+      usernameChangedAt: true,
     },
   });
 
@@ -29,10 +31,15 @@ export async function GET() {
     return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
   }
 
+  const { canChange, nextChangeAt } = getUsernameChangeStatus(user.usernameChangedAt);
+
   return NextResponse.json({
     email: user.email,
     username: user.username,
     createdAt: user.createdAt.toISOString(),
+    usernameChangedAt: user.usernameChangedAt?.toISOString() ?? null,
+    canChangeUsername: canChange,
+    nextUsernameChangeAt: nextChangeAt?.toISOString() ?? null,
   });
 }
 
@@ -68,7 +75,12 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Contraseña actual incorrecta" }, { status: 403 });
     }
 
-    const updates: { email?: string; username?: string; passwordHash?: string } = {};
+    const updates: {
+      email?: string;
+      username?: string;
+      passwordHash?: string;
+      usernameChangedAt?: Date;
+    } = {};
 
     if (email !== undefined && email !== user.email) {
       const emailError = validateEmail(email);
@@ -82,6 +94,22 @@ export async function PATCH(request: Request) {
     }
 
     if (username !== undefined && username !== user.username) {
+      const { canChange, nextChangeAt } = getUsernameChangeStatus(user.usernameChangedAt);
+      if (!canChange && nextChangeAt) {
+        const dateLabel = nextChangeAt.toLocaleDateString("es-ES", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        });
+        return NextResponse.json(
+          {
+            error: `Solo puedes cambiar tu usuario cada 14 días. Podrás cambiarlo de nuevo el ${dateLabel}.`,
+            nextUsernameChangeAt: nextChangeAt.toISOString(),
+          },
+          { status: 429 }
+        );
+      }
+
       const usernameError = validateUsername(username);
       if (usernameError) return NextResponse.json({ error: usernameError }, { status: 400 });
 
@@ -90,6 +118,7 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ error: "Este nombre de usuario ya está en uso" }, { status: 409 });
       }
       updates.username = username;
+      updates.usernameChangedAt = new Date();
     }
 
     if (newPassword) {
@@ -107,14 +136,24 @@ export async function PATCH(request: Request) {
 
     const updated = await prisma.user.update({
       where: { id: user.id },
+      select: {
+        email: true,
+        username: true,
+        createdAt: true,
+        usernameChangedAt: true,
+      },
       data: updates,
-      select: { email: true, username: true, createdAt: true },
     });
+
+    const usernameStatus = getUsernameChangeStatus(updated.usernameChangedAt);
 
     return NextResponse.json({
       email: updated.email,
       username: updated.username,
       createdAt: updated.createdAt.toISOString(),
+      usernameChangedAt: updated.usernameChangedAt?.toISOString() ?? null,
+      canChangeUsername: usernameStatus.canChange,
+      nextUsernameChangeAt: usernameStatus.nextChangeAt?.toISOString() ?? null,
       message: "Cuenta actualizada correctamente",
     });
   } catch {

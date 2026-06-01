@@ -5,7 +5,7 @@ import { createVerificationCode, getCodeExpiry } from "@/lib/password-reset";
 import { normalizeEmail, validateEmail } from "@/lib/validation";
 
 const GENERIC_MESSAGE =
-  "Si el email está registrado, recibirás un código de verificación de 6 dígitos.";
+  "Si el email está registrado, recibirás un código de verificación de 6 dígitos. Revisa también la carpeta de spam.";
 
 export async function POST(request: Request) {
   try {

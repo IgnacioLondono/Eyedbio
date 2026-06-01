@@ -64,9 +64,11 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [tab, setTabState] = useState<Tab>(() => parseTab(searchParams.get("tab")));
-  const [saved, setSaved] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
 
   useEffect(() => {
     fetch("/api/profile")
@@ -74,7 +76,10 @@ function DashboardContent() {
         if (!res.ok) throw new Error("No autorizado");
         return res.json();
       })
-      .then(setProfile)
+      .then((data) => {
+        setProfile(data);
+        setIsDirty(false);
+      })
       .catch(() => setError("No se pudo cargar el perfil"));
   }, []);
 
@@ -90,7 +95,7 @@ function DashboardContent() {
   const update = (partial: Partial<Profile>) => {
     if (!profile) return;
     setProfile({ ...profile, ...partial });
-    setSaved(false);
+    setIsDirty(true);
   };
 
   const updateSettings = (partial: Partial<Profile["settings"]>) => {
@@ -99,7 +104,7 @@ function DashboardContent() {
       ...profile,
       settings: { ...profile.settings, ...partial },
     });
-    setSaved(false);
+    setIsDirty(true);
   };
 
   const updateBackground = (url: string, backgroundType?: BackgroundType) => {
@@ -110,7 +115,7 @@ function DashboardContent() {
       backgroundType: nextType,
       settings: { ...profile.settings, backgroundUrl: url },
     });
-    setSaved(false);
+    setIsDirty(true);
   };
 
   const clearBackground = () => {
@@ -120,11 +125,11 @@ function DashboardContent() {
       backgroundType: "image",
       settings: { ...profile.settings, backgroundUrl: "" },
     });
-    setSaved(false);
+    setIsDirty(true);
   };
 
-  const handleSave = async () => {
-    if (!profile) return;
+  const handleSave = async (): Promise<boolean> => {
+    if (!profile) return false;
     setSaving(true);
     setError("");
 
@@ -139,12 +144,34 @@ function DashboardContent() {
       if (!res.ok) throw new Error(data.error ?? "Error al guardar");
 
       setProfile(data);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      setIsDirty(false);
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 2000);
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al guardar");
+      return false;
     } finally {
       setSaving(false);
+    }
+  };
+
+  const openProfilePreview = () => {
+    if (!profile) return;
+    window.open(`/${profile.username}`, "_blank", "noopener,noreferrer");
+  };
+
+  const handleViewProfileClick = (event: React.MouseEvent) => {
+    if (!isDirty) return;
+    event.preventDefault();
+    setShowUnsavedModal(true);
+  };
+
+  const handleSaveAndViewProfile = async () => {
+    const ok = await handleSave();
+    if (ok) {
+      setShowUnsavedModal(false);
+      openProfilePreview();
     }
   };
 
@@ -185,7 +212,12 @@ function DashboardContent() {
               href={`/${profile.username}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white/60 hover:text-white border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
+              onClick={handleViewProfileClick}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-lg transition-colors ${
+                isDirty
+                  ? "text-amber-200/90 border-amber-400/30 hover:bg-amber-500/10"
+                  : "text-white/60 hover:text-white border-white/10 hover:bg-white/5"
+              }`}
             >
               <UserRound className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Ver perfil</span>
@@ -197,7 +229,7 @@ function DashboardContent() {
               className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-lg transition-colors"
             >
               <Save className="w-3.5 h-3.5" />
-              {saved ? "Guardado ✓" : saving ? "Guardando..." : "Guardar"}
+              {justSaved ? "Guardado ✓" : saving ? "Guardando..." : "Guardar"}
             </button>
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
@@ -215,6 +247,58 @@ function DashboardContent() {
           <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-2">
             {error}
           </p>
+        </div>
+      )}
+
+      {showUnsavedModal && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="unsaved-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowUnsavedModal(false)}
+            aria-label="Cerrar"
+          />
+          <div className="relative w-full max-w-md rounded-2xl border border-white/10 bg-[#12121a] p-6 shadow-2xl">
+            <h2 id="unsaved-title" className="text-lg font-semibold text-white">
+              Tienes cambios sin guardar
+            </h2>
+            <p className="mt-2 text-sm text-white/50 leading-relaxed">
+              Guarda tu perfil antes de verlo público para que los visitantes vean la versión
+              actualizada.
+            </p>
+            <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={() => setShowUnsavedModal(false)}
+                className="px-4 py-2.5 text-sm text-white/70 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+              >
+                Seguir editando
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUnsavedModal(false);
+                  openProfilePreview();
+                }}
+                className="px-4 py-2.5 text-sm border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
+              >
+                Ver sin guardar
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAndViewProfile}
+                disabled={saving}
+                className="px-4 py-2.5 text-sm font-medium bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-lg transition-colors"
+              >
+                {saving ? "Guardando..." : "Guardar y ver"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

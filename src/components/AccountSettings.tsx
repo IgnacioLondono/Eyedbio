@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { Shield, Mail, AtSign, KeyRound, CalendarDays } from "lucide-react";
+import { USERNAME_CHANGE_COOLDOWN_DAYS } from "@/lib/account-config";
 import PasswordInput from "@/components/PasswordInput";
 
 interface AccountData {
   email: string;
   username: string;
   createdAt: string;
+  canChangeUsername: boolean;
+  nextUsernameChangeAt: string | null;
 }
 
 interface Props {
@@ -114,6 +117,19 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
       })
     : "";
 
+  const usernameLocked =
+    account !== null &&
+    !account.canChangeUsername &&
+    username === account.username;
+
+  const nextUsernameChangeLabel = account?.nextUsernameChangeAt
+    ? new Date(account.nextUsernameChangeAt).toLocaleDateString("es-ES", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
+
   return (
     <form onSubmit={handleSave} className="space-y-6 max-w-lg">
       <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
@@ -166,9 +182,10 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 onChange={(e) =>
                   setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ""))
                 }
-                className="input-field input-field--username font-mono text-sm"
+                className="input-field input-field--username font-mono text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 required
                 minLength={3}
+                disabled={usernameLocked}
               />
               <AtSign
                 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-purple-400/70 pointer-events-none z-[1]"
@@ -176,8 +193,14 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
               />
             </div>
             <p className="text-[11px] text-white/30 mt-1.5">
-              Solo letras y números (a–z, 0–9). Mínimo 3 caracteres.
+              Solo letras y números (a–z, 0–9). Mínimo 3 caracteres. Puedes cambiarlo cada{" "}
+              {USERNAME_CHANGE_COOLDOWN_DAYS} días.
             </p>
+            {usernameLocked && nextUsernameChangeLabel && (
+              <p className="text-[11px] text-amber-300/90 mt-1.5">
+                Podrás cambiar tu usuario de nuevo el {nextUsernameChangeLabel}.
+              </p>
+            )}
           </div>
         </div>
       </div>

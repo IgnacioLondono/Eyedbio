@@ -63,13 +63,27 @@ export default function AudioClipSelector({ audioUrl, startTime, onChange }: Pro
 
   useEffect(() => {
     const audio = audioRef.current;
+    if (!audio || loading || !previewing) return;
+
+    const clamped = clampAudioStart(startTime, duration || Infinity);
+    if (Math.abs(audio.currentTime - clamped) > 0.05) {
+      audio.currentTime = clamped;
+    }
+  }, [startTime, previewing, loading, duration]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
     if (!audio) return;
 
     const onTimeUpdate = () => {
       if (!previewing) return;
-      if (audio.currentTime >= clipEnd) {
-        audio.pause();
-        setPreviewing(false);
+      const end =
+        audio.duration > AUDIO_CLIP_DURATION
+          ? startTimeRef.current + AUDIO_CLIP_DURATION
+          : audio.duration;
+
+      if (Number.isFinite(end) && audio.currentTime >= end) {
+        audio.currentTime = startTimeRef.current;
       }
     };
 
@@ -81,7 +95,7 @@ export default function AudioClipSelector({ audioUrl, startTime, onChange }: Pro
       audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.removeEventListener("ended", onEnded);
     };
-  }, [clipEnd, previewing]);
+  }, [previewing, duration]);
 
   const timeFromClientX = useCallback(
     (clientX: number) => {
@@ -157,7 +171,7 @@ export default function AudioClipSelector({ audioUrl, startTime, onChange }: Pro
 
   return (
     <div className="space-y-3 rounded-xl border border-white/10 bg-white/5 p-4">
-      <audio ref={audioRef} src={src} preload="metadata" />
+      <audio ref={audioRef} src={src} preload="auto" />
 
       <div className="flex items-center justify-between gap-3">
         <div>
