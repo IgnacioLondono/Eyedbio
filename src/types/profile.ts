@@ -85,6 +85,8 @@ export interface Profile {
   links: SocialLink[];
   settings: ProfileSettings;
   createdAt: string;
+  /** ISO; para detectar ediciones concurrentes al guardar */
+  updatedAt?: string;
 }
 
 export const DEFAULT_SETTINGS: ProfileSettings = {

@@ -68,10 +68,11 @@ export function userToProfile(user: UserWithLinks): Profile {
       })),
     settings,
     createdAt: user.createdAt.toISOString(),
+    updatedAt: user.updatedAt.toISOString(),
   };
 }
 
-export function profileToUpdateData(profile: Profile): Prisma.UserUpdateInput {
+export function profileToUserUpdateData(profile: Profile): Prisma.UserUpdateInput {
   const { backgroundUrl, ...restSettings } = profile.settings;
   const backgroundType = resolveBackgroundType(backgroundUrl, profile.backgroundType);
 
@@ -86,6 +87,13 @@ export function profileToUpdateData(profile: Profile): Prisma.UserUpdateInput {
     audioEnabled: profile.audioEnabled,
     badges: JSON.stringify(profile.badges),
     settings: JSON.stringify(restSettings),
+  };
+}
+
+/** @deprecated Usar profileToUserUpdateData + saveUserProfile para enlaces */
+export function profileToUpdateData(profile: Profile): Prisma.UserUpdateInput {
+  return {
+    ...profileToUserUpdateData(profile),
     links: {
       deleteMany: {},
       create: profile.links.map((link, index) => ({

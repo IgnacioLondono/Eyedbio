@@ -1,8 +1,11 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { profileCacheTag } from "@/lib/cached-profile";
 import { prisma } from "@/lib/prisma";
 import { validateSocialLinksCount } from "@/lib/links-config";
-import { profileToUpdateData, userToProfile } from "@/lib/profile-mapper";
+import { saveUserProfile } from "@/lib/profile-save";
+import { userToProfile } from "@/lib/profile-mapper";
 import { Profile } from "@/types/profile";
 
 export async function GET() {
@@ -37,13 +40,30 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: linksError }, { status: 400 });
     }
 
-    const user = await prisma.user.update({
-      where: { id: session.user.id },
-      data: profileToUpdateData(profile),
-      include: { links: true },
-    });
+    const result = await saveUserProfile(
+      session.user.id,
+      profile,
+      profile.updatedAt
+    );
 
-    return NextResponse.json(userToProfile(user));
+    if (!result.ok) {
+      if (result.conflict) {
+        return NextResponse.json(
+          {
+            error:
+              "El perfil cambió en otra pestaña o dispositivo. Recarga y vuelve a guardar.",
+            code: "PROFILE_CONFLICT",
+          },
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+
+    revalidateTag(profileCacheTag(result.profile.username), "max");
+
+    return NextResponse.json(result.profile);
   } catch {
     return NextResponse.json(
       { error: "Error al guardar el perfil" },

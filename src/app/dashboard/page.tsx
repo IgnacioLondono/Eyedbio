@@ -141,6 +141,12 @@ function DashboardContent() {
       });
 
       const data = await res.json();
+      if (res.status === 409) {
+        throw new Error(
+          data.error ??
+            "El perfil cambió en otra pestaña. Recarga la página antes de guardar."
+        );
+      }
       if (!res.ok) throw new Error(data.error ?? "Error al guardar");
 
       setProfile(data);

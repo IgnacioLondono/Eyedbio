@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getCachedProfileUser } from "@/lib/cached-profile";
 import { userToProfile } from "@/lib/profile-mapper";
 import {
   profileUnlockCookieName,
@@ -17,10 +17,7 @@ export async function GET(_request: Request, { params }: Props) {
   const { username } = await params;
   const normalizedUsername = username.toLowerCase();
 
-  const user = await prisma.user.findUnique({
-    where: { username: normalizedUsername },
-    include: { links: true },
-  });
+  const user = await getCachedProfileUser(normalizedUsername);
 
   if (!user) {
     return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });

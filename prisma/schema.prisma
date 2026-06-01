@@ -34,6 +34,7 @@ model User {
 
   profileViewsAsViewer        ProfileView[] @relation("ProfileViewViewer")
   profileViewsAsProfileUser   ProfileView[] @relation("ProfileViewProfileUser")
+  profileViewsAsGuest         ProfileViewGuest[]
 }
 
 model ProfileView {
@@ -68,6 +69,17 @@ model LoginVerificationToken {
   createdAt DateTime @default(now())
 
   @@index([userId])
+}
+
+model ProfileViewGuest {
+  id            String   @id @default(cuid())
+  profileUserId String
+  profileUser   User     @relation(fields: [profileUserId], references: [id], onDelete: Cascade)
+  guestId       String
+  createdAt     DateTime @default(now())
+
+  @@unique([profileUserId, guestId])
+  @@index([profileUserId])
 }
 
 model SocialLink {

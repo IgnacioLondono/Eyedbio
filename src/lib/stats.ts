@@ -1,8 +1,11 @@
+import { unstable_cache } from "next/cache";
 import { readdir } from "fs/promises";
 import path from "path";
 import { prisma } from "@/lib/prisma";
 
 const UPLOAD_ROOT = process.env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads");
+
+const STATS_REVALIDATE_SECONDS = 300;
 
 async function countFiles(dir: string): Promise<number> {
   let count = 0;
@@ -24,14 +27,13 @@ async function countFiles(dir: string): Promise<number> {
   return count;
 }
 
-export async function getPlatformStats() {
-  const [users, viewsAgg, links] = await Promise.all([
+async function fetchPlatformStats() {
+  const [users, viewsAgg, links, uploads] = await Promise.all([
     prisma.user.count(),
     prisma.user.aggregate({ _sum: { views: true } }),
     prisma.socialLink.count(),
+    countFiles(UPLOAD_ROOT),
   ]);
-
-  const uploads = await countFiles(UPLOAD_ROOT);
 
   return {
     users,
@@ -39,6 +41,16 @@ export async function getPlatformStats() {
     uploads,
     links,
   };
+}
+
+const getCachedPlatformStats = unstable_cache(
+  fetchPlatformStats,
+  ["platform-stats"],
+  { revalidate: STATS_REVALIDATE_SECONDS, tags: ["platform-stats"] }
+);
+
+export async function getPlatformStats() {
+  return getCachedPlatformStats();
 }
 
 export function formatStat(value: number): string {

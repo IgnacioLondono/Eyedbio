@@ -1,4 +1,6 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
+import { profileCacheTag } from "@/lib/cached-profile";
 import bcrypt from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -189,6 +191,18 @@ export async function PATCH(request: Request) {
     });
 
     const usernameStatus = getUsernameChangeStatus(updated.usernameChangedAt);
+
+    const profileFieldsChanged =
+      updates.username !== undefined ||
+      updates.accessCodeEnabled !== undefined ||
+      updates.accessCodeHash !== undefined;
+
+    if (profileFieldsChanged) {
+      revalidateTag(profileCacheTag(user.username), "max");
+      if (updates.username !== undefined) {
+        revalidateTag(profileCacheTag(updates.username), "max");
+      }
+    }
 
     return NextResponse.json({
       email: updated.email,
