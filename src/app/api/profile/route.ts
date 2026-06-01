@@ -1,18 +1,36 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { isUserBlocked } from "@/lib/auth-user";
 import { safeRevalidateTag } from "@/lib/cache-utils";
-import { profileCacheTag } from "@/lib/cached-profile";
 import { prisma } from "@/lib/prisma";
+import { profileCacheTag } from "@/lib/cached-profile";
 import { validateSocialLinksCount } from "@/lib/links-config";
 import { saveUserProfile } from "@/lib/profile-save";
 import { userToProfile } from "@/lib/profile-mapper";
 import { Profile } from "@/types/profile";
+
+async function rejectIfBlocked(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { blockedAt: true },
+  });
+  if (!user || isUserBlocked(user)) {
+    return NextResponse.json(
+      { error: "Tu cuenta está bloqueada. Contacta con soporte." },
+      { status: 403 }
+    );
+  }
+  return null;
+}
 
 export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
+
+  const blocked = await rejectIfBlocked(session.user.id);
+  if (blocked) return blocked;
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -31,6 +49,9 @@ export async function PATCH(request: Request) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
+
+  const blocked = await rejectIfBlocked(session.user.id);
+  if (blocked) return blocked;
 
   try {
     const profile = (await request.json()) as Profile;

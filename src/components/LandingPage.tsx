@@ -17,7 +17,6 @@ import {
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
-import LandingReviewsSection from "@/components/LandingReviewsSection";
 
 const statConfig = [
   { key: "profileViews" as const, label: "Visitas a perfiles", icon: Eye },
@@ -225,8 +224,6 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
-
-      <LandingReviewsSection />
 
       <section id="features" className="py-24 px-6">
         <div className="max-w-5xl mx-auto">

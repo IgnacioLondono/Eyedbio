@@ -1,7 +1,8 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
+import { isAdminRole } from "@/lib/roles";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, ShieldCheck } from "lucide-react";
@@ -26,6 +27,7 @@ function LoginForm() {
 
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const resetSuccess = searchParams.get("reset") === "success";
+  const blockedNotice = searchParams.get("error") === "blocked";
 
   const requestCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,7 +80,15 @@ function LoginForm() {
       return;
     }
 
-    router.push(callbackUrl);
+    const session = await getSession();
+    const destination =
+      session?.user && isAdminRole(session.user.role)
+        ? callbackUrl.startsWith("/admin")
+          ? callbackUrl
+          : "/admin"
+        : callbackUrl;
+
+    router.push(destination);
     router.refresh();
   };
 
@@ -178,6 +188,12 @@ function LoginForm() {
         {resetSuccess && (
           <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-emerald-300 text-sm">
             Contraseña actualizada. Ya puedes iniciar sesión.
+          </div>
+        )}
+
+        {blockedNotice && (
+          <div className="rounded-xl border border-amber-400/20 bg-amber-400/10 px-4 py-3 text-amber-200 text-sm">
+            Tu cuenta está bloqueada. Si crees que es un error, contacta con soporte.
           </div>
         )}
 

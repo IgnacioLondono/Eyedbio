@@ -32,7 +32,6 @@ import AccountSettings from "@/components/AccountSettings";
 import LinkEditor from "@/components/LinkEditor";
 import ShareProfileButton from "@/components/ShareProfileButton";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
-import DashboardReviewsButton from "@/components/DashboardReviewsButton";
 
 type Tab = "general" | "links" | "media" | "appearance" | "account";
 
@@ -226,7 +225,6 @@ function DashboardContent() {
           <Logo href="/" size="sm" />
 
           <div className="flex items-center gap-2">
-            <DashboardReviewsButton username={profile.username} />
             <CommunityDiscordLink variant="header" />
             <Link
               href={`/${profile.username}`}

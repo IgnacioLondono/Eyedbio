@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
+import { isUserBlocked, toAuthUser } from "@/lib/auth-user";
 import { isValidVerificationCode, normalizeVerificationCode } from "@/lib/password-reset";
 import { normalizeEmail } from "@/lib/validation";
 
@@ -32,17 +33,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) return null;
 
+        if (isUserBlocked(user)) return null;
+
         if (intent === "signup" || intent === "refresh") {
           if (!password) return null;
           const valid = await bcrypt.compare(password, user.passwordHash);
           if (!valid) return null;
 
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.displayName,
-            username: user.username,
-          };
+          return toAuthUser(user);
         }
 
         if (!code || !isValidVerificationCode(code)) return null;
@@ -64,12 +62,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.displayName,
-          username: user.username,
-        };
+        return toAuthUser(user);
       },
     }),
   ],

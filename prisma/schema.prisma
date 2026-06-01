@@ -12,6 +12,9 @@ model User {
   email               String               @unique
   passwordHash        String
   username            String               @unique
+  role                String               @default("user")
+  blockedAt           DateTime?
+  blockedReason       String?
   displayName         String
   bio                 String               @default("")
   avatarUrl           String?

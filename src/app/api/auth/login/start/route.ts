@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { sendVerificationCodeEmail } from "@/lib/mail";
 import { createVerificationCode, getCodeExpiry } from "@/lib/password-reset";
+import { isUserBlocked } from "@/lib/auth-user";
 import { normalizeEmail } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -26,6 +27,13 @@ export async function POST(request: Request) {
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
+    }
+
+    if (isUserBlocked(user)) {
+      return NextResponse.json(
+        { error: "Tu cuenta está bloqueada. Contacta con soporte si crees que es un error." },
+        { status: 403 }
+      );
     }
 
     await prisma.loginVerificationToken.deleteMany({ where: { userId: user.id } });

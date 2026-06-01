@@ -35,6 +35,9 @@ services:
       AUTH_SECRET: ${AUTH_SECRET:-kNGTnHIoXenFhVWwzCSW3LYJ+YKlTb2gW5Lx7XhYkvY=}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:9090}
       AUTH_TRUST_HOST: "true"
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       HOSTNAME: 0.0.0.0
       PORT: "9090"
     volumes:

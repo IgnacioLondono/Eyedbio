@@ -42,6 +42,13 @@ while [ "$attempt" -le "$max_attempts" ]; do
   sleep 3
 done
 
+echo "Ensuring admin account..."
+if npx tsx ./scripts/ensure-admin.ts; then
+  echo "Admin bootstrap completed."
+else
+  echo "Admin bootstrap skipped or failed (check ADMIN_EMAIL / ADMIN_PASSWORD)."
+fi
+
 echo "Starting Eyed.bio..."
 
 if [ -n "$RESEND_API_KEY" ]; then
@@ -71,4 +78,7 @@ exec runuser -u nextjs -- env \
   SMTP_USER="${SMTP_USER:-}" \
   SMTP_PASS="${SMTP_PASS:-}" \
   SMTP_FROM="${SMTP_FROM:-}" \
+  ADMIN_EMAIL="${ADMIN_EMAIL:-}" \
+  ADMIN_PASSWORD="${ADMIN_PASSWORD:-}" \
+  ADMIN_USERNAME="${ADMIN_USERNAME:-}" \
   "$@"
