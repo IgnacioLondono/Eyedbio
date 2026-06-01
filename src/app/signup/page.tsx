@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -10,10 +10,15 @@ import AuthLayout, {
   AuthSubmitButton,
 } from "@/components/AuthLayout";
 import PasswordInput from "@/components/PasswordInput";
+import { getMessages } from "@/lib/i18n";
+import { writeLocaleCookie } from "@/lib/i18n";
+import type { AppLocale } from "@/lib/i18n/types";
+import { APP_LOCALES, LOCALE_LABELS } from "@/lib/i18n/types";
 
 function SignupForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [locale, setLocale] = useState<AppLocale>("es");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -22,13 +27,21 @@ function SignupForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const m = getMessages(locale).signup;
+  const footer = getMessages(locale).signup;
+
+  useEffect(() => {
+    writeLocaleCookie(locale);
+    document.documentElement.lang = locale;
+  }, [locale]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
+      setError(m.passwordMismatch);
       setLoading(false);
       return;
     }
@@ -37,12 +50,12 @@ function SignupForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username, displayName }),
+        body: JSON.stringify({ email, password, username, displayName, locale }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Error al registrarse");
+        setError(data.error ?? m.connectionError);
         setLoading(false);
         return;
       }
@@ -55,7 +68,11 @@ function SignupForm() {
       });
 
       if (result?.error) {
-        setError("Cuenta creada, pero falló el inicio de sesión. Prueba en /login");
+        setError(
+          locale === "en"
+            ? "Account created, but sign-in failed. Try /login"
+            : "Cuenta creada, pero falló el inicio de sesión. Prueba en /login"
+        );
         setLoading(false);
         return;
       }
@@ -63,23 +80,41 @@ function SignupForm() {
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("Error de conexión");
+      setError(m.connectionError);
       setLoading(false);
     }
   };
 
   return (
     <AuthLayout
-      title="Crea tu perfil"
-      subtitle="Regístrate gratis y personaliza tu página en minutos."
+      title={m.title}
+      subtitle={m.subtitle}
       footer={
-        <AuthFooterLink text="¿Ya tienes cuenta?" linkText="Inicia sesión" href="/login" />
+        <AuthFooterLink text={footer.hasAccount} linkText={footer.login} href="/login" />
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
+          <label htmlFor="locale" className="auth-label">
+            {m.language}
+          </label>
+          <select
+            id="locale"
+            value={locale}
+            onChange={(e) => setLocale(e.target.value as AppLocale)}
+            className="auth-input"
+          >
+            {APP_LOCALES.map((code) => (
+              <option key={code} value={code}>
+                {LOCALE_LABELS[code]}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
           <label htmlFor="email" className="auth-label">
-            Email
+            {m.email}
           </label>
           <input
             id="email"
@@ -95,13 +130,13 @@ function SignupForm() {
 
         <div>
           <label htmlFor="password" className="auth-label">
-            Contraseña
+            {m.password}
           </label>
           <PasswordInput
             id="password"
             value={password}
             onChange={setPassword}
-            placeholder="Mínimo 8 caracteres"
+            placeholder={locale === "en" ? "At least 8 characters" : "Mínimo 8 caracteres"}
             autoComplete="new-password"
             required
             minLength={8}
@@ -110,13 +145,13 @@ function SignupForm() {
 
         <div>
           <label htmlFor="confirmPassword" className="auth-label">
-            Confirmar contraseña
+            {m.confirmPassword}
           </label>
           <PasswordInput
             id="confirmPassword"
             value={confirmPassword}
             onChange={setConfirmPassword}
-            placeholder="Repite tu contraseña"
+            placeholder={locale === "en" ? "Repeat your password" : "Repite tu contraseña"}
             autoComplete="new-password"
             required
             minLength={8}
@@ -125,7 +160,7 @@ function SignupForm() {
 
         <div>
           <label htmlFor="username" className="auth-label">
-            Nombre de usuario
+            {m.username}
           </label>
           <div className="flex items-center bg-white/5 border border-white/10 rounded-xl overflow-hidden focus-within:border-purple-500/50 transition-colors">
             <span className="px-3 text-white/30 text-sm font-mono whitespace-nowrap">
@@ -143,30 +178,30 @@ function SignupForm() {
               required
             />
           </div>
-          <p className="text-[11px] text-white/30 mt-1.5">
-            Solo letras y números (a–z, 0–9). Mínimo 3 caracteres.
-          </p>
         </div>
 
         <div>
           <label htmlFor="displayName" className="auth-label">
-            Nombre para mostrar
+            {m.displayName}
           </label>
           <input
             id="displayName"
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Tu nombre"
+            placeholder={locale === "en" ? "Your name" : "Tu nombre"}
             className="auth-input"
           />
         </div>
 
         <AuthError message={error} />
 
-        <AuthSubmitButton loading={loading} loadingText="Creando...">
+        <AuthSubmitButton
+          loading={loading}
+          loadingText={locale === "en" ? "Creating..." : "Creando..."}
+        >
           <>
-            Crear cuenta
+            {m.submit}
             <ArrowRight className="w-4 h-4" />
           </>
         </AuthSubmitButton>

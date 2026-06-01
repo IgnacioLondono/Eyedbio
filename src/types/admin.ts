@@ -5,6 +5,7 @@ export interface AdminUserRow {
   displayName: string;
   role: string;
   views: number;
+  badges: string[];
   blockedAt: string | null;
   blockedReason: string | null;
   createdAt: string;

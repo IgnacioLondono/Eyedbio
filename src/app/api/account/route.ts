@@ -31,6 +31,7 @@ export async function GET() {
       usernameChangedAt: true,
       accessCodeEnabled: true,
       accessCodeHash: true,
+      locale: true,
     },
   });
 
@@ -49,6 +50,7 @@ export async function GET() {
     nextUsernameChangeAt: nextChangeAt?.toISOString() ?? null,
     accessCodeEnabled: user.accessCodeEnabled,
     hasAccessCode: Boolean(user.accessCodeHash),
+    locale: user.locale === "en" ? "en" : "es",
   });
 }
 
@@ -70,6 +72,34 @@ export async function PATCH(request: Request) {
       body.accessCodeEnabled !== undefined ? Boolean(body.accessCodeEnabled) : undefined;
     const accessCode =
       body.accessCode !== undefined ? normalizeAccessCode(String(body.accessCode)) : undefined;
+    const locale =
+      body.locale !== undefined ? (body.locale === "en" ? "en" : "es") : undefined;
+
+    const sensitiveFields =
+      email !== undefined ||
+      username !== undefined ||
+      newPassword ||
+      accessCodeEnabled !== undefined ||
+      accessCode !== undefined;
+
+    if (sensitiveFields && !currentPassword) {
+      return NextResponse.json(
+        { error: "Introduce tu contraseña actual para confirmar los cambios" },
+        { status: 400 }
+      );
+    }
+
+    if (locale !== undefined && !sensitiveFields) {
+      const updated = await prisma.user.update({
+        where: { id: session.user.id },
+        data: { locale },
+        select: { locale: true },
+      });
+      return NextResponse.json({
+        message: "Idioma actualizado",
+        locale: updated.locale === "en" ? "en" : "es",
+      });
+    }
 
     if (!currentPassword) {
       return NextResponse.json(
@@ -95,6 +125,7 @@ export async function PATCH(request: Request) {
       usernameChangedAt?: Date;
       accessCodeEnabled?: boolean;
       accessCodeHash?: string | null;
+      locale?: string;
     } = {};
 
     if (email !== undefined && email !== user.email) {
@@ -173,6 +204,10 @@ export async function PATCH(request: Request) {
       }
     }
 
+    if (locale !== undefined) {
+      updates.locale = locale;
+    }
+
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: "No hay cambios para guardar" }, { status: 400 });
     }
@@ -186,6 +221,7 @@ export async function PATCH(request: Request) {
         usernameChangedAt: true,
         accessCodeEnabled: true,
         accessCodeHash: true,
+        locale: true,
       },
       data: updates,
     });
@@ -213,6 +249,7 @@ export async function PATCH(request: Request) {
       nextUsernameChangeAt: usernameStatus.nextChangeAt?.toISOString() ?? null,
       accessCodeEnabled: updated.accessCodeEnabled,
       hasAccessCode: Boolean(updated.accessCodeHash),
+      locale: updated.locale === "en" ? "en" : "es",
       message: "Cuenta actualizada correctamente",
     });
   } catch {

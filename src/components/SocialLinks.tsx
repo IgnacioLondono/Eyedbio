@@ -14,6 +14,7 @@ interface Props {
   monochromeIcons: boolean;
   compact?: boolean;
   mutedColor?: string;
+  emptyLabel?: string;
 }
 
 function LinkIcon({
@@ -51,11 +52,12 @@ export default function SocialLinks({
   monochromeIcons,
   compact = false,
   mutedColor = "rgba(255,255,255,0.3)",
+  emptyLabel = "Sin enlaces aún",
 }: Props) {
   if (links.length === 0) {
     return (
       <p className="text-sm italic" style={{ color: mutedColor }}>
-        Sin enlaces aún
+        {emptyLabel}
       </p>
     );
   }
@@ -65,7 +67,7 @@ export default function SocialLinks({
   if (visibleLinks.length === 0) {
     return (
       <p className="text-sm italic" style={{ color: mutedColor }}>
-        Sin enlaces aún
+        {emptyLabel}
       </p>
     );
   }

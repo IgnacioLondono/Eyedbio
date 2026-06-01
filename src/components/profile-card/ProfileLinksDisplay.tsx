@@ -9,6 +9,7 @@ import { getMediaSrc } from "@/lib/media-url";
 import { hexToRgba } from "@/lib/color-utils";
 import type { LinkStyle } from "@/types/profile";
 import SocialLinks from "@/components/SocialLinks";
+import { t as translate } from "@/lib/i18n";
 
 interface Props {
   links: SocialLink[];
@@ -18,6 +19,7 @@ interface Props {
   monochromeIcons: boolean;
   textColor: string;
   compact?: boolean;
+  locale?: "es" | "en";
   mutedColor?: string;
 }
 
@@ -41,10 +43,10 @@ function LinkIcon({
   return <PlatformIcon platform={link.platform as SocialPlatform} />;
 }
 
-function EmptyLinks({ mutedColor }: { mutedColor: string }) {
+function EmptyLinks({ mutedColor, locale = "es" }: { mutedColor: string; locale?: "es" | "en" }) {
   return (
     <p className="text-sm italic" style={{ color: mutedColor }}>
-      Sin enlaces aún
+      {translate(locale, "profile.noLinks")}
     </p>
   );
 }
@@ -56,18 +58,19 @@ function PillsLinks({
   monochromeIcons,
   textColor,
   compact,
+  locale = "es",
   mutedColor,
 }: Omit<Props, "linkStyle">) {
   const visible = links.filter((l) => l.url.trim().length > 0);
-  if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} />;
+  if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
 
   return (
-    <div className={`w-full flex flex-col ${compact ? "gap-1.5" : "gap-2"}`}>
+    <div className={`w-full flex flex-col ${compact ? "gap-1" : "gap-1.5"}`}>
       {visible.map((link, i) => {
         const config = PLATFORM_CONFIG[link.platform];
         const color = monochromeIcons ? accentColor : config.color;
         const title = link.label ?? config.label;
-        const iconSize = compact ? "w-4 h-4" : "w-5 h-5";
+        const iconSize = compact ? "w-3.5 h-3.5" : "w-4 h-4";
 
         return (
           <motion.a
@@ -75,21 +78,21 @@ function PillsLinks({
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            initial={compact ? false : { opacity: 0, x: -8 }}
+            initial={compact ? false : { opacity: 0, x: -6 }}
             animate={compact ? undefined : { opacity: 1, x: 0 }}
-            transition={compact ? undefined : { delay: 0.25 + i * 0.06 }}
-            whileHover={{ scale: 1.02 }}
+            transition={compact ? undefined : { delay: 0.2 + i * 0.04 }}
+            whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            className={`flex items-center gap-3 w-full rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors ${
-              compact ? "px-3 py-2 text-xs" : "px-4 py-3 text-sm"
+            className={`flex items-center gap-2.5 w-full rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 transition-colors ${
+              compact ? "px-2.5 py-1.5 text-[11px]" : "px-3 py-2 text-xs"
             }`}
             style={{
               borderLeftColor: color,
-              borderLeftWidth: 3,
+              borderLeftWidth: 2,
             }}
           >
             <span
-              className={`flex shrink-0 items-center justify-center ${compact ? "w-8 h-8" : "w-10 h-10"} rounded-lg bg-white/5`}
+              className={`flex shrink-0 items-center justify-center ${compact ? "w-7 h-7" : "w-8 h-8"} rounded-md bg-white/5`}
               style={{
                 color: link.iconUrl ? undefined : color,
                 filter: glowIcons && !link.iconUrl ? `drop-shadow(0 0 6px ${color})` : undefined,
@@ -113,10 +116,11 @@ function RowLinks({
   glowIcons,
   monochromeIcons,
   compact,
+  locale = "es",
   mutedColor,
 }: Omit<Props, "linkStyle" | "textColor">) {
   const visible = links.filter((l) => l.url.trim().length > 0);
-  if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} />;
+  if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
 
   const btn = compact ? "w-8 h-8" : "w-10 h-10";
   const icon = compact ? "w-4 h-4" : "w-4 h-4";
@@ -155,10 +159,11 @@ function ChipsLinks({
   monochromeIcons,
   textColor,
   compact,
+  locale = "es",
   mutedColor,
 }: Omit<Props, "linkStyle">) {
   const visible = links.filter((l) => l.url.trim().length > 0);
-  if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} />;
+  if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
 
   return (
     <div className={`flex flex-wrap justify-center ${compact ? "gap-1.5" : "gap-2"}`}>
@@ -201,6 +206,7 @@ export default function ProfileLinksDisplay({
   monochromeIcons,
   textColor,
   compact = false,
+  locale = "es",
   mutedColor,
 }: Props) {
   const muted = mutedColor ?? hexToRgba(textColor, 0.3);
@@ -214,6 +220,7 @@ export default function ProfileLinksDisplay({
         monochromeIcons={monochromeIcons}
         compact={compact}
         mutedColor={muted}
+        emptyLabel={translate(locale, "profile.noLinks")}
       />
     );
   }
@@ -225,6 +232,7 @@ export default function ProfileLinksDisplay({
     monochromeIcons,
     textColor,
     compact,
+    locale,
     mutedColor: muted,
   };
 

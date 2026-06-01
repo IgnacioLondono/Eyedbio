@@ -1,9 +1,12 @@
 import { Prisma, SocialLink as DbSocialLink, User } from "@/generated/prisma/client";
+import { parseBadgesJson } from "@/lib/badges";
+import { resolveBackgroundEffect } from "@/lib/background-effects-config";
 import {
   resolveAvatarStyle,
   resolveCardLayout,
   resolveLinkStyle,
 } from "@/lib/card-layout-config";
+import { parseLocale } from "@/lib/i18n/types";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { resolveNameEffect } from "@/lib/name-effects";
 import {
@@ -26,12 +29,7 @@ function parseSettings(raw: string): Partial<ProfileSettings> {
 }
 
 function parseBadges(raw: string): string[] {
-  try {
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return parseBadgesJson(raw);
 }
 
 export function userToProfile(user: UserWithLinks): Profile {
@@ -47,6 +45,7 @@ export function userToProfile(user: UserWithLinks): Profile {
     cardLayout: resolveCardLayout(storedSettings),
     linkStyle: resolveLinkStyle(storedSettings),
     avatarStyle: resolveAvatarStyle(storedSettings),
+    backgroundEffect: resolveBackgroundEffect(storedSettings.backgroundEffect),
   };
 
   return {
@@ -75,6 +74,7 @@ export function userToProfile(user: UserWithLinks): Profile {
         iconUrl: link.iconUrl ?? undefined,
       })),
     settings: merged,
+    locale: parseLocale((user as User & { locale?: string }).locale),
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   };

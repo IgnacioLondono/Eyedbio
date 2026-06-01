@@ -164,6 +164,7 @@ export function getLayoutThumbnailProfile(layout: CardLayout): Profile {
     badges: [],
     links: THUMBNAIL_LINKS,
     createdAt: "",
+    locale: "es",
     settings,
   };
 }

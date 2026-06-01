@@ -1,6 +1,6 @@
 "use client";
 
-import { Crown, CheckCircle, Star, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import { Profile } from "@/types/profile";
 import { hexToRgba } from "@/lib/color-utils";
 import { getMediaSrc } from "@/lib/media-url";
@@ -11,13 +11,9 @@ import {
   resolveNameEffect,
 } from "@/lib/name-effects";
 import { resolveAvatarStyle } from "@/lib/card-layout-config";
+import { BADGE_CONFIG } from "@/lib/badges";
+import { t as translate } from "@/lib/i18n";
 import type { AvatarStyle } from "@/types/profile";
-
-const BADGE_CONFIG: Record<string, { icon: typeof Crown; color: string; label: string }> = {
-  premium: { icon: Crown, color: "#f59e0b", label: "Premium" },
-  verified: { icon: CheckCircle, color: "#3b82f6", label: "Verificado" },
-  og: { icon: Star, color: "#a855f7", label: "OG" },
-};
 
 function avatarShapeClass(style: AvatarStyle): string {
   switch (style) {
@@ -62,11 +58,11 @@ export interface CardScale {
 export function getCardScale(compact: boolean): CardScale {
   return {
     compact,
-    avatar: compact ? "w-16 h-16" : "w-24 h-24",
-    name: compact ? "text-lg" : "text-2xl",
+    avatar: compact ? "w-16 h-16" : "w-20 h-20",
+    name: compact ? "text-lg" : "text-xl",
     badge: compact ? "w-4 h-4" : "w-5 h-5",
-    bio: compact ? "text-xs line-clamp-3" : "text-sm max-w-xs",
-    views: compact ? "text-[10px]" : "text-xs",
+    bio: compact ? "text-xs line-clamp-3" : "text-sm max-w-xs line-clamp-4",
+    views: compact ? "text-[10px]" : "text-[11px]",
     eye: compact ? "w-3 h-3" : "w-3.5 h-3.5",
   };
 }
@@ -136,10 +132,11 @@ export function ProfileNameBlock({
           const config = BADGE_CONFIG[badge];
           if (!config) return null;
           const Icon = config.icon;
+          const label = translate(profile.locale, `badges.${config.labelKey}`);
           return (
             <span
               key={badge}
-              title={config.label}
+              title={label}
               className="inline-flex shrink-0"
               style={{
                 filter: settings.glowIcons
@@ -203,7 +200,10 @@ export function ProfileViews({
       style={{ color: hexToRgba(textColor, 0.4) }}
     >
       <Eye className={scale.eye} />
-      <span>{profile.views.toLocaleString()} visitas</span>
+      <span>
+        {profile.views.toLocaleString(profile.locale === "en" ? "en-US" : "es-ES")}{" "}
+        {translate(profile.locale, "profile.visits")}
+      </span>
     </div>
   );
 }

@@ -37,7 +37,14 @@ export type BackgroundEffect =
   | "rain"
   | "stars"
   | "aurora"
-  | "fireflies";
+  | "fireflies"
+  | "bubbles"
+  | "nebula"
+  | "galaxy"
+  | "comets"
+  | "meteors"
+  | "cosmic_dust"
+  | "satellites";
 export type BackgroundType = "image" | "video" | "gif";
 export type NameEffect = "none" | "glow" | "aura" | "neon" | "pulse" | "gradient";
 
@@ -102,6 +109,7 @@ export interface Profile {
   badges: string[];
   links: SocialLink[];
   settings: ProfileSettings;
+  locale: "es" | "en";
   createdAt: string;
   /** ISO; para detectar ediciones concurrentes al guardar */
   updatedAt?: string;

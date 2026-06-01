@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
+import { parseBadgesJson, toggleBadgeList, MANAGED_BADGES } from "@/lib/badges";
 import { requireAdminApi } from "@/lib/admin-guard";
-import { isAdminRole, USER_ROLE_ADMIN } from "@/lib/roles";
+import { isAdminRole } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 
 interface Props {
@@ -24,6 +25,7 @@ export async function GET(_request: Request, { params }: Props) {
       views: true,
       blockedAt: true,
       blockedReason: true,
+      badges: true,
       createdAt: true,
       updatedAt: true,
       _count: { select: { links: true, reviewsReceived: true } },
@@ -36,6 +38,7 @@ export async function GET(_request: Request, { params }: Props) {
 
   return NextResponse.json({
     ...user,
+    badges: parseBadgesJson(user.badges),
     blockedAt: user.blockedAt?.toISOString() ?? null,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
@@ -56,7 +59,7 @@ export async function PATCH(request: Request, { params }: Props) {
 
   const target = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, role: true },
+    select: { id: true, role: true, badges: true },
   });
 
   if (!target) {
@@ -119,6 +122,31 @@ export async function PATCH(request: Request, { params }: Props) {
           ...updated,
           blockedAt: null,
         },
+      });
+    }
+
+    if (action === "toggleBadge") {
+      const badge = String(body.badge ?? "");
+      if (!MANAGED_BADGES.includes(badge as (typeof MANAGED_BADGES)[number])) {
+        return NextResponse.json({ error: "Insignia no válida" }, { status: 400 });
+      }
+
+      const current = parseBadgesJson(target.badges);
+      const next = toggleBadgeList(current, badge);
+
+      const updated = await prisma.user.update({
+        where: { id },
+        data: { badges: JSON.stringify(next) },
+        select: { id: true, badges: true, username: true },
+      });
+
+      const { safeRevalidateTag } = await import("@/lib/cache-utils");
+      const { profileCacheTag } = await import("@/lib/cached-profile");
+      safeRevalidateTag(profileCacheTag(updated.username));
+
+      return NextResponse.json({
+        message: "Insignias actualizadas",
+        user: { id: updated.id, badges: parseBadgesJson(updated.badges) },
       });
     }
 

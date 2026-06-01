@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Ban, CheckCircle, Loader2, Search } from "lucide-react";
+import { Ban, CheckCircle, Crown, Loader2, Search } from "lucide-react";
 import { AdminUserRow } from "@/types/admin";
 import { isAdminRole } from "@/lib/roles";
 
@@ -40,6 +40,25 @@ export default function AdminUsersTable() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const toggleBadge = async (userId: string, badge: "verified" | "owner") => {
+    setActionId(userId);
+    setError("");
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "toggleBadge", badge }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "No se pudo completar");
+      await load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error");
+    } finally {
+      setActionId(null);
+    }
+  };
 
   const runAction = async (userId: string, action: "block" | "unblock") => {
     const reason =
@@ -106,6 +125,7 @@ export default function AdminUsersTable() {
                 <th className="px-4 py-3 font-medium">Usuario</th>
                 <th className="px-4 py-3 font-medium">Email</th>
                 <th className="px-4 py-3 font-medium">Rol</th>
+                <th className="px-4 py-3 font-medium">Insignias</th>
                 <th className="px-4 py-3 font-medium">Estado</th>
                 <th className="px-4 py-3 font-medium">Visitas</th>
                 <th className="px-4 py-3 font-medium text-right">Acciones</th>
@@ -114,13 +134,13 @@ export default function AdminUsersTable() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center text-white/40">
+                  <td colSpan={7} className="px-4 py-12 text-center text-white/40">
                     <Loader2 className="w-6 h-6 animate-spin mx-auto" />
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-10 text-center text-white/40">
+                  <td colSpan={7} className="px-4 py-10 text-center text-white/40">
                     No hay usuarios
                   </td>
                 </tr>
@@ -155,6 +175,23 @@ export default function AdminUsersTable() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
+                        <div className="flex items-center gap-1.5">
+                          {user.badges.includes("verified") && (
+                            <span title="Verificado">
+                              <CheckCircle className="w-4 h-4 text-blue-400" />
+                            </span>
+                          )}
+                          {user.badges.includes("owner") && (
+                            <span title="Owner">
+                              <Crown className="w-4 h-4 text-amber-400" />
+                            </span>
+                          )}
+                          {!user.badges.length && (
+                            <span className="text-xs text-white/25">—</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
                         {blocked ? (
                           <span className="text-xs text-amber-300">Bloqueado</span>
                         ) : (
@@ -163,9 +200,36 @@ export default function AdminUsersTable() {
                       </td>
                       <td className="px-4 py-3 text-white/50">{user.views}</td>
                       <td className="px-4 py-3">
-                        <div className="flex justify-end gap-2">
+                        <div className="flex justify-end flex-wrap gap-1.5">
                           {!isAdmin ? (
-                            blocked ? (
+                            <>
+                              <button
+                                type="button"
+                                disabled={busy}
+                                onClick={() => void toggleBadge(user.id, "verified")}
+                                className={`inline-flex items-center gap-1 px-2 py-1.5 text-[11px] rounded-lg border disabled:opacity-50 ${
+                                  user.badges.includes("verified")
+                                    ? "border-blue-500/40 bg-blue-500/15 text-blue-300"
+                                    : "border-white/10 text-white/50 hover:border-white/20"
+                                }`}
+                                title="Verificado"
+                              >
+                                <CheckCircle className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={busy}
+                                onClick={() => void toggleBadge(user.id, "owner")}
+                                className={`inline-flex items-center gap-1 px-2 py-1.5 text-[11px] rounded-lg border disabled:opacity-50 ${
+                                  user.badges.includes("owner")
+                                    ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
+                                    : "border-white/10 text-white/50 hover:border-white/20"
+                                }`}
+                                title="Owner"
+                              >
+                                <Crown className="w-3.5 h-3.5" />
+                              </button>
+                              {blocked ? (
                               <button
                                 type="button"
                                 disabled={busy}
@@ -185,7 +249,8 @@ export default function AdminUsersTable() {
                                 <Ban className="w-3.5 h-3.5" />
                                 Bloquear
                               </button>
-                            )
+                              )}
+                            </>
                           ) : null}
                         </div>
                       </td>

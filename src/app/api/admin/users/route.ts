@@ -3,6 +3,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { requireAdminApi } from "@/lib/admin-guard";
 import { prisma } from "@/lib/prisma";
 import { AdminUserRow } from "@/types/admin";
+import { parseBadgesJson } from "@/lib/badges";
 
 const PAGE_SIZE = 20;
 
@@ -41,6 +42,7 @@ export async function GET(request: Request) {
           views: true,
           blockedAt: true,
           blockedReason: true,
+          badges: true,
           createdAt: true,
         },
       }),
@@ -53,6 +55,7 @@ export async function GET(request: Request) {
       displayName: user.displayName,
       role: user.role,
       views: user.views,
+      badges: parseBadgesJson(user.badges),
       blockedAt: user.blockedAt?.toISOString() ?? null,
       blockedReason: user.blockedReason,
       createdAt: user.createdAt.toISOString(),

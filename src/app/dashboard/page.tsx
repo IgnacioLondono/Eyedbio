@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import {
   Profile,
-  BackgroundEffect,
   BackgroundType,
   NameEffect,
 } from "@/types/profile";
@@ -24,6 +23,7 @@ import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
 import { resolveBackgroundType } from "@/lib/media-config";
 import ProfileCard from "@/components/ProfileCard";
 import BackgroundEffects from "@/components/BackgroundEffects";
+import BackgroundEffectSelect from "@/components/BackgroundEffectSelect";
 import BackgroundMedia from "@/components/BackgroundMedia";
 import FileUpload from "@/components/FileUpload";
 import AudioClipSelector from "@/components/AudioClipSelector";
@@ -474,22 +474,10 @@ function DashboardContent() {
             {tab === "appearance" && (
               <>
                 <Field label="Efecto de fondo">
-                  <select
+                  <BackgroundEffectSelect
                     value={profile.settings.backgroundEffect}
-                    onChange={(e) =>
-                      updateSettings({
-                        backgroundEffect: e.target.value as BackgroundEffect,
-                      })
-                    }
-                    className="input-field"
-                  >
-                    <option value="none">Ninguno</option>
-                    <option value="stars">Estrellas</option>
-                    <option value="snow">Nieve</option>
-                    <option value="rain">Lluvia</option>
-                    <option value="aurora">Aurora</option>
-                    <option value="fireflies">Luciérnagas</option>
-                  </select>
+                    onChange={(backgroundEffect) => updateSettings({ backgroundEffect })}
+                  />
                 </Field>
 
                 <Field label={`Opacidad del fondo (${Math.round(profile.settings.profileOpacity * 100)}%)`}>

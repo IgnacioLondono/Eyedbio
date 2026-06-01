@@ -1,0 +1,65 @@
+import type { Messages } from "./es";
+
+export const en: Messages = {
+  common: {
+    save: "Save",
+    cancel: "Cancel",
+    loading: "Loading…",
+    error: "Error",
+    share: "Share",
+  },
+  signup: {
+    title: "Create your profile",
+    subtitle: "Sign up for free and customize your page in minutes.",
+    language: "Language",
+    email: "Email",
+    password: "Password",
+    confirmPassword: "Confirm password",
+    username: "Username",
+    displayName: "Display name",
+    submit: "Create account",
+    hasAccount: "Already have an account?",
+    login: "Log in",
+    passwordMismatch: "Passwords do not match",
+    connectionError: "Connection error",
+  },
+  account: {
+    language: "Language",
+    languageHint: "Affects the dashboard and your public profile labels.",
+    languageSaved: "Language updated",
+    memberSince: "Member since",
+  },
+  profile: {
+    visits: "views",
+    noLinks: "No links yet",
+    notFound: "Profile not found",
+    welcomeBio: "Welcome to my website!",
+  },
+  dashboard: {
+    tabs: {
+      general: "General",
+      links: "Links",
+      media: "Media",
+      appearance: "Style",
+      account: "Account",
+    },
+    preview: "Preview",
+    save: "Save changes",
+    saved: "Saved",
+    backgroundEffect: "Background effect",
+    effectCategory: "Category",
+  },
+  badges: {
+    owner: "Owner",
+    verified: "Verified",
+    premium: "Premium",
+    og: "OG",
+  },
+  admin: {
+    verify: "Verify",
+    unverify: "Remove verified",
+    setOwner: "Owner crown",
+    removeOwner: "Remove owner",
+    badges: "Badges",
+  },
+};

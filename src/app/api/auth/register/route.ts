@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_SETTINGS } from "@/types/profile";
+import { parseLocale } from "@/lib/i18n/types";
 import { normalizeEmail, normalizeUsername, validatePassword, validateUsername } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -11,6 +12,7 @@ export async function POST(request: Request) {
     const password = String(body.password ?? "");
     const username = normalizeUsername(String(body.username ?? ""));
     const displayName = String(body.displayName ?? username).trim();
+    const locale = parseLocale(body.locale);
 
     if (!email || !password || !username) {
       return NextResponse.json(
@@ -53,12 +55,13 @@ export async function POST(request: Request) {
         passwordHash,
         username,
         displayName: displayName || username,
+        locale,
         settings: JSON.stringify(DEFAULT_SETTINGS),
       },
     });
 
     return NextResponse.json(
-      { id: user.id, username: user.username, email: user.email },
+      { id: user.id, username: user.username, email: user.email, locale: user.locale },
       { status: 201 }
     );
   } catch (err) {

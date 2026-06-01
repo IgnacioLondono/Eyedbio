@@ -35,7 +35,7 @@ function CardShell({
   noPadding?: boolean;
 }) {
   const cardStyle = getCardSurfaceStyle(profile.settings);
-  const pad = noPadding ? "" : compact ? "p-4" : "p-8";
+  const pad = noPadding ? "" : compact ? "p-3" : "p-5";
   return (
     <div className={`rounded-2xl border shadow-2xl ${pad} ${className}`} style={cardStyle}>
       {children}
@@ -55,6 +55,7 @@ function LinksBlock({ profile, compact }: { profile: Profile; compact?: boolean 
       monochromeIcons={settings.monochromeIcons}
       textColor={settings.textColor}
       compact={compact}
+      locale={profile.locale}
       mutedColor={hexToRgba(settings.textColor, 0.3)}
     />
   );
@@ -67,8 +68,8 @@ export function LayoutClassic({ profile, compact }: LayoutProps) {
       <div className="flex flex-col items-center text-center">
         <ProfileAvatar profile={profile} scale={scale} className="mx-auto mb-3" />
         <ProfileNameBlock profile={profile} scale={scale} />
-        <ProfileBio profile={profile} scale={scale} className="mt-2 mb-3 max-w-full" />
-        <ProfileViews profile={profile} scale={scale} className="mb-3 justify-center" />
+        <ProfileBio profile={profile} scale={scale} className="mt-1.5 mb-2 max-w-full" />
+        <ProfileViews profile={profile} scale={scale} className="mb-2 justify-center" />
         <LinksBlock profile={profile} compact={compact} />
       </div>
     </CardShell>
@@ -183,7 +184,7 @@ export function LayoutStack({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
   return (
     <CardShell profile={profile} compact={compact}>
-      <div className="flex flex-col items-center text-center mb-4">
+      <div className="flex flex-col items-center text-center mb-2">
         <ProfileAvatar profile={profile} scale={scale} className="mx-auto mb-2" />
         <ProfileNameBlock profile={profile} scale={scale} />
         <ProfileBio profile={profile} scale={scale} className="mt-1 mb-2" />

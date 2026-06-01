@@ -27,6 +27,7 @@ function demoProfile(
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...rest,
+    locale: rest.locale ?? "es",
     settings: {
       ...DEFAULT_SETTINGS,
       backgroundUrl: "",

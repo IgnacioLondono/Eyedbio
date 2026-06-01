@@ -5,11 +5,15 @@ import { signIn } from "next-auth/react";
 import { Shield, Mail, AtSign, KeyRound, CalendarDays, ArrowRight, Lock } from "lucide-react";
 import { USERNAME_CHANGE_COOLDOWN_DAYS } from "@/lib/validation";
 import PasswordInput from "@/components/PasswordInput";
+import { useI18n } from "@/components/LocaleProvider";
+import { APP_LOCALES, LOCALE_LABELS } from "@/lib/i18n/types";
+import type { AppLocale } from "@/lib/i18n/types";
 
 interface AccountData {
   email: string;
   username: string;
   createdAt: string;
+  locale: "es" | "en";
   canChangeUsername: boolean;
   nextUsernameChangeAt: string | null;
   accessCodeEnabled: boolean;
@@ -22,6 +26,7 @@ interface Props {
 }
 
 export default function AccountSettings({ profileUsername, onUsernameUpdated }: Props) {
+  const { locale, setLocale, t } = useI18n();
   const [account, setAccount] = useState<AccountData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -48,6 +53,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
         setEmail(data.email);
         setUsername(data.username);
         setAccessCodeEnabled(data.accessCodeEnabled);
+        if (data.locale) void setLocale(data.locale, false);
       })
       .catch(() => setError("No se pudo cargar la configuración de la cuenta"))
       .finally(() => setLoading(false));
@@ -167,9 +173,36 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
 
   const previousUsername = account?.username ?? "";
 
+  const handleLocaleChange = async (next: AppLocale) => {
+    await setLocale(next);
+    setSuccess(t("account.languageSaved"));
+    setTimeout(() => setSuccess(""), 2500);
+  };
+
   return (
     <>
       <form onSubmit={handleSave} className="space-y-6 max-w-lg">
+        <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-3">
+          <div>
+            <label htmlFor="account-locale" className="block text-sm text-white/60 mb-2">
+              {t("account.language")}
+            </label>
+            <select
+              id="account-locale"
+              value={locale}
+              onChange={(e) => void handleLocaleChange(e.target.value as AppLocale)}
+              className="input-field"
+            >
+              {APP_LOCALES.map((code) => (
+                <option key={code} value={code}>
+                  {LOCALE_LABELS[code]}
+                </option>
+              ))}
+            </select>
+            <p className="text-[11px] text-white/35 mt-1.5">{t("account.languageHint")}</p>
+          </div>
+        </div>
+
         <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5">
           <div className="flex items-start gap-3 mb-4">
             <div className="p-2 rounded-lg bg-purple-500/15 text-purple-400">
@@ -186,7 +219,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
           {memberSince && (
             <div className="flex items-center gap-2 text-xs text-white/35 mb-5 pb-4 border-b border-white/5">
               <CalendarDays className="w-3.5 h-3.5 shrink-0" />
-              Miembro desde {memberSince}
+              {t("account.memberSince")} {memberSince}
             </div>
           )}
 

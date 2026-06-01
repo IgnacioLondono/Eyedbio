@@ -25,6 +25,7 @@ model User {
   audioEnabled        Boolean              @default(false)
   views               Int                  @default(0)
   badges              String               @default("[]")
+  locale              String               @default("es")
   settings            String               @default("{}")
   usernameChangedAt   DateTime?
   accessCodeEnabled   Boolean              @default(false)
