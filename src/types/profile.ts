@@ -31,7 +31,13 @@ export type SocialPlatform =
   | "website"
   | "custom";
 
-export type BackgroundEffect = "none" | "snow" | "rain" | "stars";
+export type BackgroundEffect =
+  | "none"
+  | "snow"
+  | "rain"
+  | "stars"
+  | "aurora"
+  | "fireflies";
 export type BackgroundType = "image" | "video" | "gif";
 export type NameEffect = "none" | "glow" | "aura" | "neon" | "pulse" | "gradient";
 

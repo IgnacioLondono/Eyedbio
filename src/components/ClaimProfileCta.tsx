@@ -10,7 +10,7 @@ export default function ClaimProfileCta() {
   if (status !== "unauthenticated") return null;
 
   return (
-    <div className="fixed bottom-4 left-1/2 z-30 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2">
+    <div className="fixed bottom-8 md:bottom-10 left-1/2 z-30 w-[calc(100%-2rem)] max-w-md -translate-x-1/2">
       <div className="rounded-2xl border border-white/10 bg-black/70 px-4 py-3.5 shadow-2xl backdrop-blur-md">
         <div className="flex items-start gap-3">
           <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-500/20 text-purple-300">

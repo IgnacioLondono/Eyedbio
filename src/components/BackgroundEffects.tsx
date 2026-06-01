@@ -15,6 +15,7 @@ interface Particle {
   speed: number;
   opacity: number;
   drift?: number;
+  hue?: number;
 }
 
 export default function BackgroundEffects({ effect, contained = false }: Props) {
@@ -46,21 +47,55 @@ export default function BackgroundEffects({ effect, contained = false }: Props) 
           ? 50
           : effect === "snow"
             ? 35
-            : 45
+            : effect === "aurora"
+              ? 18
+              : effect === "fireflies"
+                ? 28
+                : 45
         : effect === "stars"
           ? 120
           : effect === "snow"
             ? 80
-            : 100;
+            : effect === "aurora"
+              ? 36
+              : effect === "fireflies"
+                ? 65
+                : 100;
 
-      particles = Array.from({ length: count }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: effect === "stars" ? Math.random() * 2 + 0.5 : Math.random() * 3 + 1,
-        speed: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.8 + 0.2,
-        drift: Math.random() * 2 - 1,
-      }));
+      particles = Array.from({ length: count }, () => {
+        if (effect === "aurora") {
+          return {
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height * 0.8,
+            size: Math.random() * 200 + 140,
+            speed: Math.random() * 0.8 + 0.2,
+            opacity: Math.random() * 0.25 + 0.1,
+            drift: Math.random() * 0.8 - 0.4,
+            hue: 180 + Math.random() * 120,
+          };
+        }
+
+        if (effect === "fireflies") {
+          return {
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 2.2 + 0.8,
+            speed: Math.random() * 0.8 + 0.2,
+            opacity: Math.random() * 0.6 + 0.2,
+            drift: Math.random() * 2 - 1,
+            hue: 45 + Math.random() * 30,
+          };
+        }
+
+        return {
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: effect === "stars" ? Math.random() * 2 + 0.5 : Math.random() * 3 + 1,
+          speed: Math.random() * 2 + 0.5,
+          opacity: Math.random() * 0.8 + 0.2,
+          drift: Math.random() * 2 - 1,
+        };
+      });
     };
 
     const draw = () => {
@@ -99,6 +134,37 @@ export default function BackgroundEffects({ effect, contained = false }: Props) 
             p.y = -20;
             p.x = Math.random() * canvas.width;
           }
+        } else if (effect === "aurora") {
+          const gradient = ctx.createRadialGradient(
+            p.x,
+            p.y,
+            0,
+            p.x,
+            p.y,
+            p.size
+          );
+          gradient.addColorStop(0, `hsla(${p.hue ?? 190}, 80%, 65%, ${p.opacity})`);
+          gradient.addColorStop(1, `hsla(${p.hue ?? 190}, 80%, 65%, 0)`);
+          ctx.fillStyle = gradient;
+          ctx.fillRect(p.x - p.size, p.y - p.size, p.size * 2, p.size * 2);
+
+          p.x += (p.drift ?? 0) * 0.15;
+          p.y += Math.sin((p.x + p.y) * 0.002) * 0.2;
+          if (p.x < -p.size) p.x = canvas.width + p.size;
+          if (p.x > canvas.width + p.size) p.x = -p.size;
+        } else if (effect === "fireflies") {
+          ctx.fillStyle = `hsla(${p.hue ?? 55}, 95%, 65%, ${p.opacity})`;
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+
+          p.x += (p.drift ?? 0) * 0.5;
+          p.y += (Math.random() - 0.5) * 0.6;
+          p.opacity += (Math.random() - 0.5) * 0.06;
+          p.opacity = Math.max(0.12, Math.min(0.95, p.opacity));
+          if (p.x > canvas.width + 10) p.x = -10;
+          if (p.x < -10) p.x = canvas.width + 10;
+          if (p.y > canvas.height + 10) p.y = -10;
+          if (p.y < -10) p.y = canvas.height + 10;
         }
       });
 

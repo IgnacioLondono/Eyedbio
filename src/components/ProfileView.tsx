@@ -8,6 +8,7 @@ import ProfileAudio from "@/components/ProfileAudio";
 import ProfileCard from "@/components/ProfileCard";
 import ShareProfileButton from "@/components/ShareProfileButton";
 import ClaimProfileCta from "@/components/ClaimProfileCta";
+import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 
 interface Props {
   username: string;
@@ -85,6 +86,7 @@ export default function ProfileView({ username }: Props) {
         username={profile.username}
         displayName={profile.displayName}
       />
+      <ProfileQuickNavButton profileUsername={profile.username} />
       <ClaimProfileCta />
       <div className="relative z-20 flex min-h-[100dvh] w-full items-center justify-center p-6 pb-28">
         <ProfileCard profile={profile} />

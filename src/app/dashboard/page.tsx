@@ -372,6 +372,8 @@ function DashboardContent() {
                     <option value="stars">Estrellas</option>
                     <option value="snow">Nieve</option>
                     <option value="rain">Lluvia</option>
+                    <option value="aurora">Aurora</option>
+                    <option value="fireflies">Luciérnagas</option>
                   </select>
                 </Field>
 
