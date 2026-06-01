@@ -34,8 +34,8 @@ import ShareProfileButton from "@/components/ShareProfileButton";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
 import CardLayoutPicker from "@/components/CardLayoutPicker";
 import {
-  resolveLinkStyle,
   resolveCardLayout,
+  resolveLinkStyle,
   suggestedSettingsForLayout,
 } from "@/lib/card-layout-config";
 
@@ -444,6 +444,36 @@ function DashboardContent() {
                     />
                   </Field>
                 </div>
+
+                {resolveCardLayout(profile.settings) === "banner" && (
+                  <div className="p-4 rounded-xl bg-white/[0.03] border border-purple-500/20 space-y-3">
+                    <div>
+                      <h3 className="text-sm font-medium text-white">Banner de la tarjeta</h3>
+                      <p className="text-xs text-white/40 mt-1 mb-3">
+                        Imagen horizontal para la cabecera del layout Banner. Independiente del
+                        fondo de pantalla.
+                      </p>
+                      <FileUpload
+                        kind="banner"
+                        label=""
+                        hint="JPG, PNG, WEBP o GIF · máx. 10 MB"
+                        currentUrl={profile.settings.bannerUrl}
+                        onUploaded={(url) => updateSettings({ bannerUrl: url })}
+                        onClear={() => updateSettings({ bannerUrl: "" })}
+                      />
+                    </div>
+                    <Field label="O pega una URL del banner">
+                      <input
+                        type="url"
+                        value={profile.settings.bannerUrl ?? ""}
+                        onChange={(e) => updateSettings({ bannerUrl: e.target.value })}
+                        className="input-field"
+                        placeholder="https://ejemplo.com/mi-banner.jpg"
+                      />
+                    </Field>
+                  </div>
+                )}
+
                 <FileUpload
                   kind="audio"
                   label="Audio de fondo"
@@ -671,7 +701,11 @@ function DashboardContent() {
             <BackgroundEffects effect={profile.settings.backgroundEffect} contained />
             <div className="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6 overflow-y-auto pointer-events-none">
               <div className="pointer-events-auto w-full flex justify-center">
-                <ProfileCard profile={profile} compact />
+                <ProfileCard
+                  key={`${profile.settings.cardLayout}-${profile.settings.linkStyle}`}
+                  profile={profile}
+                  compact
+                />
               </div>
             </div>
           </div>

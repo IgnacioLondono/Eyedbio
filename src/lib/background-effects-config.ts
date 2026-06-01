@@ -72,3 +72,12 @@ export function effectLabel(value: BackgroundEffect, locale: AppLocale): string 
 export function categoryLabel(category: EffectCategory, locale: AppLocale): string {
   return category.label[locale];
 }
+
+export function effectCategoryFor(value: BackgroundEffect, locale: AppLocale): string {
+  for (const cat of BACKGROUND_EFFECT_CATEGORIES) {
+    if (cat.effects.some((e) => e.value === value)) {
+      return categoryLabel(cat, locale);
+    }
+  }
+  return categoryLabel(BACKGROUND_EFFECT_CATEGORIES[0], locale);
+}

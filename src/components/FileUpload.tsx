@@ -85,6 +85,26 @@ function MediaPreview({
     );
   }
 
+  if (kind === "banner") {
+    if (broken) {
+      return (
+        <div className="h-24 bg-gradient-to-r from-purple-900/40 to-indigo-900/40 flex items-center justify-center">
+          <ImageIcon className="w-8 h-8 text-white/30" />
+        </div>
+      );
+    }
+    return (
+      <img
+        src={displayUrl}
+        alt="Banner"
+        referrerPolicy="no-referrer"
+        decoding="async"
+        className="w-full h-24 object-cover object-center"
+        onError={() => setBroken(true)}
+      />
+    );
+  }
+
   if (kind === "background") {
     if (broken && !isVideo) {
       return (
@@ -139,6 +159,8 @@ export default function FileUpload({
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState("");
   const isBackground = kind === "background";
+  const isBanner = kind === "banner";
+  const allowsDragDrop = isBackground || isBanner;
 
   const uploadFile = (
     file: File,
@@ -245,12 +267,12 @@ export default function FileUpload({
 
       <div
         onDragOver={(e) => {
-          if (!isBackground) return;
+          if (!allowsDragDrop) return;
           e.preventDefault();
           setDragOver(true);
         }}
         onDragLeave={() => setDragOver(false)}
-        onDrop={isBackground ? handleDrop : undefined}
+        onDrop={allowsDragDrop ? handleDrop : undefined}
       >
         <button
           type="button"
@@ -272,9 +294,11 @@ export default function FileUpload({
                 : "Subiendo..."
               : currentUrl
                 ? "Cambiar archivo"
-                : isBackground
-                  ? "Subir imagen, GIF o video"
-                  : "Subir archivo"}
+                : isBanner
+                  ? "Subir imagen de banner"
+                  : isBackground
+                    ? "Subir imagen, GIF o video"
+                    : "Subir archivo"}
           </span>
           {uploading && progress !== null && (
             <div className="w-full max-w-[200px] h-1 rounded-full bg-white/10 overflow-hidden">

@@ -46,6 +46,7 @@ export function userToProfile(user: UserWithLinks): Profile {
     linkStyle: resolveLinkStyle(storedSettings),
     avatarStyle: resolveAvatarStyle(storedSettings),
     backgroundEffect: resolveBackgroundEffect(storedSettings.backgroundEffect),
+    bannerUrl: storedSettings.bannerUrl ?? DEFAULT_SETTINGS.bannerUrl,
   };
 
   return {

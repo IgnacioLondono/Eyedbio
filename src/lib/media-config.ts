@@ -1,10 +1,11 @@
 import type { BackgroundType } from "@/types/profile";
 
-export type UploadKind = "avatar" | "background" | "audio" | "linkIcon";
+export type UploadKind = "avatar" | "background" | "banner" | "audio" | "linkIcon";
 
 export const UPLOAD_LIMITS: Record<UploadKind, number> = {
   avatar: 5 * 1024 * 1024,
   background: 50 * 1024 * 1024,
+  banner: 10 * 1024 * 1024,
   audio: 25 * 1024 * 1024,
   linkIcon: 2 * 1024 * 1024,
 };
@@ -86,6 +87,7 @@ export const AVATAR_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".av
 export const ALLOWED_MIMES: Record<UploadKind, readonly string[]> = {
   avatar: AVATAR_MIMES,
   background: BACKGROUND_MIMES,
+  banner: AVATAR_MIMES,
   audio: AUDIO_MIMES,
   linkIcon: AVATAR_MIMES,
 };
@@ -93,6 +95,7 @@ export const ALLOWED_MIMES: Record<UploadKind, readonly string[]> = {
 export const ALLOWED_EXTENSIONS: Record<UploadKind, readonly string[]> = {
   avatar: AVATAR_EXTENSIONS,
   background: BACKGROUND_EXTENSIONS,
+  banner: AVATAR_EXTENSIONS,
   audio: AUDIO_EXTENSIONS,
   linkIcon: AVATAR_EXTENSIONS,
 };
@@ -100,6 +103,7 @@ export const ALLOWED_EXTENSIONS: Record<UploadKind, readonly string[]> = {
 export const ACCEPT_ATTR: Record<UploadKind, string> = {
   avatar: AVATAR_MIMES.join(","),
   background: [...BACKGROUND_MIMES, ...BACKGROUND_EXTENSIONS].join(","),
+  banner: [...AVATAR_MIMES, ...AVATAR_EXTENSIONS].join(","),
   audio: [...AUDIO_MIMES, ...AUDIO_EXTENSIONS].join(","),
   linkIcon: [...AVATAR_MIMES, ...AVATAR_EXTENSIONS].join(","),
 };

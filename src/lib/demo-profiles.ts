@@ -53,7 +53,7 @@ export const LANDING_STYLE_DEMOS: Profile[] = [
       profileBlur: 20,
       nameEffect: "glow",
       backgroundEffect: "aurora",
-      backgroundUrl:
+      bannerUrl:
         "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=240&fit=crop&q=80",
     },
   }),

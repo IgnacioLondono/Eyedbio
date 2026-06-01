@@ -91,6 +91,8 @@ export interface ProfileSettings {
   showCardShadow: boolean;
   borderOpacity: number;
   cursorUrl?: string;
+  /** Imagen de cabecera cuando cardLayout es "banner" */
+  bannerUrl?: string;
   cardLayout: CardLayout;
   linkStyle: LinkStyle;
   avatarStyle: AvatarStyle;
@@ -132,6 +134,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
   showCardBorder: true,
   showCardShadow: true,
   borderOpacity: 0.2,
+  bannerUrl: "",
   cardLayout: "classic",
   linkStyle: "icons",
   avatarStyle: "circle",

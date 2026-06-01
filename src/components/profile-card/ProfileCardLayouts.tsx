@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Profile } from "@/types/profile";
 import { hexToRgba } from "@/lib/color-utils";
 import { getMediaSrc } from "@/lib/media-url";
-import { getCardSurfaceStyle } from "@/lib/card-styles";
+import { getCardSurfaceStyle, getCardFrameStyle, getCardBodySurfaceStyle } from "@/lib/card-styles";
 import { resolveLinkStyle } from "@/lib/card-layout-config";
 import ProfileLinksDisplay from "./ProfileLinksDisplay";
 import {
@@ -120,36 +120,54 @@ export function LayoutSplit({ profile, compact }: LayoutProps) {
 export function LayoutBanner({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
   const { settings } = profile;
-  const bannerH = compact ? "h-16" : "h-24";
-  const bannerSrc = settings.backgroundUrl ? getMediaSrc(settings.backgroundUrl) : null;
+  const frameStyle = getCardFrameStyle(settings);
+  const bodyStyle = getCardBodySurfaceStyle(settings);
+  const bannerH = compact ? "h-[76px]" : "h-[112px]";
+  const bannerSrc = settings.bannerUrl?.trim()
+    ? getMediaSrc(settings.bannerUrl)
+    : null;
+  const avatarSize = compact ? "w-[60px] h-[60px]" : "w-[84px] h-[84px]";
+  const overlap = compact ? "-mt-[30px]" : "-mt-[42px]";
 
   return (
-    <CardShell profile={profile} compact={compact} noPadding className="overflow-hidden">
+    <div
+      className="rounded-2xl border overflow-hidden w-full"
+      style={frameStyle}
+    >
       <div
-        className={`${bannerH} w-full bg-cover bg-center relative`}
+        className={`${bannerH} w-full relative bg-cover bg-center shrink-0`}
         style={
           bannerSrc
             ? { backgroundImage: `url(${bannerSrc})` }
             : {
-                background: `linear-gradient(135deg, ${settings.accentColor} 0%, ${hexToRgba(settings.cardColorSecondary || settings.accentColor, 0.85)} 50%, ${hexToRgba(settings.cardColor, 0.95)} 100%)`,
+                background: `linear-gradient(135deg, ${settings.accentColor} 0%, ${hexToRgba(settings.cardColorSecondary || settings.accentColor, 0.9)} 55%, ${hexToRgba(settings.cardColor, 1)} 100%)`,
               }
         }
       >
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/45" />
       </div>
-      <div className={`${compact ? "px-4 pb-4" : "px-6 pb-6"} -mt-8 flex flex-col items-center text-center`}>
-        <ProfileAvatar
-          profile={profile}
-          scale={scale}
-          sizeOverride={compact ? "w-16 h-16" : "w-20 h-20"}
-          className="mx-auto mb-3 ring-2 ring-black/20"
-        />
-        <ProfileNameBlock profile={profile} scale={scale} />
-        <ProfileBio profile={profile} scale={scale} className="mt-2 mb-2" />
-        <ProfileViews profile={profile} scale={scale} className="mb-3 justify-center" />
-        <LinksBlock profile={profile} compact={compact} />
+
+      <div
+        className={`relative border-t border-white/10 ${compact ? "px-3.5 pb-3.5" : "px-5 pb-5"}`}
+        style={bodyStyle}
+      >
+        <div className={`relative z-10 flex justify-center ${overlap} mb-1`}>
+          <ProfileAvatar
+            profile={profile}
+            scale={scale}
+            sizeOverride={avatarSize}
+            className="ring-[3px] ring-[#0a0a0f]/80 shadow-lg shadow-black/40"
+          />
+        </div>
+
+        <div className="flex flex-col items-center text-center">
+          <ProfileNameBlock profile={profile} scale={scale} />
+          <ProfileBio profile={profile} scale={scale} className="mt-1.5 mb-1.5" />
+          <ProfileViews profile={profile} scale={scale} className="mb-2 justify-center" />
+          <LinksBlock profile={profile} compact={compact} />
+        </div>
       </div>
-    </CardShell>
+    </div>
   );
 }
 

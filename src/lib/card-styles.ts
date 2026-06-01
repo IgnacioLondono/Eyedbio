@@ -16,6 +16,17 @@ export function resolveCardSettings(settings: Partial<ProfileSettings>): {
   };
 }
 
+export function getCardFrameStyle(settings: ProfileSettings): CSSProperties {
+  const { showCardBorder, showCardShadow, borderOpacity } = resolveCardSettings(settings);
+  return {
+    borderColor: showCardBorder
+      ? hexToRgba(settings.accentColor, borderOpacity)
+      : "transparent",
+    borderWidth: showCardBorder ? 1 : 0,
+    boxShadow: showCardShadow ? "0 25px 50px -12px rgba(0, 0, 0, 0.45)" : "none",
+  };
+}
+
 export function getCardSurfaceStyle(settings: ProfileSettings): CSSProperties {
   const { transparentCard, showCardBorder, showCardShadow, borderOpacity } =
     resolveCardSettings(settings);
@@ -40,5 +51,27 @@ export function getCardSurfaceStyle(settings: ProfileSettings): CSSProperties {
       : "transparent",
     borderWidth: showCardBorder ? 1 : 0,
     boxShadow: showCardShadow ? "0 25px 50px -12px rgba(0, 0, 0, 0.45)" : "none",
+  };
+}
+
+/** Superficie de tarjeta sin borde ni sombra (cuerpo bajo el banner). */
+export function getCardBodySurfaceStyle(settings: ProfileSettings): CSSProperties {
+  const { transparentCard } = resolveCardSettings(settings);
+
+  let background: string;
+  if (transparentCard) {
+    background = "transparent";
+  } else if (settings.gradientEnabled) {
+    background = `linear-gradient(135deg, ${hexToRgba(settings.cardColor, settings.profileOpacity)} 0%, ${hexToRgba(settings.cardColorSecondary, settings.profileOpacity)} 100%)`;
+  } else {
+    background = hexToRgba(settings.cardColor, settings.profileOpacity);
+  }
+
+  const blur = settings.profileBlur;
+
+  return {
+    background,
+    backdropFilter: blur > 0 ? `blur(${blur}px)` : undefined,
+    WebkitBackdropFilter: blur > 0 ? `blur(${blur}px)` : undefined,
   };
 }

@@ -150,6 +150,10 @@ export function getLayoutThumbnailProfile(layout: CardLayout): Profile {
       layout === "minimal" ? 0 : (suggestions.profileOpacity ?? DEFAULT_SETTINGS.profileOpacity),
     profileBlur:
       layout === "minimal" ? 0 : (suggestions.profileBlur ?? DEFAULT_SETTINGS.profileBlur),
+    bannerUrl:
+      layout === "banner"
+        ? "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=640&h=200&fit=crop&q=80"
+        : "",
   };
 
   return {
