@@ -121,6 +121,7 @@ export interface Messages {
     resetFailed: string;
     passwordRepeat: string;
     codeSentSuccess: string;
+    codeSentFallback: string;
     sendCodeFailed: string;
     noCode: string;
     requestCode: string;
@@ -522,7 +523,9 @@ export const es: Messages = {
     resetFailed: "No se pudo restablecer la contraseña",
     passwordRepeat: "Repite la contraseña",
     codeSentSuccess:
-      "Código enviado. Revisa tu bandeja de entrada y, si no lo ves, la carpeta de spam.",
+      "Te enviamos un código de acceso de 6 dígitos. Revisa tu bandeja de entrada y la carpeta de spam.",
+    codeSentFallback:
+      "Código generado. Revisa tu correo; si no llega, contacta con soporte.",
     sendCodeFailed: "No se pudo enviar el código",
     noCode: "¿No tienes código?",
     requestCode: "Solicitar uno",

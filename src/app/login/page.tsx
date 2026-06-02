@@ -82,7 +82,7 @@ function LoginForm() {
         return;
       }
 
-      setInfo(data.message ?? t("auth.codeSentSuccess"));
+      setInfo(data.emailSent === false ? t("auth.codeSentFallback") : t("auth.codeSentSuccess"));
       setStep("code");
       setCode("");
     } catch {

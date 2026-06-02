@@ -93,9 +93,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       requiresCode: true,
-      message: mail.sent
-        ? "Te enviamos un código de acceso de 6 dígitos. Revisa tu bandeja de entrada y la carpeta de spam."
-        : "Código generado. Revisa tu correo; si no llega, contacta con soporte.",
       emailSent: mail.sent,
     });
   } catch (err) {

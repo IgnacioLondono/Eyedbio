@@ -173,7 +173,9 @@ export const en: Messages = {
     resetFailed: "Could not reset password",
     passwordRepeat: "Repeat password",
     codeSentSuccess:
-      "Code sent. Check your inbox and spam folder if you don't see it.",
+      "We sent you a 6-digit access code. Check your inbox and spam folder.",
+    codeSentFallback:
+      "Code generated. Check your email; if it doesn't arrive, contact support.",
     sendCodeFailed: "Could not send the code",
     noCode: "Don't have a code?",
     requestCode: "Request one",
