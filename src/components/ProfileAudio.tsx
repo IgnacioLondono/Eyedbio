@@ -104,14 +104,24 @@ export default function ProfileAudio({
       setVolume(restored);
       volumeRef.current = restored;
       localStorage.setItem(VOLUME_STORAGE_KEY, String(restored));
+      audio.volume = restored;
+      audio.muted = false;
     }
 
+    userPausedRef.current = false;
+    wantsPlayRef.current = true;
+
     if (audio.currentTime < clipStartRef.current || audio.ended) {
-      runPlay(true);
-    } else {
-      resumePlayback();
+      audio.currentTime = clipStartRef.current;
     }
-  }, [enabled, isTouchDevice, pausePlayback, resumePlayback, runPlay]);
+
+    const playPromise = audio.play();
+    if (playPromise === undefined) return;
+
+    playPromise
+      .then(() => setNeedsInteraction(false))
+      .catch(() => setNeedsInteraction(true));
+  }, [enabled, isTouchDevice, pausePlayback]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
