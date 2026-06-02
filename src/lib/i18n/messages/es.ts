@@ -88,6 +88,8 @@ export interface Messages {
     backToCredentials: string;
     sendCode: string;
     sendingCode: string;
+    signIn: string;
+    signingIn: string;
     forgotPassword: string;
     noAccount: string;
     signupLink: string;
@@ -142,6 +144,9 @@ export interface Messages {
     accessCodeKeep: string;
     accessCodePlaceholder: string;
     accessCodeRules: string;
+    loginCodeTitle: string;
+    loginCodeHint: string;
+    loginCodeEnable: string;
     securityTitle: string;
     securityHint: string;
     currentPassword: string;
@@ -173,7 +178,6 @@ export interface Messages {
     loadError: string;
     connectionError: string;
     pageTitleNotFound: string;
-    serial: string;
   };
   accessGate: {
     protected: string;
@@ -471,8 +475,7 @@ export const es: Messages = {
   },
   auth: {
     loginTitle: "Bienvenido de nuevo",
-    loginSubtitle:
-      "Inicia sesión con tu email y contraseña. Te enviaremos un código de acceso por correo.",
+    loginSubtitle: "Inicia sesión con tu email y contraseña.",
     codeTitle: "Código de acceso",
     codeSubtitle: "Introduce el código de 6 dígitos enviado a {email}. Revisa también spam.",
     codeLabel: "Código de acceso",
@@ -485,6 +488,8 @@ export const es: Messages = {
     backToCredentials: "← Volver a email y contraseña",
     sendCode: "Enviar código de acceso",
     sendingCode: "Enviando código...",
+    signIn: "Iniciar sesión",
+    signingIn: "Iniciando sesión...",
     forgotPassword: "¿Olvidaste tu contraseña?",
     noAccount: "¿No tienes cuenta?",
     signupLink: "Regístrate gratis",
@@ -543,6 +548,10 @@ export const es: Messages = {
     accessCodePlaceholder: "Mínimo 4 caracteres",
     accessCodeRules:
       "Solo letras y números (4–32 caracteres). Compártelo solo con quien quieras que vea tu perfil.",
+    loginCodeTitle: "Código por correo al iniciar sesión",
+    loginCodeHint:
+      "Si lo activas, además de tu contraseña te enviaremos un código de 6 dígitos por email cada vez que entres.",
+    loginCodeEnable: "Exigir código por correo al iniciar sesión",
     securityTitle: "Seguridad",
     securityHint:
       "Confirma con tu contraseña actual. Deja en blanco si no quieres cambiarla.",
@@ -563,7 +572,7 @@ export const es: Messages = {
     usernameCooldown: "Solo podrás volver a cambiarlo dentro de {days} días.",
     usernameConfirmYes: "Sí, cambiar usuario",
     publicUid: "Serial (UID)",
-    publicUidHint: "Identificador único y permanente de tu cuenta. Visible en tu perfil público.",
+    publicUidHint: "Identificador único y permanente de tu cuenta. Solo visible aquí, en ajustes de cuenta.",
   },
   profile: {
     visits: "visitas",
@@ -576,7 +585,6 @@ export const es: Messages = {
     loadError: "No se pudo cargar el perfil",
     connectionError: "Error de conexión. Comprueba tu red e inténtalo de nuevo.",
     pageTitleNotFound: "Perfil no encontrado — Eyed.bio",
-    serial: "Serial de cuenta",
   },
   accessGate: {
     protected: "Perfil protegido",

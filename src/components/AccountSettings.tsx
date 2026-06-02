@@ -20,6 +20,7 @@ interface AccountData {
   nextUsernameChangeAt: string | null;
   accessCodeEnabled: boolean;
   hasAccessCode: boolean;
+  loginCodeEnabled: boolean;
 }
 
 interface Props {
@@ -43,6 +44,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
   const [confirmPassword, setConfirmPassword] = useState("");
   const [accessCodeEnabled, setAccessCodeEnabled] = useState(false);
   const [accessCode, setAccessCode] = useState("");
+  const [loginCodeEnabled, setLoginCodeEnabled] = useState(false);
 
   useEffect(() => {
     fetch("/api/account")
@@ -55,6 +57,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
         setEmail(data.email);
         setUsername(data.username);
         setAccessCodeEnabled(data.accessCodeEnabled);
+        setLoginCodeEnabled(data.loginCodeEnabled);
         if (data.locale) void setLocale(data.locale, false);
       })
       .catch(() => setError(t("account.loadError")))
@@ -67,6 +70,9 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
   const accessCodeSettingsChanged =
     account !== null &&
     (accessCodeEnabled !== account.accessCodeEnabled || accessCode.length > 0);
+
+  const loginCodeSettingsChanged =
+    account !== null && loginCodeEnabled !== account.loginCodeEnabled;
 
   const submitChanges = async () => {
     if (!account) return;
@@ -87,6 +93,9 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
       if (accessCodeSettingsChanged) {
         payload.accessCodeEnabled = accessCodeEnabled;
         if (accessCode) payload.accessCode = accessCode;
+      }
+      if (loginCodeSettingsChanged) {
+        payload.loginCodeEnabled = loginCodeEnabled;
       }
 
       const res = await fetch("/api/account", {
@@ -109,6 +118,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
       setConfirmPassword("");
       setAccessCode("");
       setAccessCodeEnabled(data.accessCodeEnabled);
+      setLoginCodeEnabled(data.loginCodeEnabled);
       setSuccess(data.message ?? t("account.updated"));
       setShowUsernameConfirm(false);
 
@@ -355,6 +365,28 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
                 {t("account.securityHint")}
               </p>
             </div>
+          </div>
+
+          <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+            <div className="min-w-0 pr-3">
+              <p className="text-sm text-white/70">{t("account.loginCodeEnable")}</p>
+              <p className="text-[11px] text-white/35 mt-1 leading-relaxed">{t("account.loginCodeHint")}</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={loginCodeEnabled}
+              onClick={() => setLoginCodeEnabled((prev) => !prev)}
+              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
+                loginCodeEnabled ? "bg-purple-600" : "bg-white/10"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                  loginCodeEnabled ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
           </div>
 
           <div>

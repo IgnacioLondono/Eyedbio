@@ -167,7 +167,6 @@ export function getLayoutThumbnailProfile(layout: CardLayout): Profile {
     views: 999,
     badges: [],
     links: THUMBNAIL_LINKS,
-    publicUid: "EYE-000000",
     createdAt: "",
     locale: "es",
     settings,

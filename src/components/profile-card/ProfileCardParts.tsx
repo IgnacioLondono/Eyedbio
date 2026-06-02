@@ -202,15 +202,6 @@ export function ProfileNameBlock({
       >
         @{profile.username}
       </p>
-      {profile.publicUid ? (
-        <p
-          className={`font-mono tracking-wide ${scale.compact ? "text-[10px] mt-0.5" : "text-[11px] mt-1"}`}
-          style={{ color: hexToRgba(textColor, 0.35) }}
-          title={translate(profile.locale, "profile.serial")}
-        >
-          {profile.publicUid}
-        </p>
-      ) : null}
     </>
   );
 }

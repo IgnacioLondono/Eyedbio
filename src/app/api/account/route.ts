@@ -33,6 +33,7 @@ export async function GET() {
       usernameChangedAt: true,
       accessCodeEnabled: true,
       accessCodeHash: true,
+      loginCodeEnabled: true,
       locale: true,
     },
   });
@@ -55,6 +56,7 @@ export async function GET() {
     nextUsernameChangeAt: nextChangeAt?.toISOString() ?? null,
     accessCodeEnabled: user.accessCodeEnabled,
     hasAccessCode: Boolean(user.accessCodeHash),
+    loginCodeEnabled: user.loginCodeEnabled,
     locale: user.locale === "en" ? "en" : "es",
   });
 }
@@ -77,6 +79,8 @@ export async function PATCH(request: Request) {
       body.accessCodeEnabled !== undefined ? Boolean(body.accessCodeEnabled) : undefined;
     const accessCode =
       body.accessCode !== undefined ? normalizeAccessCode(String(body.accessCode)) : undefined;
+    const loginCodeEnabled =
+      body.loginCodeEnabled !== undefined ? Boolean(body.loginCodeEnabled) : undefined;
     const locale =
       body.locale !== undefined ? (body.locale === "en" ? "en" : "es") : undefined;
 
@@ -85,7 +89,8 @@ export async function PATCH(request: Request) {
       username !== undefined ||
       newPassword ||
       accessCodeEnabled !== undefined ||
-      accessCode !== undefined;
+      accessCode !== undefined ||
+      loginCodeEnabled !== undefined;
 
     if (sensitiveFields && !currentPassword) {
       return NextResponse.json(
@@ -130,6 +135,7 @@ export async function PATCH(request: Request) {
       usernameChangedAt?: Date;
       accessCodeEnabled?: boolean;
       accessCodeHash?: string | null;
+      loginCodeEnabled?: boolean;
       locale?: string;
     } = {};
 
@@ -209,6 +215,13 @@ export async function PATCH(request: Request) {
       }
     }
 
+    if (loginCodeEnabled !== undefined) {
+      updates.loginCodeEnabled = loginCodeEnabled;
+      if (loginCodeEnabled === false) {
+        await prisma.loginVerificationToken.deleteMany({ where: { userId: user.id } });
+      }
+    }
+
     if (locale !== undefined) {
       updates.locale = locale;
     }
@@ -226,6 +239,7 @@ export async function PATCH(request: Request) {
         usernameChangedAt: true,
         accessCodeEnabled: true,
         accessCodeHash: true,
+        loginCodeEnabled: true,
         locale: true,
       },
       data: updates,
@@ -254,6 +268,7 @@ export async function PATCH(request: Request) {
       nextUsernameChangeAt: usernameStatus.nextChangeAt?.toISOString() ?? null,
       accessCodeEnabled: updated.accessCodeEnabled,
       hasAccessCode: Boolean(updated.accessCodeHash),
+      loginCodeEnabled: updated.loginCodeEnabled,
       locale: updated.locale === "en" ? "en" : "es",
       message: "Cuenta actualizada correctamente",
     });

@@ -30,6 +30,20 @@ function LoginForm() {
   const resetSuccess = searchParams.get("reset") === "success";
   const blockedNotice = searchParams.get("error") === "blocked";
 
+  const redirectAfterLogin = async () => {
+    const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
+    const session = sessionRes.ok ? await sessionRes.json() : await getSession();
+
+    const destination =
+      session?.user && isAdminRole(session.user.role)
+        ? callbackUrl.startsWith("/admin")
+          ? callbackUrl
+          : "/admin"
+        : callbackUrl;
+
+    window.location.href = destination;
+  };
+
   const requestCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -46,6 +60,25 @@ function LoginForm() {
       const data = await res.json();
       if (!res.ok) {
         setError(data.error ?? t("auth.wrongCredentials"));
+        return;
+      }
+
+      if (data.requiresCode === false) {
+        setLoading(true);
+        const result = await signIn("credentials", {
+          email,
+          password,
+          intent: "login",
+          redirect: false,
+        });
+        setLoading(false);
+
+        if (result?.error) {
+          setError(t("auth.wrongCredentials"));
+          return;
+        }
+
+        await redirectAfterLogin();
         return;
       }
 
@@ -78,17 +111,7 @@ function LoginForm() {
       return;
     }
 
-    const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
-    const session = sessionRes.ok ? await sessionRes.json() : await getSession();
-
-    const destination =
-      session?.user && isAdminRole(session.user.role)
-        ? callbackUrl.startsWith("/admin")
-          ? callbackUrl
-          : "/admin"
-        : callbackUrl;
-
-    window.location.href = destination;
+    await redirectAfterLogin();
   };
 
   if (step === "code") {
@@ -235,9 +258,9 @@ function LoginForm() {
 
         <AuthError message={error} />
 
-        <AuthSubmitButton loading={loading} loadingText={t("auth.sendingCode")}>
+        <AuthSubmitButton loading={loading} loadingText={t("auth.signingIn")}>
           <>
-            {t("auth.sendCode")}
+            {t("auth.signIn")}
             <ArrowRight className="w-4 h-4" />
           </>
         </AuthSubmitButton>

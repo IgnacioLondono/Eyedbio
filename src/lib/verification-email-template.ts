@@ -123,10 +123,7 @@ function escapeHtml(value: string): string {
 }
 
 function formatCodeDisplay(code: string): string {
-  const digits = code.replace(/\D/g, "").slice(0, 6);
-  if (digits.length <= 3) return escapeHtml(digits);
-  const mid = Math.ceil(digits.length / 2);
-  return `${escapeHtml(digits.slice(0, mid))}&nbsp;&nbsp;${escapeHtml(digits.slice(mid))}`;
+  return escapeHtml(code.replace(/\D/g, "").slice(0, 6));
 }
 
 export function getVerificationEmailCopy(
@@ -240,7 +237,7 @@ export function buildVerificationEmailHtml(
                           <p style="margin:0 0 6px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:${BRAND.textDim};">
                             ${safeCodeLabel}
                           </p>
-                          <p style="margin:0;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:36px;font-weight:700;letter-spacing:0.28em;color:${BRAND.text};">
+                          <p style="margin:0;font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',Menlo,monospace;font-size:36px;font-weight:700;letter-spacing:0.18em;color:${BRAND.text};">
                             ${codeDisplay}
                           </p>
                         </td>

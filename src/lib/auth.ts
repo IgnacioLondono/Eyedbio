@@ -49,27 +49,40 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return fresh ? toAuthUser(fresh) : null;
         }
 
-        if (!code || !isValidVerificationCode(code)) return null;
+        if (intent === "login") {
+          if (!user.loginCodeEnabled) {
+            if (!password) return null;
+            const valid = await bcrypt.compare(password, user.passwordHash);
+            if (!valid) return null;
 
-        try {
-          const loginToken = await prisma.loginVerificationToken.findFirst({
-            where: {
-              userId: user.id,
-              token: code,
-              expiresAt: { gt: new Date() },
-            },
-          });
+            const fresh = await loadUser();
+            return fresh ? toAuthUser(fresh) : null;
+          }
 
-          if (!loginToken) return null;
+          if (!code || !isValidVerificationCode(code)) return null;
 
-          await prisma.loginVerificationToken.delete({ where: { id: loginToken.id } });
-        } catch (err) {
-          console.error("[auth] login verification lookup failed:", err);
-          return null;
+          try {
+            const loginToken = await prisma.loginVerificationToken.findFirst({
+              where: {
+                userId: user.id,
+                token: code,
+                expiresAt: { gt: new Date() },
+              },
+            });
+
+            if (!loginToken) return null;
+
+            await prisma.loginVerificationToken.delete({ where: { id: loginToken.id } });
+          } catch (err) {
+            console.error("[auth] login verification lookup failed:", err);
+            return null;
+          }
+
+          const fresh = await loadUser();
+          return fresh ? toAuthUser(fresh) : null;
         }
 
-        const fresh = await loadUser();
-        return fresh ? toAuthUser(fresh) : null;
+        return null;
       },
     }),
   ],

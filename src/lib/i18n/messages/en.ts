@@ -127,8 +127,7 @@ export const en: Messages = {
   },
   auth: {
     loginTitle: "Welcome back",
-    loginSubtitle:
-      "Log in with your email and password. We'll send you an access code by email.",
+    loginSubtitle: "Sign in with your email and password.",
     codeTitle: "Access code",
     codeSubtitle: "Enter the 6-digit code sent to {email}. Check spam too.",
     codeLabel: "Access code",
@@ -141,6 +140,8 @@ export const en: Messages = {
     backToCredentials: "← Back to email and password",
     sendCode: "Send access code",
     sendingCode: "Sending code...",
+    signIn: "Sign in",
+    signingIn: "Signing in...",
     forgotPassword: "Forgot your password?",
     noAccount: "Don't have an account?",
     signupLink: "Sign up free",
@@ -199,6 +200,10 @@ export const en: Messages = {
     accessCodePlaceholder: "Minimum 4 characters",
     accessCodeRules:
       "Letters and numbers only (4–32 characters). Share only with people you want to see your profile.",
+    loginCodeTitle: "Email code on sign-in",
+    loginCodeHint:
+      "When enabled, we'll email you a 6-digit code in addition to your password every time you sign in.",
+    loginCodeEnable: "Require email code on sign-in",
     securityTitle: "Security",
     securityHint:
       "Confirm with your current password. Leave blank if you don't want to change it.",
@@ -219,7 +224,7 @@ export const en: Messages = {
     usernameCooldown: "You can only change it again in {days} days.",
     usernameConfirmYes: "Yes, change username",
     publicUid: "Serial (UID)",
-    publicUidHint: "Unique permanent account identifier. Shown on your public profile.",
+    publicUidHint: "Unique permanent account identifier. Only visible here in account settings.",
   },
   profile: {
     visits: "views",
@@ -232,7 +237,6 @@ export const en: Messages = {
     loadError: "Could not load profile",
     connectionError: "Connection error. Check your network and try again.",
     pageTitleNotFound: "Profile not found — Eyed.bio",
-    serial: "Account serial",
   },
   accessGate: {
     protected: "Protected profile",

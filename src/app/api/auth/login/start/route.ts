@@ -67,6 +67,12 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!user.loginCodeEnabled) {
+      return NextResponse.json({
+        requiresCode: false,
+      });
+    }
+
     await prisma.loginVerificationToken.deleteMany({ where: { userId: user.id } });
 
     const code = createVerificationCode();
@@ -86,6 +92,7 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
+      requiresCode: true,
       message: mail.sent
         ? "Te enviamos un código de acceso de 6 dígitos. Revisa tu bandeja de entrada y la carpeta de spam."
         : "Código generado. Revisa tu correo; si no llega, contacta con soporte.",
