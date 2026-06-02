@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
 import { AUDIO_CLIP_DURATION, clampAudioStart } from "@/lib/audio-config";
+import { getMediaSrc } from "@/lib/media-url";
 
 const VOLUME_STORAGE_KEY = "eyed-audio-volume";
 
@@ -21,13 +22,32 @@ export default function ProfileAudio({
   variant = "floating",
 }: Props) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const wantsPlayRef = useRef(false);
+  const clipStartRef = useRef(0);
   const [volume, setVolume] = useState(0.7);
   const [duration, setDuration] = useState(0);
   const [showVolume, setShowVolume] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [needsInteraction, setNeedsInteraction] = useState(false);
 
+  const src = getMediaSrc(url);
   const clipStart = clampAudioStart(startTime, duration || Infinity);
-  const clipEnd = clipStart + AUDIO_CLIP_DURATION;
+  clipStartRef.current = clipStart;
+
+  const tryPlaySync = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || !enabled || volume === 0) return;
+
+    wantsPlayRef.current = true;
+    audio.currentTime = clipStartRef.current;
+
+    const playPromise = audio.play();
+    if (playPromise === undefined) return;
+
+    playPromise
+      .then(() => setNeedsInteraction(false))
+      .catch(() => setNeedsInteraction(true));
+  }, [enabled, volume]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -46,8 +66,6 @@ export default function ProfileAudio({
         return;
       }
     }
-    // En móvil usamos el volumen del sistema del teléfono,
-    // así que dejamos por defecto el audio al máximo.
     setVolume(isTouchDevice ? 1 : 0.7);
   }, [isTouchDevice]);
 
@@ -56,7 +74,12 @@ export default function ProfileAudio({
     if (!audio) return;
     audio.volume = volume;
     audio.muted = volume === 0;
-  }, [volume, url]);
+    if (volume === 0) {
+      wantsPlayRef.current = false;
+      audio.pause();
+      setNeedsInteraction(false);
+    }
+  }, [volume, src]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -69,13 +92,14 @@ export default function ProfileAudio({
     };
 
     const onTimeUpdate = () => {
+      const start = clipStartRef.current;
       const end =
         audio.duration > AUDIO_CLIP_DURATION
-          ? clipStart + AUDIO_CLIP_DURATION
+          ? start + AUDIO_CLIP_DURATION
           : audio.duration;
 
       if (Number.isFinite(end) && audio.currentTime >= end) {
-        audio.currentTime = clipStart;
+        audio.currentTime = start;
       }
     };
 
@@ -85,24 +109,55 @@ export default function ProfileAudio({
       audio.removeEventListener("loadedmetadata", onLoaded);
       audio.removeEventListener("timeupdate", onTimeUpdate);
     };
-  }, [clipStart, url]);
+  }, [src]);
 
   useEffect(() => {
-    if (!enabled || !audioRef.current) return;
+    if (!enabled || !audioRef.current || volume === 0) return;
 
     const audio = audioRef.current;
-    const playFromClip = () => {
-      audio.currentTime = clipStart;
-      audio.play().catch(() => {});
-    };
+    const attemptPlay = () => tryPlaySync();
 
     if (audio.readyState >= 1) {
-      playFromClip();
+      attemptPlay();
     } else {
-      audio.addEventListener("loadedmetadata", playFromClip, { once: true });
-      return () => audio.removeEventListener("loadedmetadata", playFromClip);
+      audio.addEventListener("loadedmetadata", attemptPlay, { once: true });
+      audio.addEventListener("canplay", attemptPlay, { once: true });
+      return () => {
+        audio.removeEventListener("loadedmetadata", attemptPlay);
+        audio.removeEventListener("canplay", attemptPlay);
+      };
     }
-  }, [clipStart, enabled, url]);
+  }, [clipStart, enabled, src, tryPlaySync, volume]);
+
+  useEffect(() => {
+    if (!enabled || !needsInteraction || volume === 0) return;
+
+    const unlock = () => tryPlaySync();
+
+    document.addEventListener("pointerdown", unlock, { capture: true });
+    document.addEventListener("touchstart", unlock, { capture: true, passive: true });
+    document.addEventListener("keydown", unlock, { capture: true });
+
+    return () => {
+      document.removeEventListener("pointerdown", unlock, { capture: true });
+      document.removeEventListener("touchstart", unlock, { capture: true });
+      document.removeEventListener("keydown", unlock, { capture: true });
+    };
+  }, [enabled, needsInteraction, tryPlaySync, volume]);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const resumeIfNeeded = () => {
+      if (document.visibilityState !== "visible" || !wantsPlayRef.current || volume === 0) {
+        return;
+      }
+      tryPlaySync();
+    };
+
+    document.addEventListener("visibilitychange", resumeIfNeeded);
+    return () => document.removeEventListener("visibilitychange", resumeIfNeeded);
+  }, [enabled, tryPlaySync, volume]);
 
   if (!enabled || !url) return null;
 
@@ -110,9 +165,11 @@ export default function ProfileAudio({
     const next = Math.min(1, Math.max(0, value));
     setVolume(next);
     localStorage.setItem(VOLUME_STORAGE_KEY, String(next));
+    if (next > 0) tryPlaySync();
   };
 
   const muted = volume === 0;
+  const waitingForTap = needsInteraction && !muted;
 
   const controlsShell =
     variant === "card"
@@ -141,11 +198,22 @@ export default function ProfileAudio({
 
   return (
     <>
-      <audio ref={audioRef} src={url} preload="auto" playsInline />
+      <audio
+        ref={audioRef}
+        src={src}
+        preload="auto"
+        playsInline
+        // eslint-disable-next-line react/no-unknown-property
+        webkit-playsinline="true"
+      />
       <div className={wrapperClass}>
         <div className={controlsShell}>
           <button
             type="button"
+            onPointerDown={(event) => {
+              event.stopPropagation();
+              tryPlaySync();
+            }}
             onClick={() => {
               if (isTouchDevice) {
                 setShowVolume((prev) => !prev);
@@ -153,8 +221,18 @@ export default function ProfileAudio({
               }
               setShowVolume(true);
             }}
-            className={buttonPadding}
-            aria-label={muted ? "Activar sonido" : "Ajustar volumen"}
+            className={`${buttonPadding} ${
+              waitingForTap
+                ? "animate-pulse ring-2 ring-purple-400/60 ring-offset-1 ring-offset-transparent rounded-lg"
+                : ""
+            }`}
+            aria-label={
+              waitingForTap
+                ? "Toca para reproducir música"
+                : muted
+                  ? "Activar sonido"
+                  : "Ajustar volumen"
+            }
           >
             {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
           </button>
