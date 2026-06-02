@@ -348,8 +348,9 @@ export const en: Messages = {
     monochromeIcons: "Monochrome icons",
   },
   linkEditor: {
-    count: "{count}/{max} links",
-    limitReached: " · Limit reached. Remove one to add another.",
+    count: "{count}/{max} active links",
+    draftHint: " · {drafts} without URL (not counted toward the limit)",
+    limitReached: " · Limit reached. Remove one or complete the missing URLs.",
     empty: "Pick an icon below to add your first link.",
     visibleName: "Visible name (optional)",
     remove: "Remove {label}",

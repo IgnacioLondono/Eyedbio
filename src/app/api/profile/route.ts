@@ -56,7 +56,7 @@ export async function PATCH(request: Request) {
   try {
     const profile = (await request.json()) as Profile;
 
-    const linksError = validateSocialLinksCount(profile.links?.length ?? 0);
+    const linksError = validateSocialLinksCount(profile.links ?? []);
     if (linksError) {
       return NextResponse.json({ error: linksError }, { status: 400 });
     }

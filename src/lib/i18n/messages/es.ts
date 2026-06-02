@@ -284,6 +284,7 @@ export interface Messages {
   };
   linkEditor: {
     count: string;
+    draftHint: string;
     limitReached: string;
     empty: string;
     visibleName: string;
@@ -696,8 +697,9 @@ export const es: Messages = {
     monochromeIcons: "Iconos monocromáticos",
   },
   linkEditor: {
-    count: "{count}/{max} enlaces",
-    limitReached: " · Límite alcanzado. Quita uno para añadir otro.",
+    count: "{count}/{max} enlaces activos",
+    draftHint: " · {drafts} sin URL (no cuentan en el límite)",
+    limitReached: " · Límite alcanzado. Quita uno o completa los que faltan.",
     empty: "Elige un icono abajo para añadir tu primer enlace.",
     visibleName: "Nombre visible (opcional)",
     remove: "Quitar {label}",

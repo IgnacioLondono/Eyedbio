@@ -7,7 +7,12 @@ import { PLATFORM_CONFIG } from "@/lib/platforms";
 import { PLATFORM_CATEGORIES, getPlatformUrlPlaceholder } from "@/lib/platform-categories";
 import { PlatformIcon } from "@/components/PlatformIcons";
 import { createEmptyLink } from "@/lib/profile-mapper";
-import { MAX_SOCIAL_LINKS, canAddSocialLink } from "@/lib/links-config";
+import {
+  MAX_SOCIAL_LINKS,
+  canAddSocialLink,
+  countActiveSocialLinks,
+  countDraftSocialLinks,
+} from "@/lib/links-config";
 import { ACCEPT_ATTR } from "@/lib/media-config";
 import { getMediaSrc } from "@/lib/media-url";
 import { useI18n } from "@/components/LocaleProvider";
@@ -100,16 +105,29 @@ export default function LinkEditor({ links, onChange }: Props) {
     links.filter((l) => l.platform !== "custom").map((l) => l.platform)
   );
 
-  const atLinkLimit = !canAddSocialLink(links.length);
+  const activeCount = countActiveSocialLinks(links);
+  const draftCount = countDraftSocialLinks(links);
+  const atLinkLimit = !canAddSocialLink(links);
 
-  const addLink = (platform: SocialPlatform) => {
+  const insertLink = (platform: SocialPlatform) => {
+    const emptyIndex = links.findIndex((link) => !link.url.trim());
+    if (emptyIndex >= 0) {
+      const next = [...links];
+      next[emptyIndex] = { ...createEmptyLink(platform), id: next[emptyIndex].id };
+      onChange(next);
+      return;
+    }
     if (atLinkLimit) return;
     onChange([...links, createEmptyLink(platform)]);
   };
 
+  const addLink = (platform: SocialPlatform) => {
+    if (usedPlatforms.has(platform)) return;
+    insertLink(platform);
+  };
+
   const addCustomLink = () => {
-    if (atLinkLimit) return;
-    onChange([...links, createEmptyLink("custom")]);
+    insertLink("custom");
   };
 
   const updateLink = (id: string, partial: Partial<SocialLink>) => {
@@ -129,8 +147,11 @@ export default function LinkEditor({ links, onChange }: Props) {
   return (
     <div className="space-y-6">
       <p className="text-xs text-white/40">
-        {tVars("linkEditor.count", { count: links.length, max: MAX_SOCIAL_LINKS })}
-        {atLinkLimit && (
+        {tVars("linkEditor.count", { count: activeCount, max: MAX_SOCIAL_LINKS })}
+        {draftCount > 0 && (
+          <span className="text-white/30">{tVars("linkEditor.draftHint", { drafts: draftCount })}</span>
+        )}
+        {atLinkLimit && activeCount >= MAX_SOCIAL_LINKS && (
           <span className="text-amber-300/90">{t("linkEditor.limitReached")}</span>
         )}
       </p>
@@ -147,7 +168,9 @@ export default function LinkEditor({ links, onChange }: Props) {
             return (
               <div
                 key={link.id}
-                className="flex flex-col items-center p-4 rounded-xl bg-white/[0.03] border border-white/5"
+                className={`flex flex-col items-center p-4 rounded-xl bg-white/[0.03] border ${
+                  link.url.trim() ? "border-white/5" : "border-amber-500/35"
+                }`}
               >
                 <div className="w-full flex items-start justify-between gap-2 mb-2">
                   <div className="min-w-0 flex-1">
