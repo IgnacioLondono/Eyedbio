@@ -82,6 +82,7 @@ export async function POST(request: Request) {
       to: user.email,
       code,
       purpose: "login",
+      locale: user.locale,
     });
 
     return NextResponse.json({

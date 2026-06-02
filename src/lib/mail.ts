@@ -1,11 +1,19 @@
+import type { AppLocale } from "@/lib/i18n/types";
 import { describeMailConfig, getMailConfig } from "@/lib/mail-config";
+import {
+  buildVerificationEmailHtml,
+  buildVerificationEmailText,
+  getVerificationEmailCopy,
+  type VerificationEmailPurpose,
+} from "@/lib/verification-email-template";
 
-export type VerificationEmailPurpose = "reset" | "login";
+export type { VerificationEmailPurpose };
 
 interface SendCodeOptions {
   to: string;
   code: string;
   purpose?: VerificationEmailPurpose;
+  locale?: AppLocale | string | null;
 }
 
 interface SendResult {
@@ -13,59 +21,15 @@ interface SendResult {
   error?: string;
 }
 
-function getCopy(purpose: VerificationEmailPurpose) {
-  if (purpose === "login") {
-    return {
-      subject: "Tu código de acceso — Eyed.bio",
-      intro: "Tu código para iniciar sesión en Eyed.bio:",
-      htmlIntro: "Tu código de acceso para iniciar sesión:",
-      ignore:
-        "Si no intentaste iniciar sesión, ignora este mensaje y cambia tu contraseña.",
-    };
-  }
-
-  return {
-    subject: "Tu código de verificación — Eyed.bio",
-    intro: "Tu código para restablecer la contraseña en Eyed.bio:",
-    htmlIntro: "Tu código de verificación para restablecer la contraseña:",
-    ignore: "Si no solicitaste este código, ignora este mensaje.",
-  };
-}
-
-function buildTextBody(code: string, purpose: VerificationEmailPurpose): string {
-  const copy = getCopy(purpose);
-  return [
-    copy.intro,
-    "",
-    code,
-    "",
-    "Válido durante 15 minutos.",
-    "Revisa también la carpeta de spam si no lo ves en la bandeja de entrada.",
-    copy.ignore,
-  ].join("\n");
-}
-
-function buildHtmlBody(code: string, purpose: VerificationEmailPurpose): string {
-  const copy = getCopy(purpose);
-  return `
-    <div style="font-family:system-ui,sans-serif;max-width:520px;margin:0 auto;color:#111">
-      <h2 style="color:#7c3aed">Eyed.bio</h2>
-      <p>${copy.htmlIntro}</p>
-      <p style="font-size:32px;font-weight:700;letter-spacing:8px;color:#7c3aed;margin:24px 0">${code}</p>
-      <p style="color:#666;font-size:13px">Válido 15 minutos. Si no ves el correo, revisa spam.</p>
-      <p style="color:#666;font-size:13px">${copy.ignore}</p>
-    </div>
-  `;
-}
-
 async function sendViaResend(
   to: string,
   code: string,
   purpose: VerificationEmailPurpose,
   apiKey: string,
-  from: string
+  from: string,
+  locale?: AppLocale | string | null
 ): Promise<SendResult> {
-  const copy = getCopy(purpose);
+  const copy = getVerificationEmailCopy(purpose, locale);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -76,8 +40,8 @@ async function sendViaResend(
       from,
       to: [to],
       subject: copy.subject,
-      text: buildTextBody(code, purpose),
-      html: buildHtmlBody(code, purpose),
+      text: buildVerificationEmailText(code, purpose, locale),
+      html: buildVerificationEmailHtml(code, purpose, locale),
     }),
   });
 
@@ -96,7 +60,8 @@ async function sendViaSmtp(
   to: string,
   code: string,
   purpose: VerificationEmailPurpose,
-  smtp: NonNullable<ReturnType<typeof getMailConfig>["smtp"]>
+  smtp: NonNullable<ReturnType<typeof getMailConfig>["smtp"]>,
+  locale?: AppLocale | string | null
 ): Promise<SendResult> {
   if (!smtp.user || !smtp.pass) {
     return {
@@ -105,7 +70,7 @@ async function sendViaSmtp(
     };
   }
 
-  const copy = getCopy(purpose);
+  const copy = getVerificationEmailCopy(purpose, locale);
   const nodemailer = await import("nodemailer");
   const transporter = nodemailer.createTransport({
     host: smtp.host,
@@ -126,8 +91,8 @@ async function sendViaSmtp(
     from: smtp.from,
     to,
     subject: copy.subject,
-    text: buildTextBody(code, purpose),
-    html: buildHtmlBody(code, purpose),
+    text: buildVerificationEmailText(code, purpose, locale),
+    html: buildVerificationEmailHtml(code, purpose, locale),
   });
 
   return { sent: true };
@@ -137,6 +102,7 @@ export async function sendVerificationCodeEmail({
   to,
   code,
   purpose = "reset",
+  locale,
 }: SendCodeOptions): Promise<SendResult> {
   const config = getMailConfig();
   const label = purpose === "login" ? "acceso" : "verificación";
@@ -156,9 +122,9 @@ export async function sendVerificationCodeEmail({
   try {
     const result =
       config.provider === "resend" && config.resend
-        ? await sendViaResend(to, code, purpose, config.resend.apiKey, config.resend.from)
+        ? await sendViaResend(to, code, purpose, config.resend.apiKey, config.resend.from, locale)
         : config.provider === "smtp" && config.smtp
-          ? await sendViaSmtp(to, code, purpose, config.smtp)
+          ? await sendViaSmtp(to, code, purpose, config.smtp, locale)
           : { sent: false, error: "Proveedor de correo inválido" };
 
     if (result.sent) {

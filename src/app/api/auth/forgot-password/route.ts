@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         },
       });
 
-      await sendVerificationCodeEmail({ to: user.email, code });
+      await sendVerificationCodeEmail({ to: user.email, code, locale: user.locale });
     }
 
     return NextResponse.json({ message: GENERIC_MESSAGE });
