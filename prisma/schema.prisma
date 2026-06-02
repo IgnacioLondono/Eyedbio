@@ -12,6 +12,7 @@ model User {
   email               String               @unique
   passwordHash        String
   username            String               @unique
+  publicUid           String               @unique
   role                String               @default("user")
   blockedAt           DateTime?
   blockedReason       String?

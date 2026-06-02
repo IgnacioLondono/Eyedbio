@@ -159,6 +159,8 @@ export interface Messages {
     usernameNew: string;
     usernameCooldown: string;
     usernameConfirmYes: string;
+    publicUid: string;
+    publicUidHint: string;
   };
   profile: {
     visits: string;
@@ -171,6 +173,7 @@ export interface Messages {
     loadError: string;
     connectionError: string;
     pageTitleNotFound: string;
+    serial: string;
   };
   accessGate: {
     protected: string;
@@ -559,6 +562,8 @@ export const es: Messages = {
     usernameNew: "Nuevo",
     usernameCooldown: "Solo podrás volver a cambiarlo dentro de {days} días.",
     usernameConfirmYes: "Sí, cambiar usuario",
+    publicUid: "Serial (UID)",
+    publicUidHint: "Identificador único y permanente de tu cuenta. Visible en tu perfil público.",
   },
   profile: {
     visits: "visitas",
@@ -571,6 +576,7 @@ export const es: Messages = {
     loadError: "No se pudo cargar el perfil",
     connectionError: "Error de conexión. Comprueba tu red e inténtalo de nuevo.",
     pageTitleNotFound: "Perfil no encontrado — Eyed.bio",
+    serial: "Serial de cuenta",
   },
   accessGate: {
     protected: "Perfil protegido",

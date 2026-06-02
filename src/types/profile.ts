@@ -112,6 +112,8 @@ export interface Profile {
   links: SocialLink[];
   settings: ProfileSettings;
   locale: "es" | "en";
+  /** Serial público permanente (p. ej. EYE-000042) */
+  publicUid: string;
   createdAt: string;
   /** ISO; para detectar ediciones concurrentes al guardar */
   updatedAt?: string;

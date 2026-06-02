@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { auth } from "@/lib/auth";
 import { findProfileByUsername } from "@/lib/profile-query";
 import { userToProfile } from "@/lib/profile-mapper";
+import { ensureUserPublicUid } from "@/lib/public-uid";
 import {
   profileUnlockCookieName,
   verifyProfileUnlockToken,
@@ -31,6 +32,10 @@ export async function GET(request: Request, { params }: Props) {
 
   if (!user) {
     return NextResponse.json({ error: "Perfil no encontrado" }, { status: 404 });
+  }
+
+  if (!user.publicUid) {
+    user.publicUid = await ensureUserPublicUid(user.id);
   }
 
   const session = await auth();

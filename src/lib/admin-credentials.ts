@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { ensureAdminEnvLoaded } from "@/lib/load-admin-env";
 import { prisma } from "@/lib/prisma";
+import { issueNextPublicUid } from "@/lib/public-uid";
 import { USER_ROLE_ADMIN } from "@/lib/roles";
 import { normalizeEmail, normalizeUsername, validateUsername } from "@/lib/validation";
 
@@ -69,14 +70,18 @@ async function createAdminUser(email: string, password: string) {
     finalUsername = `${username}${attempt + 1}`;
   }
 
-  return prisma.user.create({
-    data: {
-      email,
-      passwordHash: await bcrypt.hash(password, 12),
-      username: finalUsername,
-      displayName: "Administrador",
-      role: USER_ROLE_ADMIN,
-    },
+  return prisma.$transaction(async (tx) => {
+    const publicUid = await issueNextPublicUid(tx);
+    return tx.user.create({
+      data: {
+        email,
+        passwordHash: await bcrypt.hash(password, 12),
+        username: finalUsername,
+        displayName: "Administrador",
+        role: USER_ROLE_ADMIN,
+        publicUid,
+      },
+    });
   });
 }
 

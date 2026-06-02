@@ -4,6 +4,7 @@ import { profileCacheTag } from "@/lib/cached-profile";
 import bcrypt from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { ensureUserPublicUid } from "@/lib/public-uid";
 import { hashAccessCode } from "@/lib/profile-access";
 import {
   getUsernameChangeStatus,
@@ -27,6 +28,7 @@ export async function GET() {
     select: {
       email: true,
       username: true,
+      publicUid: true,
       createdAt: true,
       usernameChangedAt: true,
       accessCodeEnabled: true,
@@ -39,11 +41,14 @@ export async function GET() {
     return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
   }
 
+  const publicUid = user.publicUid ?? (await ensureUserPublicUid(session.user.id));
+
   const { canChange, nextChangeAt } = getUsernameChangeStatus(user.usernameChangedAt);
 
   return NextResponse.json({
     email: user.email,
     username: user.username,
+    publicUid,
     createdAt: user.createdAt.toISOString(),
     usernameChangedAt: user.usernameChangedAt?.toISOString() ?? null,
     canChangeUsername: canChange,

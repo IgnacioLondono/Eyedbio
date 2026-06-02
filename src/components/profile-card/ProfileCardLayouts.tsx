@@ -136,38 +136,40 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
 
   return (
     <div
-      className="relative rounded-2xl border overflow-hidden w-full isolate"
+      className="relative rounded-2xl border w-full isolate"
       style={frameStyle}
     >
       {/* Capa única de vidrio/blur en toda la tarjeta — evita el corte entre banner y cuerpo */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={glassStyle}
+        style={{ ...glassStyle, borderRadius: "inherit" }}
         aria-hidden
       />
 
       <CardToolbarSlot />
 
-      <div
-        className={`relative z-10 ${bannerH} w-full bg-cover bg-center shrink-0`}
-        style={
-          bannerSrc
-            ? { backgroundImage: `url(${bannerSrc})` }
-            : {
-                background: `linear-gradient(135deg, ${settings.accentColor} 0%, ${hexToRgba(settings.cardColorSecondary || settings.accentColor, 0.9)} 55%, ${hexToRgba(settings.cardColor, 1)} 100%)`,
-              }
-        }
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/50" />
+      <div className="relative z-10 overflow-hidden rounded-t-2xl">
         <div
-          className="absolute bottom-0 inset-x-0 h-6 pointer-events-none"
-          style={{
-            background: settings.transparentCard
-              ? "linear-gradient(to bottom, transparent, rgba(0,0,0,0.12))"
-              : `linear-gradient(to bottom, transparent, ${hexToRgba(settings.cardColor, settings.profileOpacity * 0.85)})`,
-          }}
-          aria-hidden
-        />
+          className={`${bannerH} w-full bg-cover bg-center shrink-0`}
+          style={
+            bannerSrc
+              ? { backgroundImage: `url(${bannerSrc})` }
+              : {
+                  background: `linear-gradient(135deg, ${settings.accentColor} 0%, ${hexToRgba(settings.cardColorSecondary || settings.accentColor, 0.9)} 55%, ${hexToRgba(settings.cardColor, 1)} 100%)`,
+                }
+          }
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/50" />
+          <div
+            className="absolute bottom-0 inset-x-0 h-6 pointer-events-none"
+            style={{
+              background: settings.transparentCard
+                ? "linear-gradient(to bottom, transparent, rgba(0,0,0,0.12))"
+                : `linear-gradient(to bottom, transparent, ${hexToRgba(settings.cardColor, settings.profileOpacity * 0.85)})`,
+            }}
+            aria-hidden
+          />
+        </div>
       </div>
 
       <div className={`relative z-10 ${compact ? "px-3.5 pb-3.5" : "px-5 pb-5"}`}>

@@ -76,6 +76,7 @@ export function userToProfile(user: UserWithLinks): Profile {
       })),
     settings: merged,
     locale: parseLocale((user as User & { locale?: string }).locale),
+    publicUid: user.publicUid,
     createdAt: user.createdAt.toISOString(),
     updatedAt: user.updatedAt.toISOString(),
   };

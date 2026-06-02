@@ -218,6 +218,8 @@ export const en: Messages = {
     usernameNew: "New",
     usernameCooldown: "You can only change it again in {days} days.",
     usernameConfirmYes: "Yes, change username",
+    publicUid: "Serial (UID)",
+    publicUidHint: "Unique permanent account identifier. Shown on your public profile.",
   },
   profile: {
     visits: "views",
@@ -230,6 +232,7 @@ export const en: Messages = {
     loadError: "Could not load profile",
     connectionError: "Connection error. Check your network and try again.",
     pageTitleNotFound: "Profile not found — Eyed.bio",
+    serial: "Account serial",
   },
   accessGate: {
     protected: "Protected profile",

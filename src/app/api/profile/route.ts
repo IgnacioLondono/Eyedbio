@@ -7,6 +7,7 @@ import { profileCacheTag } from "@/lib/cached-profile";
 import { validateSocialLinksCount } from "@/lib/links-config";
 import { saveUserProfile } from "@/lib/profile-save";
 import { userToProfile } from "@/lib/profile-mapper";
+import { ensureUserPublicUid } from "@/lib/public-uid";
 import { Profile } from "@/types/profile";
 
 async function rejectIfBlocked(userId: string) {
@@ -39,6 +40,10 @@ export async function GET() {
 
   if (!user) {
     return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
+  }
+
+  if (!user.publicUid) {
+    user.publicUid = await ensureUserPublicUid(user.id);
   }
 
   return NextResponse.json(userToProfile(user));

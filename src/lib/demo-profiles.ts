@@ -24,6 +24,7 @@ function demoProfile(
     views: 12840,
     badges: ["verified"],
     links: baseLinks,
+    publicUid: "EYE-000000",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     ...rest,

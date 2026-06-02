@@ -13,6 +13,7 @@ import type { AppLocale } from "@/lib/i18n/types";
 interface AccountData {
   email: string;
   username: string;
+  publicUid: string;
   createdAt: string;
   locale: "es" | "en";
   canChangeUsername: boolean;
@@ -221,6 +222,14 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
             <div className="flex items-center gap-2 text-xs text-white/35 mb-5 pb-4 border-b border-white/5">
               <CalendarDays className="w-3.5 h-3.5 shrink-0" />
               {t("account.memberSince")} {memberSince}
+            </div>
+          )}
+
+          {account?.publicUid && (
+            <div className="mb-5 pb-4 border-b border-white/5">
+              <label className="block text-sm text-white/60 mb-2">{t("account.publicUid")}</label>
+              <p className="font-mono text-sm text-purple-200/90 tracking-wide">{account.publicUid}</p>
+              <p className="text-[11px] text-white/35 mt-1.5">{t("account.publicUidHint")}</p>
             </div>
           )}
 

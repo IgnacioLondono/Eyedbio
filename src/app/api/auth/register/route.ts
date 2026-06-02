@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_SETTINGS } from "@/types/profile";
 import { parseLocale } from "@/lib/i18n/types";
+import { issueNextPublicUid } from "@/lib/public-uid";
 import { normalizeEmail, normalizeUsername, validatePassword, validateUsername } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -49,19 +50,23 @@ export async function POST(request: Request) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
-    const user = await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        username,
-        displayName: displayName || username,
-        locale,
-        settings: JSON.stringify(DEFAULT_SETTINGS),
-      },
+    const user = await prisma.$transaction(async (tx) => {
+      const publicUid = await issueNextPublicUid(tx);
+      return tx.user.create({
+        data: {
+          email,
+          passwordHash,
+          username,
+          displayName: displayName || username,
+          locale,
+          publicUid,
+          settings: JSON.stringify(DEFAULT_SETTINGS),
+        },
+      });
     });
 
     return NextResponse.json(
-      { id: user.id, username: user.username, email: user.email, locale: user.locale },
+      { id: user.id, username: user.username, email: user.email, locale: user.locale, publicUid: user.publicUid },
       { status: 201 }
     );
   } catch (err) {
