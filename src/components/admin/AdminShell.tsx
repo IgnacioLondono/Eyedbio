@@ -9,6 +9,7 @@ import {
   LogOut,
   ExternalLink,
   Shield,
+  SlidersHorizontal,
 } from "lucide-react";
 import Logo from "@/components/Logo";
 
@@ -20,6 +21,7 @@ interface Props {
 const nav = [
   { href: "/admin", label: "Panel", icon: LayoutDashboard, exact: true },
   { href: "/admin/users", label: "Usuarios", icon: Users, exact: false },
+  { href: "/admin/settings", label: "Sitio", icon: SlidersHorizontal, exact: false },
 ];
 
 export default function AdminShell({ children, adminEmail }: Props) {

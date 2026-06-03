@@ -8,6 +8,7 @@ import { validateSocialLinksCount } from "@/lib/links-config";
 import { saveUserProfile } from "@/lib/profile-save";
 import { userToProfile } from "@/lib/profile-mapper";
 import { Profile } from "@/types/profile";
+import { getSiteSettings } from "@/lib/site-settings";
 
 async function rejectIfBlocked(userId: string) {
   const user = await prisma.user.findUnique({
@@ -59,6 +60,19 @@ export async function PATCH(request: Request) {
     const linksError = validateSocialLinksCount(profile.links ?? []);
     if (linksError) {
       return NextResponse.json({ error: linksError }, { status: 400 });
+    }
+
+    const site = await getSiteSettings();
+    if (!site.profileAudioEnabled) {
+      const current = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { audioUrl: true, audioEnabled: true, audioStartTime: true },
+      });
+      if (current) {
+        profile.audioUrl = current.audioUrl ?? undefined;
+        profile.audioEnabled = current.audioEnabled;
+        profile.audioStartTime = current.audioStartTime ?? 0;
+      }
     }
 
     const result = await saveUserProfile(

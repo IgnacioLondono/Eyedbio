@@ -9,12 +9,18 @@ import {
   signProfileUnlockToken,
   verifyAccessCode,
 } from "@/lib/profile-access";
+import { getSiteSettings } from "@/lib/site-settings";
 
 interface Props {
   params: Promise<{ username: string }>;
 }
 
 export async function POST(request: Request, { params }: Props) {
+  const site = await getSiteSettings();
+  if (!site.profileAccessCodeEnabled) {
+    return NextResponse.json({ error: "La protección por código no está disponible" }, { status: 403 });
+  }
+
   const { username } = await params;
   const normalizedUsername = username.toLowerCase();
 

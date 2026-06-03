@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 import ReviewsReceivedModal from "@/components/ReviewsReceivedModal";
+import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { ReviewSummary } from "@/types/review";
 
 interface Props {
@@ -10,11 +11,12 @@ interface Props {
 }
 
 export default function DashboardReviewsButton({ username }: Props) {
+  const site = useSiteSettings();
   const [open, setOpen] = useState(false);
   const [summary, setSummary] = useState<ReviewSummary | null>(null);
 
   useEffect(() => {
-    if (!username) return;
+    if (!site.profileReviewsEnabled || !username) return;
 
     fetch(`/api/profile/${username}/reviews?limit=1`)
       .then((res) => res.json())
@@ -22,7 +24,9 @@ export default function DashboardReviewsButton({ username }: Props) {
         if (data.summary) setSummary(data.summary);
       })
       .catch(() => {});
-  }, [username]);
+  }, [username, site.profileReviewsEnabled]);
+
+  if (!site.profileReviewsEnabled) return null;
 
   return (
     <>

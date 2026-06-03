@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { saveUpload, UploadKind, validateUpload } from "@/lib/upload";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";
@@ -18,6 +19,16 @@ export async function POST(request: Request) {
 
     if (!(file instanceof File) || !kind) {
       return NextResponse.json({ error: "Archivo inválido" }, { status: 400 });
+    }
+
+    if (kind === "audio") {
+      const site = await getSiteSettings();
+      if (!site.profileAudioEnabled) {
+        return NextResponse.json(
+          { error: "El audio en perfiles no está disponible" },
+          { status: 403 }
+        );
+      }
     }
 
     const error = validateUpload(kind, file);

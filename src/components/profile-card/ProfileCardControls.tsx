@@ -2,6 +2,7 @@
 
 import ShareProfileButton from "@/components/ShareProfileButton";
 import ProfileAudio from "@/components/ProfileAudio";
+import { useSiteSettings } from "@/components/SiteSettingsProvider";
 
 interface Props {
   username: string;
@@ -20,10 +21,12 @@ export default function ProfileCardControls({
   audioEnabled,
   accentColor,
 }: Props) {
+  const site = useSiteSettings();
+
   return (
     <>
       <ShareProfileButton username={username} displayName={displayName} variant="card" />
-      {audioEnabled && audioUrl ? (
+      {site.profileAudioEnabled && audioEnabled && audioUrl ? (
         <ProfileAudio
           url={audioUrl}
           startTime={audioStartTime}

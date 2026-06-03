@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Sparkles } from "lucide-react";
 import { useI18n } from "@/components/LocaleProvider";
+import { useSiteSettings } from "@/components/SiteSettingsProvider";
 
 export default function ClaimProfileCta() {
   const { status } = useSession();
   const { t } = useI18n();
+  const site = useSiteSettings();
 
-  if (status !== "unauthenticated") return null;
+  if (!site.claimProfileCtaEnabled || status !== "unauthenticated") return null;
 
   return (
     <div className="fixed bottom-8 md:bottom-10 left-1/2 z-30 w-[calc(100%-2rem)] max-w-md -translate-x-1/2">

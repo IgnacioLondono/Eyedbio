@@ -6,6 +6,7 @@ import { Shield, Mail, AtSign, KeyRound, CalendarDays, ArrowRight, Lock } from "
 import { USERNAME_CHANGE_COOLDOWN_DAYS } from "@/lib/validation";
 import PasswordInput from "@/components/PasswordInput";
 import { useI18n } from "@/components/LocaleProvider";
+import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { formatLocaleDate } from "@/lib/i18n";
 import { APP_LOCALES, LOCALE_LABELS } from "@/lib/i18n/types";
 import type { AppLocale } from "@/lib/i18n/types";
@@ -30,6 +31,7 @@ interface Props {
 
 export default function AccountSettings({ profileUsername, onUsernameUpdated }: Props) {
   const { locale, setLocale, t, tVars } = useI18n();
+  const site = useSiteSettings();
   const [account, setAccount] = useState<AccountData | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -94,7 +96,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
         payload.accessCodeEnabled = accessCodeEnabled;
         if (accessCode) payload.accessCode = accessCode;
       }
-      if (loginCodeSettingsChanged) {
+      if (loginCodeSettingsChanged && site.allowLoginCodeByEmail) {
         payload.loginCodeEnabled = loginCodeEnabled;
       }
 
@@ -235,7 +237,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
             </div>
           )}
 
-          {account?.publicUid && (
+          {site.showPublicUidInAccount && account?.publicUid && (
             <div className="mb-5 pb-4 border-b border-white/5">
               <label className="block text-sm text-white/60 mb-2">{t("account.publicUid")}</label>
               <p className="font-mono text-sm text-purple-200/90 tracking-wide">{account.publicUid}</p>
@@ -295,6 +297,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
         </div>
       </div>
 
+      {site.profileAccessCodeEnabled && (
       <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-lg bg-purple-500/15 text-purple-400">
@@ -353,6 +356,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
           </div>
         )}
       </div>
+      )}
 
       <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
         <div className="flex items-start gap-3">
@@ -367,6 +371,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
             </div>
           </div>
 
+          {site.allowLoginCodeByEmail && (
           <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
             <div className="min-w-0 pr-3">
               <p className="text-sm text-white/70">{t("account.loginCodeEnable")}</p>
@@ -388,6 +393,7 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
               />
             </button>
           </div>
+          )}
 
           <div>
             <label className="block text-sm text-white/60 mb-2">{t("account.currentPassword")}</label>

@@ -106,6 +106,12 @@ model ProfileReview {
   @@index([createdAt(sort: Desc)])
 }
 
+model SiteSettings {
+  id        String   @id @default("default")
+  config    String   @default("{}")
+  updatedAt DateTime @updatedAt
+}
+
 model SocialLink {
   id        String  @id @default(cuid())
   userId    String

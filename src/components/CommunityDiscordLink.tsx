@@ -3,6 +3,7 @@ import {
   COMMUNITY_DISCORD_LABEL,
   COMMUNITY_DISCORD_URL,
 } from "@/lib/community";
+import { useSiteSettings } from "@/components/SiteSettingsProvider";
 
 interface Props {
   variant?: "button" | "banner" | "header";
@@ -13,6 +14,9 @@ export default function CommunityDiscordLink({
   variant = "button",
   className = "",
 }: Props) {
+  const site = useSiteSettings();
+  if (!site.communityDiscordEnabled) return null;
+
   if (variant === "header") {
     return (
       <a

@@ -6,18 +6,26 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { ProfileReview } from "@/types/review";
 import ReviewCard from "@/components/ReviewCard";
+import { useSiteSettings } from "@/components/SiteSettingsProvider";
 
 export default function LandingReviewsSection() {
+  const site = useSiteSettings();
   const [reviews, setReviews] = useState<ProfileReview[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!site.profileReviewsEnabled) {
+      setLoading(false);
+      return;
+    }
     fetch("/api/reviews/recent")
       .then((res) => res.json())
       .then((data) => setReviews(data.reviews ?? []))
       .catch(() => setReviews([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [site.profileReviewsEnabled]);
+
+  if (!site.profileReviewsEnabled) return null;
 
   if (!loading && reviews.length === 0) {
     return null;

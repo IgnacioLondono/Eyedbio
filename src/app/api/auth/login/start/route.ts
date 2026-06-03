@@ -11,6 +11,7 @@ import {
   syncAdminFromEnvIfEmail,
 } from "@/lib/admin-credentials";
 import { normalizeEmail } from "@/lib/validation";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export async function POST(request: Request) {
   try {
@@ -67,7 +68,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!user.loginCodeEnabled) {
+    const site = await getSiteSettings();
+
+    if (!site.allowLoginCodeByEmail || !user.loginCodeEnabled) {
       return NextResponse.json({
         requiresCode: false,
       });

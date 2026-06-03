@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Providers from "@/components/Providers";
 import { resolveServerLocale } from "@/lib/i18n/server-locale";
+import { getSiteSettings } from "@/lib/site-settings";
 import "./globals.css";
 
 const inter = Inter({
@@ -20,12 +21,17 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const initialLocale = await resolveServerLocale();
+  const [initialLocale, initialSiteSettings] = await Promise.all([
+    resolveServerLocale(),
+    getSiteSettings(),
+  ]);
 
   return (
     <html lang={initialLocale} className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
-        <Providers initialLocale={initialLocale}>{children}</Providers>
+        <Providers initialLocale={initialLocale} initialSiteSettings={initialSiteSettings}>
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -11,6 +11,7 @@ import {
   validateReviewRating,
 } from "@/lib/reviews";
 import { REVIEW_PAGE_SIZE } from "@/lib/reviews-config";
+import { getSiteSettings } from "@/lib/site-settings";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -24,6 +25,11 @@ async function resolveProfileUser(username: string) {
 }
 
 export async function GET(request: Request, { params }: Props) {
+  const site = await getSiteSettings();
+  if (!site.profileReviewsEnabled) {
+    return NextResponse.json({ error: "Las reseñas no están disponibles" }, { status: 403 });
+  }
+
   const { username } = await params;
   const profileUser = await resolveProfileUser(username);
 
@@ -66,6 +72,11 @@ export async function GET(request: Request, { params }: Props) {
 }
 
 export async function POST(request: Request, { params }: Props) {
+  const site = await getSiteSettings();
+  if (!site.profileReviewsEnabled) {
+    return NextResponse.json({ error: "Las reseñas no están disponibles" }, { status: 403 });
+  }
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Inicia sesión para dejar una reseña" }, { status: 401 });
@@ -147,6 +158,11 @@ export async function POST(request: Request, { params }: Props) {
 }
 
 export async function DELETE(_request: Request, { params }: Props) {
+  const site = await getSiteSettings();
+  if (!site.profileReviewsEnabled) {
+    return NextResponse.json({ error: "Las reseñas no están disponibles" }, { status: 403 });
+  }
+
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });

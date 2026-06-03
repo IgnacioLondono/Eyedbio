@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ensureUserPublicUid } from "@/lib/public-uid";
+import { getSiteSettings } from "@/lib/site-settings";
 import { hashAccessCode } from "@/lib/profile-access";
 import {
   getUsernameChangeStatus,
@@ -42,6 +43,7 @@ export async function GET() {
     return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
   }
 
+  const site = await getSiteSettings();
   const publicUid = user.publicUid ?? (await ensureUserPublicUid(session.user.id));
 
   const { canChange, nextChangeAt } = getUsernameChangeStatus(user.usernameChangedAt);
@@ -49,7 +51,7 @@ export async function GET() {
   return NextResponse.json({
     email: user.email,
     username: user.username,
-    publicUid,
+    publicUid: site.showPublicUidInAccount ? publicUid : undefined,
     createdAt: user.createdAt.toISOString(),
     usernameChangedAt: user.usernameChangedAt?.toISOString() ?? null,
     canChangeUsername: canChange,
@@ -188,6 +190,16 @@ export async function PATCH(request: Request) {
     }
 
     if (accessCodeEnabled !== undefined || accessCode !== undefined) {
+      const siteForAccess = await getSiteSettings();
+      if (
+        !siteForAccess.profileAccessCodeEnabled &&
+        (accessCodeEnabled === true || accessCode)
+      ) {
+        return NextResponse.json(
+          { error: "La protección por código de acceso no está disponible" },
+          { status: 403 }
+        );
+      }
       if (accessCodeEnabled === false) {
         updates.accessCodeEnabled = false;
         updates.accessCodeHash = null;
@@ -216,6 +228,13 @@ export async function PATCH(request: Request) {
     }
 
     if (loginCodeEnabled !== undefined) {
+      const site = await getSiteSettings();
+      if (!site.allowLoginCodeByEmail && loginCodeEnabled) {
+        return NextResponse.json(
+          { error: "El código por correo al iniciar sesión no está disponible" },
+          { status: 403 }
+        );
+      }
       updates.loginCodeEnabled = loginCodeEnabled;
       if (loginCodeEnabled === false) {
         await prisma.loginVerificationToken.deleteMany({ where: { userId: user.id } });

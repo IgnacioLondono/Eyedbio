@@ -23,6 +23,7 @@ import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
 import { getMessages } from "@/lib/i18n";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { useI18n } from "@/components/LocaleProvider";
+import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import ProfileCard from "@/components/ProfileCard";
 import BackgroundEffects from "@/components/BackgroundEffects";
 import BackgroundEffectSelect from "@/components/BackgroundEffectSelect";
@@ -80,6 +81,7 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const { t, tVars, locale, setLocale } = useI18n();
+  const site = useSiteSettings();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -505,30 +507,34 @@ function DashboardContent() {
                   </div>
                 )}
 
-                <FileUpload
-                  kind="audio"
-                  label={t("dashboard.audioLabel")}
-                  hint={t("dashboard.audioHint")}
-                  currentUrl={profile.audioUrl}
-                  onUploaded={(url) =>
-                    update({ audioUrl: url, audioEnabled: true, audioStartTime: 0 })
-                  }
-                  onClear={() =>
-                    update({ audioUrl: undefined, audioEnabled: false, audioStartTime: 0 })
-                  }
-                />
-                {profile.audioUrl && (
-                  <AudioClipSelector
-                    audioUrl={profile.audioUrl}
-                    startTime={profile.audioStartTime}
-                    onChange={(audioStartTime) => update({ audioStartTime })}
-                  />
-                )}
-                <Toggle
-                  label={t("dashboard.playAudio")}
-                  checked={profile.audioEnabled}
-                  onChange={(v) => update({ audioEnabled: v })}
-                />
+                {site.profileAudioEnabled ? (
+                  <>
+                    <FileUpload
+                      kind="audio"
+                      label={t("dashboard.audioLabel")}
+                      hint={t("dashboard.audioHint")}
+                      currentUrl={profile.audioUrl}
+                      onUploaded={(url) =>
+                        update({ audioUrl: url, audioEnabled: true, audioStartTime: 0 })
+                      }
+                      onClear={() =>
+                        update({ audioUrl: undefined, audioEnabled: false, audioStartTime: 0 })
+                      }
+                    />
+                    {profile.audioUrl && (
+                      <AudioClipSelector
+                        audioUrl={profile.audioUrl}
+                        startTime={profile.audioStartTime}
+                        onChange={(audioStartTime) => update({ audioStartTime })}
+                      />
+                    )}
+                    <Toggle
+                      label={t("dashboard.playAudio")}
+                      checked={profile.audioEnabled}
+                      onChange={(v) => update({ audioEnabled: v })}
+                    />
+                  </>
+                ) : null}
               </>
             )}
 
