@@ -9,16 +9,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-eyedbio}
     volumes:
       - eyed-db:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -h 127.0.0.1 -p 5432 -U ${POSTGRES_USER:-eyedbio} -d ${POSTGRES_DB:-eyedbio} || exit 1",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 45s
     restart: unless-stopped
     networks:
       - eyed-net
@@ -53,7 +43,7 @@ services:
       - eyed-uploads:/data
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "node", "/app/healthcheck.js"]
       interval: 15s
