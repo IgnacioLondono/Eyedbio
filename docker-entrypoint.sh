@@ -57,13 +57,20 @@ else
   echo "Email: NO configurado — los códigos solo aparecerán en los logs"
 fi
 
-if [ -n "$SIGHTENGINE_API_USER" ] && [ -n "$SIGHTENGINE_API_SECRET" ]; then
-  echo "Moderación: Sightengine configurado"
-elif [ -n "$OPENAI_API_KEY" ]; then
-  echo "Moderación: OpenAI configurado"
-else
-  echo "Moderación: NO configurada — subidas de imagen bloqueadas en producción"
-fi
+case "${CONTENT_MODERATION:-off}" in
+  on|true|1|yes|ON|TRUE|YES)
+    if [ -n "$SIGHTENGINE_API_USER" ] && [ -n "$SIGHTENGINE_API_SECRET" ]; then
+      echo "Moderación: activa (Sightengine)"
+    elif [ -n "$OPENAI_API_KEY" ]; then
+      echo "Moderación: activa (OpenAI)"
+    else
+      echo "Moderación: activada pero sin credenciales (Sightengine u OpenAI)"
+    fi
+    ;;
+  *)
+    echo "Moderación: desactivada"
+    ;;
+esac
 
 exec runuser -u nextjs -- env \
   DATABASE_URL="$DATABASE_URL" \

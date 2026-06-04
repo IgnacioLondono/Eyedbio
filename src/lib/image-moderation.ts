@@ -22,8 +22,7 @@ export function uploadKindNeedsImageModeration(kind: UploadKind): boolean {
 
 function moderationEnabled(): boolean {
   const flag = process.env.CONTENT_MODERATION?.trim().toLowerCase();
-  if (flag === "off" || flag === "false" || flag === "0") return false;
-  return true;
+  return flag === "on" || flag === "true" || flag === "1" || flag === "yes";
 }
 
 function getSightengineCredentials(): { user: string; secret: string } | null {
@@ -211,7 +210,7 @@ async function moderateWithOpenAi(buffer: Buffer, mime: string): Promise<void> {
 }
 
 /**
- * Analiza una imagen antes de guardarla. Requiere Sightengine u OpenAI si CONTENT_MODERATION está activo.
+ * Analiza una imagen antes de guardarla si CONTENT_MODERATION=on y hay Sightengine u OpenAI.
  */
 export async function moderateImageBuffer(buffer: Buffer, mime: string): Promise<void> {
   ensureAdminEnvLoaded();
