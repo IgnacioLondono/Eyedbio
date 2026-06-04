@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eyedbio_secret}
       POSTGRES_DB: ${POSTGRES_DB:-eyedbio}
     volumes:
-      - eyed-db:/var/lib/postgresql/data
+      - ${EYEDBIO_DATA_ROOT}/postgres:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
       - eyed-net
@@ -40,7 +40,7 @@ services:
       HOSTNAME: 0.0.0.0
       PORT: "9090"
     volumes:
-      - eyed-uploads:/data
+      - ${EYEDBIO_DATA_ROOT}/uploads:/data
     depends_on:
       postgres:
         condition: service_started
@@ -63,7 +63,7 @@ services:
     ports:
       - "${APP_PORT:-9090}:9090"
     volumes:
-      - eyed-uploads:/data:ro
+      - ${EYEDBIO_DATA_ROOT}/uploads:/data:ro
     depends_on:
       eyed-bio:
         condition: service_started
@@ -77,12 +77,6 @@ services:
     restart: unless-stopped
     networks:
       - eyed-net
-
-volumes:
-  eyed-db:
-    name: eyed-bio-db
-  eyed-uploads:
-    name: eyed-bio-uploads
 
 networks:
   eyed-net:
