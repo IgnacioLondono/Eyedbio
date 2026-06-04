@@ -40,6 +40,30 @@ export function validateUpload(kind: UploadKind, file: File) {
   return null;
 }
 
+export async function saveUploadBuffer(
+  userId: string,
+  kind: UploadKind,
+  buffer: Buffer,
+  options: { ext: string; mime?: string; originalName?: string }
+) {
+  const ext = options.ext.startsWith(".") ? options.ext : `.${options.ext}`;
+  const filename = `${kind}-${Date.now()}${ext}`;
+  const dir = path.join(UPLOAD_ROOT, userId);
+  const filePath = path.join(dir, filename);
+
+  await mkdir(dir, { recursive: true });
+  await writeFile(filePath, buffer);
+
+  const mime = options.mime ?? "";
+  const name = options.originalName ?? `file${ext}`;
+
+  return {
+    url: buildMediaUrl(userId, filename),
+    backgroundType:
+      kind === "background" ? getBackgroundType(mime, name) : undefined,
+  };
+}
+
 /** Escribe el archivo en disco por streaming (menor uso de RAM en archivos grandes). */
 export async function saveUpload(userId: string, kind: UploadKind, file: File) {
   const ext =

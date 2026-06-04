@@ -6,6 +6,7 @@ import { SocialLink, SocialPlatform } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
 import { PLATFORM_CATEGORIES, getPlatformUrlPlaceholder } from "@/lib/platform-categories";
 import { PlatformIcon } from "@/components/PlatformIcons";
+import CustomLinkIcon from "@/components/CustomLinkIcon";
 import { createEmptyLink } from "@/lib/profile-mapper";
 import {
   MAX_SOCIAL_LINKS,
@@ -72,10 +73,10 @@ function LinkIconPreview({
         {uploading ? (
           <Loader2 className="w-5 h-5 animate-spin text-white/50" />
         ) : link.iconUrl ? (
-          <img
-            src={getMediaSrc(link.iconUrl)}
-            alt=""
-            className="w-full h-full object-cover"
+          <CustomLinkIcon
+            iconUrl={link.iconUrl}
+            color="#a855f7"
+            sizeClass="w-8 h-8"
           />
         ) : (
           <Globe className="w-6 h-6 text-white/50" />
@@ -201,6 +202,14 @@ export default function LinkEditor({ links, onChange }: Props) {
                     link={link}
                     onUploaded={(iconUrl) => updateLink(link.id, { iconUrl })}
                   />
+                ) : isCustom && link.iconUrl ? (
+                  <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-white/5 border border-white/10 mb-3">
+                    <CustomLinkIcon
+                      iconUrl={link.iconUrl}
+                      color="#a855f7"
+                      sizeClass="w-9 h-9"
+                    />
+                  </div>
                 ) : (
                   <div
                     className="flex items-center justify-center w-14 h-14 rounded-xl bg-white/5 border border-white/10 mb-3"

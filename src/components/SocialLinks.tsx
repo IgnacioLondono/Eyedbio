@@ -5,7 +5,7 @@ import { Globe } from "lucide-react";
 import { SocialLink, SocialPlatform } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
 import { PlatformIcon } from "@/components/PlatformIcons";
-import { getMediaSrc } from "@/lib/media-url";
+import CustomLinkIcon from "@/components/CustomLinkIcon";
 
 interface Props {
   links: SocialLink[];
@@ -21,19 +21,22 @@ function LinkIcon({
   link,
   color,
   compact,
+  glowIcons,
 }: {
   link: SocialLink;
   color: string;
   compact: boolean;
+  glowIcons?: boolean;
 }) {
   const size = compact ? "w-4 h-4" : "w-5 h-5";
 
   if (link.iconUrl) {
     return (
-      <img
-        src={getMediaSrc(link.iconUrl)}
-        alt=""
-        className={`${size} object-contain`}
+      <CustomLinkIcon
+        iconUrl={link.iconUrl}
+        color={color}
+        sizeClass={size}
+        glowIcons={glowIcons}
       />
     );
   }
@@ -80,6 +83,7 @@ export default function SocialLinks({
       {visibleLinks.map((link, i) => {
         const config = PLATFORM_CONFIG[link.platform];
         const color = monochromeIcons ? accentColor : config.color;
+        const iconColor = link.iconUrl ? accentColor : color;
         const title = link.label ?? config.label;
 
         return (
@@ -100,7 +104,7 @@ export default function SocialLinks({
               filter: glowIcons && !link.iconUrl ? `drop-shadow(0 0 8px ${color})` : undefined,
             }}
           >
-            <LinkIcon link={link} color={color} compact={compact} />
+            <LinkIcon link={link} color={iconColor} compact={compact} glowIcons={glowIcons} />
           </motion.a>
         );
       })}

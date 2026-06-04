@@ -5,7 +5,7 @@ import { Globe } from "lucide-react";
 import { SocialLink, SocialPlatform } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
 import { PlatformIcon } from "@/components/PlatformIcons";
-import { getMediaSrc } from "@/lib/media-url";
+import CustomLinkIcon from "@/components/CustomLinkIcon";
 import { hexToRgba } from "@/lib/color-utils";
 import type { LinkStyle } from "@/types/profile";
 import SocialLinks from "@/components/SocialLinks";
@@ -27,14 +27,24 @@ function LinkIcon({
   link,
   color,
   sizeClass,
+  monochromeIcons,
+  glowIcons,
 }: {
   link: SocialLink;
   color: string;
   sizeClass: string;
+  monochromeIcons?: boolean;
+  glowIcons?: boolean;
 }) {
   if (link.iconUrl) {
     return (
-      <img src={getMediaSrc(link.iconUrl)} alt="" className={`${sizeClass} object-contain`} />
+      <CustomLinkIcon
+        iconUrl={link.iconUrl}
+        color={color}
+        sizeClass={sizeClass}
+        glowIcons={glowIcons}
+        themed
+      />
     );
   }
   if (link.platform === "custom") {
@@ -98,7 +108,12 @@ function PillsLinks({
                 filter: glowIcons && !link.iconUrl ? `drop-shadow(0 0 6px ${color})` : undefined,
               }}
             >
-              <LinkIcon link={link} color={color} sizeClass={iconSize} />
+              <LinkIcon
+                link={link}
+                color={link.iconUrl ? accentColor : color}
+                sizeClass={iconSize}
+                glowIcons={glowIcons}
+              />
             </span>
             <span className="font-medium truncate" style={{ color: textColor }}>
               {title}
@@ -144,7 +159,12 @@ function RowLinks({
               filter: glowIcons && !link.iconUrl ? `drop-shadow(0 0 6px ${color})` : undefined,
             }}
           >
-            <LinkIcon link={link} color={color} sizeClass={icon} />
+            <LinkIcon
+              link={link}
+              color={link.iconUrl ? accentColor : color}
+              sizeClass={icon}
+              glowIcons={glowIcons}
+            />
           </a>
         );
       })}
@@ -188,7 +208,12 @@ function ChipsLinks({
             }}
           >
             <span style={{ color: link.iconUrl ? undefined : color }}>
-              <LinkIcon link={link} color={color} sizeClass={iconSize} />
+              <LinkIcon
+                link={link}
+                color={link.iconUrl ? accentColor : color}
+                sizeClass={iconSize}
+                glowIcons={glowIcons}
+              />
             </span>
             <span className="truncate max-w-[100px]">{title}</span>
           </a>
