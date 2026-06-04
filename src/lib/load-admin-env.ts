@@ -26,7 +26,7 @@ function parseEnvLine(line: string): { key: string; value: string } | null {
 }
 
 /**
- * Carga ADMIN_* desde archivo si no están en process.env (útil en Portainer).
+ * Carga ADMIN_* y moderación de imágenes desde archivo si no están en process.env (Portainer /data/admin.env).
  * Rutas: ADMIN_ENV_FILE, /data/admin.env, /app/admin.env
  */
 export function loadAdminEnvFromFile(): boolean {
@@ -47,7 +47,19 @@ export function loadAdminEnvFromFile(): boolean {
         const parsed = parseEnvLine(line);
         if (!parsed) continue;
 
-        if (!["ADMIN_EMAIL", "ADMIN_PASSWORD", "ADMIN_USERNAME"].includes(parsed.key)) {
+        const allowedKeys = [
+          "ADMIN_EMAIL",
+          "ADMIN_PASSWORD",
+          "ADMIN_USERNAME",
+          "CONTENT_MODERATION",
+          "SIGHTENGINE_API_USER",
+          "SIGHTENGINE_API_SECRET",
+          "SIGHTENGINE_USER",
+          "SIGHTENGINE_SECRET",
+          "OPENAI_API_KEY",
+          "OPENAI_MODERATION_MODEL",
+        ];
+        if (!allowedKeys.includes(parsed.key)) {
           continue;
         }
 

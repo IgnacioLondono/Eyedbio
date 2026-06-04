@@ -160,49 +160,57 @@ export function ProfileNameBlock({
   const nameEffect = resolveNameEffect(settings);
   const nameEffectClass = getNameEffectClass(nameEffect);
   const nameEffectStyle = getNameEffectStyle(nameEffect, settings.accentColor, textColor);
-  const alignClass = align === "left" ? "justify-start text-left" : "justify-center text-center";
+  const centered = align === "center";
+  const rowAlign = centered ? "justify-center" : "justify-start";
+  const textAlign = centered ? "text-center" : "text-left";
 
   return (
-    <>
-      <div className={`flex items-center gap-1.5 flex-wrap ${alignClass} ${scale.compact ? "px-0" : "gap-2"}`}>
-        <h1
-          className={`${scale.name} font-bold break-all ${nameEffectClass ?? ""}`}
-          style={{
-            color: nameEffect === "gradient" ? undefined : textColor,
-            ...nameEffectStyle,
-          }}
+    <div className={`w-full ${textAlign}`}>
+      <h1
+        className={`${scale.name} font-bold break-words ${textAlign} ${nameEffectClass ?? ""}`}
+        style={{
+          color: nameEffect === "gradient" ? undefined : textColor,
+          ...nameEffectStyle,
+        }}
+      >
+        {profile.displayName}
+      </h1>
+      {profile.badges.length > 0 ? (
+        <div
+          className={`mt-1.5 flex flex-wrap items-center gap-1.5 ${rowAlign} ${scale.compact ? "" : "gap-2"}`}
         >
-          {profile.displayName}
-        </h1>
-        {profile.badges.map((badge) => {
-          const config = BADGE_CONFIG[badge];
-          if (!config) return null;
-          const label = translate(profile.locale, `badges.${config.labelKey}`);
-          return (
-            <ProfileBadge
-              key={badge}
-              badge={badge}
-              icon={config.icon}
-              color={config.color}
-              label={label}
-              compact={scale.compact}
-              glowIcons={settings.glowIcons}
-            />
-          );
-        })}
-      </div>
+          {profile.badges.map((badge) => {
+            const config = BADGE_CONFIG[badge];
+            if (!config) return null;
+            const label = translate(profile.locale, `badges.${config.labelKey}`);
+            return (
+              <ProfileBadge
+                key={badge}
+                badge={badge}
+                icon={config.icon}
+                color={config.color}
+                label={label}
+                compact={scale.compact}
+                glowIcons={settings.glowIcons}
+              />
+            );
+          })}
+        </div>
+      ) : null}
       <p
-        className={`${scale.compact ? "text-xs" : "text-sm"} ${nameEffect !== "none" && nameEffect !== "gradient" ? nameEffectClass ?? "" : ""}`}
+        className={`mt-1 w-full ${scale.compact ? "text-xs" : "text-sm"} ${textAlign} ${
+          nameEffect !== "none" && nameEffect !== "gradient" ? nameEffectClass ?? "" : ""
+        }`}
         style={{
           color: hexToRgba(textColor, 0.6),
           ...(nameEffect !== "none" && nameEffect !== "gradient"
             ? getNameEffectStyle(nameEffect, settings.accentColor, hexToRgba(textColor, 0.6))
-            : {}),
+            : {})
         }}
       >
         @{profile.username}
       </p>
-    </>
+    </div>
   );
 }
 
@@ -210,15 +218,18 @@ export function ProfileBio({
   profile,
   scale,
   className = "",
+  align = "center",
 }: {
   profile: Profile;
   scale: CardScale;
   className?: string;
+  align?: "center" | "left";
 }) {
   if (!profile.bio) return null;
+  const alignClass = align === "left" ? "text-left mx-0" : "text-center mx-auto";
   return (
     <p
-      className={`${scale.bio} mx-auto ${className}`}
+      className={`${scale.bio} w-full ${alignClass} ${className}`}
       style={{ color: hexToRgba(profile.settings.textColor, 0.8) }}
     >
       {profile.bio}
@@ -230,15 +241,18 @@ export function ProfileViews({
   profile,
   scale,
   className = "",
+  align = "center",
 }: {
   profile: Profile;
   scale: CardScale;
   className?: string;
+  align?: "center" | "left";
 }) {
   const { textColor } = profile.settings;
+  const alignClass = align === "left" ? "justify-start" : "justify-center";
   return (
     <div
-      className={`flex items-center gap-1.5 ${scale.views} ${className}`}
+      className={`flex w-full items-center gap-1.5 ${scale.views} ${alignClass} ${className}`}
       style={{ color: hexToRgba(textColor, 0.4) }}
     >
       <Eye className={scale.eye} />

@@ -42,16 +42,24 @@ function CardShell({
       className={`relative rounded-2xl border shadow-2xl ${pad} ${className}`}
       style={cardStyle}
     >
-      <CardToolbarSlot />
       {children}
+      <CardToolbarSlot />
     </div>
   );
 }
 
-function LinksBlock({ profile, compact }: { profile: Profile; compact?: boolean }) {
+function LinksBlock({
+  profile,
+  compact,
+  centered = true,
+}: {
+  profile: Profile;
+  compact?: boolean;
+  centered?: boolean;
+}) {
   const { settings } = profile;
   const linkStyle = resolveLinkStyle(settings);
-  return (
+  const display = (
     <ProfileLinksDisplay
       links={profile.links}
       linkStyle={linkStyle}
@@ -64,17 +72,21 @@ function LinksBlock({ profile, compact }: { profile: Profile; compact?: boolean 
       mutedColor={hexToRgba(settings.textColor, 0.3)}
     />
   );
+
+  if (!centered) return display;
+
+  return <div className="w-full flex flex-col items-center">{display}</div>;
 }
 
 export function LayoutClassic({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
   return (
     <CardShell profile={profile} compact={compact}>
-      <div className="flex flex-col items-center text-center">
-        <ProfileAvatar profile={profile} scale={scale} className="mx-auto mb-3" />
+      <div className="flex w-full flex-col items-center text-center">
+        <ProfileAvatar profile={profile} scale={scale} className="mb-3" />
         <ProfileNameBlock profile={profile} scale={scale} />
-        <ProfileBio profile={profile} scale={scale} className="mt-1.5 mb-2 max-w-full" />
-        <ProfileViews profile={profile} scale={scale} className="mb-2 justify-center" />
+        <ProfileBio profile={profile} scale={scale} className="mt-1.5 mb-2" />
+        <ProfileViews profile={profile} scale={scale} className="mb-2" />
         <LinksBlock profile={profile} compact={compact} />
       </div>
     </CardShell>
@@ -85,17 +97,17 @@ export function LayoutHero({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
   const heroAvatar = compact ? "w-20 h-20" : "w-28 h-28";
   return (
-    <CardShell profile={profile} compact={compact} className={compact ? "" : "pt-10"}>
-      <div className="flex flex-col items-center text-center">
+    <CardShell profile={profile} compact={compact}>
+      <div className="flex w-full flex-col items-center text-center">
         <ProfileAvatar
           profile={profile}
           scale={scale}
           sizeOverride={heroAvatar}
-          className="mx-auto mb-4"
+          className="mb-4"
         />
         <ProfileNameBlock profile={profile} scale={scale} />
-        <ProfileBio profile={profile} scale={scale} className="mt-2 mb-2 max-w-full" />
-        <ProfileViews profile={profile} scale={scale} className="mb-4 justify-center" />
+        <ProfileBio profile={profile} scale={scale} className="mt-2 mb-2" />
+        <ProfileViews profile={profile} scale={scale} className="mb-4" />
         <LinksBlock profile={profile} compact={compact} />
       </div>
     </CardShell>
@@ -111,12 +123,12 @@ export function LayoutSplit({ profile, compact }: LayoutProps) {
         <ProfileAvatar profile={profile} scale={scale} sizeOverride={splitAvatar} />
         <div className="min-w-0 flex-1">
           <ProfileNameBlock profile={profile} scale={scale} align="left" />
-          <ProfileBio profile={profile} scale={scale} className="mt-2 mb-2" />
-          <ProfileViews profile={profile} scale={scale} className="mb-3" />
+          <ProfileBio profile={profile} scale={scale} align="left" className="mt-2 mb-2" />
+          <ProfileViews profile={profile} scale={scale} align="left" className="mb-3" />
         </div>
       </div>
-      <div className="mt-4 pt-3 border-t border-white/10">
-        <LinksBlock profile={profile} compact={compact} />
+      <div className="mt-4 w-full border-t border-white/10 pt-3">
+        <LinksBlock profile={profile} compact={compact} centered />
       </div>
     </CardShell>
   );
@@ -145,8 +157,6 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
         style={{ ...glassStyle, borderRadius: "inherit" }}
         aria-hidden
       />
-
-      <CardToolbarSlot />
 
       <div className="relative z-10 overflow-hidden rounded-t-2xl">
         <div
@@ -182,13 +192,15 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
           />
         </div>
 
-        <div className="flex flex-col items-center text-center">
+        <div className="flex w-full flex-col items-center text-center">
           <ProfileNameBlock profile={profile} scale={scale} />
           <ProfileBio profile={profile} scale={scale} className="mt-1.5 mb-1.5" />
-          <ProfileViews profile={profile} scale={scale} className="mb-2 justify-center" />
+          <ProfileViews profile={profile} scale={scale} className="mb-2" />
           <LinksBlock profile={profile} compact={compact} />
         </div>
       </div>
+
+      <CardToolbarSlot />
     </div>
   );
 }
@@ -203,20 +215,22 @@ export function LayoutMinimal({ profile, compact }: LayoutProps) {
 
   return (
     <div
-      className={`relative rounded-2xl ${compact ? "p-2" : "p-4"} text-center`}
+      className={`relative flex w-full flex-col items-center rounded-2xl text-center ${
+        compact ? "p-2" : "p-4"
+      }`}
       style={minimalStyle}
     >
-      <CardToolbarSlot />
       <ProfileAvatar
         profile={profile}
         scale={scale}
         sizeOverride={compact ? "w-14 h-14" : "w-20 h-20"}
-        className="mx-auto mb-2"
+        className="mb-2"
       />
       <ProfileNameBlock profile={profile} scale={scale} />
-      <ProfileBio profile={profile} scale={scale} className="mt-1 mb-2 mx-auto" />
-      <ProfileViews profile={profile} scale={scale} className="mb-3 justify-center" />
+      <ProfileBio profile={profile} scale={scale} className="mt-1 mb-2" />
+      <ProfileViews profile={profile} scale={scale} className="mb-3" />
       <LinksBlock profile={profile} compact={compact} />
+      <CardToolbarSlot />
     </div>
   );
 }
@@ -225,11 +239,11 @@ export function LayoutStack({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
   return (
     <CardShell profile={profile} compact={compact}>
-      <div className="flex flex-col items-center text-center mb-2">
-        <ProfileAvatar profile={profile} scale={scale} className="mx-auto mb-2" />
+      <div className="mb-2 flex w-full flex-col items-center text-center">
+        <ProfileAvatar profile={profile} scale={scale} className="mb-2" />
         <ProfileNameBlock profile={profile} scale={scale} />
         <ProfileBio profile={profile} scale={scale} className="mt-1 mb-2" />
-        <ProfileViews profile={profile} scale={scale} className="justify-center" />
+        <ProfileViews profile={profile} scale={scale} />
       </div>
       <LinksBlock profile={profile} compact={compact} />
     </CardShell>
@@ -240,20 +254,18 @@ export function LayoutGlass({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
   return (
     <CardShell profile={profile} compact={compact} className={compact ? "max-w-[260px]" : "max-w-md"}>
-      <div className="flex flex-col items-center text-center">
-        <ProfileAvatar profile={profile} scale={scale} className="mx-auto mb-3" />
+      <div className="flex w-full flex-col items-center text-center">
+        <ProfileAvatar profile={profile} scale={scale} className="mb-3" />
         <ProfileNameBlock profile={profile} scale={scale} />
         <ProfileBio profile={profile} scale={scale} className="mt-2 mb-3" />
       </div>
       <div
-        className={`flex flex-wrap items-center justify-center gap-3 pt-3 border-t border-white/10 ${
-          compact ? "flex-col" : "gap-4"
+        className={`flex w-full flex-col items-center gap-3 border-t border-white/10 pt-3 ${
+          compact ? "gap-2" : "gap-4"
         }`}
       >
-        <ProfileViews profile={profile} scale={scale} className="justify-center" />
-        <div className="w-full flex justify-center">
-          <LinksBlock profile={profile} compact={compact} />
-        </div>
+        <ProfileViews profile={profile} scale={scale} />
+        <LinksBlock profile={profile} compact={compact} />
       </div>
     </CardShell>
   );

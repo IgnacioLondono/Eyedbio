@@ -285,8 +285,10 @@ export interface Messages {
   };
   linkEditor: {
     count: string;
+    customCount: string;
     draftHint: string;
     limitReached: string;
+    customLimitReached: string;
     empty: string;
     visibleName: string;
     remove: string;
@@ -701,8 +703,10 @@ export const es: Messages = {
   },
   linkEditor: {
     count: "{count}/{max} enlaces activos",
+    customCount: " · {count}/{max} URLs personalizadas",
     draftHint: " · {drafts} sin URL (no cuentan en el límite)",
     limitReached: " · Límite alcanzado. Quita uno o completa los que faltan.",
+    customLimitReached: "Límite de URLs personalizadas alcanzado.",
     empty: "Elige un icono abajo para añadir tu primer enlace.",
     visibleName: "Nombre visible (opcional)",
     remove: "Quitar {label}",
@@ -710,7 +714,7 @@ export const es: Messages = {
     uploadIcon: "Subir icono personalizado",
     changeIcon: "Cambiar icono",
     customTitle: "Añadir URL personalizada",
-    customHint: "Usa tu propia URL y elige un icono que encaje.",
+    customHint: "Hasta {max} proyectos o webs propias, con icono a medida.",
     uploadError: "Error al subir",
   },
   fileUpload: {

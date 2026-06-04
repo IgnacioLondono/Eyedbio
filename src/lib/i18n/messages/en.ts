@@ -351,8 +351,10 @@ export const en: Messages = {
   },
   linkEditor: {
     count: "{count}/{max} active links",
+    customCount: " · {count}/{max} custom URLs",
     draftHint: " · {drafts} without URL (not counted toward the limit)",
     limitReached: " · Limit reached. Remove one or complete the missing URLs.",
+    customLimitReached: "Custom URL limit reached.",
     empty: "Pick an icon below to add your first link.",
     visibleName: "Visible name (optional)",
     remove: "Remove {label}",
@@ -360,7 +362,7 @@ export const en: Messages = {
     uploadIcon: "Upload custom icon",
     changeIcon: "Change icon",
     customTitle: "Add custom URL",
-    customHint: "Use your own URL and pick a matching icon.",
+    customHint: "Up to {max} of your own sites or projects, with a custom icon.",
     uploadError: "Upload error",
   },
   fileUpload: {

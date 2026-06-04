@@ -1,5 +1,6 @@
 import sharp from "sharp";
 import type { UploadKind } from "@/lib/media-config";
+import { ensureAdminEnvLoaded } from "@/lib/load-admin-env";
 
 export type ModerationRejectReason = "nsfw" | "unavailable";
 
@@ -25,13 +26,26 @@ function moderationEnabled(): boolean {
   return true;
 }
 
+function getSightengineCredentials(): { user: string; secret: string } | null {
+  ensureAdminEnvLoaded();
+
+  const user =
+    process.env.SIGHTENGINE_API_USER?.trim() ||
+    process.env.SIGHTENGINE_USER?.trim();
+  const secret =
+    process.env.SIGHTENGINE_API_SECRET?.trim() ||
+    process.env.SIGHTENGINE_SECRET?.trim();
+
+  if (user && secret) return { user, secret };
+  return null;
+}
+
 function hasSightengine(): boolean {
-  return Boolean(
-    process.env.SIGHTENGINE_API_USER?.trim() && process.env.SIGHTENGINE_API_SECRET?.trim()
-  );
+  return getSightengineCredentials() !== null;
 }
 
 function hasOpenAi(): boolean {
+  ensureAdminEnvLoaded();
   return Boolean(process.env.OPENAI_API_KEY?.trim());
 }
 
@@ -93,8 +107,14 @@ function sightengineBlocked(payload: {
 }
 
 async function moderateWithSightengine(buffer: Buffer, mime: string): Promise<void> {
-  const user = process.env.SIGHTENGINE_API_USER!.trim();
-  const secret = process.env.SIGHTENGINE_API_SECRET!.trim();
+  const creds = getSightengineCredentials();
+  if (!creds) {
+    throw new ImageModerationError(
+      "Credenciales de Sightengine no configuradas",
+      "unavailable"
+    );
+  }
+  const { user, secret } = creds;
 
   const form = new FormData();
   form.append("api_user", user);
@@ -194,6 +214,8 @@ async function moderateWithOpenAi(buffer: Buffer, mime: string): Promise<void> {
  * Analiza una imagen antes de guardarla. Requiere Sightengine u OpenAI si CONTENT_MODERATION está activo.
  */
 export async function moderateImageBuffer(buffer: Buffer, mime: string): Promise<void> {
+  ensureAdminEnvLoaded();
+
   if (hasSightengine()) {
     await moderateWithSightengine(buffer, mime);
     return;
@@ -206,15 +228,16 @@ export async function moderateImageBuffer(buffer: Buffer, mime: string): Promise
 
   if (process.env.NODE_ENV === "production") {
     throw new ImageModerationError(
-      "La moderación de imágenes no está configurada en el servidor",
+      "La moderación no está activa en el servidor. Añade SIGHTENGINE_API_USER y SIGHTENGINE_API_SECRET en Portainer (servicio eyed-bio) y reinicia el contenedor.",
       "unavailable"
     );
   }
 }
 
 async function moderateVideoWithSightengine(file: File): Promise<void> {
-  const user = process.env.SIGHTENGINE_API_USER!.trim();
-  const secret = process.env.SIGHTENGINE_API_SECRET!.trim();
+  const creds = getSightengineCredentials();
+  if (!creds) return;
+  const { user, secret } = creds;
 
   const form = new FormData();
   form.append("api_user", user);
@@ -257,6 +280,7 @@ async function moderateVideoWithSightengine(file: File): Promise<void> {
 export async function moderateUploadFile(file: File, kind: UploadKind): Promise<void> {
   if (!uploadKindNeedsImageModeration(kind)) return;
   if (!moderationEnabled()) return;
+  ensureAdminEnvLoaded();
 
   const frame = await extractModerationFrame(file);
   if (frame) {

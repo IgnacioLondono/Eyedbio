@@ -59,7 +59,7 @@ export default function SocialLinks({
 }: Props) {
   if (links.length === 0) {
     return (
-      <p className="text-sm italic" style={{ color: mutedColor }}>
+      <p className="w-full text-center text-sm italic" style={{ color: mutedColor }}>
         {emptyLabel}
       </p>
     );
@@ -69,7 +69,7 @@ export default function SocialLinks({
 
   if (visibleLinks.length === 0) {
     return (
-      <p className="text-sm italic" style={{ color: mutedColor }}>
+      <p className="w-full text-center text-sm italic" style={{ color: mutedColor }}>
         {emptyLabel}
       </p>
     );
@@ -79,7 +79,7 @@ export default function SocialLinks({
   const gap = compact ? "gap-2" : "gap-3";
 
   return (
-    <div className={`flex flex-wrap justify-center ${gap}`}>
+    <div className={`flex w-full flex-wrap justify-center ${gap}`}>
       {visibleLinks.map((link, i) => {
         const config = PLATFORM_CONFIG[link.platform];
         const color = monochromeIcons ? accentColor : config.color;

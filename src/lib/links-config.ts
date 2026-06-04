@@ -1,31 +1,82 @@
-import type { SocialLink } from "@/types/profile";
+import type { SocialLink, SocialPlatform } from "@/types/profile";
 
-/** Máximo de enlaces sociales activos (con URL) por perfil. */
-export const MAX_SOCIAL_LINKS = 7;
+/** Máximo de enlaces activos (con URL) en el perfil. */
+export const MAX_PROFILE_LINKS = 12;
+
+/** Máximo de redes / plataformas predefinidas (no custom). */
+export const MAX_PLATFORM_LINKS = 7;
+
+/** Máximo de URLs personalizadas (proyectos web, portfolios, etc.). */
+export const MAX_CUSTOM_LINKS = 5;
+
+/** @deprecated Usa MAX_PROFILE_LINKS */
+export const MAX_SOCIAL_LINKS = MAX_PROFILE_LINKS;
+
+type LinkRow = Pick<SocialLink, "url" | "platform">;
 
 export function countActiveSocialLinks(links: Pick<SocialLink, "url">[]): number {
   return links.filter((link) => link.url.trim().length > 0).length;
+}
+
+export function countActiveCustomLinks(links: LinkRow[]): number {
+  return links.filter(
+    (link) => link.platform === "custom" && link.url.trim().length > 0
+  ).length;
+}
+
+export function countActivePlatformLinks(links: LinkRow[]): number {
+  return links.filter(
+    (link) => link.platform !== "custom" && link.url.trim().length > 0
+  ).length;
 }
 
 export function countDraftSocialLinks(links: Pick<SocialLink, "url">[]): number {
   return links.filter((link) => !link.url.trim()).length;
 }
 
-/** ¿Se puede añadir otro enlace? Solo cuentan los que tienen URL. */
-export function canAddSocialLink(links: Pick<SocialLink, "url">[]): boolean {
-  const active = countActiveSocialLinks(links);
-  if (active >= MAX_SOCIAL_LINKS) return false;
-  if (links.length < MAX_SOCIAL_LINKS) return true;
+function hasDraftSlot(links: Pick<SocialLink, "url">[]): boolean {
   return links.some((link) => !link.url.trim());
 }
 
-export function validateSocialLinksCount(links: Pick<SocialLink, "url">[]): string | null {
+/** ¿Hay hueco para otro enlace (cualquier tipo)? */
+export function canAddSocialLink(links: Pick<SocialLink, "url">[]): boolean {
   const active = countActiveSocialLinks(links);
-  if (active > MAX_SOCIAL_LINKS) {
-    return `Solo puedes tener hasta ${MAX_SOCIAL_LINKS} enlaces en tu perfil.`;
+  if (active >= MAX_PROFILE_LINKS) return false;
+  if (links.length < MAX_PROFILE_LINKS) return true;
+  return hasDraftSlot(links);
+}
+
+export function canAddCustomLink(links: LinkRow[]): boolean {
+  if (!canAddSocialLink(links)) return false;
+  return countActiveCustomLinks(links) < MAX_CUSTOM_LINKS;
+}
+
+export function canAddPlatformLink(links: LinkRow[]): boolean {
+  if (!canAddSocialLink(links)) return false;
+  return countActivePlatformLinks(links) < MAX_PLATFORM_LINKS;
+}
+
+export function canAddLink(links: LinkRow[], platform: SocialPlatform): boolean {
+  if (platform === "custom") return canAddCustomLink(links);
+  return canAddPlatformLink(links);
+}
+
+export function validateSocialLinksCount(links: LinkRow[]): string | null {
+  const active = countActiveSocialLinks(links);
+  const custom = countActiveCustomLinks(links);
+  const platforms = countActivePlatformLinks(links);
+
+  if (active > MAX_PROFILE_LINKS) {
+    return `Solo puedes tener hasta ${MAX_PROFILE_LINKS} enlaces en tu perfil.`;
   }
-  if (links.length > MAX_SOCIAL_LINKS) {
-    return `Solo puedes tener hasta ${MAX_SOCIAL_LINKS} espacios de enlace. Elimina uno sin URL o borra un enlace.`;
+  if (custom > MAX_CUSTOM_LINKS) {
+    return `Solo puedes tener hasta ${MAX_CUSTOM_LINKS} URLs personalizadas.`;
+  }
+  if (platforms > MAX_PLATFORM_LINKS) {
+    return `Solo puedes tener hasta ${MAX_PLATFORM_LINKS} enlaces de redes o plataformas.`;
+  }
+  if (links.length > MAX_PROFILE_LINKS) {
+    return `Solo puedes tener hasta ${MAX_PROFILE_LINKS} espacios de enlace. Elimina uno sin URL o borra un enlace.`;
   }
   return null;
 }

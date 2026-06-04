@@ -9,8 +9,13 @@ import { PlatformIcon } from "@/components/PlatformIcons";
 import CustomLinkIcon from "@/components/CustomLinkIcon";
 import { createEmptyLink } from "@/lib/profile-mapper";
 import {
-  MAX_SOCIAL_LINKS,
+  MAX_CUSTOM_LINKS,
+  MAX_PROFILE_LINKS,
+  canAddCustomLink,
+  canAddLink,
+  canAddPlatformLink,
   canAddSocialLink,
+  countActiveCustomLinks,
   countActiveSocialLinks,
   countDraftSocialLinks,
 } from "@/lib/links-config";
@@ -77,6 +82,7 @@ function LinkIconPreview({
             iconUrl={link.iconUrl}
             color="#a855f7"
             sizeClass="w-8 h-8"
+            themed={false}
           />
         ) : (
           <Globe className="w-6 h-6 text-white/50" />
@@ -107,10 +113,15 @@ export default function LinkEditor({ links, onChange }: Props) {
   );
 
   const activeCount = countActiveSocialLinks(links);
+  const activeCustomCount = countActiveCustomLinks(links);
   const draftCount = countDraftSocialLinks(links);
-  const atLinkLimit = !canAddSocialLink(links);
+  const atTotalLimit = !canAddSocialLink(links);
+  const atCustomLimit = !canAddCustomLink(links);
+  const atPlatformLimit = !canAddPlatformLink(links);
 
   const insertLink = (platform: SocialPlatform) => {
+    if (!canAddLink(links, platform)) return;
+
     const emptyIndex = links.findIndex((link) => !link.url.trim());
     if (emptyIndex >= 0) {
       const next = [...links];
@@ -118,7 +129,7 @@ export default function LinkEditor({ links, onChange }: Props) {
       onChange(next);
       return;
     }
-    if (atLinkLimit) return;
+    if (atTotalLimit) return;
     onChange([...links, createEmptyLink(platform)]);
   };
 
@@ -140,7 +151,7 @@ export default function LinkEditor({ links, onChange }: Props) {
   };
 
   const hasAvailablePlatforms =
-    !atLinkLimit &&
+    !atPlatformLimit &&
     PLATFORM_CATEGORIES.some((category) =>
       category.platforms.some((platform) => !usedPlatforms.has(platform))
     );
@@ -148,11 +159,17 @@ export default function LinkEditor({ links, onChange }: Props) {
   return (
     <div className="space-y-6">
       <p className="text-xs text-white/40">
-        {tVars("linkEditor.count", { count: activeCount, max: MAX_SOCIAL_LINKS })}
+        {tVars("linkEditor.count", { count: activeCount, max: MAX_PROFILE_LINKS })}
+        <span className="text-white/30">
+          {tVars("linkEditor.customCount", {
+            count: activeCustomCount,
+            max: MAX_CUSTOM_LINKS,
+          })}
+        </span>
         {draftCount > 0 && (
           <span className="text-white/30">{tVars("linkEditor.draftHint", { drafts: draftCount })}</span>
         )}
-        {atLinkLimit && activeCount >= MAX_SOCIAL_LINKS && (
+        {atTotalLimit && activeCount >= MAX_PROFILE_LINKS && (
           <span className="text-amber-300/90">{t("linkEditor.limitReached")}</span>
         )}
       </p>
@@ -280,7 +297,7 @@ export default function LinkEditor({ links, onChange }: Props) {
         <button
           type="button"
           onClick={addCustomLink}
-          disabled={atLinkLimit}
+          disabled={atCustomLimit}
           className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] hover:bg-purple-500/10 hover:border-purple-500/30 transition-all text-left disabled:opacity-40 disabled:pointer-events-none"
         >
           <span className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/5 border border-white/10 shrink-0">
@@ -289,7 +306,9 @@ export default function LinkEditor({ links, onChange }: Props) {
           <span className="min-w-0">
             <span className="block text-sm font-medium text-white">{t("linkEditor.customTitle")}</span>
             <span className="block text-xs text-white/40 mt-0.5">
-              {t("linkEditor.customHint")}
+              {atCustomLimit && activeCustomCount >= MAX_CUSTOM_LINKS
+                ? t("linkEditor.customLimitReached")
+                : tVars("linkEditor.customHint", { max: MAX_CUSTOM_LINKS })}
             </span>
           </span>
         </button>

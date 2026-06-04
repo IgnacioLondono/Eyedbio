@@ -57,6 +57,14 @@ else
   echo "Email: NO configurado — los códigos solo aparecerán en los logs"
 fi
 
+if [ -n "$SIGHTENGINE_API_USER" ] && [ -n "$SIGHTENGINE_API_SECRET" ]; then
+  echo "Moderación: Sightengine configurado"
+elif [ -n "$OPENAI_API_KEY" ]; then
+  echo "Moderación: OpenAI configurado"
+else
+  echo "Moderación: NO configurada — subidas de imagen bloqueadas en producción"
+fi
+
 exec runuser -u nextjs -- env \
   DATABASE_URL="$DATABASE_URL" \
   NODE_ENV="${NODE_ENV:-production}" \
@@ -79,4 +87,11 @@ exec runuser -u nextjs -- env \
   ADMIN_EMAIL="${ADMIN_EMAIL:-}" \
   ADMIN_PASSWORD="${ADMIN_PASSWORD:-}" \
   ADMIN_USERNAME="${ADMIN_USERNAME:-}" \
+  CONTENT_MODERATION="${CONTENT_MODERATION:-}" \
+  SIGHTENGINE_API_USER="${SIGHTENGINE_API_USER:-}" \
+  SIGHTENGINE_API_SECRET="${SIGHTENGINE_API_SECRET:-}" \
+  SIGHTENGINE_USER="${SIGHTENGINE_USER:-}" \
+  SIGHTENGINE_SECRET="${SIGHTENGINE_SECRET:-}" \
+  OPENAI_API_KEY="${OPENAI_API_KEY:-}" \
+  OPENAI_MODERATION_MODEL="${OPENAI_MODERATION_MODEL:-}" \
   "$@"
