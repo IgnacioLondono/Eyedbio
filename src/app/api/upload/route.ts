@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { saveUpload, saveUploadBuffer, UploadKind, validateUpload } from "@/lib/upload";
+import { saveUpload, UploadKind, validateUpload } from "@/lib/upload";
 import { getSiteSettings } from "@/lib/site-settings";
 import {
   ImageModerationError,
   moderateUploadFile,
 } from "@/lib/image-moderation";
-import { processLinkIconBuffer } from "@/lib/link-icon-process";
 
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";
@@ -55,17 +54,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: moderationMessage(err) }, { status: 422 });
       }
       throw err;
-    }
-
-    if (kind === "linkIcon") {
-      const raw = Buffer.from(await file.arrayBuffer());
-      const processed = await processLinkIconBuffer(raw);
-      const result = await saveUploadBuffer(session.user.id, kind, processed, {
-        ext: ".png",
-        mime: "image/png",
-        originalName: file.name,
-      });
-      return NextResponse.json(result);
     }
 
     const result = await saveUpload(session.user.id, kind, file);

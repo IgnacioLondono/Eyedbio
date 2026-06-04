@@ -43,7 +43,6 @@ function LinkIcon({
         color={color}
         sizeClass={sizeClass}
         glowIcons={glowIcons}
-        themed
       />
     );
   }

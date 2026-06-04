@@ -82,7 +82,6 @@ function LinkIconPreview({
             iconUrl={link.iconUrl}
             color="#a855f7"
             sizeClass="w-8 h-8"
-            themed={false}
           />
         ) : (
           <Globe className="w-6 h-6 text-white/50" />

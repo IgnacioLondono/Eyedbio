@@ -744,9 +744,9 @@ function DashboardContent() {
             />
             <div className="absolute inset-0 bg-black/50 pointer-events-none z-[2]" />
             <BackgroundEffects effect={profile.settings.backgroundEffect} contained />
-            <div className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
-              <div className="min-h-full flex items-center justify-center p-4 sm:p-6 pointer-events-none">
-                <div className="pointer-events-auto mx-auto w-full flex justify-center">
+            <div className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden">
+              <div className="min-h-full w-full flex items-center justify-center px-5 py-4 sm:px-6 sm:py-6 pointer-events-none">
+                <div className="pointer-events-auto shrink-0 w-full max-w-[280px] mx-auto">
                   <ProfileCard
                     key={`${profile.settings.cardLayout}-${profile.settings.linkStyle}`}
                     profile={profile}

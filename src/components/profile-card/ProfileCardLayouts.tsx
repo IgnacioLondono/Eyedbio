@@ -39,7 +39,7 @@ function CardShell({
   const pad = noPadding ? "" : compact ? "p-3" : "p-5";
   return (
     <div
-      className={`relative rounded-2xl border shadow-2xl ${pad} ${className}`}
+      className={`relative w-full rounded-2xl border shadow-2xl ${pad} ${className}`}
       style={cardStyle}
     >
       {children}
@@ -253,7 +253,11 @@ export function LayoutStack({ profile, compact }: LayoutProps) {
 export function LayoutGlass({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
   return (
-    <CardShell profile={profile} compact={compact} className={compact ? "max-w-[260px]" : "max-w-md"}>
+    <CardShell
+      profile={profile}
+      compact={compact}
+      className={compact ? "mx-auto max-w-[260px]" : "max-w-md"}
+    >
       <div className="flex w-full flex-col items-center text-center">
         <ProfileAvatar profile={profile} scale={scale} className="mb-3" />
         <ProfileNameBlock profile={profile} scale={scale} />
@@ -308,7 +312,7 @@ export function ProfileCardMotionWrapper({
 
   if (compact) {
     return (
-      <div className={`relative mx-auto w-full ${widthClass}`}>
+      <div className={`relative mx-auto w-full ${widthClass} flex flex-col items-center`}>
         {children}
         <ProfileFooterBrand profile={profile} compact />
       </div>
