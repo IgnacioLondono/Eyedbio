@@ -2,6 +2,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: eyed-bio-db
+    shm_size: 256mb
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-eyedbio}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-eyedbio_secret}
@@ -9,11 +10,15 @@ services:
     volumes:
       - eyed-db:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -h 127.0.0.1 -p 5432 -U ${POSTGRES_USER:-eyedbio} -d ${POSTGRES_DB:-eyedbio} || exit 1",
+        ]
       interval: 10s
       timeout: 5s
-      retries: 6
-      start_period: 20s
+      retries: 12
+      start_period: 45s
     restart: unless-stopped
     networks:
       - eyed-net
