@@ -246,12 +246,12 @@ export function LayoutGlass({ profile, compact }: LayoutProps) {
         <ProfileBio profile={profile} scale={scale} className="mt-2 mb-3" />
       </div>
       <div
-        className={`flex items-end justify-between gap-3 pt-3 border-t border-white/10 ${
-          compact ? "flex-col items-center" : ""
+        className={`flex flex-wrap items-center justify-center gap-3 pt-3 border-t border-white/10 ${
+          compact ? "flex-col" : "gap-4"
         }`}
       >
-        <ProfileViews profile={profile} scale={scale} />
-        <div className={compact ? "w-full flex justify-center" : "shrink-0"}>
+        <ProfileViews profile={profile} scale={scale} className="justify-center" />
+        <div className="w-full flex justify-center">
           <LinksBlock profile={profile} compact={compact} />
         </div>
       </div>
@@ -282,10 +282,12 @@ export function ProfileCardMotionWrapper({
   children: React.ReactNode;
   maxWidth?: string;
 }) {
+  const widthClass = maxWidth ?? (compact || showcase ? "max-w-[280px]" : "max-w-md");
+
   if (showcase) {
     return (
       <div
-        className={`relative w-full mx-auto pointer-events-none select-none ${maxWidth ?? "max-w-[240px]"}`}
+        className={`relative mx-auto w-full ${widthClass} pointer-events-none select-none`}
       >
         {children}
       </div>
@@ -294,7 +296,7 @@ export function ProfileCardMotionWrapper({
 
   if (compact) {
     return (
-      <div className={`relative w-full mx-auto ${maxWidth ?? "max-w-[260px]"}`}>
+      <div className={`relative mx-auto w-full ${widthClass}`}>
         {children}
         <ProfileFooterBrand profile={profile} compact />
       </div>
@@ -306,7 +308,7 @@ export function ProfileCardMotionWrapper({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`relative w-full mx-auto ${maxWidth ?? "max-w-md"}`}
+      className={`relative mx-auto w-full ${widthClass}`}
     >
       {children}
       <ProfileFooterBrand profile={profile} compact={false} />

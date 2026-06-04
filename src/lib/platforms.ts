@@ -29,7 +29,7 @@ export const PLATFORM_CONFIG: Record<
   xbox: { label: "Xbox", color: "#107C10" },
   playstation: { label: "PlayStation", color: "#0070D1" },
   nintendo: { label: "Nintendo", color: "#E60012" },
-  minecraft: { label: "Minecraft", color: "#62B47A" },
+  minecraft: { label: "Minecraft", color: "#5D7C16" },
   battlenet: { label: "Battle.net", color: "#148EFF" },
   riotgames: { label: "Riot Games", color: "#D32936" },
   email: { label: "Email", color: "#a855f7" },

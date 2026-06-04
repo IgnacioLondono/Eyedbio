@@ -45,7 +45,7 @@ function LinkIcon({
 
 function EmptyLinks({ mutedColor, locale = "es" }: { mutedColor: string; locale?: "es" | "en" }) {
   return (
-    <p className="text-sm italic" style={{ color: mutedColor }}>
+    <p className="text-sm italic text-center" style={{ color: mutedColor }}>
       {translate(locale, "profile.noLinks")}
     </p>
   );

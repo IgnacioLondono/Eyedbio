@@ -161,9 +161,19 @@ export const NintendoIcon = () => (
   </svg>
 );
 
+/** Cara de Creeper en pixel art (rejilla 8×8 escalada a 24×24). */
 export const MinecraftIcon = () => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={iconClass}>
-    <path d="M3 3h18v18H3V3zm5 4v3h2V7H8zm6 0v3h2V7h-2zM8 12h2v3h4v-3h2v6h-2v-1h-4v1H8v-6z" />
+  <svg
+    viewBox="0 0 24 24"
+    className={iconClass}
+    shapeRendering="crispEdges"
+    aria-hidden
+  >
+    <rect width="24" height="24" fill="currentColor" />
+    <rect x="3" y="3" width="6" height="6" fill="#141414" />
+    <rect x="15" y="3" width="6" height="6" fill="#141414" />
+    <rect x="9" y="12" width="6" height="3" fill="#141414" />
+    <rect x="6" y="15" width="12" height="6" fill="#141414" />
   </svg>
 );
 

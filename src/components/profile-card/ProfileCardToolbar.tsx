@@ -19,7 +19,7 @@ export function CardToolbarSlot() {
   if (!toolbar) return null;
 
   return (
-    <div className="absolute top-2.5 right-2.5 z-20 flex items-center gap-1 pointer-events-auto">
+    <div className="absolute top-2.5 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center gap-1 pointer-events-auto">
       {toolbar}
     </div>
   );

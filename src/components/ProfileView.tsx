@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { Profile } from "@/types/profile";
 import { isLockedPublicProfile, LockedPublicProfile } from "@/types/public-profile";
 import BackgroundEffects from "@/components/BackgroundEffects";
@@ -11,6 +12,7 @@ import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/ProfileAccessGate";
 import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
 import { useI18n } from "@/components/LocaleProvider";
+import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
 import type { AppLocale } from "@/lib/i18n/types";
 
@@ -20,6 +22,10 @@ interface Props {
 
 export default function ProfileView({ username }: Props) {
   const { locale: uiLocale } = useI18n();
+  const { status } = useSession();
+  const site = useSiteSettings();
+  const reserveBottomForCta =
+    site.claimProfileCtaEnabled && status === "unauthenticated";
   const [profile, setProfile] = useState<Profile | null>(null);
   const [lockedProfile, setLockedProfile] = useState<LockedPublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -154,8 +160,14 @@ export default function ProfileView({ username }: Props) {
       <BackgroundEffects effect={settings.backgroundEffect} />
       <ProfileQuickNavButton profileUsername={profile.username} />
       <ClaimProfileCta />
-      <div className="relative z-20 flex min-h-[100dvh] w-full items-center justify-center p-6 pb-28">
-        <ProfileCard profile={profile} showControls />
+      <div
+        className={`relative z-20 flex min-h-[100dvh] w-full items-center justify-center px-6 py-6 ${
+          reserveBottomForCta ? "pb-28" : ""
+        }`}
+      >
+        <div className="mx-auto w-full max-w-md flex justify-center">
+          <ProfileCard profile={profile} showControls />
+        </div>
       </div>
     </div>
   );

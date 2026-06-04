@@ -729,11 +729,11 @@ function DashboardContent() {
         </div>
 
         <div
-          className={`lg:sticky lg:top-20 lg:self-start relative z-10 min-w-0 w-full max-w-[340px] mx-auto lg:max-w-none ${
+          className={`lg:sticky lg:top-20 lg:self-start relative z-10 flex w-full max-w-[340px] flex-col items-center mx-auto ${
             tab === "account" ? "hidden" : ""
           }`}
         >
-          <p className="text-white/40 text-xs uppercase tracking-wider mb-4 text-center">
+          <p className="text-white/40 text-xs uppercase tracking-wider mb-4 text-center w-full">
             {t("dashboard.preview")}
           </p>
           <div className="relative w-full rounded-2xl overflow-hidden border border-white/10 aspect-[9/16] max-h-[min(700px,85vh)] isolate bg-[#0a0a0f]">
@@ -744,13 +744,15 @@ function DashboardContent() {
             />
             <div className="absolute inset-0 bg-black/50 pointer-events-none z-[2]" />
             <BackgroundEffects effect={profile.settings.backgroundEffect} contained />
-            <div className="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6 overflow-y-auto pointer-events-none">
-              <div className="pointer-events-auto w-full flex justify-center">
-                <ProfileCard
-                  key={`${profile.settings.cardLayout}-${profile.settings.linkStyle}`}
-                  profile={profile}
-                  compact
-                />
+            <div className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden [scrollbar-gutter:stable]">
+              <div className="min-h-full flex items-center justify-center p-4 sm:p-6 pointer-events-none">
+                <div className="pointer-events-auto mx-auto w-full flex justify-center">
+                  <ProfileCard
+                    key={`${profile.settings.cardLayout}-${profile.settings.linkStyle}`}
+                    profile={profile}
+                    compact
+                  />
+                </div>
               </div>
             </div>
           </div>

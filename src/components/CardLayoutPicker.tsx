@@ -30,7 +30,7 @@ function LayoutThumbnail({ layout }: { layout: CardLayout }) {
       className="relative w-full h-[108px] rounded-lg overflow-hidden bg-[#0a0a0f] border border-white/10"
       aria-hidden
     >
-      <div className="absolute left-1/2 top-1.5 w-[240px] -translate-x-1/2 scale-[0.34] origin-top pointer-events-none select-none">
+      <div className="absolute left-1/2 top-1/2 w-[280px] -translate-x-1/2 -translate-y-1/2 scale-[0.32] origin-center pointer-events-none select-none">
         <ProfileCard profile={profile} compact />
       </div>
     </div>

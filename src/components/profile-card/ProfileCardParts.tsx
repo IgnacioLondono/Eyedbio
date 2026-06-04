@@ -218,7 +218,7 @@ export function ProfileBio({
   if (!profile.bio) return null;
   return (
     <p
-      className={`${scale.bio} ${className}`}
+      className={`${scale.bio} mx-auto ${className}`}
       style={{ color: hexToRgba(profile.settings.textColor, 0.8) }}
     >
       {profile.bio}

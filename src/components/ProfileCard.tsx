@@ -18,12 +18,8 @@ interface Props {
   showControls?: boolean;
 }
 
-const LAYOUT_MAX_WIDTH: Partial<Record<string, string>> = {
-  glass: "max-w-[300px]",
-  stack: "max-w-[280px]",
-  split: "max-w-[280px]",
-  banner: "max-w-[270px]",
-};
+/** Ancho máximo uniforme en vista previa para que el cambio de layout no “salte” horizontalmente. */
+const COMPACT_CARD_MAX_WIDTH = "max-w-[280px]";
 
 export default function ProfileCard({
   profile,
@@ -33,7 +29,12 @@ export default function ProfileCard({
 }: Props) {
   const layout = resolveCardLayout(profile.settings);
   const Layout = CARD_LAYOUT_COMPONENTS[layout];
-  const maxWidth = compact && !showcase ? LAYOUT_MAX_WIDTH[layout] : showcase ? "max-w-[240px]" : undefined;
+  const maxWidth =
+    compact && !showcase
+      ? COMPACT_CARD_MAX_WIDTH
+      : showcase
+        ? COMPACT_CARD_MAX_WIDTH
+        : undefined;
   const embedControls = showControls && !compact && !showcase;
 
   const layoutNode = <Layout profile={profile} compact={compact || showcase} />;
