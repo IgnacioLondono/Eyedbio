@@ -155,7 +155,11 @@ export default function ProfileView({ username }: Props) {
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">
-      <BackgroundMedia url={settings.backgroundUrl} type={profile.backgroundType} />
+      <BackgroundMedia
+        url={settings.backgroundUrl}
+        type={profile.backgroundType}
+        focus={settings.backgroundFocus}
+      />
       <div className="fixed inset-0 z-[1] bg-black/50 pointer-events-none" />
       <BackgroundEffects effect={settings.backgroundEffect} />
       <ProfileQuickNavButton profileUsername={profile.username} />

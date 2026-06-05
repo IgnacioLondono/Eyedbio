@@ -21,6 +21,7 @@ import {
   isAdjustableUploadKind,
 } from "@/lib/image-adjust-config";
 import ImageAdjustModal from "@/components/ImageAdjustModal";
+import { DEFAULT_MEDIA_FOCUS, mediaFocusStyle, type MediaFocus } from "@/lib/media-focus";
 import { useI18n } from "@/components/LocaleProvider";
 
 interface Props {
@@ -29,6 +30,8 @@ interface Props {
   hint?: string;
   currentUrl?: string;
   mediaType?: BackgroundType;
+  mediaFocus?: MediaFocus;
+  onMediaFocusChange?: (focus: MediaFocus) => void;
   accept?: string;
   onUploaded: (url: string, backgroundType?: BackgroundType) => void;
   onClear?: () => void;
@@ -69,10 +72,12 @@ function MediaPreview({
   kind,
   currentUrl,
   mediaType,
+  mediaFocus,
 }: {
   kind: UploadKind;
   currentUrl: string;
   mediaType?: BackgroundType;
+  mediaFocus?: MediaFocus;
 }) {
   const { t } = useI18n();
   const [broken, setBroken] = useState(false);
@@ -132,12 +137,15 @@ function MediaPreview({
         </div>
       );
     }
+    const focusStyle = mediaFocusStyle(mediaFocus ?? DEFAULT_MEDIA_FOCUS);
+
     return (
-      <div className="relative h-40">
+      <div className="relative h-40 overflow-hidden">
         {isVideo ? (
           <video
-            src={currentUrl}
+            src={displayUrl}
             className="w-full h-full object-cover"
+            style={focusStyle}
             muted
             loop
             autoPlay
@@ -150,7 +158,8 @@ function MediaPreview({
             alt={t("fileUpload.backgroundAlt")}
             referrerPolicy="no-referrer"
             decoding="async"
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover"
+            style={focusStyle}
             onError={() => setBroken(true)}
           />
         )}
@@ -171,9 +180,12 @@ export default function FileUpload({
   accept,
   onUploaded,
   onClear,
+  mediaFocus,
+  onMediaFocusChange,
 }: Props) {
   const { t, tVars } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
+  const pendingFileRef = useRef<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -266,6 +278,7 @@ export default function FileUpload({
   const closeAdjust = () => {
     if (adjustSrc?.startsWith("blob:")) URL.revokeObjectURL(adjustSrc);
     setAdjustSrc(null);
+    pendingFileRef.current = null;
   };
 
   const uploadBlob = async (blob: Blob, fileName: string) => {
@@ -282,12 +295,14 @@ export default function FileUpload({
   };
 
   const startAdjustFromFile = (file: File) => {
+    pendingFileRef.current = file;
     const src = URL.createObjectURL(file);
     void openAdjust(src, file.name);
   };
 
   const startAdjustFromUrl = async () => {
     if (!currentUrl || !canAdjust) return;
+    pendingFileRef.current = null;
     try {
       const res = await fetch(getMediaSrc(currentUrl));
       if (!res.ok) throw new Error();
@@ -298,6 +313,28 @@ export default function FileUpload({
       void openAdjust(src, name);
     } catch {
       setError(t("imageAdjust.loadError"));
+    }
+  };
+
+  const handleAdjustConfirm = async (result: {
+    focus: MediaFocus;
+    blob?: Blob;
+  }) => {
+    if (kind === "background" && onMediaFocusChange) {
+      onMediaFocusChange(result.focus);
+    }
+
+    if (result.blob) {
+      const name = adjustFileName;
+      await uploadBlob(result.blob, name);
+      pendingFileRef.current = null;
+      return;
+    }
+
+    const pending = pendingFileRef.current;
+    if (pending) {
+      await handleFile(pending);
+      pendingFileRef.current = null;
     }
   };
 
@@ -340,7 +377,12 @@ export default function FileUpload({
       {currentUrl && !isAudio && (
         <div className="space-y-2">
           <div className="relative rounded-xl overflow-hidden border border-white/10 bg-white/5">
-            <MediaPreview kind={kind} currentUrl={currentUrl} mediaType={mediaType} />
+            <MediaPreview
+            kind={kind}
+            currentUrl={currentUrl}
+            mediaType={mediaType}
+            mediaFocus={kind === "background" ? mediaFocus : undefined}
+          />
             {onClear && (
               <button
                 type="button"
@@ -434,8 +476,9 @@ export default function FileUpload({
           imageSrc={adjustSrc}
           preset={adjustPreset}
           title={adjustTitle}
+          initialFocus={kind === "background" ? mediaFocus : undefined}
           onClose={closeAdjust}
-          onConfirm={(blob) => uploadBlob(blob, adjustFileName)}
+          onConfirm={handleAdjustConfirm}
         />
       )}
 

@@ -332,6 +332,9 @@ export interface Messages {
     adjustExisting: string;
     loadError: string;
     exportError: string;
+    focusHint: string;
+    zoomOutHint: string;
+    applyFocus: string;
   };
   cardPicker: {
     structure: string;
@@ -764,6 +767,9 @@ export const es: Messages = {
     adjustExisting: "Ajustar encuadre",
     loadError: "No se pudo cargar la imagen para ajustar",
     exportError: "No se pudo procesar la imagen",
+    focusHint: "Arrastra para elegir qué parte se ve · el zoom aleja o acerca sin recortar la imagen",
+    zoomOutHint: "Menos de 1× aleja y muestra más imagen (útil en pantallas anchas).",
+    applyFocus: "Guardar encuadre",
   },
   cardPicker: {
     structure: "Estructura",

@@ -398,6 +398,9 @@ export const en: Messages = {
     adjustExisting: "Adjust framing",
     loadError: "Could not load the image to adjust",
     exportError: "Could not process the image",
+    focusHint: "Drag to choose the visible area · zoom out to show more without cropping the file",
+    zoomOutHint: "Below 1× zooms out to show more of the image (helpful on wide screens).",
+    applyFocus: "Save framing",
   },
   cardPicker: {
     structure: "Layout",

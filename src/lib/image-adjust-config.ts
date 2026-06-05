@@ -1,32 +1,44 @@
 import type { UploadKind } from "@/lib/media-config";
 
+export type ImageAdjustMode = "crop" | "focus";
+
 export interface ImageAdjustPreset {
+  mode: ImageAdjustMode;
+  /** Relación del marco de vista previa (solo UI) */
   aspect: number;
-  outputWidth: number;
-  outputHeight: number;
+  outputWidth?: number;
+  outputHeight?: number;
   circular?: boolean;
-  mime: "image/jpeg" | "image/png" | "image/webp";
+  mime?: "image/jpeg" | "image/png" | "image/webp";
+  minZoom?: number;
+  maxZoom?: number;
 }
 
 export const IMAGE_ADJUST_PRESETS: Partial<Record<UploadKind, ImageAdjustPreset>> = {
   avatar: {
+    mode: "crop",
     aspect: 1,
     outputWidth: 512,
     outputHeight: 512,
     circular: true,
     mime: "image/jpeg",
+    minZoom: 1,
+    maxZoom: 3,
   },
   banner: {
+    mode: "crop",
     aspect: 1280 / 400,
     outputWidth: 1280,
     outputHeight: 400,
     mime: "image/jpeg",
+    minZoom: 1,
+    maxZoom: 3,
   },
   background: {
-    aspect: 9 / 16,
-    outputWidth: 1080,
-    outputHeight: 1920,
-    mime: "image/jpeg",
+    mode: "focus",
+    aspect: 16 / 9,
+    minZoom: 0.5,
+    maxZoom: 2,
   },
 };
 

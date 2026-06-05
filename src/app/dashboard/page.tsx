@@ -186,7 +186,11 @@ function DashboardContent() {
     setProfile({
       ...profile,
       backgroundType: "image",
-      settings: { ...profile.settings, backgroundUrl: "" },
+      settings: {
+        ...profile.settings,
+        backgroundUrl: "",
+        backgroundFocus: { x: 50, y: 50, zoom: 1 },
+      },
     });
     setIsDirty(true);
   };
@@ -464,6 +468,10 @@ function DashboardContent() {
                       hint={t("dashboard.backgroundHintSave")}
                       currentUrl={profile.settings.backgroundUrl}
                       mediaType={profile.backgroundType}
+                      mediaFocus={profile.settings.backgroundFocus}
+                      onMediaFocusChange={(backgroundFocus) =>
+                        updateSettings({ backgroundFocus })
+                      }
                       onUploaded={(url, backgroundType) => updateBackground(url, backgroundType)}
                       onClear={clearBackground}
                     />
@@ -740,6 +748,7 @@ function DashboardContent() {
             <BackgroundMedia
               url={profile.settings.backgroundUrl}
               type={profile.backgroundType}
+              focus={profile.settings.backgroundFocus}
               contained
             />
             <div className="absolute inset-0 bg-black/50 pointer-events-none z-[2]" />

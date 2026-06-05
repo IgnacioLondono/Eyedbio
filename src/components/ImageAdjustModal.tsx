@@ -12,13 +12,19 @@ import {
 } from "@/lib/media-focus";
 import { useI18n } from "@/components/LocaleProvider";
 
+export interface ImageAdjustResult {
+  focus: MediaFocus;
+  blob?: Blob;
+}
+
 interface Props {
   open: boolean;
   imageSrc: string;
   preset: ImageAdjustPreset;
   title: string;
+  initialFocus?: MediaFocus;
   onClose: () => void;
-  onConfirm: (blob: Blob) => void | Promise<void>;
+  onConfirm: (result: ImageAdjustResult) => void | Promise<void>;
 }
 
 export default function ImageAdjustModal({
@@ -26,10 +32,15 @@ export default function ImageAdjustModal({
   imageSrc,
   preset,
   title,
+  initialFocus,
   onClose,
   onConfirm,
 }: Props) {
   const { t } = useI18n();
+  const minZoom = preset.minZoom ?? 1;
+  const maxZoom = preset.maxZoom ?? 3;
+  const isFocusMode = preset.mode === "focus";
+
   const [focus, setFocus] = useState<MediaFocus>(DEFAULT_MEDIA_FOCUS);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState("");
@@ -38,10 +49,12 @@ export default function ImageAdjustModal({
 
   useEffect(() => {
     if (open) {
-      setFocus(DEFAULT_MEDIA_FOCUS);
+      setFocus(
+        clampFocus(initialFocus ?? DEFAULT_MEDIA_FOCUS, { minZoom, maxZoom })
+      );
       setError("");
     }
-  }, [open, imageSrc]);
+  }, [open, imageSrc, initialFocus, minZoom, maxZoom]);
 
   useEffect(() => {
     if (!open) return;
@@ -68,24 +81,30 @@ export default function ImageAdjustModal({
     [exporting, focus.x, focus.y]
   );
 
-  const onPointerMove = useCallback((e: React.PointerEvent) => {
-    const drag = dragRef.current;
-    const el = frameRef.current;
-    if (!drag || !el) return;
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      const drag = dragRef.current;
+      const el = frameRef.current;
+      if (!drag || !el) return;
 
-    const rect = el.getBoundingClientRect();
-    const dx = e.clientX - drag.x;
-    const dy = e.clientY - drag.y;
-    const sens = 0.35;
+      const rect = el.getBoundingClientRect();
+      const dx = e.clientX - drag.x;
+      const dy = e.clientY - drag.y;
+      const sens = 0.35;
 
-    setFocus(
-      clampFocus({
-        x: drag.fx - (dx / rect.width) * 100 * sens,
-        y: drag.fy - (dy / rect.height) * 100 * sens,
-        zoom: focus.zoom,
-      })
-    );
-  }, [focus.zoom]);
+      setFocus((f) =>
+        clampFocus(
+          {
+            x: drag.fx - (dx / rect.width) * 100 * sens,
+            y: drag.fy - (dy / rect.height) * 100 * sens,
+            zoom: f.zoom,
+          },
+          { minZoom, maxZoom }
+        )
+      );
+    },
+    [minZoom, maxZoom]
+  );
 
   const onPointerUp = useCallback((e: React.PointerEvent) => {
     dragRef.current = null;
@@ -95,16 +114,24 @@ export default function ImageAdjustModal({
   const handleConfirm = async () => {
     setExporting(true);
     setError("");
+    const savedFocus = clampFocus(focus, { minZoom, maxZoom });
+
     try {
+      if (isFocusMode) {
+        await onConfirm({ focus: savedFocus });
+        onClose();
+        return;
+      }
+
       const blob = await cropImageToBlob(imageSrc, {
         aspect: preset.aspect,
-        outputWidth: preset.outputWidth,
-        outputHeight: preset.outputHeight,
-        focus,
+        outputWidth: preset.outputWidth!,
+        outputHeight: preset.outputHeight!,
+        focus: savedFocus,
         circular: preset.circular,
-        mime: preset.mime,
+        mime: preset.mime ?? "image/jpeg",
       });
-      await onConfirm(blob);
+      await onConfirm({ focus: savedFocus, blob });
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("imageAdjust.exportError"));
@@ -118,7 +145,7 @@ export default function ImageAdjustModal({
   const frameClass = preset.circular
     ? "aspect-square max-h-[min(52vh,360px)] w-full max-w-[min(52vh,360px)] mx-auto rounded-full"
     : preset.aspect >= 1
-      ? "aspect-[16/9] w-full max-h-[42vh]"
+      ? "aspect-video w-full max-h-[42vh]"
       : "aspect-[9/16] w-full max-w-[220px] mx-auto max-h-[48vh]";
 
   return (
@@ -147,7 +174,7 @@ export default function ImageAdjustModal({
         <div className="p-4 space-y-4">
           <p className="text-xs text-white/45 flex items-center gap-1.5">
             <Move className="w-3.5 h-3.5 shrink-0" />
-            {t("imageAdjust.dragHint")}
+            {isFocusMode ? t("imageAdjust.focusHint") : t("imageAdjust.dragHint")}
           </p>
 
           <div
@@ -173,20 +200,27 @@ export default function ImageAdjustModal({
                 <ZoomIn className="w-3.5 h-3.5" />
                 {t("imageAdjust.zoom")}
               </span>
-              <span className="text-white/70 tabular-nums">{focus.zoom.toFixed(1)}×</span>
+              <span className="text-white/70 tabular-nums">
+                {focus.zoom.toFixed(2)}×
+              </span>
             </label>
             <input
               type="range"
-              min={1}
-              max={3}
+              min={minZoom}
+              max={maxZoom}
               step={0.05}
               value={focus.zoom}
               disabled={exporting}
               onChange={(e) =>
-                setFocus((f) => clampFocus({ ...f, zoom: Number(e.target.value) }))
+                setFocus((f) =>
+                  clampFocus({ ...f, zoom: Number(e.target.value) }, { minZoom, maxZoom })
+                )
               }
               className="w-full accent-purple-500"
             />
+            {isFocusMode && (
+              <p className="text-[10px] text-white/35">{t("imageAdjust.zoomOutHint")}</p>
+            )}
           </div>
 
           {error && <p className="text-xs text-red-400">{error}</p>}
@@ -212,6 +246,8 @@ export default function ImageAdjustModal({
                 <Loader2 className="w-4 h-4 animate-spin" />
                 {t("imageAdjust.saving")}
               </>
+            ) : isFocusMode ? (
+              t("imageAdjust.applyFocus")
             ) : (
               t("imageAdjust.apply")
             )}

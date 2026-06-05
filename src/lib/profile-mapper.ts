@@ -7,6 +7,7 @@ import {
   resolveLinkStyle,
 } from "@/lib/card-layout-config";
 import { parseLocale } from "@/lib/i18n/types";
+import { parseMediaFocus } from "@/lib/media-focus";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { resolveNameEffect } from "@/lib/name-effects";
 import {
@@ -47,6 +48,10 @@ export function userToProfile(user: UserWithLinks): Profile {
     avatarStyle: resolveAvatarStyle(storedSettings),
     backgroundEffect: resolveBackgroundEffect(storedSettings.backgroundEffect),
     bannerUrl: storedSettings.bannerUrl ?? DEFAULT_SETTINGS.bannerUrl,
+    backgroundFocus: parseMediaFocus(storedSettings.backgroundFocus, {
+      minZoom: 0.5,
+      maxZoom: 2,
+    }),
   };
 
   return {

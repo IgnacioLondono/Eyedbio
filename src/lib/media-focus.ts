@@ -9,12 +9,38 @@ export interface MediaFocus {
 
 export const DEFAULT_MEDIA_FOCUS: MediaFocus = { x: 50, y: 50, zoom: 1 };
 
-export function clampFocus(focus: MediaFocus): MediaFocus {
+export type ClampFocusOptions = {
+  minZoom?: number;
+  maxZoom?: number;
+};
+
+export function clampFocus(
+  focus: MediaFocus,
+  options: ClampFocusOptions = {}
+): MediaFocus {
+  const minZoom = options.minZoom ?? 1;
+  const maxZoom = options.maxZoom ?? 3;
   return {
     x: Math.min(100, Math.max(0, focus.x)),
     y: Math.min(100, Math.max(0, focus.y)),
-    zoom: Math.min(3, Math.max(1, focus.zoom)),
+    zoom: Math.min(maxZoom, Math.max(minZoom, focus.zoom)),
   };
+}
+
+export function parseMediaFocus(
+  value: unknown,
+  options?: ClampFocusOptions
+): MediaFocus {
+  if (!value || typeof value !== "object") return { ...DEFAULT_MEDIA_FOCUS };
+  const v = value as Partial<MediaFocus>;
+  return clampFocus(
+    {
+      x: typeof v.x === "number" ? v.x : DEFAULT_MEDIA_FOCUS.x,
+      y: typeof v.y === "number" ? v.y : DEFAULT_MEDIA_FOCUS.y,
+      zoom: typeof v.zoom === "number" ? v.zoom : DEFAULT_MEDIA_FOCUS.zoom,
+    },
+    options
+  );
 }
 
 /** Calcula el rectángulo de recorte en píxeles de la imagen original. */

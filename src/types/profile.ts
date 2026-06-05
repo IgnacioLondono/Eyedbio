@@ -1,3 +1,7 @@
+import type { MediaFocus } from "@/lib/media-focus";
+
+export type { MediaFocus } from "@/lib/media-focus";
+
 export type SocialPlatform =
   | "discord"
   | "twitter"
@@ -93,6 +97,8 @@ export interface ProfileSettings {
   cursorUrl?: string;
   /** Imagen de cabecera cuando cardLayout es "banner" */
   bannerUrl?: string;
+  /** Encuadre del fondo (posición y zoom al mostrar) */
+  backgroundFocus?: MediaFocus;
   cardLayout: CardLayout;
   linkStyle: LinkStyle;
   avatarStyle: AvatarStyle;
@@ -135,6 +141,7 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
   showCardShadow: true,
   borderOpacity: 0.2,
   bannerUrl: "",
+  backgroundFocus: { x: 50, y: 50, zoom: 1 },
   cardLayout: "classic",
   linkStyle: "icons",
   avatarStyle: "circle",
