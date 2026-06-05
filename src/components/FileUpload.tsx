@@ -1,10 +1,26 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Upload, Loader2, X, ImageIcon, Film, Image as ImageLucide, Music } from "lucide-react";
+import {
+  Upload,
+  Loader2,
+  X,
+  ImageIcon,
+  Film,
+  Image as ImageLucide,
+  Music,
+  Crop,
+} from "lucide-react";
 import { BackgroundType } from "@/types/profile";
 import { ACCEPT_ATTR, UploadKind, resolveBackgroundType } from "@/lib/media-config";
 import { getMediaSrc } from "@/lib/media-url";
+import {
+  IMAGE_ADJUST_PRESETS,
+  isAdjustableImageFile,
+  isAdjustableImageUrl,
+  isAdjustableUploadKind,
+} from "@/lib/image-adjust-config";
+import ImageAdjustModal from "@/components/ImageAdjustModal";
 import { useI18n } from "@/components/LocaleProvider";
 
 interface Props {
@@ -227,10 +243,78 @@ export default function FileUpload({
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file) handleFile(file);
+    if (file) onFilePicked(file);
   };
 
   const isAudio = kind === "audio";
+  const canAdjust = isAdjustableUploadKind(kind);
+  const adjustPreset = IMAGE_ADJUST_PRESETS[kind];
+  const [adjustSrc, setAdjustSrc] = useState<string | null>(null);
+  const [adjustFileName, setAdjustFileName] = useState("image.jpg");
+
+  useEffect(() => {
+    return () => {
+      if (adjustSrc?.startsWith("blob:")) URL.revokeObjectURL(adjustSrc);
+    };
+  }, [adjustSrc]);
+
+  const openAdjust = async (source: string, fileName: string) => {
+    setAdjustFileName(fileName);
+    setAdjustSrc(source);
+  };
+
+  const closeAdjust = () => {
+    if (adjustSrc?.startsWith("blob:")) URL.revokeObjectURL(adjustSrc);
+    setAdjustSrc(null);
+  };
+
+  const uploadBlob = async (blob: Blob, fileName: string) => {
+    const ext =
+      blob.type === "image/png"
+        ? ".png"
+        : blob.type === "image/webp"
+          ? ".webp"
+          : ".jpg";
+    const file = new File([blob], fileName.replace(/\.[^.]+$/, ext) || `image${ext}`, {
+      type: blob.type || "image/jpeg",
+    });
+    await handleFile(file);
+  };
+
+  const startAdjustFromFile = (file: File) => {
+    const src = URL.createObjectURL(file);
+    void openAdjust(src, file.name);
+  };
+
+  const startAdjustFromUrl = async () => {
+    if (!currentUrl || !canAdjust) return;
+    try {
+      const res = await fetch(getMediaSrc(currentUrl));
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      if (!blob.type.startsWith("image/")) return;
+      const src = URL.createObjectURL(blob);
+      const name = currentUrl.split("/").pop()?.split("?")[0] || "image.jpg";
+      void openAdjust(src, name);
+    } catch {
+      setError(t("imageAdjust.loadError"));
+    }
+  };
+
+  const onFilePicked = (file: File) => {
+    if (canAdjust && isAdjustableImageFile(file, kind) && adjustPreset) {
+      startAdjustFromFile(file);
+      return;
+    }
+    void handleFile(file);
+  };
+
+  const adjustTitle =
+    kind === "avatar"
+      ? t("imageAdjust.titleAvatar")
+      : kind === "banner"
+        ? t("imageAdjust.titleBanner")
+        : t("imageAdjust.titleBackground");
 
   return (
     <div className="space-y-2">
@@ -254,16 +338,29 @@ export default function FileUpload({
       )}
 
       {currentUrl && !isAudio && (
-        <div className="relative rounded-xl overflow-hidden border border-white/10 bg-white/5">
-          <MediaPreview kind={kind} currentUrl={currentUrl} mediaType={mediaType} />
-          {onClear && (
+        <div className="space-y-2">
+          <div className="relative rounded-xl overflow-hidden border border-white/10 bg-white/5">
+            <MediaPreview kind={kind} currentUrl={currentUrl} mediaType={mediaType} />
+            {onClear && (
+              <button
+                type="button"
+                onClick={onClear}
+                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white z-10"
+                aria-label={t("fileUpload.removeFile")}
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+          {canAdjust && isAdjustableImageUrl(currentUrl, kind) && adjustPreset && (
             <button
               type="button"
-              onClick={onClear}
-              className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white z-10"
-              aria-label={t("fileUpload.removeFile")}
+              disabled={uploading}
+              onClick={() => void startAdjustFromUrl()}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-xl border border-white/10 bg-white/[0.03] text-xs text-white/60 hover:text-white hover:border-purple-500/30 hover:bg-purple-500/10 transition-colors disabled:opacity-50"
             >
-              <X className="w-3.5 h-3.5" />
+              <Crop className="w-3.5 h-3.5" />
+              {t("imageAdjust.adjustExisting")}
             </button>
           )}
         </div>
@@ -327,9 +424,20 @@ export default function FileUpload({
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file) handleFile(file);
+          if (file) onFilePicked(file);
         }}
       />
+
+      {adjustSrc && adjustPreset && (
+        <ImageAdjustModal
+          open
+          imageSrc={adjustSrc}
+          preset={adjustPreset}
+          title={adjustTitle}
+          onClose={closeAdjust}
+          onConfirm={(blob) => uploadBlob(blob, adjustFileName)}
+        />
+      )}
 
       {hint && <p className="text-xs text-white/30">{hint}</p>}
       {error && <p className="text-xs text-red-400">{error}</p>}

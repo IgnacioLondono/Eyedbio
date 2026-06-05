@@ -319,6 +319,20 @@ export interface Messages {
     uploadingPercent: string;
     dragHint: string;
   };
+  imageAdjust: {
+    titleAvatar: string;
+    titleBanner: string;
+    titleBackground: string;
+    dragHint: string;
+    zoom: string;
+    cancel: string;
+    apply: string;
+    saving: string;
+    close: string;
+    adjustExisting: string;
+    loadError: string;
+    exportError: string;
+  };
   cardPicker: {
     structure: string;
     structureAria: string;
@@ -736,6 +750,20 @@ export const es: Messages = {
     uploadBackground: "Subir imagen, GIF o video",
     uploadingPercent: "Subiendo… {percent}%",
     dragHint: "Arrastra aquí o haz clic · JPG, PNG, WebP, GIF, MP4, WebM, MOV",
+  },
+  imageAdjust: {
+    titleAvatar: "Ajustar foto de perfil",
+    titleBanner: "Ajustar banner",
+    titleBackground: "Ajustar fondo",
+    dragHint: "Arrastra la imagen para encuadrar · usa el zoom para acercar",
+    zoom: "Zoom",
+    cancel: "Cancelar",
+    apply: "Aplicar y subir",
+    saving: "Guardando…",
+    close: "Cerrar",
+    adjustExisting: "Ajustar encuadre",
+    loadError: "No se pudo cargar la imagen para ajustar",
+    exportError: "No se pudo procesar la imagen",
   },
   cardPicker: {
     structure: "Estructura",
