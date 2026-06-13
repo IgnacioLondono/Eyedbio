@@ -1,7 +1,6 @@
 import { readdir, unlink } from "fs/promises";
 import path from "path";
-import { buildMediaUrl } from "@/lib/media-config";
-import { isLocalMediaUrl } from "@/lib/media-url";
+import { isLocalMediaUrl, localMediaStorageKey } from "@/lib/media-url";
 import { resolveAudioSource } from "@/lib/profile-audio";
 import type { Profile } from "@/types/profile";
 
@@ -14,7 +13,33 @@ function addLocalMediaUrl(urls: Set<string>, url?: string | null) {
   }
 }
 
-/** URLs de medios locales que el perfil guardado sigue usando. */
+function addLocalMediaKey(keys: Set<string>, url?: string | null) {
+  const trimmed = url?.trim();
+  if (!trimmed || !isLocalMediaUrl(trimmed)) return;
+  const key = localMediaStorageKey(trimmed);
+  if (key) keys.add(key);
+}
+
+/** Archivos locales referenciados por el perfil (clave userId/filename). */
+export function collectProfileMediaKeys(profile: Profile): Set<string> {
+  const keys = new Set<string>();
+
+  addLocalMediaKey(keys, profile.avatarUrl);
+  addLocalMediaKey(keys, profile.settings.backgroundUrl);
+  addLocalMediaKey(keys, profile.settings.bannerUrl);
+
+  if (resolveAudioSource(profile.audioSource, profile) === "upload") {
+    addLocalMediaKey(keys, profile.audioUrl);
+  }
+
+  for (const link of profile.links) {
+    addLocalMediaKey(keys, link.iconUrl);
+  }
+
+  return keys;
+}
+
+/** @deprecated Usar collectProfileMediaKeys para comparar rutas entre prefijos. */
 export function collectProfileMediaUrls(profile: Profile): Set<string> {
   const urls = new Set<string>();
 
@@ -88,7 +113,7 @@ export async function syncUserMediaStorage(
   userId: string,
   profile: Profile
 ): Promise<void> {
-  const referenced = collectProfileMediaUrls(profile);
+  const referenced = collectProfileMediaKeys(profile);
   const userDir = path.join(UPLOAD_ROOT, userId);
 
   let filenames: string[];
@@ -104,8 +129,8 @@ export async function syncUserMediaStorage(
     filenames.map(async (filename) => {
       if (!filename || filename.includes("..")) return;
 
-      const url = buildMediaUrl(userId, filename);
-      if (referenced.has(url)) return;
+      const key = `${userId}/${filename}`;
+      if (referenced.has(key)) return;
 
       await deleteFileQuietly(path.join(userDir, filename));
     })

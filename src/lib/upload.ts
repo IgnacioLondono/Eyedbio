@@ -29,6 +29,21 @@ export function getBackgroundType(mime: string, filename: string): BackgroundTyp
   return "image";
 }
 
+function resolveUploadExtension(
+  kind: UploadKind,
+  file: Pick<File, "name" | "type">
+): string {
+  const fromName = path.extname(file.name).toLowerCase();
+  if (fromName) return fromName;
+
+  const fromMime = MIME_TO_EXT[file.type];
+  if (fromMime) return fromMime;
+
+  if (kind === "background" && file.type.startsWith("video/")) return ".mp4";
+
+  return "";
+}
+
 export function validateUpload(kind: UploadKind, file: File) {
   const error = getUploadValidationError(kind, file);
   if (!error) return null;
@@ -64,10 +79,7 @@ export async function saveUploadBuffer(
 
 /** Escribe el archivo en disco por streaming (menor uso de RAM en archivos grandes). */
 export async function saveUpload(userId: string, kind: UploadKind, file: File) {
-  const ext =
-    path.extname(file.name).toLowerCase() ||
-    MIME_TO_EXT[file.type] ||
-    "";
+  const ext = resolveUploadExtension(kind, file);
   const filename = `${kind}-${Date.now()}${ext}`;
   const dir = path.join(UPLOAD_ROOT, userId);
   const filePath = path.join(dir, filename);

@@ -11,6 +11,16 @@ export function isLocalMediaUrl(url: string): boolean {
   );
 }
 
+/** Clave estable userId/filename sin importar /media vs /api/media. */
+export function localMediaStorageKey(url: string): string | null {
+  const pathname = url.split("?")[0]?.split("#")[0] ?? "";
+  const match = /\/(?:api\/)?media\/([^/]+)\/([^/]+)$/i.exec(pathname);
+  if (!match) return null;
+  const [, userId, filename] = match;
+  if (!userId || !filename || filename.includes("..")) return null;
+  return `${userId}/${filename}`;
+}
+
 /** URL final para mostrar: locales directas, externas vía proxy (solo imágenes). */
 export function getMediaSrc(url: string): string {
   if (!url?.trim()) return url;

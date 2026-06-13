@@ -87,10 +87,6 @@ export default function BackgroundMedia({
     videoElement.addEventListener("loadedmetadata", markReady);
     videoElement.addEventListener("loadeddata", markReady);
 
-    if (videoElement.readyState === HTMLMediaElement.HAVE_NOTHING) {
-      videoElement.load();
-    }
-
     return () => {
       videoElement.removeEventListener("loadedmetadata", markReady);
       videoElement.removeEventListener("loadeddata", markReady);

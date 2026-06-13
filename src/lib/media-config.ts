@@ -235,7 +235,9 @@ export function resolveBackgroundType(
   const hasExtension = /\.(mp4|webm|mov|gif|jpe?g|png|webp|avif|bmp)(\?|$)/i.test(url);
 
   if (hasExtension) return fromUrl;
-  if (storedType === "video" && fromUrl === "image") return "image";
+
+  // Sin extensión en la URL: confiar en lo guardado en BD (p. ej. background-1234567890 sin .mp4).
+  if (storedType === "video" || storedType === "gif") return storedType;
 
   return storedType ?? fromUrl;
 }
