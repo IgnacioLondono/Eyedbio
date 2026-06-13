@@ -133,7 +133,7 @@ export function ProfileAvatar({
 
   return (
     <div
-      className={`${size} shrink-0 ${avatarShapeClass(avatarStyle)} ${className}`}
+      className={`${size} overflow-hidden shrink-0 ${avatarShapeClass(avatarStyle)} ${className}`}
       style={avatarBorderStyle(avatarStyle, settings.textColor, settings.accentColor, glow)}
     >
       <FocusedImage

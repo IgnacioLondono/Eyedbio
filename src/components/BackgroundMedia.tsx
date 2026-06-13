@@ -24,6 +24,7 @@ export default function BackgroundMedia({
   focus,
 }: Props) {
   const [broken, setBroken] = useState(false);
+  const [useBackgroundCss, setUseBackgroundCss] = useState(false);
   const shellClass = contained
     ? "absolute inset-0 overflow-hidden"
     : "fixed inset-0 z-0 h-[100dvh] w-screen overflow-hidden";
@@ -34,6 +35,7 @@ export default function BackgroundMedia({
 
   useEffect(() => {
     setBroken(false);
+    setUseBackgroundCss(false);
   }, [url, type]);
 
   if (!url?.trim() || broken) {
@@ -58,6 +60,21 @@ export default function BackgroundMedia({
     );
   }
 
+  if (useBackgroundCss) {
+    return (
+      <div
+        className={`${shellClass} ${pointerClass}`}
+        style={{
+          backgroundImage: `url("${displayUrl}")`,
+          backgroundSize: `${mediaFocus.zoom * 100}%`,
+          backgroundPosition: `${mediaFocus.x}% ${mediaFocus.y}%`,
+          backgroundRepeat: "no-repeat",
+        }}
+        aria-hidden="true"
+      />
+    );
+  }
+
   return (
     <div className={`${shellClass} ${pointerClass}`} aria-hidden="true">
       <FocusedImage
@@ -65,7 +82,13 @@ export default function BackgroundMedia({
         alt=""
         focus={mediaFocus}
         wrapperClassName="absolute inset-0"
-        onError={() => setBroken(true)}
+        onError={() => {
+          if (!useBackgroundCss) {
+            setUseBackgroundCss(true);
+            return;
+          }
+          setBroken(true);
+        }}
       />
     </div>
   );

@@ -51,26 +51,24 @@ export function mediaFocusPositionStyle(
   options?: ClampFocusOptions
 ): {
   position: "absolute";
-  left: string;
-  top: string;
-  transform: string;
-  minWidth: string;
-  minHeight: string;
+  inset: 0;
   width: string;
   height: string;
-  maxWidth: string;
+  objectFit: "cover";
+  objectPosition: string;
+  transform: string;
+  transformOrigin: string;
 } {
   const { x, y, zoom } = clampFocus(focus, options);
   return {
     position: "absolute",
-    left: `${x}%`,
-    top: `${y}%`,
-    transform: `translate(-50%, -50%) scale(${zoom})`,
-    minWidth: "100%",
-    minHeight: "100%",
-    width: "auto",
-    height: "auto",
-    maxWidth: "none",
+    inset: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    objectPosition: `${x}% ${y}%`,
+    transform: `scale(${zoom})`,
+    transformOrigin: `${x}% ${y}%`,
   };
 }
 
