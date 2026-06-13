@@ -20,7 +20,7 @@ let volumeInitialized = false;
 let volumeBeforeMute = 0.7;
 let listeners = new Set<Listener>();
 let pendingPlay: PendingPlay | null = null;
-let audioUnlocked = false;
+let lastPlayMode: "hold" | "muted" | "audio" | null = null;
 
 const SERVER_SNAPSHOT: BackgroundVideoAudioSnapshot = {
   volume: 0.7,
@@ -97,17 +97,16 @@ function notify(): void {
   listeners.forEach((listener) => listener());
 }
 
-function syncElementVolume(element: HTMLVideoElement, withAudio: boolean): void {
+function applyMutedLoopVolume(element: HTMLVideoElement): void {
+  element.muted = true;
+  element.volume = 0;
+}
+
+function applyVideoAudioVolume(element: HTMLVideoElement): void {
   ensureVolumeInitialized();
-  if (withAudio && audioFromVideo) {
-    audioUnlocked = true;
-    if (volume > 0) {
-      element.volume = volume;
-      element.muted = false;
-    } else {
-      element.muted = true;
-      element.volume = 0;
-    }
+  if (volume > 0) {
+    element.volume = volume;
+    element.muted = false;
     markMediaUnlockedSession();
     return;
   }
@@ -117,29 +116,47 @@ function syncElementVolume(element: HTMLVideoElement, withAudio: boolean): void 
 }
 
 async function startPlayback(element: HTMLVideoElement, withAudio: boolean): Promise<void> {
-  element.currentTime = 0;
-  syncElementVolume(element, withAudio);
+  const wantsAudio = withAudio && audioFromVideo;
+  const mode: "muted" | "audio" = wantsAudio ? "audio" : "muted";
 
-  try {
-    await element.play();
+  if (lastPlayMode === mode && isPlaying()) {
+    if (wantsAudio) {
+      applyVideoAudioVolume(element);
+    } else {
+      applyMutedLoopVolume(element);
+    }
     notify();
     return;
-  } catch {
-    element.muted = true;
-    element.volume = 0;
+  }
+
+  lastPlayMode = mode;
+
+  // Siempre arrancar en silencio: autoplay fiable y luego desmutear en el mismo gesto.
+  element.muted = true;
+  element.volume = 0;
+
+  if (element.readyState >= HTMLMediaElement.HAVE_METADATA) {
+    element.currentTime = 0;
   }
 
   try {
     await element.play();
   } catch {
-    /* el navegador bloqueó la reproducción */
+    lastPlayMode = null;
+    notify();
+    return;
   }
+
+  if (wantsAudio) {
+    applyVideoAudioVolume(element);
+  }
+
   notify();
 }
 
 export function resetBackgroundVideoAudioState(): void {
   pendingPlay = null;
-  audioUnlocked = false;
+  lastPlayMode = null;
   audioFromVideo = false;
   boundVideo = null;
   notify();
@@ -155,6 +172,7 @@ export function bindProfileBackgroundVideo(
 
   if (!element) {
     boundVideo = null;
+    lastPlayMode = null;
     notify();
     return () => {};
   }
@@ -183,6 +201,7 @@ export function bindProfileBackgroundVideo(
     element.removeEventListener("timeupdate", sync);
     if (boundVideo === element) {
       boundVideo = null;
+      lastPlayMode = null;
     }
     notify();
   };
@@ -191,10 +210,12 @@ export function bindProfileBackgroundVideo(
 export function holdProfileBackgroundVideo(): void {
   const element = boundVideo;
   if (!element) return;
+  lastPlayMode = "hold";
   element.pause();
-  element.currentTime = 0;
-  element.muted = true;
-  element.volume = 0;
+  if (element.readyState >= HTMLMediaElement.HAVE_METADATA) {
+    element.currentTime = 0;
+  }
+  applyMutedLoopVolume(element);
   notify();
 }
 
@@ -226,13 +247,11 @@ export function subscribeBackgroundVideoAudio(listener: Listener): () => void {
   return () => listeners.delete(listener);
 }
 
-/** Compat: arranca el video de fondo con sonido (gesto de entrada). */
 export function startBackgroundVideoFromEnter(): boolean {
   playProfileBackgroundVideo({ withAudio: true });
   return Boolean(boundVideo);
 }
 
-/** Compat: arranca video de fondo en bucle sin audio (gesto de entrada). */
 export function startBackgroundVideoMutedFromEnter(): boolean {
   playProfileBackgroundVideo({ withAudio: false });
   return Boolean(boundVideo);
@@ -242,10 +261,7 @@ export function unmuteBackgroundVideoFromUserGesture(): boolean {
   const element = boundVideo;
   if (!element || !audioFromVideo || volume === 0) return false;
 
-  ensureVolumeInitialized();
-  element.volume = volume;
-  element.muted = false;
-  markMediaUnlockedSession();
+  applyVideoAudioVolume(element);
 
   if (element.paused) {
     void element.play().catch(() => notify());

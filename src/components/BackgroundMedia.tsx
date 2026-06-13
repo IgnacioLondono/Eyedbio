@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BackgroundType } from "@/types/profile";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { DEFAULT_MEDIA_FOCUS, type MediaFocus } from "@/lib/media-focus";
@@ -38,8 +38,6 @@ export default function BackgroundMedia({
   const [useBackgroundCss, setUseBackgroundCss] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
-  const deferPlaybackRef = useRef(deferPlayback);
-  deferPlaybackRef.current = deferPlayback;
 
   const shellClass = contained
     ? "absolute inset-0 overflow-hidden"
@@ -49,6 +47,7 @@ export default function BackgroundMedia({
   const displayUrl = getMediaSrc(url);
   const mediaFocus =
     mediaType === "video" ? DEFAULT_MEDIA_FOCUS : (focus ?? DEFAULT_MEDIA_FOCUS);
+  const videoMuted = deferPlayback || !videoAudioEnabled;
 
   useEffect(() => {
     setBroken(false);
@@ -64,25 +63,14 @@ export default function BackgroundMedia({
       audioFromVideo: videoAudioEnabled,
     });
 
-    if (deferPlaybackRef.current) {
+    if (deferPlayback) {
       holdProfileBackgroundVideo();
     } else {
       playProfileBackgroundVideo({ withAudio: videoAudioEnabled });
     }
 
     return unbind;
-  }, [mediaType, videoElement, displayUrl, videoAudioEnabled]);
-
-  useEffect(() => {
-    if (mediaType !== "video" || !videoElement) return;
-
-    if (deferPlayback) {
-      holdProfileBackgroundVideo();
-      return;
-    }
-
-    playProfileBackgroundVideo({ withAudio: videoAudioEnabled });
-  }, [deferPlayback, videoElement, mediaType, videoAudioEnabled]);
+  }, [mediaType, videoElement, displayUrl, videoAudioEnabled, deferPlayback]);
 
   useEffect(() => {
     if (!videoElement || mediaType !== "video") return;
@@ -142,7 +130,7 @@ export default function BackgroundMedia({
             src={displayUrl}
             priority
             autoPlay={false}
-            muted
+            muted={videoMuted}
             videoRef={setVideoElement}
             wrapperClassName="absolute inset-0"
             onReady={() => setLoaded(true)}

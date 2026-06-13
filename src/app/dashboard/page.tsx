@@ -25,7 +25,7 @@ import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
 import { NAME_ANIMATION_OPTIONS } from "@/lib/name-animations";
 import { getMessages } from "@/lib/i18n";
 import { resolveBackgroundType, getUploadLimitMb } from "@/lib/media-config";
-import { backgroundHasAudio, getEffectiveAudioUrl } from "@/lib/profile-audio";
+import { backgroundHasAudio, getEffectiveAudioUrl, isBackgroundProfileAudio } from "@/lib/profile-audio";
 import { resolveProfileDisplay } from "@/lib/profile-display-config";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
@@ -988,6 +988,12 @@ function DashboardContent() {
               type={profile.backgroundType}
               focus={profile.settings.backgroundFocus}
               contained
+              videoAudioEnabled={
+                site.profileAudioEnabled &&
+                profile.audioEnabled &&
+                isBackgroundProfileAudio(profile)
+              }
+              deferPlayback={simulateEntryInPreview}
             />
             <div className="absolute inset-0 bg-black/50 pointer-events-none z-[2]" />
             <BackgroundEffects effect={profile.settings.backgroundEffect} contained />

@@ -73,7 +73,7 @@ export default function ProfileAudio({
   useEffect(() => {
     if (!enabled || !volumeOnly) return;
     destroyProfileAudioEngine();
-  }, [enabled, volumeOnly]);
+  }, [enabled, volumeOnly, url]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
