@@ -546,7 +546,12 @@ function DashboardContent() {
                           type="button"
                           disabled={!backgroundHasAudio(profile)}
                           onClick={() =>
-                            update({ audioSource: "background", audioEnabled: true })
+                            update({
+                              audioSource: "background",
+                              audioEnabled: true,
+                              audioStartTime: 0,
+                              audioClipDuration: 0,
+                            })
                           }
                           className={`rounded-xl border px-3 py-2.5 text-left text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
                             profile.audioSource === "background"
@@ -595,9 +600,9 @@ function DashboardContent() {
                       />
                     )}
 
-                    {getEffectiveAudioUrl(profile) ? (
+                    {profile.audioSource !== "background" && profile.audioUrl ? (
                       <AudioClipSelector
-                        audioUrl={getEffectiveAudioUrl(profile)!}
+                        audioUrl={profile.audioUrl}
                         startTime={profile.audioStartTime}
                         clipDuration={profile.audioClipDuration}
                         onChange={({ startTime, clipDuration }) =>

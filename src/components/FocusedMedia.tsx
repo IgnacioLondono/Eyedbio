@@ -2,7 +2,6 @@
 
 import {
   DEFAULT_MEDIA_FOCUS,
-  mediaFocusPositionStyle,
   mediaFocusStyle,
   type MediaFocus,
 } from "@/lib/media-focus";
@@ -28,8 +27,10 @@ export function FocusedImage({
   onLoad,
   onError,
 }: ImageProps) {
+  const focusStyle = mediaFocusStyle(focus ?? DEFAULT_MEDIA_FOCUS);
+
   return (
-    <div className={`relative overflow-hidden ${wrapperClassName}`}>
+    <div className={`relative h-full w-full overflow-hidden ${wrapperClassName}`}>
       <img
         src={src}
         alt={alt}
@@ -38,8 +39,8 @@ export function FocusedImage({
         draggable={false}
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
-        className={imgClassName}
-        style={mediaFocusPositionStyle(focus ?? DEFAULT_MEDIA_FOCUS)}
+        className={`absolute inset-0 h-full w-full min-h-full min-w-full object-cover ${imgClassName}`}
+        style={focusStyle}
         onLoad={onLoad}
         onError={onError}
       />

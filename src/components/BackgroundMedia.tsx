@@ -42,14 +42,20 @@ export default function BackgroundMedia({
   }, [url, type]);
 
   useEffect(() => {
-    if (!useBackgroundCss || !displayUrl) return;
+    if (mediaType === "video" || !displayUrl?.trim()) return;
+
     const img = new Image();
-    img.onload = () => setLoaded(true);
+    const markLoaded = () => setLoaded(true);
+    img.onload = markLoaded;
+    img.onerror = () => setUseBackgroundCss(true);
     img.src = displayUrl;
+    if (img.complete && img.naturalWidth > 0) markLoaded();
+
     return () => {
       img.onload = null;
+      img.onerror = null;
     };
-  }, [useBackgroundCss, displayUrl]);
+  }, [displayUrl, mediaType]);
 
   if (!url?.trim() || broken) {
     return (

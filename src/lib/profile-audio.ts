@@ -27,6 +27,20 @@ export function getEffectiveAudioUrl(profile: Profile): string | undefined {
   return profile.audioUrl?.trim() || undefined;
 }
 
+export function getEffectiveAudioClipDuration(profile: Profile): number {
+  if (resolveAudioSource(profile.audioSource, profile) === "background") {
+    return 0;
+  }
+  return profile.audioClipDuration;
+}
+
+export function isBackgroundProfileAudio(profile: Profile): boolean {
+  return (
+    profile.audioEnabled &&
+    resolveAudioSource(profile.audioSource, profile) === "background"
+  );
+}
+
 export function hasPlayableProfileAudio(profile: Profile): boolean {
   return Boolean(getEffectiveAudioUrl(profile));
 }

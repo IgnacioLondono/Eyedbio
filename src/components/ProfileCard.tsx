@@ -2,7 +2,7 @@
 
 import { Profile } from "@/types/profile";
 import { resolveCardLayout } from "@/lib/card-layout-config";
-import { getEffectiveAudioUrl } from "@/lib/profile-audio";
+import { getEffectiveAudioUrl, getEffectiveAudioClipDuration, isBackgroundProfileAudio } from "@/lib/profile-audio";
 import {
   CARD_LAYOUT_COMPONENTS,
   ProfileCardMotionWrapper,
@@ -55,7 +55,8 @@ export default function ProfileCard({
               displayName={profile.displayName}
               playbackUrl={getEffectiveAudioUrl(profile)}
               audioStartTime={profile.audioStartTime}
-              audioClipDuration={profile.audioClipDuration}
+              audioClipDuration={getEffectiveAudioClipDuration(profile)}
+              volumeOnly={isBackgroundProfileAudio(profile)}
               audioEnabled={profile.audioEnabled}
               accentColor={profile.settings.accentColor}
             />

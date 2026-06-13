@@ -10,6 +10,7 @@ interface Props {
   playbackUrl?: string;
   audioStartTime?: number;
   audioClipDuration?: number;
+  volumeOnly?: boolean;
   audioEnabled?: boolean;
   accentColor?: string;
 }
@@ -20,6 +21,7 @@ export default function ProfileCardControls({
   playbackUrl,
   audioStartTime,
   audioClipDuration,
+  volumeOnly = false,
   audioEnabled,
   accentColor,
 }: Props) {
@@ -33,6 +35,7 @@ export default function ProfileCardControls({
           url={playbackUrl}
           startTime={audioStartTime}
           clipDuration={audioClipDuration}
+          volumeOnly={volumeOnly}
           enabled={audioEnabled}
           accentColor={accentColor}
           variant="card"

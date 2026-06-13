@@ -1,6 +1,7 @@
 export const MIN_CLIP_DURATION = 10;
 export const CLIP_DURATION_STEP = 5;
-export const DEFAULT_CLIP_DURATION = 30;
+export const MAX_CLIP_DURATION = 30;
+export const DEFAULT_CLIP_DURATION = MAX_CLIP_DURATION;
 
 /** @deprecated Usar DEFAULT_CLIP_DURATION */
 export const AUDIO_CLIP_DURATION = DEFAULT_CLIP_DURATION;
@@ -37,7 +38,8 @@ export function getClipDurationOptions(duration: number): number[] {
     return options;
   }
 
-  const maxClip = Math.floor(duration / CLIP_DURATION_STEP) * CLIP_DURATION_STEP;
+  const trackMax = Math.floor(duration / CLIP_DURATION_STEP) * CLIP_DURATION_STEP;
+  const maxClip = Math.min(MAX_CLIP_DURATION, trackMax);
   for (let d = MIN_CLIP_DURATION; d <= maxClip; d += CLIP_DURATION_STEP) {
     options.push(d);
   }
@@ -55,7 +57,8 @@ export function normalizeClipDuration(
   }
   if (duration < MIN_CLIP_DURATION) return 0;
 
-  const maxClip = Math.floor(duration / CLIP_DURATION_STEP) * CLIP_DURATION_STEP;
+  const trackMax = Math.floor(duration / CLIP_DURATION_STEP) * CLIP_DURATION_STEP;
+  const maxClip = Math.min(MAX_CLIP_DURATION, trackMax);
   if (maxClip < MIN_CLIP_DURATION) return 0;
 
   let rounded =

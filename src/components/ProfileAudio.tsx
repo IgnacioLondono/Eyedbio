@@ -39,6 +39,7 @@ interface Props {
   url: string;
   startTime?: number;
   clipDuration?: number;
+  volumeOnly?: boolean;
   enabled: boolean;
   accentColor?: string;
   variant?: "floating" | "card";
@@ -48,6 +49,7 @@ export default function ProfileAudio({
   url,
   startTime = 0,
   clipDuration = DEFAULT_CLIP_DURATION,
+  volumeOnly = false,
   enabled,
   variant = "floating",
 }: Props) {
@@ -59,6 +61,7 @@ export default function ProfileAudio({
   const clipBoundsRef = useRef({ start: 0, end: Infinity, nativeLoop: false });
   const volumeRef = useRef(0.7);
   const autoplayAttemptsRef = useRef(0);
+  const volumeBeforeMuteRef = useRef(0.7);
 
   const [volume, setVolume] = useState(readInitialVolume);
   const [duration, setDuration] = useState(0);
@@ -243,6 +246,8 @@ export default function ProfileAudio({
   }, [enabled, seekToClipStart]);
 
   const togglePlayPause = useCallback(() => {
+    if (volumeOnly) return;
+
     const audio = audioRef.current;
     if (!audio || !enabled) return;
 
@@ -293,7 +298,7 @@ export default function ProfileAudio({
         setNeedsInteraction(true);
         syncPlayingState();
       });
-  }, [enabled, isTouchDevice, pausePlayback, seekToClipStart, syncPlayingState]);
+  }, [enabled, isTouchDevice, pausePlayback, seekToClipStart, syncPlayingState, volumeOnly]);
 
   useEffect(() => {
     userPausedRef.current = false;
@@ -509,13 +514,41 @@ export default function ProfileAudio({
 
   const handleVolumeChange = (value: number) => {
     const next = Math.min(1, Math.max(0, value));
+    if (next > 0) {
+      volumeBeforeMuteRef.current = next;
+    }
     mutedForAutoplayRef.current = false;
     setVolume(next);
     localStorage.setItem(VOLUME_STORAGE_KEY, String(next));
   };
 
+  const handleVolumeButtonClick = () => {
+    if (volumeOnly) {
+      if (volume === 0) {
+        const restored =
+          volumeBeforeMuteRef.current > 0
+            ? volumeBeforeMuteRef.current
+            : isTouchDevice
+              ? 1
+              : 0.7;
+        handleVolumeChange(restored);
+      } else {
+        volumeBeforeMuteRef.current = volume;
+        handleVolumeChange(0);
+      }
+      return;
+    }
+
+    if (isTouchDevice) {
+      setShowVolume((prev) => !prev);
+      return;
+    }
+    setShowVolume(true);
+  };
+
   const muted = volume === 0;
-  const waitingForTap = needsInteraction && !muted && !isPlaying;
+  const waitingForTap = needsInteraction && !muted && !isPlaying && !volumeOnly;
+  const waitingForTapVolume = needsInteraction && !muted && !isPlaying && volumeOnly;
 
   const controlsShell =
     variant === "card"
@@ -525,17 +558,19 @@ export default function ProfileAudio({
         }`;
 
   const sliderReveal =
-    variant === "card"
-      ? isTouchDevice
-        ? showVolume
-          ? "w-[88px] opacity-100"
-          : "w-0 opacity-0"
-        : "w-0 opacity-0 group-hover:w-[88px] group-hover:opacity-100 group-hover:pr-2"
-      : isTouchDevice
-        ? showVolume
-          ? "w-[130px] opacity-100"
-          : "w-0 opacity-0"
-        : "w-0 opacity-0 group-hover:w-[130px] group-hover:opacity-100 group-hover:pr-3";
+    volumeOnly && variant === "card"
+      ? "w-[88px] opacity-100 pr-2"
+      : variant === "card"
+        ? isTouchDevice
+          ? showVolume
+            ? "w-[88px] opacity-100"
+            : "w-0 opacity-0"
+          : "w-0 opacity-0 group-hover:w-[88px] group-hover:opacity-100 group-hover:pr-2"
+        : isTouchDevice
+          ? showVolume
+            ? "w-[130px] opacity-100"
+            : "w-0 opacity-0"
+          : "w-0 opacity-0 group-hover:w-[130px] group-hover:opacity-100 group-hover:pr-3";
 
   const wrapperClass =
     variant === "card" ? "" : "fixed bottom-6 right-6 z-30";
@@ -556,31 +591,31 @@ export default function ProfileAudio({
       />
       <div className={wrapperClass}>
         <div className={controlsShell}>
-          <button
-            type="button"
-            onPointerDown={(event) => event.stopPropagation()}
-            onClick={togglePlayPause}
-            className={`${buttonPadding} ${
-              waitingForTap
-                ? "animate-pulse ring-2 ring-purple-400/60 ring-offset-1 ring-offset-transparent rounded-lg"
-                : ""
-            }`}
-            aria-label={isPlaying ? "Pausar música" : "Reproducir música"}
-          >
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-          </button>
+          {!volumeOnly ? (
+            <button
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={togglePlayPause}
+              className={`${buttonPadding} ${
+                waitingForTap
+                  ? "animate-pulse ring-2 ring-purple-400/60 ring-offset-1 ring-offset-transparent rounded-lg"
+                  : ""
+              }`}
+              aria-label={isPlaying ? "Pausar música" : "Reproducir música"}
+            >
+              {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            </button>
+          ) : null}
 
           <button
             type="button"
             onPointerDown={(event) => event.stopPropagation()}
-            onClick={() => {
-              if (isTouchDevice) {
-                setShowVolume((prev) => !prev);
-                return;
-              }
-              setShowVolume(true);
-            }}
-            className={buttonPadding}
+            onClick={handleVolumeButtonClick}
+            className={`${buttonPadding} ${
+              waitingForTapVolume
+                ? "animate-pulse ring-2 ring-purple-400/60 ring-offset-1 ring-offset-transparent rounded-lg"
+                : ""
+            }`}
             aria-label={muted ? "Activar sonido" : "Ajustar volumen"}
           >
             {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}

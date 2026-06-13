@@ -125,6 +125,7 @@ function MediaPreview({
           src={displayUrl}
           alt={t("fileUpload.bannerAlt")}
           focus={mediaFocus}
+          priority
           wrapperClassName="absolute inset-0"
           onError={() => setBroken(true)}
         />
@@ -149,13 +150,14 @@ function MediaPreview({
             onError={() => setBroken(true)}
           />
         ) : (
-          <FocusedImage
-            src={displayUrl}
-            alt={t("fileUpload.backgroundAlt")}
-            focus={mediaFocus}
-            wrapperClassName="absolute inset-0"
-            onError={() => setBroken(true)}
-          />
+        <FocusedImage
+          src={displayUrl}
+          alt={t("fileUpload.backgroundAlt")}
+          focus={mediaFocus}
+          priority
+          wrapperClassName="absolute inset-0"
+          onError={() => setBroken(true)}
+        />
         )}
         <MediaTypeBadge type={resolvedType} />
       </div>
