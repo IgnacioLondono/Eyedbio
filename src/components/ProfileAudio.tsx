@@ -7,9 +7,9 @@ import {
   DEFAULT_CLIP_DURATION,
   getAudioClipBounds,
 } from "@/lib/audio-config";
-import { hasRecentMediaUserActivation, noteMediaUserActivation } from "@/lib/media-gesture";
+import { noteMediaUserActivation, canAttemptUnmutedAutoplay, markMediaUnlockedSession } from "@/lib/media-gesture";
 import { getMediaSrc } from "@/lib/media-url";
-import { setProfileAudioGesturePlay } from "@/lib/profile-audio-bridge";
+import { consumePendingGestureUnlock, setProfileAudioGesturePlay } from "@/lib/profile-audio-bridge";
 
 const VOLUME_STORAGE_KEY = "eyed-audio-volume";
 const LOOP_SEEK_MARGIN = 0.2;
@@ -69,6 +69,7 @@ export default function ProfileAudio({
   const [showVolume, setShowVolume] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [needsInteraction, setNeedsInteraction] = useState(false);
+  const [awaitingUnmute, setAwaitingUnmute] = useState(false);
 
   const src = getMediaSrc(url);
   const clipStart = clampAudioStart(startTime, duration || Infinity, clipDuration);
@@ -119,6 +120,7 @@ export default function ProfileAudio({
       if (mutedForAutoplayRef.current && volumeRef.current > 0) {
         audio.muted = false;
         mutedForAutoplayRef.current = false;
+        setAwaitingUnmute(false);
       }
 
       const playPromise = audio.play();
@@ -142,10 +144,22 @@ export default function ProfileAudio({
     if (!audio || !enabled || userPausedRef.current || volumeRef.current === 0) return;
 
     noteMediaUserActivation();
-    mutedForAutoplayRef.current = false;
     wantsPlayRef.current = true;
-    audio.volume = volumeRef.current;
-    audio.muted = false;
+
+    const unmuteNow = () => {
+      mutedForAutoplayRef.current = false;
+      setAwaitingUnmute(false);
+      audio.volume = volumeRef.current;
+      audio.muted = false;
+    };
+
+    if (mutedForAutoplayRef.current) {
+      unmuteNow();
+      markMediaUnlockedSession();
+    } else {
+      audio.volume = volumeRef.current;
+      audio.muted = false;
+    }
 
     const { start, end } = clipBoundsRef.current;
     if (audio.paused || audio.ended || audio.currentTime < start || audio.currentTime >= end - 0.05) {
@@ -157,7 +171,9 @@ export default function ProfileAudio({
       if (playPromise !== undefined) {
         playPromise
           .then(() => {
+            markMediaUnlockedSession();
             setNeedsInteraction(false);
+            setAwaitingUnmute(false);
             syncPlayingState();
           })
           .catch(() => {
@@ -166,7 +182,9 @@ export default function ProfileAudio({
           });
       }
     } else {
+      markMediaUnlockedSession();
       setNeedsInteraction(false);
+      setAwaitingUnmute(false);
       syncPlayingState();
     }
   }, [enabled, syncPlayingState]);
@@ -182,16 +200,31 @@ export default function ProfileAudio({
 
     seekToClipStart();
     wantsPlayRef.current = true;
-    mutedForAutoplayRef.current = false;
     applyVolumeToAudio(audio, volumeRef.current);
 
     try {
+      audio.muted = false;
+      mutedForAutoplayRef.current = false;
       await audio.play();
-      noteMediaUserActivation();
+      markMediaUnlockedSession();
+      setAwaitingUnmute(false);
       setNeedsInteraction(false);
       syncPlayingState();
       return true;
     } catch {
+      /* Política del navegador: Chrome/Safari suelen exigir silencio al inicio */
+    }
+
+    try {
+      audio.muted = true;
+      mutedForAutoplayRef.current = true;
+      await audio.play();
+      setAwaitingUnmute(true);
+      setNeedsInteraction(true);
+      syncPlayingState();
+      return true;
+    } catch {
+      setAwaitingUnmute(false);
       setNeedsInteraction(true);
       syncPlayingState();
       return false;
@@ -306,18 +339,22 @@ export default function ProfileAudio({
     mutedForAutoplayRef.current = false;
     autoplayAttemptsRef.current = 0;
     setNeedsInteraction(false);
+    setAwaitingUnmute(false);
     setDuration(0);
     setIsPlaying(false);
   }, [src]);
 
   useEffect(() => {
     setProfileAudioGesturePlay(unlockFromUserGestureSync);
+    if (consumePendingGestureUnlock()) {
+      unlockFromUserGestureSync();
+    }
     return () => setProfileAudioGesturePlay(null);
   }, [unlockFromUserGestureSync]);
 
   useLayoutEffect(() => {
     if (!enabled || volumeRef.current === 0) return;
-    if (hasRecentMediaUserActivation()) {
+    if (canAttemptUnmutedAutoplay()) {
       unlockFromUserGestureSync();
       return;
     }
@@ -477,17 +514,19 @@ export default function ProfileAudio({
     };
 
     document.addEventListener("pointerdown", unlock, { capture: true });
+    document.addEventListener("click", unlock, { capture: true });
     document.addEventListener("touchstart", unlock, { capture: true, passive: true });
+    document.addEventListener("touchend", unlock, { capture: true, passive: true });
     document.addEventListener("keydown", unlock, { capture: true });
-    document.addEventListener("scroll", unlock, { capture: true, passive: true });
     window.addEventListener("focus", unlock);
     window.addEventListener("pageshow", unlock);
 
     return () => {
       document.removeEventListener("pointerdown", unlock, { capture: true });
+      document.removeEventListener("click", unlock, { capture: true });
       document.removeEventListener("touchstart", unlock, { capture: true });
+      document.removeEventListener("touchend", unlock, { capture: true });
       document.removeEventListener("keydown", unlock, { capture: true });
-      document.removeEventListener("scroll", unlock, { capture: true });
       window.removeEventListener("focus", unlock);
       window.removeEventListener("pageshow", unlock);
     };
@@ -523,6 +562,11 @@ export default function ProfileAudio({
   };
 
   const handleVolumeButtonClick = () => {
+    if (awaitingUnmute || mutedForAutoplayRef.current) {
+      unlockFromUserGestureSync();
+      if (volumeOnly) return;
+    }
+
     if (volumeOnly) {
       if (volume === 0) {
         const restored =
@@ -547,8 +591,9 @@ export default function ProfileAudio({
   };
 
   const muted = volume === 0;
-  const waitingForTap = needsInteraction && !muted && !isPlaying && !volumeOnly;
-  const waitingForTapVolume = needsInteraction && !muted && !isPlaying && volumeOnly;
+  const showUnlockHint = awaitingUnmute && volume > 0;
+  const waitingForTap = (needsInteraction || showUnlockHint) && !muted && !volumeOnly;
+  const waitingForTapVolume = (needsInteraction || showUnlockHint) && !muted && volumeOnly;
 
   const controlsShell =
     variant === "card"

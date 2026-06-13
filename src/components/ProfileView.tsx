@@ -171,6 +171,8 @@ export default function ProfileView({ username }: Props) {
     <div
       className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]"
       onPointerDownCapture={() => playProfileAudioFromGesture()}
+      onClickCapture={() => playProfileAudioFromGesture()}
+      onTouchEndCapture={() => playProfileAudioFromGesture()}
     >
       <BackgroundMedia
         url={settings.backgroundUrl}
