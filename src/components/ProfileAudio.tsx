@@ -4,9 +4,18 @@ import { useEffect, useSyncExternalStore, useState } from "react";
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { DEFAULT_CLIP_DURATION } from "@/lib/audio-config";
 import {
+  getBackgroundVideoAudioServerSnapshot,
+  getBackgroundVideoAudioSnapshot,
+  getBackgroundVideoVolumeBeforeMute,
+  setBackgroundVideoVolume,
+  subscribeBackgroundVideoAudio,
+  unmuteBackgroundVideoFromUserGesture,
+} from "@/lib/profile-background-video-audio";
+import {
   configureProfileAudioEngine,
-  getProfileAudioEngineSnapshot,
+  destroyProfileAudioEngine,
   getProfileAudioEngineServerSnapshot,
+  getProfileAudioEngineSnapshot,
   playProfileAudioFromUserGesture,
   setProfileAudioVolume,
   subscribeProfileAudioEngine,
@@ -31,24 +40,40 @@ export default function ProfileAudio({
   enabled,
   variant = "floating",
 }: Props) {
-  const snapshot = useSyncExternalStore(
+  const uploadSnapshot = useSyncExternalStore(
     subscribeProfileAudioEngine,
     getProfileAudioEngineSnapshot,
     getProfileAudioEngineServerSnapshot
+  );
+
+  const videoSnapshot = useSyncExternalStore(
+    subscribeBackgroundVideoAudio,
+    getBackgroundVideoAudioSnapshot,
+    getBackgroundVideoAudioServerSnapshot
   );
 
   const [showVolume, setShowVolume] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
-    if (!enabled || !url) return;
+    if (!enabled || volumeOnly || !url) return;
+
     configureProfileAudioEngine({
       src: url,
       startTime,
       clipDuration,
       enabled,
     });
-  }, [clipDuration, enabled, startTime, url]);
+
+    return () => {
+      destroyProfileAudioEngine();
+    };
+  }, [clipDuration, enabled, startTime, url, volumeOnly]);
+
+  useEffect(() => {
+    if (!enabled || !volumeOnly) return;
+    destroyProfileAudioEngine();
+  }, [enabled, volumeOnly]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -59,27 +84,38 @@ export default function ProfileAudio({
 
   if (!enabled || !url) return null;
 
-  const { isPlaying, volume, awaitingUnlock, needsTap } = snapshot;
-  const muted = volume === 0;
-  const waitingForTap = needsTap && !muted;
-  const volumeBeforeMuteRef = { current: volume > 0 ? volume : 0.7 };
+  const volume = volumeOnly ? videoSnapshot.volume : uploadSnapshot.volume;
+  const isPlaying = volumeOnly ? videoSnapshot.isPlaying : uploadSnapshot.isPlaying;
+  const needsTap = volumeOnly ? videoSnapshot.needsTap : uploadSnapshot.needsTap;
+  const muted = volumeOnly ? videoSnapshot.muted : volume === 0;
+  const waitingForTap = volumeOnly
+    ? videoSnapshot.needsTap
+    : (uploadSnapshot.awaitingUnlock && volume > 0);
 
   const handleVolumeChange = (value: number) => {
+    if (volumeOnly) {
+      setBackgroundVideoVolume(value);
+      return;
+    }
     setProfileAudioVolume(value);
   };
 
   const handleVolumePointerDown = () => {
-    if (needsTap || awaitingUnlock) {
+    if (volumeOnly) {
+      unmuteBackgroundVideoFromUserGesture();
+      return;
+    }
+    if (needsTap || uploadSnapshot.awaitingUnlock) {
       playProfileAudioFromUserGesture();
     }
   };
 
   const handleVolumeButtonClick = () => {
     if (volumeOnly) {
-      if (volume === 0) {
-        handleVolumeChange(volumeBeforeMuteRef.current > 0 ? volumeBeforeMuteRef.current : isTouchDevice ? 1 : 0.7);
+      if (muted) {
+        const restored = getBackgroundVideoVolumeBeforeMute();
+        handleVolumeChange(restored > 0 ? restored : isTouchDevice ? 1 : 0.7);
       } else {
-        volumeBeforeMuteRef.current = volume;
         handleVolumeChange(0);
       }
       return;
@@ -124,11 +160,13 @@ export default function ProfileAudio({
           <button
             type="button"
             onPointerDown={() => {
-              if (needsTap || awaitingUnlock) playProfileAudioFromUserGesture();
+              if (needsTap || uploadSnapshot.awaitingUnlock) {
+                playProfileAudioFromUserGesture();
+              }
             }}
             onClick={toggleProfileAudioPlayPause}
             className={`${buttonPadding} ${
-              waitingForTap && !volumeOnly
+              waitingForTap
                 ? "animate-pulse ring-2 ring-purple-400/60 ring-offset-1 ring-offset-transparent rounded-lg"
                 : ""
             }`}

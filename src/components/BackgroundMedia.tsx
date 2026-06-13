@@ -5,6 +5,7 @@ import { BackgroundType } from "@/types/profile";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { DEFAULT_MEDIA_FOCUS, type MediaFocus } from "@/lib/media-focus";
 import { getMediaSrc } from "@/lib/media-url";
+import { registerProfileBackgroundVideo } from "@/lib/profile-background-video-audio";
 import { FocusedImage, FocusedVideo } from "@/components/FocusedMedia";
 
 interface Props {
@@ -12,6 +13,8 @@ interface Props {
   type: BackgroundType;
   contained?: boolean;
   focus?: MediaFocus;
+  /** El audio del perfil sale del mismo video (sin segundo reproductor). */
+  videoAudioEnabled?: boolean;
 }
 
 const FALLBACK_CLASS =
@@ -22,10 +25,12 @@ export default function BackgroundMedia({
   type,
   contained = false,
   focus,
+  videoAudioEnabled = false,
 }: Props) {
   const [broken, setBroken] = useState(false);
   const [useBackgroundCss, setUseBackgroundCss] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
   const shellClass = contained
     ? "absolute inset-0 overflow-hidden"
     : "fixed inset-0 z-0 h-[100dvh] w-screen overflow-hidden";
@@ -39,7 +44,13 @@ export default function BackgroundMedia({
     setBroken(false);
     setUseBackgroundCss(false);
     setLoaded(false);
+    setVideoElement(null);
   }, [url, type]);
+
+  useEffect(() => {
+    if (!videoAudioEnabled || !videoElement) return;
+    return registerProfileBackgroundVideo(videoElement);
+  }, [videoAudioEnabled, videoElement, displayUrl]);
 
   useEffect(() => {
     if (mediaType === "video" || !displayUrl?.trim()) return;
@@ -78,6 +89,7 @@ export default function BackgroundMedia({
           <FocusedVideo
             src={displayUrl}
             priority
+            videoRef={videoAudioEnabled ? setVideoElement : undefined}
             wrapperClassName="absolute inset-0"
             onReady={() => setLoaded(true)}
             onError={() => setBroken(true)}

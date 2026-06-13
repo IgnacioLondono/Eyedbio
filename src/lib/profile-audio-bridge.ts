@@ -1,8 +1,10 @@
 import { noteMediaUserActivation } from "@/lib/media-gesture";
+import { unmuteBackgroundVideoIfNeeded } from "@/lib/profile-background-video-audio";
 import { unlockProfileAudioIfNeeded } from "@/lib/profile-audio-engine";
 
-/** Desbloquea el audio solo si hace falta, en el mismo tick que un gesto del usuario. */
+/** Activa el sonido en el gesto del usuario (video de fondo o pista subida). */
 export function playProfileAudioFromGesture(): void {
   noteMediaUserActivation();
+  unmuteBackgroundVideoIfNeeded();
   unlockProfileAudioIfNeeded();
 }

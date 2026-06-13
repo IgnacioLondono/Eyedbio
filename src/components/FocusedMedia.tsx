@@ -54,6 +54,7 @@ interface VideoProps {
   wrapperClassName?: string;
   videoClassName?: string;
   priority?: boolean;
+  videoRef?: (element: HTMLVideoElement | null) => void;
   onReady?: () => void;
   onError?: () => void;
 }
@@ -64,12 +65,14 @@ export function FocusedVideo({
   wrapperClassName = "",
   videoClassName = "",
   priority = false,
+  videoRef,
   onReady,
   onError,
 }: VideoProps) {
   return (
     <div className={`relative h-full w-full overflow-hidden ${wrapperClassName}`}>
       <video
+        ref={videoRef}
         key={src}
         src={src}
         className={`absolute inset-0 h-full w-full min-h-full min-w-full object-cover ${videoClassName}`}
