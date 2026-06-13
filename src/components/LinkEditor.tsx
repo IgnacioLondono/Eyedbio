@@ -19,7 +19,7 @@ import {
   countActiveSocialLinks,
   countDraftSocialLinks,
 } from "@/lib/links-config";
-import { ACCEPT_ATTR } from "@/lib/media-config";
+import { ACCEPT_ATTR, getUploadValidationError } from "@/lib/media-config";
 import { getMediaSrc } from "@/lib/media-url";
 import { useI18n } from "@/components/LocaleProvider";
 
@@ -35,12 +35,23 @@ function LinkIconPreview({
   link: SocialLink;
   onUploaded: (url: string) => void;
 }) {
-  const { t } = useI18n();
+  const { t, tVars } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
   const handleFile = async (file: File) => {
+    const validation = getUploadValidationError("linkIcon", file);
+    if (validation) {
+      setError(
+        validation.code === "size"
+          ? tVars("fileUpload.fileTooLarge", { limit: validation.limitMb })
+          : t("fileUpload.fileTypeNotAllowed")
+      );
+      if (inputRef.current) inputRef.current.value = "";
+      return;
+    }
+
     setError("");
     setUploading(true);
 

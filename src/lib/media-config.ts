@@ -170,6 +170,26 @@ export function buildMediaUrl(userId: string, filename: string) {
   return `${getMediaPublicPrefix()}/${userId}/${filename}`;
 }
 
+export function getUploadLimitMb(kind: UploadKind): number {
+  return Math.round(UPLOAD_LIMITS[kind] / 1024 / 1024);
+}
+
+export type UploadValidationError =
+  | { code: "type" }
+  | { code: "size"; limitMb: number };
+
+export function getUploadValidationError(
+  kind: UploadKind,
+  file: Pick<File, "name" | "type" | "size">
+): UploadValidationError | null {
+  if (!isUploadAllowed(kind, file)) return { code: "type" };
+  const limit = UPLOAD_LIMITS[kind];
+  if (file.size > limit) {
+    return { code: "size", limitMb: getUploadLimitMb(kind) };
+  }
+  return null;
+}
+
 export function isUploadAllowed(kind: UploadKind, file: Pick<File, "name" | "type">) {
   const ext = file.name.includes(".")
     ? file.name.slice(file.name.lastIndexOf(".")).toLowerCase()

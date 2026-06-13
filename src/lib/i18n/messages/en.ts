@@ -316,13 +316,9 @@ export const en: Messages = {
     backgroundHint:
       "Upload your own image, animated GIF, or background video. It appears behind your card on the public profile.",
     backgroundHintSave: "Max 50 MB · Remember to click Save after uploading",
-    externalUrl: "Or paste an external URL",
-    externalUrlPlaceholder: "https://example.com/my-background.mp4",
     bannerTitle: "Card banner",
     bannerHint:
       "Horizontal image for the Banner layout header. Separate from the page background.",
-    bannerUrl: "Or paste a banner URL",
-    bannerUrlPlaceholder: "https://example.com/my-banner.jpg",
     bannerFileHint: "JPG, PNG, WEBP or GIF · max 10 MB",
     audioLabel: "Background audio",
     audioHint:
@@ -370,6 +366,8 @@ export const en: Messages = {
     uploading: "Uploading...",
     remove: "Remove",
     uploadError: "Upload error",
+    fileTooLarge: "File is too large (max {limit} MB).",
+    fileTypeNotAllowed: "File type not allowed.",
     image: "Image",
     gif: "GIF",
     video: "Video",

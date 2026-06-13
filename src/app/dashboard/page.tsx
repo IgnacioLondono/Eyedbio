@@ -479,15 +479,6 @@ function DashboardContent() {
                       onClear={clearBackground}
                     />
                   </div>
-                  <Field label={t("dashboard.externalUrl")}>
-                    <input
-                      type="url"
-                      value={profile.settings.backgroundUrl}
-                      onChange={(e) => updateBackground(e.target.value)}
-                      className="input-field"
-                      placeholder={t("dashboard.externalUrlPlaceholder")}
-                    />
-                  </Field>
                 </div>
 
                 {resolveCardLayout(profile.settings) === "banner" && (
@@ -513,15 +504,6 @@ function DashboardContent() {
                         }
                       />
                     </div>
-                    <Field label={t("dashboard.bannerUrl")}>
-                      <input
-                        type="url"
-                        value={profile.settings.bannerUrl ?? ""}
-                        onChange={(e) => updateSettings({ bannerUrl: e.target.value })}
-                        className="input-field"
-                        placeholder={t("dashboard.bannerUrlPlaceholder")}
-                      />
-                    </Field>
                   </div>
                 )}
 

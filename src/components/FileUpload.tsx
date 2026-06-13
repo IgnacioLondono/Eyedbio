@@ -12,7 +12,7 @@ import {
   Crop,
 } from "lucide-react";
 import { BackgroundType } from "@/types/profile";
-import { ACCEPT_ATTR, UploadKind, resolveBackgroundType } from "@/lib/media-config";
+import { ACCEPT_ATTR, UploadKind, getUploadLimitMb, getUploadValidationError, resolveBackgroundType } from "@/lib/media-config";
 import { getMediaSrc } from "@/lib/media-url";
 import {
   IMAGE_ADJUST_PRESETS,
@@ -206,6 +206,15 @@ export default function FileUpload({
       });
 
       xhr.addEventListener("load", () => {
+        if (xhr.status === 413) {
+          reject(
+            new Error(
+              tVars("fileUpload.fileTooLarge", { limit: getUploadLimitMb(kind) })
+            )
+          );
+          return;
+        }
+
         try {
           const data = JSON.parse(xhr.responseText) as {
             url?: string;
@@ -229,7 +238,26 @@ export default function FileUpload({
       xhr.send(formData);
     });
 
+  const resolveValidationError = (file: File): string | null => {
+    const validation = getUploadValidationError(kind, file);
+    if (!validation) return null;
+    if (validation.code === "size") {
+      return tVars("fileUpload.fileTooLarge", { limit: validation.limitMb });
+    }
+    return t("fileUpload.fileTypeNotAllowed");
+  };
+
+  const rejectInvalidFile = (file: File): boolean => {
+    const message = resolveValidationError(file);
+    if (!message) return false;
+    setError(message);
+    if (inputRef.current) inputRef.current.value = "";
+    return true;
+  };
+
   const handleFile = async (file: File) => {
+    if (rejectInvalidFile(file)) return;
+
     setError("");
     setUploading(true);
     setProgress(0);
@@ -311,6 +339,8 @@ export default function FileUpload({
   };
 
   const onFilePicked = (file: File) => {
+    if (rejectInvalidFile(file)) return;
+
     if (canAdjust && isAdjustableImageFile(file, kind) && adjustPreset) {
       startAdjustFromFile(file);
       return;

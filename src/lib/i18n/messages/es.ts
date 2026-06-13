@@ -252,12 +252,8 @@ export interface Messages {
     backgroundTitle: string;
     backgroundHint: string;
     backgroundHintSave: string;
-    externalUrl: string;
-    externalUrlPlaceholder: string;
     bannerTitle: string;
     bannerHint: string;
-    bannerUrl: string;
-    bannerUrlPlaceholder: string;
     bannerFileHint: string;
     audioLabel: string;
     audioHint: string;
@@ -304,6 +300,8 @@ export interface Messages {
     uploading: string;
     remove: string;
     uploadError: string;
+    fileTooLarge: string;
+    fileTypeNotAllowed: string;
     image: string;
     gif: string;
     video: string;
@@ -686,13 +684,9 @@ export const es: Messages = {
     backgroundHint:
       "Sube tu propia imagen, GIF animado o video de fondo. Se verá detrás de tu tarjeta en el perfil público.",
     backgroundHintSave: "Máximo 50 MB · Recuerda pulsar Guardar después de subir",
-    externalUrl: "O pega una URL externa",
-    externalUrlPlaceholder: "https://ejemplo.com/mi-fondo.mp4",
     bannerTitle: "Banner de la tarjeta",
     bannerHint:
       "Imagen horizontal para la cabecera del layout Banner. Independiente del fondo de pantalla.",
-    bannerUrl: "O pega una URL del banner",
-    bannerUrlPlaceholder: "https://ejemplo.com/mi-banner.jpg",
     bannerFileHint: "JPG, PNG, WEBP o GIF · máx. 10 MB",
     audioLabel: "Audio de fondo",
     audioHint:
@@ -740,6 +734,8 @@ export const es: Messages = {
     uploading: "Subiendo...",
     remove: "Quitar",
     uploadError: "Error al subir",
+    fileTooLarge: "El archivo pesa demasiado (máximo {limit} MB).",
+    fileTypeNotAllowed: "Tipo de archivo no permitido.",
     image: "Imagen",
     gif: "GIF",
     video: "Video",

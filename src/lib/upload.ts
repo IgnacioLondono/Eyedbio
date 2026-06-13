@@ -6,9 +6,8 @@ import { Readable } from "stream";
 import { BackgroundType } from "@/types/profile";
 import {
   UploadKind,
-  UPLOAD_LIMITS,
   buildMediaUrl,
-  isUploadAllowed,
+  getUploadValidationError,
   MIME_TO_EXT,
 } from "@/lib/media-config";
 
@@ -31,13 +30,12 @@ export function getBackgroundType(mime: string, filename: string): BackgroundTyp
 }
 
 export function validateUpload(kind: UploadKind, file: File) {
-  if (!isUploadAllowed(kind, file)) {
-    return `Tipo de archivo no permitido para ${kind}`;
+  const error = getUploadValidationError(kind, file);
+  if (!error) return null;
+  if (error.code === "size") {
+    return `El archivo supera el límite de ${error.limitMb}MB`;
   }
-  if (file.size > UPLOAD_LIMITS[kind]) {
-    return `El archivo supera el límite de ${Math.round(UPLOAD_LIMITS[kind] / 1024 / 1024)}MB`;
-  }
-  return null;
+  return `Tipo de archivo no permitido para ${kind}`;
 }
 
 export async function saveUploadBuffer(
