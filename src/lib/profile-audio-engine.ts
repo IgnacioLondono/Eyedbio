@@ -1,5 +1,4 @@
 import {
-  clampAudioStart,
   DEFAULT_CLIP_DURATION,
   getAudioClipBounds,
 } from "@/lib/audio-config";
@@ -7,7 +6,7 @@ import { hasMediaUnlockedSession, markMediaUnlockedSession } from "@/lib/media-g
 import { getMediaSrc } from "@/lib/media-url";
 
 const VOLUME_STORAGE_KEY = "eyed-audio-volume";
-const LOOP_SEEK_MARGIN = 0.2;
+const LOOP_SEEK_MARGIN = 0.05;
 
 export type ProfileAudioEngineConfig = {
   src: string;
@@ -38,7 +37,6 @@ let mutedForPolicy = false;
 let wasPlayingBeforeMute = false;
 let volumeBeforeMute = volume;
 let clipBounds = { start: 0, end: Infinity as number, nativeLoop: false };
-let loopIntervalId: number | null = null;
 let listeners = new Set<Listener>();
 let autoplayHandler: (() => void) | null = null;
 let autoplayHandlersBound = false;
@@ -82,10 +80,13 @@ const SERVER_SNAPSHOT: ProfileAudioEngineSnapshot = {
 
 let snapshotCache: ProfileAudioEngineSnapshot = SERVER_SNAPSHOT;
 
+function isElementPlaying(): boolean {
+  return Boolean(audio && !audio.paused && !audio.ended);
+}
+
 function refreshSnapshotCache(): ProfileAudioEngineSnapshot {
   ensureVolumeInitialized();
-  const element = audio;
-  const isPlaying = Boolean(element && !element.paused && !element.ended);
+  const isPlaying = isElementPlaying();
   const awaitingUnlock = mutedForPolicy && volume > 0 && wantsPlay && !userPaused;
   const needsTap =
     volume > 0 && !userPaused && (awaitingUnlock || (wantsPlay && !isPlaying));
@@ -165,45 +166,18 @@ function applyVolumeToElement(nextVolume: number): void {
 }
 
 function syncPlayingState(): void {
-  const element = audio;
-  if (!element) return;
-  const playing = !element.paused && !element.ended;
-  if (!playing && wantsPlay && !userPaused && volume > 0 && config?.enabled) {
-    /* state refresh only */
-  }
   notify();
 }
 
-function restartClipLoop(): void {
+function handleClipLoop(): void {
   const element = audio;
-  if (!element || !config?.enabled || userPaused || volume === 0) return;
+  if (!element || element.paused || userPaused || clipBounds.nativeLoop) return;
 
-  seekToClipStart();
-  if (element.paused && wantsPlay) {
-    void element.play().catch(() => notify());
+  const { start, end } = clipBounds;
+  if (!Number.isFinite(end)) return;
+  if (element.currentTime >= end - LOOP_SEEK_MARGIN) {
+    element.currentTime = start;
   }
-}
-
-function clearLoopInterval(): void {
-  if (loopIntervalId !== null) {
-    window.clearInterval(loopIntervalId);
-    loopIntervalId = null;
-  }
-}
-
-function setupLoopInterval(): void {
-  clearLoopInterval();
-  if (!config?.enabled || clipBounds.nativeLoop) return;
-
-  loopIntervalId = window.setInterval(() => {
-    const element = audio;
-    if (!element || element.paused || userPaused) return;
-    const { start, end } = clipBounds;
-    if (!Number.isFinite(end)) return;
-    if (element.currentTime >= end - LOOP_SEEK_MARGIN) {
-      element.currentTime = start;
-    }
-  }, 100);
 }
 
 function bindAudioEvents(element: HTMLAudioElement): void {
@@ -216,16 +190,13 @@ function bindAudioEvents(element: HTMLAudioElement): void {
   };
 
   const onTimeUpdate = () => {
-    const { start, end, nativeLoop } = clipBounds;
-    if (nativeLoop || !Number.isFinite(end)) return;
-    if (element.currentTime >= end - LOOP_SEEK_MARGIN) {
-      element.currentTime = start;
-    }
+    handleClipLoop();
   };
 
   const onEnded = () => {
-    if (clipBounds.nativeLoop) return;
-    restartClipLoop();
+    if (clipBounds.nativeLoop || userPaused || !wantsPlay || volume === 0) return;
+    seekToClipStart();
+    void element.play().catch(() => notify());
   };
 
   element.addEventListener("loadedmetadata", onLoaded);
@@ -253,7 +224,11 @@ function ensureAutoplayHandlers(): void {
   const element = audio;
   if (!element || autoplayHandlersBound) return;
 
-  autoplayHandler = () => tryProfileAudioAutoplay();
+  autoplayHandler = () => {
+    if (isElementPlaying()) return;
+    tryProfileAudioAutoplay();
+  };
+
   element.addEventListener("loadedmetadata", autoplayHandler);
   element.addEventListener("loadeddata", autoplayHandler);
   element.addEventListener("canplay", autoplayHandler);
@@ -286,6 +261,8 @@ export function configureProfileAudioEngine(next: ProfileAudioEngineConfig): voi
   const element = getAudioElement();
   const nextSrc = getMediaSrc(next.src);
   const srcChanged = config?.src !== next.src;
+  const timingChanged =
+    config?.startTime !== next.startTime || config?.clipDuration !== next.clipDuration;
 
   config = next;
 
@@ -299,14 +276,20 @@ export function configureProfileAudioEngine(next: ProfileAudioEngineConfig): voi
 
   updateClipBounds();
   applyVolumeToElement(volume);
-  setupLoopInterval();
   ensureAutoplayHandlers();
-  tryProfileAudioAutoplay();
+
+  if (srcChanged) {
+    tryProfileAudioAutoplay();
+  } else if (timingChanged && isElementPlaying()) {
+    seekToClipStart();
+  } else if (!isElementPlaying()) {
+    tryProfileAudioAutoplay();
+  }
+
   notify();
 }
 
 export function destroyProfileAudioEngine(): void {
-  clearLoopInterval();
   clearAutoplayHandlers();
   if (audio) {
     audio.pause();
@@ -337,6 +320,12 @@ export function playProfileAudioFromUserGesture(): boolean {
     seekToClipStart();
   }
 
+  if (isElementPlaying() && !element.muted) {
+    markMediaUnlockedSession();
+    notify();
+    return true;
+  }
+
   try {
     const playPromise = element.play();
     markMediaUnlockedSession();
@@ -360,12 +349,16 @@ export function tryProfileAudioAutoplay(): void {
   ensureVolumeInitialized();
   const element = audio;
   if (!element || !config?.enabled || userPaused || volume === 0) return;
+  if (isElementPlaying()) return;
 
   wantsPlay = true;
-  seekToClipStart();
+  if (element.paused || element.ended) {
+    seekToClipStart();
+  }
   applyVolumeToElement(volume);
 
   const attemptMuted = () => {
+    if (isElementPlaying()) return;
     element.muted = true;
     mutedForPolicy = true;
     void element
@@ -413,6 +406,7 @@ export function pauseProfileAudio(userInitiated: boolean): void {
 export function resumeProfileAudio(): void {
   const element = audio;
   if (!element || !config?.enabled || userPaused || volume === 0) return;
+  if (isElementPlaying()) return;
 
   wantsPlay = true;
   applyVolumeToElement(volume);
@@ -480,4 +474,10 @@ export function setProfileAudioVolume(nextVolume: number): void {
 
 export function isProfileAudioAwaitingUnlock(): boolean {
   return getProfileAudioEngineSnapshot().needsTap;
+}
+
+export function unlockProfileAudioIfNeeded(): void {
+  if (getProfileAudioEngineSnapshot().needsTap) {
+    playProfileAudioFromUserGesture();
+  }
 }

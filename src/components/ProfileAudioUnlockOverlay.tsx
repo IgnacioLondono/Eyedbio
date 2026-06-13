@@ -6,8 +6,8 @@ import { useI18n } from "@/components/LocaleProvider";
 import {
   getProfileAudioEngineSnapshot,
   getProfileAudioEngineServerSnapshot,
-  playProfileAudioFromUserGesture,
   subscribeProfileAudioEngine,
+  unlockProfileAudioIfNeeded,
 } from "@/lib/profile-audio-engine";
 
 interface Props {
@@ -23,7 +23,7 @@ export default function ProfileAudioUnlockOverlay({ enabled }: Props) {
   );
 
   const unlock = useCallback(() => {
-    playProfileAudioFromUserGesture();
+    unlockProfileAudioIfNeeded();
   }, []);
 
   useEffect(() => {

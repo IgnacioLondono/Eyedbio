@@ -123,7 +123,9 @@ export default function ProfileAudio({
         {!volumeOnly ? (
           <button
             type="button"
-            onPointerDown={() => playProfileAudioFromUserGesture()}
+            onPointerDown={() => {
+              if (needsTap || awaitingUnlock) playProfileAudioFromUserGesture();
+            }}
             onClick={toggleProfileAudioPlayPause}
             className={`${buttonPadding} ${
               waitingForTap && !volumeOnly
