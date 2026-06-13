@@ -60,6 +60,7 @@ export const ALL_PLATFORMS: SocialPlatform[] = PLATFORM_CATEGORIES.flatMap(
 
 export function getPlatformUrlPlaceholder(platform: SocialPlatform): string {
   const placeholders: Partial<Record<SocialPlatform, string>> = {
+    discord: "tu_usuario",
     email: "mailto:tu@email.com",
     steam: "https://steamcommunity.com/id/tu-usuario",
     roblox: "https://www.roblox.com/users/123456789/profile",
@@ -74,4 +75,8 @@ export function getPlatformUrlPlaceholder(platform: SocialPlatform): string {
   };
 
   return placeholders[platform] ?? "https://...";
+}
+
+export function isPlatformUsernameField(platform: SocialPlatform): boolean {
+  return platform === "discord";
 }

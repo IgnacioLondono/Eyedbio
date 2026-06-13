@@ -171,6 +171,8 @@ export interface Messages {
   profile: {
     visits: string;
     noLinks: string;
+    discordCopyHint: string;
+    discordCopied: string;
     notFound: string;
     notFoundTitle: string;
     notFoundHint: string;
@@ -289,6 +291,8 @@ export interface Messages {
     visibleName: string;
     remove: string;
     linkFor: string;
+    discordUsernameFor: string;
+    discordHint: string;
     uploadIcon: string;
     changeIcon: string;
     customTitle: string;
@@ -599,6 +603,8 @@ export const es: Messages = {
   profile: {
     visits: "visitas",
     noLinks: "Sin enlaces aún",
+    discordCopyHint: "Copiar usuario",
+    discordCopied: "Usuario copiado",
     notFound: "Perfil no encontrado",
     notFoundTitle: "Este perfil no existe",
     notFoundHint: "Comprueba el enlace o el nombre de usuario (@{username})",
@@ -723,6 +729,8 @@ export const es: Messages = {
     visibleName: "Nombre visible (opcional)",
     remove: "Quitar {label}",
     linkFor: "Enlace de {label}",
+    discordUsernameFor: "Usuario de Discord de {label}",
+    discordHint: "Solo el nombre de usuario (sin enlace). En el perfil se copia al pulsar.",
     uploadIcon: "Subir icono personalizado",
     changeIcon: "Cambiar icono",
     customTitle: "Añadir URL personalizada",

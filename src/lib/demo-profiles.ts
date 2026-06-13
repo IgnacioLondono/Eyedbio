@@ -2,7 +2,7 @@ import { Profile } from "@/types/profile";
 import { DEFAULT_SETTINGS } from "@/types/profile";
 
 const baseLinks = [
-  { id: "d1", platform: "discord" as const, url: "https://discord.com", label: "Discord" },
+  { id: "d1", platform: "discord" as const, url: "mi_usuario", label: "Discord" },
   { id: "d2", platform: "instagram" as const, url: "https://instagram.com", label: "Instagram" },
   { id: "d3", platform: "github" as const, url: "https://github.com", label: "GitHub" },
   { id: "d4", platform: "spotify" as const, url: "https://spotify.com", label: "Spotify" },

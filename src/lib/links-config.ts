@@ -1,4 +1,5 @@
 import type { SocialLink, SocialPlatform } from "@/types/profile";
+import { isSocialLinkActive } from "@/lib/social-link-utils";
 
 /** Máximo de enlaces activos (con URL) en el perfil. */
 export const MAX_PROFILE_LINKS = 12;
@@ -14,8 +15,8 @@ export const MAX_SOCIAL_LINKS = MAX_PROFILE_LINKS;
 
 type LinkRow = Pick<SocialLink, "url" | "platform">;
 
-export function countActiveSocialLinks(links: Pick<SocialLink, "url">[]): number {
-  return links.filter((link) => link.url.trim().length > 0).length;
+export function countActiveSocialLinks(links: Pick<SocialLink, "url" | "platform">[]): number {
+  return links.filter(isSocialLinkActive).length;
 }
 
 export function countActiveCustomLinks(links: LinkRow[]): number {
@@ -30,16 +31,16 @@ export function countActivePlatformLinks(links: LinkRow[]): number {
   ).length;
 }
 
-export function countDraftSocialLinks(links: Pick<SocialLink, "url">[]): number {
-  return links.filter((link) => !link.url.trim()).length;
+export function countDraftSocialLinks(links: Pick<SocialLink, "url" | "platform">[]): number {
+  return links.filter((link) => !isSocialLinkActive(link)).length;
 }
 
-function hasDraftSlot(links: Pick<SocialLink, "url">[]): boolean {
-  return links.some((link) => !link.url.trim());
+function hasDraftSlot(links: Pick<SocialLink, "url" | "platform">[]): boolean {
+  return links.some((link) => !isSocialLinkActive(link));
 }
 
 /** ¿Hay hueco para otro enlace (cualquier tipo)? */
-export function canAddSocialLink(links: Pick<SocialLink, "url">[]): boolean {
+export function canAddSocialLink(links: Pick<SocialLink, "url" | "platform">[]): boolean {
   const active = countActiveSocialLinks(links);
   if (active >= MAX_PROFILE_LINKS) return false;
   if (links.length < MAX_PROFILE_LINKS) return true;

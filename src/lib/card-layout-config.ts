@@ -128,7 +128,7 @@ export function suggestedSettingsForLayout(layout: CardLayout): Partial<ProfileS
 }
 
 const THUMBNAIL_LINKS: Profile["links"] = [
-  { id: "p1", platform: "discord", url: "https://eyed.bio", label: "Discord" },
+  { id: "p1", platform: "discord", url: "eyedbio", label: "Discord" },
   { id: "p2", platform: "instagram", url: "https://eyed.bio" },
   { id: "p3", platform: "github", url: "https://eyed.bio" },
 ];

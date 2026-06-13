@@ -4,7 +4,8 @@ import { useRef, useState } from "react";
 import { Globe, Loader2, Trash2 } from "lucide-react";
 import { SocialLink, SocialPlatform } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
-import { PLATFORM_CATEGORIES, getPlatformUrlPlaceholder } from "@/lib/platform-categories";
+import { PLATFORM_CATEGORIES, getPlatformUrlPlaceholder, isPlatformUsernameField } from "@/lib/platform-categories";
+import { sanitizeSocialLinkInput } from "@/lib/social-link-utils";
 import { PlatformIcon } from "@/components/PlatformIcons";
 import CustomLinkIcon from "@/components/CustomLinkIcon";
 import { createEmptyLink } from "@/lib/profile-mapper";
@@ -19,6 +20,7 @@ import {
   countActiveSocialLinks,
   countDraftSocialLinks,
 } from "@/lib/links-config";
+import { isSocialLinkActive } from "@/lib/social-link-utils";
 import { ACCEPT_ATTR, getUploadValidationError } from "@/lib/media-config";
 import { getMediaSrc } from "@/lib/media-url";
 import { useI18n } from "@/components/LocaleProvider";
@@ -197,7 +199,7 @@ export default function LinkEditor({ links, onChange }: Props) {
               <div
                 key={link.id}
                 className={`flex flex-col items-center p-4 rounded-xl bg-white/[0.03] border ${
-                  link.url.trim() ? "border-white/5" : "border-amber-500/35"
+                  isSocialLinkActive(link) ? "border-white/5" : "border-amber-500/35"
                 }`}
               >
                 <div className="w-full flex items-start justify-between gap-2 mb-2">
@@ -249,11 +251,24 @@ export default function LinkEditor({ links, onChange }: Props) {
                 <input
                   type="text"
                   value={link.url}
-                  onChange={(e) => updateLink(link.id, { url: e.target.value })}
+                  onChange={(e) =>
+                    updateLink(link.id, {
+                      url: sanitizeSocialLinkInput(link.platform, e.target.value),
+                    })
+                  }
                   placeholder={getPlatformUrlPlaceholder(link.platform)}
                   className="input-field w-full text-sm mt-3"
-                  aria-label={tVars("linkEditor.linkFor", { label: config.label })}
+                  aria-label={
+                    isPlatformUsernameField(link.platform)
+                      ? tVars("linkEditor.discordUsernameFor", { label: config.label })
+                      : tVars("linkEditor.linkFor", { label: config.label })
+                  }
                 />
+                {isPlatformUsernameField(link.platform) && (
+                  <p className="text-[10px] text-white/35 mt-1.5 text-center w-full">
+                    {t("linkEditor.discordHint")}
+                  </p>
+                )}
               </div>
             );
           })}
