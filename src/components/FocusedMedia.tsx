@@ -3,6 +3,7 @@
 import {
   DEFAULT_MEDIA_FOCUS,
   mediaFocusPositionStyle,
+  mediaFocusStyle,
   type MediaFocus,
 } from "@/lib/media-focus";
 
@@ -55,15 +56,17 @@ export function FocusedVideo({
   onError,
 }: VideoProps) {
   return (
-    <div className={`relative overflow-hidden ${wrapperClassName}`}>
+    <div className={`relative h-full w-full overflow-hidden ${wrapperClassName}`}>
       <video
+        key={src}
         src={src}
-        className={videoClassName}
-        style={mediaFocusPositionStyle(focus ?? DEFAULT_MEDIA_FOCUS)}
+        className={`absolute inset-0 h-full w-full min-h-full min-w-full object-cover ${videoClassName}`}
+        style={mediaFocusStyle(focus ?? DEFAULT_MEDIA_FOCUS)}
         autoPlay
         loop
         muted
         playsInline
+        preload="auto"
         onError={onError}
       />
     </div>

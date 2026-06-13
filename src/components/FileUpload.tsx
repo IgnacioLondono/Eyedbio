@@ -145,7 +145,6 @@ function MediaPreview({
         {isVideo ? (
           <FocusedVideo
             src={displayUrl}
-            focus={mediaFocus}
             wrapperClassName="absolute inset-0"
             onError={() => setBroken(true)}
           />

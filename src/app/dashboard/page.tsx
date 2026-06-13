@@ -176,7 +176,13 @@ function DashboardContent() {
     setProfile({
       ...profile,
       backgroundType: nextType,
-      settings: { ...profile.settings, backgroundUrl: url },
+      settings: {
+        ...profile.settings,
+        backgroundUrl: url,
+        ...(nextType === "video"
+          ? { backgroundFocus: { x: 50, y: 50, zoom: 1 } }
+          : {}),
+      },
     });
     setIsDirty(true);
   };

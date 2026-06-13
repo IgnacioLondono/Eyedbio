@@ -31,7 +31,8 @@ export default function BackgroundMedia({
   const pointerClass = "pointer-events-none";
   const mediaType = resolveBackgroundType(url, type);
   const displayUrl = getMediaSrc(url);
-  const mediaFocus = focus ?? DEFAULT_MEDIA_FOCUS;
+  const mediaFocus =
+    mediaType === "video" ? DEFAULT_MEDIA_FOCUS : (focus ?? DEFAULT_MEDIA_FOCUS);
 
   useEffect(() => {
     setBroken(false);
@@ -52,7 +53,6 @@ export default function BackgroundMedia({
       <div className={`${shellClass} ${pointerClass}`} aria-hidden="true">
         <FocusedVideo
           src={displayUrl}
-          focus={mediaFocus}
           wrapperClassName="absolute inset-0"
           onError={() => setBroken(true)}
         />
