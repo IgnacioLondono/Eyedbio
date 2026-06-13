@@ -43,7 +43,11 @@ export function preloadProfileAudio(url: string): void {
 }
 
 /** Precarga el fondo en segundo plano para que aparezca antes en el perfil. */
-export function preloadBackgroundMedia(url: string, type: BackgroundType): void {
+export function preloadBackgroundMedia(
+  url: string,
+  type: BackgroundType,
+  deferPlayback = false
+): void {
   if (typeof window === "undefined" || !url?.trim()) return;
 
   const src = getMediaSrc(url);
@@ -51,7 +55,7 @@ export function preloadBackgroundMedia(url: string, type: BackgroundType): void 
 
   if (mediaType === "video") {
     const video = document.createElement("video");
-    video.preload = "auto";
+    video.preload = deferPlayback ? "metadata" : "auto";
     video.muted = true;
     video.src = src;
     video.load();

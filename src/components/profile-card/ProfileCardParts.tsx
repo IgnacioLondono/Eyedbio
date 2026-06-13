@@ -11,6 +11,8 @@ import {
   getNameEffectStyle,
   resolveNameEffect,
 } from "@/lib/name-effects";
+import { resolveNameAnimation } from "@/lib/name-animations";
+import AnimatedDisplayName from "@/components/AnimatedDisplayName";
 import { resolveAvatarStyle } from "@/lib/card-layout-config";
 import { BADGE_CONFIG } from "@/lib/badges";
 import { t as translate } from "@/lib/i18n";
@@ -169,23 +171,44 @@ export function ProfileNameBlock({
   const { settings } = profile;
   const { textColor } = settings;
   const nameEffect = resolveNameEffect(settings);
+  const nameAnimation = resolveNameAnimation(settings);
   const nameEffectClass = getNameEffectClass(nameEffect);
   const nameEffectStyle = getNameEffectStyle(nameEffect, settings.accentColor, textColor);
+  const profileNameIcon = settings.profileNameIconUrl?.trim();
   const centered = align === "center";
   const rowAlign = centered ? "justify-center" : "justify-start";
   const textAlign = centered ? "text-center" : "text-left";
 
   return (
     <div className={`w-full ${textAlign}`}>
-      <h1
-        className={`${scale.name} font-bold break-words ${textAlign} ${nameEffectClass ?? ""}`}
-        style={{
-          color: nameEffect === "gradient" ? undefined : textColor,
-          ...nameEffectStyle,
-        }}
-      >
-        {profile.displayName}
-      </h1>
+      <div className={`flex w-full items-center gap-2 ${rowAlign}`}>
+        {profileNameIcon ? (
+          <img
+            src={getMediaSrc(profileNameIcon)}
+            alt=""
+            className={`${scale.compact ? "h-7 w-7" : "h-9 w-9"} shrink-0 rounded-lg object-cover ring-1 ring-white/15`}
+            draggable={false}
+            referrerPolicy="no-referrer"
+          />
+        ) : null}
+        <h1
+          className={`${scale.name} font-bold break-words ${textAlign} ${nameEffectClass ?? ""} min-w-0`}
+          style={{
+            color: nameEffect === "gradient" ? undefined : textColor,
+            ...nameEffectStyle,
+          }}
+        >
+          <AnimatedDisplayName
+            text={profile.displayName}
+            animation={nameAnimation}
+            style={
+              nameEffect === "gradient"
+                ? nameEffectStyle
+                : undefined
+            }
+          />
+        </h1>
+      </div>
       {profile.badges.length > 0 ? (
         <div
           className={`mt-1.5 flex flex-wrap items-center gap-1.5 ${rowAlign} ${scale.compact ? "" : "gap-2"}`}

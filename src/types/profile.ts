@@ -53,6 +53,15 @@ export type BackgroundType = "image" | "video" | "gif";
 export type AudioSource = "upload" | "background";
 export type NameEffect = "none" | "glow" | "aura" | "neon" | "pulse" | "gradient";
 
+/** Animación letra a letra del nombre en la tarjeta */
+export type NameAnimation =
+  | "none"
+  | "typewriter"
+  | "wave"
+  | "bounce"
+  | "shimmer"
+  | "glitch";
+
 /** Estructura / composición de la tarjeta de perfil */
 export type CardLayout =
   | "classic"
@@ -88,6 +97,8 @@ export interface ProfileSettings {
   /** @deprecated Usar nameEffect */
   glowUsername?: boolean;
   nameEffect: NameEffect;
+  /** Animación del nombre en la tarjeta (independiente del efecto visual) */
+  nameAnimation?: NameAnimation;
   glowIcons: boolean;
   gradientEnabled: boolean;
   monochromeIcons: boolean;
@@ -110,6 +121,10 @@ export interface ProfileSettings {
   entryGateText?: string;
   /** Título personalizado de la pestaña del navegador (ej. @usuario) */
   browserTabTitle?: string;
+  /** Icono de la pestaña del navegador (favicon) */
+  browserTabIconUrl?: string;
+  /** Icono junto al nombre en la tarjeta del perfil */
+  profileNameIconUrl?: string;
   /** Mostrar contador de visitas en la tarjeta */
   showViewCount?: boolean;
   /** Mostrar botón compartir en el perfil público */

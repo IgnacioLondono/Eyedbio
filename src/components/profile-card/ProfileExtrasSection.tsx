@@ -5,6 +5,10 @@ import { Profile } from "@/types/profile";
 import { hexToRgba } from "@/lib/color-utils";
 import { resolveProfileDisplay } from "@/lib/profile-display-config";
 import { isValidDiscordUserId } from "@/lib/lanyard";
+import {
+  getSocialLinkCopyValue,
+  isSocialLinkActive,
+} from "@/lib/social-link-utils";
 import ProfileDiscordPresence from "./ProfileDiscordPresence";
 import type { CardScale } from "./ProfileCardParts";
 
@@ -23,13 +27,19 @@ export default function ProfileExtrasSection({
   align = "center",
   className = "",
 }: Props) {
-  const { settings, locale } = profile;
+  const { settings, locale, links } = profile;
   const display = resolveProfileDisplay(settings);
   const location = display.location.trim();
   const showLocation = display.showLocation && location.length > 0;
+
+  const discordLink = links.find(
+    (link) => link.platform === "discord" && isSocialLinkActive(link)
+  );
+  const fallbackUsername = discordLink ? getSocialLinkCopyValue(discordLink) : undefined;
+  const discordUserId = display.discordUserId.trim();
   const showDiscord =
     display.discordPresenceEnabled &&
-    isValidDiscordUserId(display.discordUserId);
+    (isValidDiscordUserId(discordUserId) || Boolean(fallbackUsername));
 
   if (!showLocation && !showDiscord) return null;
 
@@ -51,7 +61,8 @@ export default function ProfileExtrasSection({
       ) : null}
       {showDiscord ? (
         <ProfileDiscordPresence
-          userId={display.discordUserId}
+          userId={discordUserId}
+          fallbackUsername={fallbackUsername ?? undefined}
           accentColor={settings.accentColor}
           textColor={settings.textColor}
           scale={scale}

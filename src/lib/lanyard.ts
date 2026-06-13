@@ -113,7 +113,7 @@ export async function fetchLanyardPresence(userId: string): Promise<LanyardPrese
 
   const res = await fetch(`https://api.lanyard.rest/v1/users/${id}`, {
     headers: { Accept: "application/json" },
-    next: { revalidate: 30 },
+    cache: "no-store",
   });
 
   if (!res.ok) return null;
@@ -122,4 +122,8 @@ export async function fetchLanyardPresence(userId: string): Promise<LanyardPrese
   if (!body.success || !body.data) return null;
 
   return body.data;
+}
+
+export function proxiedDiscordAvatarUrl(url: string): string {
+  return `/api/image-proxy?url=${encodeURIComponent(url)}`;
 }

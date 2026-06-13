@@ -18,6 +18,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
 import LandingStyleShowcase from "@/components/LandingStyleShowcase";
+import LandingProfilesSection from "@/components/LandingProfilesSection";
 import { useI18n } from "@/components/LocaleProvider";
 import { getMessages } from "@/lib/i18n";
 
@@ -172,6 +173,8 @@ export default function LandingPage() {
           ))}
         </div>
       </section>
+
+      <LandingProfilesSection />
 
       <LandingStyleShowcase />
 

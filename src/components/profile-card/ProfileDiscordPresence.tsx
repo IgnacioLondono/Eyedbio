@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { hexToRgba } from "@/lib/color-utils";
+import { proxiedDiscordAvatarUrl, isValidDiscordUserId } from "@/lib/lanyard";
+import { t as translate } from "@/lib/i18n";
 import type { CardScale } from "./ProfileCardParts";
 
 interface PresencePayload {
@@ -10,10 +12,12 @@ interface PresencePayload {
   statusColor: string;
   activityEs: string | null;
   activityEn: string | null;
+  fallback?: boolean;
 }
 
 interface Props {
   userId: string;
+  fallbackUsername?: string;
   accentColor: string;
   textColor: string;
   scale: CardScale;
@@ -22,8 +26,31 @@ interface Props {
   className?: string;
 }
 
+const REFRESH_MS = 30_000;
+
+function buildFallbackPresence(
+  fallbackUsername: string,
+  locale: "es" | "en"
+): PresencePayload {
+  const name = fallbackUsername.startsWith("@")
+    ? fallbackUsername
+    : `@${fallbackUsername}`;
+
+  return {
+    displayName: name,
+    avatarUrl: proxiedDiscordAvatarUrl(
+      "https://cdn.discordapp.com/embed/avatars/0.png"
+    ),
+    statusColor: "#80848e",
+    activityEs: translate("es", "profile.discordLanyardHint"),
+    activityEn: translate("en", "profile.discordLanyardHint"),
+    fallback: true,
+  };
+}
+
 export default function ProfileDiscordPresence({
   userId,
+  fallbackUsername,
   accentColor,
   textColor,
   scale,
@@ -34,29 +61,59 @@ export default function ProfileDiscordPresence({
   const [presence, setPresence] = useState<PresencePayload | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const loadPresence = useCallback(async () => {
+    if (!isValidDiscordUserId(userId)) {
+      if (fallbackUsername?.trim()) {
+        return buildFallbackPresence(fallbackUsername.trim(), locale);
+      }
+      return null;
+    }
+
+    try {
+      const res = await fetch(`/api/discord/presence/${encodeURIComponent(userId.trim())}`, {
+        cache: "no-store",
+      });
+
+      if (res.ok) {
+        return (await res.json()) as PresencePayload;
+      }
+
+      if (fallbackUsername?.trim()) {
+        return buildFallbackPresence(fallbackUsername.trim(), locale);
+      }
+
+      return null;
+    } catch {
+      if (fallbackUsername?.trim()) {
+        return buildFallbackPresence(fallbackUsername.trim(), locale);
+      }
+      return null;
+    }
+  }, [fallbackUsername, locale, userId]);
+
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
 
-    void fetch(`/api/discord/presence/${encodeURIComponent(userId.trim())}`)
-      .then(async (res) => {
-        if (!res.ok) return null;
-        return (await res.json()) as PresencePayload;
-      })
+    void loadPresence()
       .then((data) => {
         if (!cancelled) setPresence(data);
-      })
-      .catch(() => {
-        if (!cancelled) setPresence(null);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
 
+    const interval = window.setInterval(() => {
+      void loadPresence().then((data) => {
+        if (!cancelled && data) setPresence(data);
+      });
+    }, REFRESH_MS);
+
     return () => {
       cancelled = true;
+      window.clearInterval(interval);
     };
-  }, [userId]);
+  }, [loadPresence]);
 
   if (!loading && !presence) return null;
 
@@ -85,9 +142,14 @@ export default function ProfileDiscordPresence({
         <div className="flex items-center gap-3 text-left">
           <div className="relative shrink-0">
             <img
-              src={presence.avatarUrl}
+              src={
+                presence.fallback
+                  ? presence.avatarUrl
+                  : proxiedDiscordAvatarUrl(presence.avatarUrl)
+              }
               alt=""
-              className={`${compact ? "h-9 w-9" : "h-11 w-11"} rounded-full object-cover`}
+              referrerPolicy="no-referrer"
+              className={`${compact ? "h-9 w-9" : "h-11 w-11"} rounded-full object-cover bg-white/5`}
               draggable={false}
             />
             <span

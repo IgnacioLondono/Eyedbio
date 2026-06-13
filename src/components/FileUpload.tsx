@@ -164,6 +164,26 @@ function MediaPreview({
     );
   }
 
+  if (kind === "favicon" || kind === "profileIcon") {
+    if (broken) {
+      return (
+        <div className="w-16 h-16 mx-auto my-3 rounded-xl bg-white/5 flex items-center justify-center">
+          <ImageIcon className="w-6 h-6 text-white/30" />
+        </div>
+      );
+    }
+    return (
+      <div className="w-16 h-16 mx-auto my-3">
+        <FocusedImage
+          src={displayUrl}
+          alt=""
+          wrapperClassName="h-full w-full rounded-xl"
+          onError={() => setBroken(true)}
+        />
+      </div>
+    );
+  }
+
   return null;
 }
 

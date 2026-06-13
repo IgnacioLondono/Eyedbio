@@ -18,9 +18,11 @@ import {
   Profile,
   BackgroundType,
   NameEffect,
+  type NameAnimation,
   type AudioSource,
 } from "@/types/profile";
 import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
+import { NAME_ANIMATION_OPTIONS } from "@/lib/name-animations";
 import { getMessages } from "@/lib/i18n";
 import { resolveBackgroundType, getUploadLimitMb } from "@/lib/media-config";
 import { backgroundHasAudio, getEffectiveAudioUrl } from "@/lib/profile-audio";
@@ -99,6 +101,7 @@ function DashboardContent() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [simulateEntryInPreview, setSimulateEntryInPreview] = useState(false);
 
   useEffect(() => {
     if (profile?.locale) void setLocale(profile.locale, false);
@@ -279,6 +282,7 @@ function DashboardContent() {
   }
 
   const nameEffectLabels = getMessages(locale).nameEffects;
+  const nameAnimationLabels = getMessages(locale).nameAnimations;
 
   const tabs: { id: Tab; label: string; icon: typeof Settings }[] = [
     { id: "general", label: t("dashboard.tabs.general"), icon: UserRound },
@@ -486,6 +490,16 @@ function DashboardContent() {
                       className="input-field"
                     />
                   </Field>
+                </div>
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-white">
+                      {t("dashboard.browserTabSectionTitle")}
+                    </h3>
+                    <p className="text-xs text-white/40 mt-1">
+                      {t("dashboard.browserTabSectionHint")}
+                    </p>
+                  </div>
                   <Field label={t("dashboard.browserTabTitle")}>
                     <input
                       type="text"
@@ -496,6 +510,47 @@ function DashboardContent() {
                     />
                     <p className="text-xs text-white/35 mt-2">{t("dashboard.browserTabTitleHint")}</p>
                   </Field>
+                  <FileUpload
+                    kind="favicon"
+                    label={t("dashboard.browserTabIconLabel")}
+                    hint={t("dashboard.browserTabIconHint")}
+                    currentUrl={profile.settings.browserTabIconUrl}
+                    onUploaded={(url) => updateSettings({ browserTabIconUrl: url })}
+                    onClear={() => updateSettings({ browserTabIconUrl: "" })}
+                  />
+                </div>
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-white">
+                      {t("dashboard.profileNameSectionTitle")}
+                    </h3>
+                    <p className="text-xs text-white/40 mt-1">
+                      {t("dashboard.profileNameSectionHint")}
+                    </p>
+                  </div>
+                  <Field label={t("dashboard.nameAnimation")}>
+                    <select
+                      value={profile.settings.nameAnimation ?? "none"}
+                      onChange={(e) =>
+                        updateSettings({ nameAnimation: e.target.value as NameAnimation })
+                      }
+                      className="input-field"
+                    >
+                      {NAME_ANIMATION_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {nameAnimationLabels[opt.value] ?? opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <FileUpload
+                    kind="profileIcon"
+                    label={t("dashboard.profileNameIconLabel")}
+                    hint={t("dashboard.profileNameIconHint")}
+                    currentUrl={profile.settings.profileNameIconUrl}
+                    onUploaded={(url) => updateSettings({ profileNameIconUrl: url })}
+                    onClear={() => updateSettings({ profileNameIconUrl: "" })}
+                  />
                 </div>
                 <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-3">
                   <h3 className="text-sm font-medium text-white">
@@ -920,9 +975,19 @@ function DashboardContent() {
             tab === "account" ? "hidden" : ""
           }`}
         >
-          <p className="text-white/40 text-xs uppercase tracking-wider mb-4 text-center w-full">
+          <p className="text-white/40 text-xs uppercase tracking-wider mb-3 text-center w-full">
             {t("dashboard.preview")}
           </p>
+          {profile &&
+          resolveProfileDisplay(profile.settings, profile.locale ?? locale).entryGateEnabled ? (
+            <div className="mb-3 w-full">
+              <Toggle
+                label={t("dashboard.previewSimulateEntry")}
+                checked={simulateEntryInPreview}
+                onChange={setSimulateEntryInPreview}
+              />
+            </div>
+          ) : null}
           <div className="relative w-full rounded-2xl overflow-hidden border border-white/10 aspect-[9/16] max-h-[min(700px,85vh)] isolate bg-[#0a0a0f]">
             <BackgroundMedia
               url={profile.settings.backgroundUrl}
@@ -943,10 +1008,12 @@ function DashboardContent() {
                 </div>
               </div>
             </div>
-            {resolveProfileDisplay(profile.settings).entryGateEnabled ? (
+            {profile &&
+            simulateEntryInPreview &&
+            resolveProfileDisplay(profile.settings, profile.locale ?? locale).entryGateEnabled ? (
               <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none">
                 <span className="text-white/75 text-[10px] sm:text-xs tracking-[0.15em] lowercase">
-                  {resolveProfileDisplay(profile.settings).entryGateText}
+                  {resolveProfileDisplay(profile.settings, profile.locale ?? locale).entryGateText}
                 </span>
               </div>
             ) : null}

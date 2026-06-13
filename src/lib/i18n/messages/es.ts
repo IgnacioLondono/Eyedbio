@@ -53,6 +53,15 @@ export interface Messages {
     showcaseBullet3: string;
     showcaseViewLabel: string;
     showcaseTabsLabel: string;
+    profilesTitle: string;
+    profilesTitleHighlight: string;
+    profilesSubtitle: string;
+    profilesTabTop: string;
+    profilesTabRecent: string;
+    profilesTabAll: string;
+    profilesCount: string;
+    profilesViewsLabel: string;
+    profilesEmpty: string;
     features: readonly { title: string; desc: string }[];
     faqs: readonly { q: string; a: string }[];
   };
@@ -182,6 +191,7 @@ export interface Messages {
     connectionError: string;
     pageTitleNotFound: string;
     tapForSound: string;
+    discordLanyardHint: string;
   };
   accessGate: {
     protected: string;
@@ -306,6 +316,15 @@ export interface Messages {
     browserTabTitle: string;
     browserTabTitlePlaceholder: string;
     browserTabTitleHint: string;
+    browserTabSectionTitle: string;
+    browserTabSectionHint: string;
+    browserTabIconLabel: string;
+    browserTabIconHint: string;
+    profileNameSectionTitle: string;
+    profileNameSectionHint: string;
+    nameAnimation: string;
+    profileNameIconLabel: string;
+    profileNameIconHint: string;
     visibilitySectionTitle: string;
     showViewCount: string;
     showShareButton: string;
@@ -319,6 +338,7 @@ export interface Messages {
     discordUserIdPlaceholder: string;
     discordUserIdHint: string;
     discordLanyardLink: string;
+    previewSimulateEntry: string;
   };
   linkEditor: {
     platformCount: string;
@@ -398,6 +418,7 @@ export interface Messages {
   >;
   avatarStyles: Record<string, { label: string }>;
   nameEffects: Record<string, string>;
+  nameAnimations: Record<string, string>;
   badges: {
     owner: string;
     verified: string;
@@ -472,6 +493,16 @@ export const es: Messages = {
     showcaseBullet3: "Más de {count} combinaciones visuales distintas.",
     showcaseViewLabel: "Vista:",
     showcaseTabsLabel: "Estilos de ejemplo",
+    profilesTitle: "Descubre",
+    profilesTitleHighlight: "perfiles",
+    profilesSubtitle:
+      "Explora la comunidad Eyed.bio: los más visitados, los más recientes y todos los perfiles públicos.",
+    profilesTabTop: "Top visitas",
+    profilesTabRecent: "Recientes",
+    profilesTabAll: "Todos",
+    profilesCount: "{count} perfiles",
+    profilesViewsLabel: "visitas",
+    profilesEmpty: "Aún no hay perfiles públicos. ¡Sé el primero!",
     features: [
       {
         title: "Todos tus enlaces",
@@ -655,6 +686,7 @@ export const es: Messages = {
     connectionError: "Error de conexión. Comprueba tu red e inténtalo de nuevo.",
     pageTitleNotFound: "Perfil no encontrado — Eyed.bio",
     tapForSound: "Pulsar para activar el sonido",
+    discordLanyardHint: "Únete a Lanyard para ver tu estado en vivo",
   },
   accessGate: {
     protected: "Perfil protegido",
@@ -780,28 +812,38 @@ export const es: Messages = {
     monochromeIcons: "Iconos monocromáticos",
     entrySectionTitle: "Pantalla de entrada",
     entrySectionHint:
-      "Como guns.lol: el visitante pulsa para entrar y el audio arranca sincronizado con el video.",
+      "Los visitantes pulsan para entrar y el audio arranca sincronizado con el video de fondo.",
     entryGateEnabled: "Mostrar pantalla de entrada",
     entryGateText: "Texto de entrada",
-    entryGateTextPlaceholder: "click to enter...",
+    entryGateTextPlaceholder: "pulsa para entrar...",
     browserTabTitle: "Título de la pestaña",
     browserTabTitlePlaceholder: "@tuusuario",
     browserTabTitleHint: "Lo que aparece en la pestaña del navegador. Déjalo vacío para usar el nombre por defecto.",
+    browserTabSectionTitle: "Pestaña del navegador",
+    browserTabSectionHint: "Personaliza el título y el icono que ven los visitantes en la pestaña del navegador.",
+    browserTabIconLabel: "Icono de la pestaña",
+    browserTabIconHint: "PNG, JPG, WebP o GIF · máx. 1 MB · recomendado 32×32 o 64×64 px",
+    profileNameSectionTitle: "Nombre en el perfil",
+    profileNameSectionHint: "Animación e icono junto a tu nombre en la tarjeta. El brillo/neón está en Estilo.",
+    nameAnimation: "Animación de letras",
+    profileNameIconLabel: "Icono junto al nombre",
+    profileNameIconHint: "PNG, JPG, WebP o GIF · máx. 2 MB · se muestra al lado de tu nombre",
     visibilitySectionTitle: "Visibilidad del perfil",
     showViewCount: "Mostrar contador de visitas",
     showShareButton: "Mostrar botón compartir",
     discordSectionTitle: "Discord y ubicación",
     discordSectionHint:
-      "Muestra tu ubicación y un widget con tu estado de Discord en tiempo real, como en guns.lol.",
+      "Muestra tu ubicación y un widget con tu estado de Discord en tiempo real.",
     showLocation: "Mostrar ubicación",
     locationLabel: "Ubicación",
-    locationPlaceholder: "México 🔥",
+    locationPlaceholder: "Ej: Madrid, España",
     discordPresenceEnabled: "Mostrar widget de Discord",
     discordUserIdLabel: "ID de usuario de Discord",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
       "Activa Modo desarrollador en Discord → clic derecho en tu perfil → Copiar ID. Para que aparezca tu estado, únete a Lanyard en discord.gg/lanyard.",
     discordLanyardLink: "Unirse a Lanyard",
+    previewSimulateEntry: "Simular pantalla de entrada",
   },
   linkEditor: {
     platformCount: "{count}/{max} redes y plataformas",
@@ -898,6 +940,14 @@ export const es: Messages = {
     neon: "Neón",
     pulse: "Pulso",
     gradient: "Gradiente",
+  },
+  nameAnimations: {
+    none: "Ninguna",
+    typewriter: "Máquina de escribir",
+    wave: "Ola",
+    bounce: "Rebote",
+    shimmer: "Brillo móvil",
+    glitch: "Glitch",
   },
   badges: {
     owner: "Owner",

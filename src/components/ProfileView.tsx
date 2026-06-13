@@ -11,11 +11,17 @@ import ClaimProfileCta from "@/components/ClaimProfileCta";
 import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/ProfileAccessGate";
 import ProfileEntryGate from "@/components/ProfileEntryGate";
+import ProfileTabIcon from "@/components/ProfileTabIcon";
 import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
 import { preloadBackgroundMedia } from "@/lib/media-url";
 import { getEffectiveAudioUrl, isBackgroundProfileAudio } from "@/lib/profile-audio";
 import { getProfileDocumentTitle, resolveProfileDisplay } from "@/lib/profile-display-config";
 import { enterProfileFromGesture } from "@/lib/profile-enter";
+import {
+  resetBackgroundVideoAudioState,
+  setBackgroundVideoAwaitEntryGate,
+  tryBackgroundVideoAutoplay,
+} from "@/lib/profile-background-video-audio";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
@@ -54,6 +60,7 @@ export default function ProfileView({ username }: Props) {
     setLoadError(null);
     setEntered(false);
     viewPendingRef.current = false;
+    resetBackgroundVideoAudioState();
 
     try {
       const res = await fetch(`/api/profile/${username}`, {
@@ -85,10 +92,11 @@ export default function ProfileView({ username }: Props) {
       setLoading(false);
       preloadBackgroundMedia(
         nextProfile.settings.backgroundUrl,
-        nextProfile.backgroundType
+        nextProfile.backgroundType,
+        resolveProfileDisplay(nextProfile.settings, nextProfile.locale).entryGateEnabled
       );
 
-      if (resolveProfileDisplay(nextProfile.settings).entryGateEnabled) {
+      if (resolveProfileDisplay(nextProfile.settings, nextProfile.locale).entryGateEnabled) {
         viewPendingRef.current = true;
       } else {
         void recordView();
@@ -119,6 +127,22 @@ export default function ProfileView({ username }: Props) {
       document.title = t("profile.pageTitleNotFound");
     }
   }, [profile, lockedProfile, loading, loadError, t]);
+
+  useEffect(() => {
+    if (!profile) return;
+
+    const display = resolveProfileDisplay(profile.settings, profile.locale);
+    const playbackUrl = getEffectiveAudioUrl(profile);
+    const showProfileAudio =
+      site.profileAudioEnabled && profile.audioEnabled && Boolean(playbackUrl);
+    const backgroundVideoAudio = showProfileAudio && isBackgroundProfileAudio(profile);
+
+    setBackgroundVideoAwaitEntryGate(display.entryGateEnabled && !entered);
+
+    if (backgroundVideoAudio && !display.entryGateEnabled) {
+      tryBackgroundVideoAutoplay();
+    }
+  }, [profile, entered, site.profileAudioEnabled]);
 
   const handleEnter = useCallback(() => {
     if (!profile || entered) return;
@@ -183,7 +207,7 @@ export default function ProfileView({ username }: Props) {
   }
 
   const { settings } = profile;
-  const display = resolveProfileDisplay(settings);
+  const display = resolveProfileDisplay(settings, profile.locale);
   const playbackUrl = getEffectiveAudioUrl(profile);
   const showProfileAudio =
     site.profileAudioEnabled && profile.audioEnabled && Boolean(playbackUrl);
@@ -193,12 +217,13 @@ export default function ProfileView({ username }: Props) {
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">
+      <ProfileTabIcon iconUrl={settings.browserTabIconUrl} />
       <BackgroundMedia
         url={settings.backgroundUrl}
         type={profile.backgroundType}
         focus={settings.backgroundFocus}
         videoAudioEnabled={backgroundVideoAudio}
-        playbackActive={mediaActive}
+        deferPlayback={needsGate}
       />
       <div className="fixed inset-0 z-[1] bg-black/50 pointer-events-none" />
       <BackgroundEffects effect={settings.backgroundEffect} />

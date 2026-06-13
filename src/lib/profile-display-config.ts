@@ -12,12 +12,22 @@ export type ResolvedProfileDisplay = {
   discordUserId: string;
 };
 
+export function resolveEntryGateText(
+  settings: Partial<ProfileSettings>,
+  locale: "es" | "en" = "es"
+): string {
+  const custom = settings.entryGateText?.trim();
+  if (custom) return custom;
+  return locale === "en" ? "click to enter..." : "pulsa para entrar...";
+}
+
 export function resolveProfileDisplay(
-  settings: Partial<ProfileSettings>
+  settings: Partial<ProfileSettings>,
+  locale: "es" | "en" = "es"
 ): ResolvedProfileDisplay {
   return {
     entryGateEnabled: settings.entryGateEnabled ?? true,
-    entryGateText: settings.entryGateText?.trim() || "click to enter...",
+    entryGateText: resolveEntryGateText(settings, locale),
     browserTabTitle: settings.browserTabTitle?.trim() || "",
     showViewCount: settings.showViewCount ?? true,
     showShareButton: settings.showShareButton ?? true,
@@ -29,17 +39,17 @@ export function resolveProfileDisplay(
 }
 
 export function getProfileDocumentTitle(
-  profile: Pick<Profile, "displayName" | "username" | "settings">
+  profile: Pick<Profile, "displayName" | "username" | "settings" | "locale">
 ): string {
-  const { browserTabTitle } = resolveProfileDisplay(profile.settings);
+  const { browserTabTitle } = resolveProfileDisplay(profile.settings, profile.locale);
   if (browserTabTitle) return browserTabTitle;
   return `${profile.displayName} (@${profile.username}) — Eyed.bio`;
 }
 
 export function getProfileMetadataTitle(
-  profile: Pick<Profile, "displayName" | "username" | "settings">
+  profile: Pick<Profile, "displayName" | "username" | "settings" | "locale">
 ): string {
-  const { browserTabTitle } = resolveProfileDisplay(profile.settings);
+  const { browserTabTitle } = resolveProfileDisplay(profile.settings, profile.locale);
   if (browserTabTitle) return browserTabTitle;
   return `${profile.displayName} (@${profile.username})`;
 }

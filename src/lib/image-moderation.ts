@@ -14,7 +14,14 @@ export class ImageModerationError extends Error {
   }
 }
 
-const IMAGE_KINDS = new Set<UploadKind>(["avatar", "background", "banner", "linkIcon"]);
+const IMAGE_KINDS = new Set<UploadKind>([
+  "avatar",
+  "background",
+  "banner",
+  "linkIcon",
+  "favicon",
+  "profileIcon",
+]);
 
 export function uploadKindNeedsImageModeration(kind: UploadKind): boolean {
   return IMAGE_KINDS.has(kind);

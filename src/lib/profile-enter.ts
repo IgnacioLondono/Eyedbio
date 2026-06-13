@@ -16,12 +16,14 @@ export function enterProfileFromGesture(profile: Profile): void {
   noteMediaUserActivation();
   markMediaUnlockedSession();
 
-  if (!profile.audioEnabled) return;
+  const backgroundVideoAudio =
+    profile.audioEnabled && isBackgroundProfileAudio(profile);
 
-  if (isBackgroundProfileAudio(profile)) {
+  if (backgroundVideoAudio) {
     startBackgroundVideoFromEnter();
-    return;
   }
+
+  if (!profile.audioEnabled || backgroundVideoAudio) return;
 
   const url = getEffectiveAudioUrl(profile);
   if (!url) return;

@@ -16,6 +16,9 @@ let volume = 0.7;
 let volumeInitialized = false;
 let volumeBeforeMute = 0.7;
 let listeners = new Set<Listener>();
+let pendingEnterActivation = false;
+let audioUnlocked = false;
+let awaitEntryGate = false;
 
 const SERVER_SNAPSHOT: BackgroundVideoAudioSnapshot = {
   volume: 0.7,
@@ -103,10 +106,55 @@ function applyVolumeToVideo(): void {
   element.volume = volume;
 }
 
-export function registerProfileBackgroundVideo(
-  element: HTMLVideoElement,
-  options?: { deferPlayback?: boolean }
-): () => void {
+function holdVideoUntilEnter(element: HTMLVideoElement): void {
+  element.pause();
+  element.currentTime = 0;
+  element.muted = true;
+  element.volume = 0;
+}
+
+function startMutedPreview(element: HTMLVideoElement): void {
+  element.muted = true;
+  element.volume = 0;
+  if (element.paused) {
+    void element.play().catch(() => notify());
+  }
+}
+
+export function resetBackgroundVideoAudioState(): void {
+  pendingEnterActivation = false;
+  audioUnlocked = false;
+  awaitEntryGate = false;
+  video = null;
+  notify();
+}
+
+export function setBackgroundVideoAwaitEntryGate(next: boolean): void {
+  awaitEntryGate = next;
+}
+
+export function tryBackgroundVideoAutoplay(): void {
+  const element = video;
+  if (!element || audioUnlocked || awaitEntryGate || volume === 0) return;
+
+  ensureVolumeInitialized();
+  element.volume = volume;
+  element.muted = false;
+
+  void element
+    .play()
+    .then(() => {
+      audioUnlocked = true;
+      markMediaUnlockedSession();
+      notify();
+    })
+    .catch(() => {
+      startMutedPreview(element);
+      notify();
+    });
+}
+
+export function registerProfileBackgroundVideo(element: HTMLVideoElement): () => void {
   video = element;
   ensureVolumeInitialized();
 
@@ -115,16 +163,14 @@ export function registerProfileBackgroundVideo(
   element.addEventListener("pause", sync);
   element.addEventListener("volumechange", sync);
 
-  if (options?.deferPlayback) {
-    element.pause();
-    element.currentTime = 0;
-    element.muted = true;
-    element.volume = 0;
+  if (pendingEnterActivation || audioUnlocked) {
+    pendingEnterActivation = false;
+    activateBackgroundVideoFromEnter();
+  } else if (awaitEntryGate) {
+    holdVideoUntilEnter(element);
   } else {
-    applyVolumeToVideo();
-    if (element.paused) {
-      void element.play().catch(() => notify());
-    }
+    startMutedPreview(element);
+    tryBackgroundVideoAutoplay();
   }
 
   notify();
@@ -157,20 +203,36 @@ export function subscribeBackgroundVideoAudio(listener: Listener): () => void {
   return () => listeners.delete(listener);
 }
 
-/** Arranca el video de fondo desde el inicio con sonido (gesto de entrada). */
-export function startBackgroundVideoFromEnter(): boolean {
+function activateBackgroundVideoFromEnter(): boolean {
   const element = video;
-  if (!element || volume === 0) return false;
+  if (!element) return false;
 
   ensureVolumeInitialized();
+  audioUnlocked = true;
   element.currentTime = 0;
-  element.volume = volume;
-  element.muted = false;
-  markMediaUnlockedSession();
 
+  if (volume > 0) {
+    element.volume = volume;
+    element.muted = false;
+  } else {
+    element.muted = true;
+    element.volume = 0;
+  }
+
+  markMediaUnlockedSession();
   void element.play().catch(() => notify());
   notify();
   return true;
+}
+
+/** Arranca el video de fondo desde el inicio con sonido (gesto de entrada). */
+export function startBackgroundVideoFromEnter(): boolean {
+  if (video) {
+    return activateBackgroundVideoFromEnter();
+  }
+
+  pendingEnterActivation = true;
+  return false;
 }
 
 /** Desbloquea el sonido del video de fondo sin reiniciar la reproducción. */

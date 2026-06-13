@@ -15,8 +15,8 @@ interface Props {
   focus?: MediaFocus;
   /** El audio del perfil sale del mismo video (sin segundo reproductor). */
   videoAudioEnabled?: boolean;
-  /** false = espera al gesto de entrada antes de reproducir video con audio. */
-  playbackActive?: boolean;
+  /** true = no reproducir hasta el gesto de entrada. */
+  deferPlayback?: boolean;
 }
 
 const FALLBACK_CLASS =
@@ -28,7 +28,7 @@ export default function BackgroundMedia({
   contained = false,
   focus,
   videoAudioEnabled = false,
-  playbackActive = true,
+  deferPlayback = false,
 }: Props) {
   const [broken, setBroken] = useState(false);
   const [useBackgroundCss, setUseBackgroundCss] = useState(false);
@@ -52,16 +52,24 @@ export default function BackgroundMedia({
 
   useEffect(() => {
     if (!videoAudioEnabled || !videoElement) return;
-    const deferPlayback = !playbackActive;
-    return registerProfileBackgroundVideo(videoElement, { deferPlayback });
-  }, [videoAudioEnabled, videoElement, displayUrl, playbackActive]);
+    return registerProfileBackgroundVideo(videoElement);
+  }, [videoAudioEnabled, videoElement, displayUrl]);
 
   useEffect(() => {
-    if (!videoAudioEnabled || !videoElement || playbackActive) return;
-    videoElement.pause();
-    videoElement.currentTime = 0;
+    if (!videoElement || mediaType !== "video") return;
+
+    if (deferPlayback) {
+      videoElement.pause();
+      videoElement.currentTime = 0;
+      videoElement.muted = true;
+      return;
+    }
+
+    if (videoAudioEnabled) return;
+
     videoElement.muted = true;
-  }, [videoAudioEnabled, videoElement, playbackActive]);
+    void videoElement.play().catch(() => {});
+  }, [deferPlayback, videoElement, mediaType, videoAudioEnabled]);
 
   useEffect(() => {
     if (mediaType === "video" || !displayUrl?.trim()) return;
@@ -93,10 +101,6 @@ export default function BackgroundMedia({
   }`;
 
   if (mediaType === "video") {
-    const deferVideoAudio = videoAudioEnabled && !playbackActive;
-    const shouldAutoPlay = !deferVideoAudio;
-    const videoMuted = deferVideoAudio || !videoAudioEnabled;
-
     return (
       <div className={`${shellClass} ${pointerClass}`} aria-hidden="true">
         <div className={`absolute inset-0 ${FALLBACK_CLASS}`} />
@@ -104,9 +108,9 @@ export default function BackgroundMedia({
           <FocusedVideo
             src={displayUrl}
             priority
-            autoPlay={shouldAutoPlay}
-            muted={videoMuted}
-            videoRef={videoAudioEnabled ? setVideoElement : undefined}
+            autoPlay={!deferPlayback && !videoAudioEnabled}
+            muted
+            videoRef={setVideoElement}
             wrapperClassName="absolute inset-0"
             onReady={() => setLoaded(true)}
             onError={() => setBroken(true)}
