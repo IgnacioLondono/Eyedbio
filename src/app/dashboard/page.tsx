@@ -18,10 +18,12 @@ import {
   Profile,
   BackgroundType,
   NameEffect,
+  type AudioSource,
 } from "@/types/profile";
 import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
 import { getMessages } from "@/lib/i18n";
-import { resolveBackgroundType } from "@/lib/media-config";
+import { resolveBackgroundType, getUploadLimitMb } from "@/lib/media-config";
+import { backgroundHasAudio, getEffectiveAudioUrl } from "@/lib/profile-audio";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import ProfileCard from "@/components/ProfileCard";
@@ -173,9 +175,13 @@ function DashboardContent() {
   const updateBackground = (url: string, backgroundType?: BackgroundType) => {
     if (!profile) return;
     const nextType = backgroundType ?? resolveBackgroundType(url, profile.backgroundType);
+    const losesBackgroundAudio =
+      nextType !== "video" && profile.audioSource === "background";
     setProfile({
       ...profile,
       backgroundType: nextType,
+      ...(losesBackgroundAudio ? { audioSource: "upload" as AudioSource } : {}),
+      ...(losesBackgroundAudio && !profile.audioUrl ? { audioEnabled: false } : {}),
       settings: {
         ...profile.settings,
         backgroundUrl: url,
@@ -189,9 +195,12 @@ function DashboardContent() {
 
   const clearBackground = () => {
     if (!profile) return;
+    const losesBackgroundAudio = profile.audioSource === "background";
     setProfile({
       ...profile,
       backgroundType: "image",
+      ...(losesBackgroundAudio ? { audioSource: "upload" as AudioSource } : {}),
+      ...(losesBackgroundAudio && !profile.audioUrl ? { audioEnabled: false } : {}),
       settings: {
         ...profile.settings,
         backgroundUrl: "",
@@ -474,7 +483,9 @@ function DashboardContent() {
                     <FileUpload
                       kind="background"
                       label=""
-                      hint={t("dashboard.backgroundHintSave")}
+                      hint={tVars("dashboard.backgroundHintSave", {
+                        limit: getUploadLimitMb("background"),
+                      })}
                       currentUrl={profile.settings.backgroundUrl}
                       mediaType={profile.backgroundType}
                       mediaFocus={profile.settings.backgroundFocus}
@@ -515,29 +526,92 @@ function DashboardContent() {
 
                 {site.profileAudioEnabled ? (
                   <>
-                    <FileUpload
-                      kind="audio"
-                      label={t("dashboard.audioLabel")}
-                      hint={t("dashboard.audioHint")}
-                      currentUrl={profile.audioUrl}
-                      onUploaded={(url) =>
-                        update({ audioUrl: url, audioEnabled: true, audioStartTime: 0 })
-                      }
-                      onClear={() =>
-                        update({ audioUrl: undefined, audioEnabled: false, audioStartTime: 0 })
-                      }
-                    />
-                    {profile.audioUrl && (
-                      <AudioClipSelector
-                        audioUrl={profile.audioUrl}
-                        startTime={profile.audioStartTime}
-                        onChange={(audioStartTime) => update({ audioStartTime })}
+                    <Field label={t("dashboard.audioSource")}>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => update({ audioSource: "upload" })}
+                          className={`rounded-xl border px-3 py-2.5 text-left text-xs transition-colors ${
+                            profile.audioSource !== "background"
+                              ? "border-purple-500/50 bg-purple-500/15 text-white"
+                              : "border-white/10 bg-white/[0.03] text-white/60 hover:border-white/20 hover:text-white/80"
+                          }`}
+                        >
+                          <span className="block font-medium">{t("dashboard.audioSourceUpload")}</span>
+                          <span className="mt-0.5 block text-[10px] text-white/45">
+                            {t("dashboard.audioSourceUploadHint")}
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!backgroundHasAudio(profile)}
+                          onClick={() =>
+                            update({ audioSource: "background", audioEnabled: true })
+                          }
+                          className={`rounded-xl border px-3 py-2.5 text-left text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
+                            profile.audioSource === "background"
+                              ? "border-purple-500/50 bg-purple-500/15 text-white"
+                              : "border-white/10 bg-white/[0.03] text-white/60 hover:border-white/20 hover:text-white/80"
+                          }`}
+                        >
+                          <span className="block font-medium">
+                            {t("dashboard.audioSourceBackground")}
+                          </span>
+                          <span className="mt-0.5 block text-[10px] text-white/45">
+                            {backgroundHasAudio(profile)
+                              ? t("dashboard.audioSourceBackgroundHint")
+                              : t("dashboard.audioSourceBackgroundDisabled")}
+                          </span>
+                        </button>
+                      </div>
+                    </Field>
+
+                    {profile.audioSource === "background" ? (
+                      <p className="text-[11px] text-white/40 -mt-2">
+                        {t("dashboard.audioSourceBackgroundActive")}
+                      </p>
+                    ) : (
+                      <FileUpload
+                        kind="audio"
+                        label={t("dashboard.audioLabel")}
+                        hint={t("dashboard.audioHint")}
+                        currentUrl={profile.audioUrl}
+                        onUploaded={(url) =>
+                          update({
+                            audioUrl: url,
+                            audioEnabled: true,
+                            audioStartTime: 0,
+                            audioClipDuration: 30,
+                          })
+                        }
+                        onClear={() =>
+                          update({
+                            audioUrl: undefined,
+                            audioEnabled: profile.audioSource === "background",
+                            audioStartTime: 0,
+                            audioClipDuration: 30,
+                          })
+                        }
                       />
                     )}
+
+                    {getEffectiveAudioUrl(profile) ? (
+                      <AudioClipSelector
+                        audioUrl={getEffectiveAudioUrl(profile)!}
+                        startTime={profile.audioStartTime}
+                        clipDuration={profile.audioClipDuration}
+                        onChange={({ startTime, clipDuration }) =>
+                          update({ audioStartTime: startTime, audioClipDuration: clipDuration })
+                        }
+                      />
+                    ) : null}
                     <Toggle
                       label={t("dashboard.playAudio")}
                       checked={profile.audioEnabled}
                       onChange={(v) => update({ audioEnabled: v })}
+                      disabled={
+                        !getEffectiveAudioUrl(profile) && !profile.audioEnabled
+                      }
                     />
                   </>
                 ) : null}

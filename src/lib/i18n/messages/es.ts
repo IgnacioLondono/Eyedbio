@@ -259,6 +259,23 @@ export interface Messages {
     bannerFileHint: string;
     audioLabel: string;
     audioHint: string;
+    audioSource: string;
+    audioSourceUpload: string;
+    audioSourceUploadHint: string;
+    audioSourceBackground: string;
+    audioSourceBackgroundHint: string;
+    audioSourceBackgroundDisabled: string;
+    audioSourceBackgroundActive: string;
+    audioClipTitle: string;
+    audioClipDurationLabel: string;
+    audioClipFull: string;
+    audioClipFullHint: string;
+    audioClipDurationHint: string;
+    audioClipPositionHint: string;
+    audioClipSelected: string;
+    audioClipShortTrack: string;
+    audioClipPreview: string;
+    audioClipStop: string;
     playAudio: string;
     backgroundEffect: string;
     effectCategory: string;
@@ -689,14 +706,32 @@ export const es: Messages = {
     backgroundTitle: "Fondo del perfil",
     backgroundHint:
       "Sube tu propia imagen, GIF animado o video de fondo. Se verá detrás de tu tarjeta en el perfil público.",
-    backgroundHintSave: "Máximo 50 MB · Recuerda pulsar Guardar después de subir",
+    backgroundHintSave: "Máximo {limit} MB · Recuerda pulsar Guardar después de subir",
     bannerTitle: "Banner de la tarjeta",
     bannerHint:
       "Imagen horizontal para la cabecera del layout Banner. Independiente del fondo de pantalla.",
     bannerFileHint: "JPG, PNG, WEBP o GIF · máx. 10 MB",
     audioLabel: "Audio de fondo",
     audioHint:
-      "MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, AIFF, MIDI · máx. 25MB · 30 s en el perfil",
+      "MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, AIFF, MIDI · máx. 25MB · elige fragmento o audio completo",
+    audioSource: "Fuente de audio",
+    audioSourceUpload: "Archivo subido",
+    audioSourceUploadHint: "Sube un MP3 u otro archivo de audio",
+    audioSourceBackground: "Audio del video de fondo",
+    audioSourceBackgroundHint: "Usa la pista de audio de tu video de fondo",
+    audioSourceBackgroundDisabled: "Necesitas un video de fondo con audio",
+    audioSourceBackgroundActive:
+      "Se reproduce el audio del video de fondo. El video en pantalla sigue sin sonido para evitar duplicados.",
+    audioClipTitle: "Fragmento del perfil",
+    audioClipDurationLabel: "Duración",
+    audioClipFull: "Completo",
+    audioClipFullHint: "Se reproducirá la pista completa en bucle",
+    audioClipDurationHint: "Elige {seconds} segundos que se repetirán en tu perfil",
+    audioClipPositionHint: "Arrastra para elegir por dónde empieza el fragmento",
+    audioClipSelected: "{seconds}s seleccionados",
+    audioClipShortTrack: "Duración total",
+    audioClipPreview: "Escuchar",
+    audioClipStop: "Detener",
     playAudio: "Reproducir audio en el perfil",
     backgroundEffect: "Efecto de fondo",
     effectCategory: "Categoría",

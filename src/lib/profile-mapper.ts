@@ -1,5 +1,6 @@
 import { Prisma, SocialLink as DbSocialLink, User } from "@/generated/prisma/client";
 import { parseBadgesJson } from "@/lib/badges";
+import { DEFAULT_CLIP_DURATION } from "@/lib/audio-config";
 import { resolveBackgroundEffect } from "@/lib/background-effects-config";
 import {
   resolveAvatarStyle,
@@ -9,6 +10,7 @@ import {
 import { parseLocale } from "@/lib/i18n/types";
 import { parseMediaFocus } from "@/lib/media-focus";
 import { resolveBackgroundType } from "@/lib/media-config";
+import { resolveAudioSource } from "@/lib/profile-audio";
 import { resolveNameEffect } from "@/lib/name-effects";
 import {
   BackgroundType,
@@ -17,6 +19,7 @@ import {
   ProfileSettings,
   SocialLink,
   SocialPlatform,
+  type AudioSource,
 } from "@/types/profile";
 
 type UserWithLinks = User & { links: DbSocialLink[] };
@@ -66,7 +69,20 @@ export function userToProfile(user: UserWithLinks): Profile {
     ),
     audioUrl: user.audioUrl ?? undefined,
     audioStartTime: user.audioStartTime ?? 0,
+    audioClipDuration:
+      (user as User & { audioClipDuration?: number }).audioClipDuration ??
+      DEFAULT_CLIP_DURATION,
     audioEnabled: user.audioEnabled,
+    audioSource: resolveAudioSource(
+      (user as User & { audioSource?: string }).audioSource as AudioSource | undefined,
+      {
+        settings: merged,
+        backgroundType: resolveBackgroundType(
+          backgroundUrl,
+          (user.backgroundType as BackgroundType) ?? "image"
+        ),
+      }
+    ),
     views: user.views,
     badges: parseBadges(user.badges),
     links: user.links
@@ -97,7 +113,9 @@ export function profileToUserUpdateData(profile: Profile): Prisma.UserUpdateInpu
     backgroundType,
     audioUrl: profile.audioUrl ?? null,
     audioStartTime: profile.audioStartTime,
+    audioClipDuration: profile.audioClipDuration,
     audioEnabled: profile.audioEnabled,
+    audioSource: resolveAudioSource(profile.audioSource, profile),
     badges: JSON.stringify(profile.badges),
     settings: JSON.stringify(restSettings),
   };

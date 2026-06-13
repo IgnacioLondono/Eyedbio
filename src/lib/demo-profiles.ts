@@ -21,6 +21,8 @@ function demoProfile(
     backgroundType: "image",
     audioEnabled: false,
     audioStartTime: 0,
+    audioClipDuration: 30,
+    audioSource: "upload",
     views: 12840,
     badges: ["verified"],
     links: baseLinks,

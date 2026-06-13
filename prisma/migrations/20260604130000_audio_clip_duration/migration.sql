@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "audioClipDuration" DOUBLE PRECISION NOT NULL DEFAULT 30;

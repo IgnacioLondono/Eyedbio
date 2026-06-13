@@ -4,7 +4,7 @@ export type UploadKind = "avatar" | "background" | "banner" | "audio" | "linkIco
 
 export const UPLOAD_LIMITS: Record<UploadKind, number> = {
   avatar: 5 * 1024 * 1024,
-  background: 50 * 1024 * 1024,
+  background: 80 * 1024 * 1024,
   banner: 10 * 1024 * 1024,
   audio: 25 * 1024 * 1024,
   linkIcon: 2 * 1024 * 1024,

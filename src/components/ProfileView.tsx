@@ -12,6 +12,7 @@ import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/ProfileAccessGate";
 import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
 import { preloadBackgroundMedia, preloadProfileAudio } from "@/lib/media-url";
+import { getEffectiveAudioUrl } from "@/lib/profile-audio";
 import { playProfileAudioFromGesture } from "@/lib/profile-audio-bridge";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
@@ -80,8 +81,9 @@ export default function ProfileView({ username }: Props) {
         nextProfile.settings.backgroundUrl,
         nextProfile.backgroundType
       );
-      if (nextProfile.audioEnabled && nextProfile.audioUrl) {
-        preloadProfileAudio(nextProfile.audioUrl);
+      if (nextProfile.audioEnabled) {
+        const playbackUrl = getEffectiveAudioUrl(nextProfile);
+        if (playbackUrl) preloadProfileAudio(playbackUrl);
       }
       void recordView();
       return;

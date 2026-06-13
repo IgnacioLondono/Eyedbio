@@ -164,6 +164,8 @@ export function getLayoutThumbnailProfile(layout: CardLayout): Profile {
     backgroundType: "image",
     audioEnabled: false,
     audioStartTime: 0,
+    audioClipDuration: 30,
+    audioSource: "upload" as const,
     views: 999,
     badges: [],
     links: THUMBNAIL_LINKS,

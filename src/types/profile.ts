@@ -50,6 +50,7 @@ export type BackgroundEffect =
   | "cosmic_dust"
   | "satellites";
 export type BackgroundType = "image" | "video" | "gif";
+export type AudioSource = "upload" | "background";
 export type NameEffect = "none" | "glow" | "aura" | "neon" | "pulse" | "gradient";
 
 /** Estructura / composición de la tarjeta de perfil */
@@ -114,7 +115,9 @@ export interface Profile {
   backgroundType: BackgroundType;
   audioUrl?: string;
   audioStartTime: number;
+  audioClipDuration: number;
   audioEnabled: boolean;
+  audioSource: AudioSource;
   views: number;
   badges: string[];
   links: SocialLink[];

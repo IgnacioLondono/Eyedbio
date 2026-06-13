@@ -1,6 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { profileToUserUpdateData, userToProfile } from "@/lib/profile-mapper";
+import { syncUserMediaStorage } from "@/lib/media-storage";
 import { Profile } from "@/types/profile";
 
 export type SaveProfileResult =
@@ -102,7 +103,10 @@ export async function saveUserProfile(
       return { ok: false, conflict: true };
     }
 
-    return { ok: true, profile: userToProfile(updated) };
+    const savedProfile = userToProfile(updated);
+    await syncUserMediaStorage(userId, savedProfile);
+
+    return { ok: true, profile: savedProfile };
   } catch (err) {
     if (err instanceof Error) {
       if (err.message === "USER_NOT_FOUND") {

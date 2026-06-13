@@ -7,8 +7,9 @@ import { useSiteSettings } from "@/components/SiteSettingsProvider";
 interface Props {
   username: string;
   displayName: string;
-  audioUrl?: string;
+  playbackUrl?: string;
   audioStartTime?: number;
+  audioClipDuration?: number;
   audioEnabled?: boolean;
   accentColor?: string;
 }
@@ -16,8 +17,9 @@ interface Props {
 export default function ProfileCardControls({
   username,
   displayName,
-  audioUrl,
+  playbackUrl,
   audioStartTime,
+  audioClipDuration,
   audioEnabled,
   accentColor,
 }: Props) {
@@ -26,10 +28,11 @@ export default function ProfileCardControls({
   return (
     <>
       <ShareProfileButton username={username} displayName={displayName} variant="card" />
-      {site.profileAudioEnabled && audioEnabled && audioUrl ? (
+      {site.profileAudioEnabled && audioEnabled && playbackUrl ? (
         <ProfileAudio
-          url={audioUrl}
+          url={playbackUrl}
           startTime={audioStartTime}
+          clipDuration={audioClipDuration}
           enabled={audioEnabled}
           accentColor={accentColor}
           variant="card"

@@ -7,7 +7,8 @@ import { profileCacheTag } from "@/lib/cached-profile";
 import { validateSocialLinksCount } from "@/lib/links-config";
 import { saveUserProfile } from "@/lib/profile-save";
 import { userToProfile } from "@/lib/profile-mapper";
-import { Profile } from "@/types/profile";
+import { resolveAudioSource } from "@/lib/profile-audio";
+import { Profile, type AudioSource } from "@/types/profile";
 import { getSiteSettings } from "@/lib/site-settings";
 
 async function rejectIfBlocked(userId: string) {
@@ -66,12 +67,26 @@ export async function PATCH(request: Request) {
     if (!site.profileAudioEnabled) {
       const current = await prisma.user.findUnique({
         where: { id: session.user.id },
-        select: { audioUrl: true, audioEnabled: true, audioStartTime: true },
+        select: {
+          audioUrl: true,
+          audioEnabled: true,
+          audioStartTime: true,
+          audioClipDuration: true,
+          audioSource: true,
+          backgroundUrl: true,
+          backgroundType: true,
+          settings: true,
+        },
       });
       if (current) {
         profile.audioUrl = current.audioUrl ?? undefined;
         profile.audioEnabled = current.audioEnabled;
         profile.audioStartTime = current.audioStartTime ?? 0;
+        profile.audioClipDuration = current.audioClipDuration ?? 30;
+        profile.audioSource = resolveAudioSource(
+          current.audioSource as AudioSource | undefined,
+          profile
+        );
       }
     }
 

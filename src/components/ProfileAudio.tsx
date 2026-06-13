@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 import {
   clampAudioStart,
+  DEFAULT_CLIP_DURATION,
   getAudioClipBounds,
 } from "@/lib/audio-config";
 import { hasRecentMediaUserActivation, noteMediaUserActivation } from "@/lib/media-gesture";
@@ -37,6 +38,7 @@ function readInitialVolume(): number {
 interface Props {
   url: string;
   startTime?: number;
+  clipDuration?: number;
   enabled: boolean;
   accentColor?: string;
   variant?: "floating" | "card";
@@ -45,6 +47,7 @@ interface Props {
 export default function ProfileAudio({
   url,
   startTime = 0,
+  clipDuration = DEFAULT_CLIP_DURATION,
   enabled,
   variant = "floating",
 }: Props) {
@@ -65,10 +68,10 @@ export default function ProfileAudio({
   const [needsInteraction, setNeedsInteraction] = useState(false);
 
   const src = getMediaSrc(url);
-  const clipStart = clampAudioStart(startTime, duration || Infinity);
+  const clipStart = clampAudioStart(startTime, duration || Infinity, clipDuration);
   const clipBounds = useMemo(
-    () => getAudioClipBounds(duration, startTime),
-    [duration, startTime]
+    () => getAudioClipBounds(duration, startTime, clipDuration),
+    [clipDuration, duration, startTime]
   );
 
   clipBoundsRef.current = clipBounds;
@@ -353,7 +356,7 @@ export default function ProfileAudio({
       if (Number.isFinite(audio.duration)) {
         setDuration(audio.duration);
       }
-      audio.loop = getAudioClipBounds(audio.duration, startTime).nativeLoop;
+      audio.loop = getAudioClipBounds(audio.duration, startTime, clipDuration).nativeLoop;
     };
 
     const onPlay = () => syncPlayingState();
@@ -394,7 +397,7 @@ export default function ProfileAudio({
       audio.removeEventListener("timeupdate", onTimeUpdate);
       audio.removeEventListener("ended", onEnded);
     };
-  }, [clipBounds.nativeLoop, restartClipLoop, src, startTime, syncPlayingState]);
+  }, [clipBounds.nativeLoop, clipDuration, restartClipLoop, src, startTime, syncPlayingState]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -434,7 +437,7 @@ export default function ProfileAudio({
       audio.removeEventListener("canplay", startPlayback);
       audio.removeEventListener("canplaythrough", startPlayback);
     };
-  }, [clipStart, enabled, src, tryAutoplay]);
+  }, [clipDuration, clipStart, enabled, src, tryAutoplay]);
 
   useEffect(() => {
     if (!enabled || volumeRef.current === 0) return;
