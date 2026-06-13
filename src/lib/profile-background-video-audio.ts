@@ -10,7 +10,6 @@ export type BackgroundVideoAudioSnapshot = {
 };
 
 type Listener = () => void;
-
 type PendingPlay = { withAudio: boolean };
 
 let boundVideo: HTMLVideoElement | null = null;
@@ -20,7 +19,6 @@ let volumeInitialized = false;
 let volumeBeforeMute = 0.7;
 let listeners = new Set<Listener>();
 let pendingPlay: PendingPlay | null = null;
-let lastPlayMode: "hold" | "muted" | "audio" | null = null;
 
 const SERVER_SNAPSHOT: BackgroundVideoAudioSnapshot = {
   volume: 0.7,
@@ -97,7 +95,16 @@ function notify(): void {
   listeners.forEach((listener) => listener());
 }
 
-function applyMutedLoopVolume(element: HTMLVideoElement): void {
+function holdElement(element: HTMLVideoElement): void {
+  element.pause();
+  if (element.readyState >= HTMLMediaElement.HAVE_METADATA) {
+    element.currentTime = 0;
+  }
+  element.muted = true;
+  element.volume = 0;
+}
+
+function applyMutedLoop(element: HTMLVideoElement): void {
   element.muted = true;
   element.volume = 0;
 }
@@ -110,45 +117,31 @@ function applyVideoAudioVolume(element: HTMLVideoElement): void {
     markMediaUnlockedSession();
     return;
   }
-
   element.muted = true;
   element.volume = 0;
 }
 
 async function startPlayback(element: HTMLVideoElement, withAudio: boolean): Promise<void> {
   const wantsAudio = withAudio && audioFromVideo;
-  const mode: "muted" | "audio" = wantsAudio ? "audio" : "muted";
-
-  if (lastPlayMode === mode && isPlaying()) {
-    if (wantsAudio) {
-      applyVideoAudioVolume(element);
-    } else {
-      applyMutedLoopVolume(element);
-    }
-    notify();
-    return;
-  }
-
-  lastPlayMode = mode;
-
-  // Siempre arrancar en silencio: autoplay fiable y luego desmutear en el mismo gesto.
-  element.muted = true;
-  element.volume = 0;
 
   if (element.readyState >= HTMLMediaElement.HAVE_METADATA) {
     element.currentTime = 0;
   }
 
+  element.muted = true;
+  element.volume = 0;
+
   try {
     await element.play();
   } catch {
-    lastPlayMode = null;
     notify();
     return;
   }
 
   if (wantsAudio) {
     applyVideoAudioVolume(element);
+  } else {
+    applyMutedLoop(element);
   }
 
   notify();
@@ -156,7 +149,6 @@ async function startPlayback(element: HTMLVideoElement, withAudio: boolean): Pro
 
 export function resetBackgroundVideoAudioState(): void {
   pendingPlay = null;
-  lastPlayMode = null;
   audioFromVideo = false;
   boundVideo = null;
   notify();
@@ -172,7 +164,6 @@ export function bindProfileBackgroundVideo(
 
   if (!element) {
     boundVideo = null;
-    lastPlayMode = null;
     notify();
     return () => {};
   }
@@ -201,7 +192,6 @@ export function bindProfileBackgroundVideo(
     element.removeEventListener("timeupdate", sync);
     if (boundVideo === element) {
       boundVideo = null;
-      lastPlayMode = null;
     }
     notify();
   };
@@ -210,12 +200,7 @@ export function bindProfileBackgroundVideo(
 export function holdProfileBackgroundVideo(): void {
   const element = boundVideo;
   if (!element) return;
-  lastPlayMode = "hold";
-  element.pause();
-  if (element.readyState >= HTMLMediaElement.HAVE_METADATA) {
-    element.currentTime = 0;
-  }
-  applyMutedLoopVolume(element);
+  holdElement(element);
   notify();
 }
 
@@ -230,10 +215,6 @@ export function playProfileBackgroundVideo(options: { withAudio: boolean }): voi
   void startPlayback(element, options.withAudio);
 }
 
-export function isProfileBackgroundVideoActive(): boolean {
-  return boundVideo !== null;
-}
-
 export function getBackgroundVideoAudioSnapshot(): BackgroundVideoAudioSnapshot {
   return refreshSnapshot();
 }
@@ -245,16 +226,6 @@ export function getBackgroundVideoAudioServerSnapshot(): BackgroundVideoAudioSna
 export function subscribeBackgroundVideoAudio(listener: Listener): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
-}
-
-export function startBackgroundVideoFromEnter(): boolean {
-  playProfileBackgroundVideo({ withAudio: true });
-  return Boolean(boundVideo);
-}
-
-export function startBackgroundVideoMutedFromEnter(): boolean {
-  playProfileBackgroundVideo({ withAudio: false });
-  return Boolean(boundVideo);
 }
 
 export function unmuteBackgroundVideoFromUserGesture(): boolean {

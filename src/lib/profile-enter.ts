@@ -12,7 +12,7 @@ import {
   playProfileAudioFromUserGesture,
 } from "@/lib/profile-audio-engine";
 
-/** Inicia audio y video en el mismo gesto del usuario (pantalla de entrada). */
+/** Inicia video y audio en el gesto de entrada. */
 export function enterProfileFromGesture(profile: Profile): void {
   noteMediaUserActivation();
   markMediaUnlockedSession();

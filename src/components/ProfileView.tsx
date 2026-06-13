@@ -14,7 +14,7 @@ import ProfileEntryGate from "@/components/ProfileEntryGate";
 import ProfileTabIcon from "@/components/ProfileTabIcon";
 import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
 import { preloadBackgroundMedia } from "@/lib/media-url";
-import { getEffectiveAudioUrl, isBackgroundProfileAudio } from "@/lib/profile-audio";
+import { isBackgroundProfileAudio } from "@/lib/profile-audio";
 import { getProfileDocumentTitle, resolveProfileDisplay } from "@/lib/profile-display-config";
 import { resolveProfileTabIconUrl } from "@/lib/profile-tab-icon";
 import { enterProfileFromGesture } from "@/lib/profile-enter";
@@ -186,10 +186,10 @@ export default function ProfileView({ username }: Props) {
 
   const { settings } = profile;
   const display = resolveProfileDisplay(settings, profile.locale);
-  const playbackUrl = getEffectiveAudioUrl(profile);
-  const showProfileAudio =
-    site.profileAudioEnabled && profile.audioEnabled && Boolean(playbackUrl);
-  const backgroundVideoAudio = showProfileAudio && isBackgroundProfileAudio(profile);
+  const backgroundVideoAudio =
+    site.profileAudioEnabled &&
+    profile.audioEnabled &&
+    isBackgroundProfileAudio(profile);
   const needsGate = !entered;
   const mediaActive = entered;
 

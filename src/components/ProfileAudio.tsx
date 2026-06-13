@@ -90,7 +90,7 @@ export default function ProfileAudio({
   const muted = volumeOnly ? videoSnapshot.muted : volume === 0;
   const waitingForTap = volumeOnly
     ? videoSnapshot.needsTap
-    : (uploadSnapshot.awaitingUnlock && volume > 0);
+    : uploadSnapshot.awaitingUnlock && volume > 0;
 
   const handleVolumeChange = (value: number) => {
     if (volumeOnly) {
