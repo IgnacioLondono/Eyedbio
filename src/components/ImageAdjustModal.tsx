@@ -1,20 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, Move, X, ZoomIn } from "lucide-react";
-import { cropImageToBlob } from "@/lib/crop-image";
+import { Loader2, Move, RotateCcw, X, ZoomIn } from "lucide-react";
 import type { ImageAdjustPreset } from "@/lib/image-adjust-config";
 import {
   DEFAULT_MEDIA_FOCUS,
   clampFocus,
-  mediaFocusStyle,
+  mediaFocusPositionStyle,
   type MediaFocus,
 } from "@/lib/media-focus";
 import { useI18n } from "@/components/LocaleProvider";
 
 export interface ImageAdjustResult {
   focus: MediaFocus;
-  blob?: Blob;
 }
 
 interface Props {
@@ -37,9 +35,8 @@ export default function ImageAdjustModal({
   onConfirm,
 }: Props) {
   const { t } = useI18n();
-  const minZoom = preset.minZoom ?? 1;
+  const minZoom = preset.minZoom ?? 0.5;
   const maxZoom = preset.maxZoom ?? 3;
-  const isFocusMode = preset.mode === "focus";
 
   const [focus, setFocus] = useState<MediaFocus>(DEFAULT_MEDIA_FOCUS);
   const [exporting, setExporting] = useState(false);
@@ -117,21 +114,7 @@ export default function ImageAdjustModal({
     const savedFocus = clampFocus(focus, { minZoom, maxZoom });
 
     try {
-      if (isFocusMode) {
-        await onConfirm({ focus: savedFocus });
-        onClose();
-        return;
-      }
-
-      const blob = await cropImageToBlob(imageSrc, {
-        aspect: preset.aspect,
-        outputWidth: preset.outputWidth!,
-        outputHeight: preset.outputHeight!,
-        focus: savedFocus,
-        circular: preset.circular,
-        mime: preset.mime ?? "image/jpeg",
-      });
-      await onConfirm({ focus: savedFocus, blob });
+      await onConfirm({ focus: savedFocus });
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("imageAdjust.exportError"));
@@ -174,7 +157,7 @@ export default function ImageAdjustModal({
         <div className="p-4 space-y-4">
           <p className="text-xs text-white/45 flex items-center gap-1.5">
             <Move className="w-3.5 h-3.5 shrink-0" />
-            {isFocusMode ? t("imageAdjust.focusHint") : t("imageAdjust.dragHint")}
+            {t("imageAdjust.focusHint")}
           </p>
 
           <div
@@ -189,21 +172,27 @@ export default function ImageAdjustModal({
               src={imageSrc}
               alt=""
               draggable={false}
-              className="absolute inset-0 h-full w-full object-cover select-none"
-              style={mediaFocusStyle(focus)}
+              className="select-none"
+              style={mediaFocusPositionStyle(focus, { minZoom, maxZoom })}
             />
           </div>
 
           <div className="space-y-2">
-            <label className="flex items-center justify-between text-xs text-white/50">
-              <span className="flex items-center gap-1">
+            <div className="flex items-center justify-between gap-2">
+              <label className="flex items-center gap-1 text-xs text-white/50">
                 <ZoomIn className="w-3.5 h-3.5" />
                 {t("imageAdjust.zoom")}
-              </span>
-              <span className="text-white/70 tabular-nums">
-                {focus.zoom.toFixed(2)}×
-              </span>
-            </label>
+              </label>
+              <button
+                type="button"
+                disabled={exporting}
+                onClick={() => setFocus({ ...DEFAULT_MEDIA_FOCUS })}
+                className="flex items-center gap-1 text-[11px] text-white/45 hover:text-white"
+              >
+                <RotateCcw className="w-3 h-3" />
+                {t("imageAdjust.reset")}
+              </button>
+            </div>
             <input
               type="range"
               min={minZoom}
@@ -218,9 +207,7 @@ export default function ImageAdjustModal({
               }
               className="w-full accent-purple-500"
             />
-            {isFocusMode && (
-              <p className="text-[10px] text-white/35">{t("imageAdjust.zoomOutHint")}</p>
-            )}
+            <p className="text-[10px] text-white/35">{t("imageAdjust.zoomOutHint")}</p>
           </div>
 
           {error && <p className="text-xs text-red-400">{error}</p>}
@@ -246,10 +233,8 @@ export default function ImageAdjustModal({
                 <Loader2 className="w-4 h-4 animate-spin" />
                 {t("imageAdjust.saving")}
               </>
-            ) : isFocusMode ? (
-              t("imageAdjust.applyFocus")
             ) : (
-              t("imageAdjust.apply")
+              t("imageAdjust.applyFocus")
             )}
           </button>
         </div>

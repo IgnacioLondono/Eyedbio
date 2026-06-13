@@ -48,10 +48,9 @@ export function userToProfile(user: UserWithLinks): Profile {
     avatarStyle: resolveAvatarStyle(storedSettings),
     backgroundEffect: resolveBackgroundEffect(storedSettings.backgroundEffect),
     bannerUrl: storedSettings.bannerUrl ?? DEFAULT_SETTINGS.bannerUrl,
-    backgroundFocus: parseMediaFocus(storedSettings.backgroundFocus, {
-      minZoom: 0.5,
-      maxZoom: 2,
-    }),
+    avatarFocus: parseMediaFocus(storedSettings.avatarFocus),
+    bannerFocus: parseMediaFocus(storedSettings.bannerFocus),
+    backgroundFocus: parseMediaFocus(storedSettings.backgroundFocus),
   };
 
   return {

@@ -97,7 +97,9 @@ export interface ProfileSettings {
   cursorUrl?: string;
   /** Imagen de cabecera cuando cardLayout es "banner" */
   bannerUrl?: string;
-  /** Encuadre del fondo (posición y zoom al mostrar) */
+  /** Encuadre (posición y zoom al mostrar; no modifica el archivo) */
+  avatarFocus?: MediaFocus;
+  bannerFocus?: MediaFocus;
   backgroundFocus?: MediaFocus;
   cardLayout: CardLayout;
   linkStyle: LinkStyle;
@@ -141,6 +143,8 @@ export const DEFAULT_SETTINGS: ProfileSettings = {
   showCardShadow: true,
   borderOpacity: 0.2,
   bannerUrl: "",
+  avatarFocus: { x: 50, y: 50, zoom: 1 },
+  bannerFocus: { x: 50, y: 50, zoom: 1 },
   backgroundFocus: { x: 50, y: 50, zoom: 1 },
   cardLayout: "classic",
   linkStyle: "icons",

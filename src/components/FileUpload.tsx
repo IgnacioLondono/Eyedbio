@@ -21,7 +21,8 @@ import {
   isAdjustableUploadKind,
 } from "@/lib/image-adjust-config";
 import ImageAdjustModal from "@/components/ImageAdjustModal";
-import { DEFAULT_MEDIA_FOCUS, mediaFocusStyle, type MediaFocus } from "@/lib/media-focus";
+import { DEFAULT_MEDIA_FOCUS, type MediaFocus } from "@/lib/media-focus";
+import { FocusedImage, FocusedVideo } from "@/components/FocusedMedia";
 import { useI18n } from "@/components/LocaleProvider";
 
 interface Props {
@@ -98,14 +99,15 @@ function MediaPreview({
       );
     }
     return (
-      <img
-        src={displayUrl}
-        alt={t("fileUpload.avatarAlt")}
-        referrerPolicy="no-referrer"
-        decoding="async"
-        className="w-20 h-20 object-cover mx-auto my-3 rounded-full"
-        onError={() => setBroken(true)}
-      />
+      <div className="w-20 h-20 mx-auto my-3">
+        <FocusedImage
+          src={displayUrl}
+          alt={t("fileUpload.avatarAlt")}
+          focus={mediaFocus}
+          wrapperClassName="h-full w-full rounded-full"
+          onError={() => setBroken(true)}
+        />
+      </div>
     );
   }
 
@@ -118,14 +120,15 @@ function MediaPreview({
       );
     }
     return (
-      <img
-        src={displayUrl}
-        alt={t("fileUpload.bannerAlt")}
-        referrerPolicy="no-referrer"
-        decoding="async"
-        className="w-full h-24 object-cover object-center"
-        onError={() => setBroken(true)}
-      />
+      <div className="relative h-24 overflow-hidden">
+        <FocusedImage
+          src={displayUrl}
+          alt={t("fileUpload.bannerAlt")}
+          focus={mediaFocus}
+          wrapperClassName="absolute inset-0"
+          onError={() => setBroken(true)}
+        />
+      </div>
     );
   }
 
@@ -137,29 +140,21 @@ function MediaPreview({
         </div>
       );
     }
-    const focusStyle = mediaFocusStyle(mediaFocus ?? DEFAULT_MEDIA_FOCUS);
-
     return (
       <div className="relative h-40 overflow-hidden">
         {isVideo ? (
-          <video
+          <FocusedVideo
             src={displayUrl}
-            className="w-full h-full object-cover"
-            style={focusStyle}
-            muted
-            loop
-            autoPlay
-            playsInline
+            focus={mediaFocus}
+            wrapperClassName="absolute inset-0"
             onError={() => setBroken(true)}
           />
         ) : (
-          <img
+          <FocusedImage
             src={displayUrl}
             alt={t("fileUpload.backgroundAlt")}
-            referrerPolicy="no-referrer"
-            decoding="async"
-            className="w-full h-full object-cover"
-            style={focusStyle}
+            focus={mediaFocus}
+            wrapperClassName="absolute inset-0"
             onError={() => setBroken(true)}
           />
         )}
@@ -281,19 +276,6 @@ export default function FileUpload({
     pendingFileRef.current = null;
   };
 
-  const uploadBlob = async (blob: Blob, fileName: string) => {
-    const ext =
-      blob.type === "image/png"
-        ? ".png"
-        : blob.type === "image/webp"
-          ? ".webp"
-          : ".jpg";
-    const file = new File([blob], fileName.replace(/\.[^.]+$/, ext) || `image${ext}`, {
-      type: blob.type || "image/jpeg",
-    });
-    await handleFile(file);
-  };
-
   const startAdjustFromFile = (file: File) => {
     pendingFileRef.current = file;
     const src = URL.createObjectURL(file);
@@ -316,19 +298,9 @@ export default function FileUpload({
     }
   };
 
-  const handleAdjustConfirm = async (result: {
-    focus: MediaFocus;
-    blob?: Blob;
-  }) => {
-    if (kind === "background" && onMediaFocusChange) {
+  const handleAdjustConfirm = async (result: { focus: MediaFocus }) => {
+    if (onMediaFocusChange) {
       onMediaFocusChange(result.focus);
-    }
-
-    if (result.blob) {
-      const name = adjustFileName;
-      await uploadBlob(result.blob, name);
-      pendingFileRef.current = null;
-      return;
     }
 
     const pending = pendingFileRef.current;
@@ -381,7 +353,7 @@ export default function FileUpload({
             kind={kind}
             currentUrl={currentUrl}
             mediaType={mediaType}
-            mediaFocus={kind === "background" ? mediaFocus : undefined}
+            mediaFocus={mediaFocus}
           />
             {onClear && (
               <button
@@ -476,7 +448,7 @@ export default function FileUpload({
           imageSrc={adjustSrc}
           preset={adjustPreset}
           title={adjustTitle}
-          initialFocus={kind === "background" ? mediaFocus : undefined}
+          initialFocus={mediaFocus}
           onClose={closeAdjust}
           onConfirm={handleAdjustConfirm}
         />

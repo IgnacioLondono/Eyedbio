@@ -4,6 +4,7 @@ import { Eye } from "lucide-react";
 import { Profile } from "@/types/profile";
 import { hexToRgba } from "@/lib/color-utils";
 import { getMediaSrc } from "@/lib/media-url";
+import { FocusedImage } from "@/components/FocusedMedia";
 import {
   getAvatarGlowStyle,
   getNameEffectClass,
@@ -132,15 +133,14 @@ export function ProfileAvatar({
 
   return (
     <div
-      className={`${size} overflow-hidden shrink-0 ${avatarShapeClass(avatarStyle)} ${className}`}
+      className={`${size} shrink-0 ${avatarShapeClass(avatarStyle)} ${className}`}
       style={avatarBorderStyle(avatarStyle, settings.textColor, settings.accentColor, glow)}
     >
-      <img
+      <FocusedImage
         src={getMediaSrc(profile.avatarUrl)}
         alt={profile.displayName}
-        referrerPolicy="no-referrer"
-        decoding="async"
-        className="w-full h-full object-cover object-center"
+        focus={settings.avatarFocus}
+        wrapperClassName={`h-full w-full ${avatarShapeClass(avatarStyle)}`}
       />
     </div>
   );

@@ -391,6 +391,7 @@ export const en: Messages = {
     titleBackground: "Adjust background",
     dragHint: "Drag to reposition · use zoom to crop tighter",
     zoom: "Zoom",
+    reset: "Reset",
     cancel: "Cancel",
     apply: "Apply & upload",
     saving: "Saving…",

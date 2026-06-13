@@ -1,11 +1,16 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
-import { AUDIO_CLIP_DURATION, clampAudioStart } from "@/lib/audio-config";
+import {
+  AUDIO_CLIP_DURATION,
+  clampAudioStart,
+  getAudioClipBounds,
+} from "@/lib/audio-config";
 import { getMediaSrc } from "@/lib/media-url";
 
 const VOLUME_STORAGE_KEY = "eyed-audio-volume";
+const LOOP_SEEK_MARGIN = 0.2;
 
 interface Props {
   url: string;
@@ -22,10 +27,11 @@ export default function ProfileAudio({
   variant = "floating",
 }: Props) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const wantsPlayRef = useRef(false);
+  const wantsPlayRef = useRef(true);
   const userPausedRef = useRef(false);
   const wasPlayingBeforeMuteRef = useRef(false);
-  const clipStartRef = useRef(0);
+  const mutedForAutoplayRef = useRef(false);
+  const clipBoundsRef = useRef({ start: 0, end: Infinity, nativeLoop: false });
   const volumeRef = useRef(0.7);
 
   const [volume, setVolume] = useState(0.7);
@@ -37,27 +43,73 @@ export default function ProfileAudio({
 
   const src = getMediaSrc(url);
   const clipStart = clampAudioStart(startTime, duration || Infinity);
-  clipStartRef.current = clipStart;
+  const clipBounds = useMemo(
+    () => getAudioClipBounds(duration, startTime),
+    [duration, startTime]
+  );
+
+  clipBoundsRef.current = clipBounds;
   volumeRef.current = volume;
 
-  const runPlay = useCallback((fromStart: boolean) => {
+  const seekToClipStart = useCallback(() => {
     const audio = audioRef.current;
-    if (!audio || !enabled || volumeRef.current === 0) return;
+    if (!audio) return;
+    audio.currentTime = clipBoundsRef.current.start;
+  }, []);
 
-    if (fromStart) {
-      audio.currentTime = clipStartRef.current;
+  const runPlay = useCallback(
+    (fromStart: boolean) => {
+      const audio = audioRef.current;
+      if (!audio || !enabled || volumeRef.current === 0) return;
+
+      if (fromStart) {
+        seekToClipStart();
+      }
+
+      wantsPlayRef.current = true;
+      userPausedRef.current = false;
+
+      if (mutedForAutoplayRef.current && volumeRef.current > 0) {
+        audio.muted = false;
+        mutedForAutoplayRef.current = false;
+      }
+
+      const playPromise = audio.play();
+      if (playPromise === undefined) return;
+
+      playPromise
+        .then(() => setNeedsInteraction(false))
+        .catch(() => setNeedsInteraction(true));
+    },
+    [enabled, seekToClipStart]
+  );
+
+  const tryAutoplay = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio || !enabled || volumeRef.current === 0 || userPausedRef.current) return;
+
+    seekToClipStart();
+    wantsPlayRef.current = true;
+
+    try {
+      audio.muted = false;
+      mutedForAutoplayRef.current = false;
+      await audio.play();
+      setNeedsInteraction(false);
+      return;
+    } catch {
+      /* Política de autoplay: intentar en silencio */
     }
 
-    wantsPlayRef.current = true;
-    userPausedRef.current = false;
-
-    const playPromise = audio.play();
-    if (playPromise === undefined) return;
-
-    playPromise
-      .then(() => setNeedsInteraction(false))
-      .catch(() => setNeedsInteraction(true));
-  }, [enabled]);
+    try {
+      audio.muted = true;
+      mutedForAutoplayRef.current = true;
+      await audio.play();
+      setNeedsInteraction(true);
+    } catch {
+      setNeedsInteraction(true);
+    }
+  }, [enabled, seekToClipStart]);
 
   const pausePlayback = useCallback((userInitiated: boolean) => {
     const audio = audioRef.current;
@@ -82,6 +134,17 @@ export default function ProfileAudio({
       .then(() => setNeedsInteraction(false))
       .catch(() => setNeedsInteraction(true));
   }, [enabled]);
+
+  const restartClipLoop = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || !enabled || userPausedRef.current || volumeRef.current === 0) return;
+
+    seekToClipStart();
+
+    if (audio.paused && wantsPlayRef.current) {
+      void audio.play().catch(() => setNeedsInteraction(true));
+    }
+  }, [enabled, seekToClipStart]);
 
   const togglePlayPause = useCallback(() => {
     const audio = audioRef.current;
@@ -111,8 +174,14 @@ export default function ProfileAudio({
     userPausedRef.current = false;
     wantsPlayRef.current = true;
 
-    if (audio.currentTime < clipStartRef.current || audio.ended) {
-      audio.currentTime = clipStartRef.current;
+    if (mutedForAutoplayRef.current && volumeRef.current > 0) {
+      audio.muted = false;
+      mutedForAutoplayRef.current = false;
+    }
+
+    const { start, end } = clipBoundsRef.current;
+    if (audio.currentTime < start || audio.currentTime >= end - 0.05 || audio.ended) {
+      seekToClipStart();
     }
 
     const playPromise = audio.play();
@@ -121,7 +190,15 @@ export default function ProfileAudio({
     playPromise
       .then(() => setNeedsInteraction(false))
       .catch(() => setNeedsInteraction(true));
-  }, [enabled, isTouchDevice, pausePlayback]);
+  }, [enabled, isTouchDevice, pausePlayback, seekToClipStart]);
+
+  useEffect(() => {
+    userPausedRef.current = false;
+    wantsPlayRef.current = true;
+    mutedForAutoplayRef.current = false;
+    setNeedsInteraction(false);
+    setDuration(0);
+  }, [src]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -166,67 +243,108 @@ export default function ProfileAudio({
     const audio = audioRef.current;
     if (!audio) return;
 
+    audio.loop = clipBounds.nativeLoop;
+
     const onLoaded = () => {
       if (Number.isFinite(audio.duration)) {
         setDuration(audio.duration);
       }
+      audio.loop = getAudioClipBounds(audio.duration, startTime).nativeLoop;
     };
 
     const onPlay = () => setIsPlaying(true);
     const onPause = () => setIsPlaying(false);
 
     const onTimeUpdate = () => {
-      const start = clipStartRef.current;
-      const end =
-        audio.duration > AUDIO_CLIP_DURATION
-          ? start + AUDIO_CLIP_DURATION
-          : audio.duration;
-
-      if (Number.isFinite(end) && audio.currentTime >= end) {
+      const { start, end, nativeLoop } = clipBoundsRef.current;
+      if (nativeLoop || !Number.isFinite(end)) return;
+      if (audio.currentTime >= end - LOOP_SEEK_MARGIN) {
         audio.currentTime = start;
       }
     };
 
+    const onEnded = () => {
+      if (clipBoundsRef.current.nativeLoop) return;
+      restartClipLoop();
+    };
+
     audio.addEventListener("loadedmetadata", onLoaded);
+    audio.addEventListener("durationchange", onLoaded);
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
     audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", onEnded);
+
+    if (audio.readyState >= 1 && Number.isFinite(audio.duration)) {
+      onLoaded();
+    }
+
     return () => {
       audio.removeEventListener("loadedmetadata", onLoaded);
+      audio.removeEventListener("durationchange", onLoaded);
       audio.removeEventListener("play", onPlay);
       audio.removeEventListener("pause", onPause);
       audio.removeEventListener("timeupdate", onTimeUpdate);
+      audio.removeEventListener("ended", onEnded);
     };
-  }, [src]);
+  }, [src, clipBounds.nativeLoop, startTime, restartClipLoop]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !enabled || clipBounds.nativeLoop) return;
+
+    const tick = () => {
+      if (audio.paused || userPausedRef.current) return;
+      const { start, end } = clipBoundsRef.current;
+      if (!Number.isFinite(end)) return;
+      if (audio.currentTime >= end - LOOP_SEEK_MARGIN) {
+        audio.currentTime = start;
+      }
+    };
+
+    const id = window.setInterval(tick, 100);
+    return () => window.clearInterval(id);
+  }, [enabled, src, clipBounds.nativeLoop, duration]);
 
   useEffect(() => {
     if (!enabled || !audioRef.current || volumeRef.current === 0) return;
 
     const audio = audioRef.current;
-    const attemptPlay = () => runPlay(true);
+    const startPlayback = () => void tryAutoplay();
 
-    if (audio.readyState >= 1) {
-      attemptPlay();
-    } else {
-      audio.addEventListener("loadedmetadata", attemptPlay, { once: true });
-      audio.addEventListener("canplay", attemptPlay, { once: true });
-      return () => {
-        audio.removeEventListener("loadedmetadata", attemptPlay);
-        audio.removeEventListener("canplay", attemptPlay);
-      };
+    if (audio.readyState >= 2) {
+      void startPlayback();
     }
-  }, [clipStart, enabled, src, runPlay]);
+
+    audio.addEventListener("loadeddata", startPlayback, { once: true });
+    audio.addEventListener("canplay", startPlayback, { once: true });
+    audio.addEventListener("canplaythrough", startPlayback, { once: true });
+
+    return () => {
+      audio.removeEventListener("loadeddata", startPlayback);
+      audio.removeEventListener("canplay", startPlayback);
+      audio.removeEventListener("canplaythrough", startPlayback);
+    };
+  }, [clipStart, enabled, src, tryAutoplay]);
 
   useEffect(() => {
-    if (!enabled || !needsInteraction || volumeRef.current === 0) return;
+    if (!enabled || volumeRef.current === 0) return;
 
     const unlock = () => {
       const audio = audioRef.current;
-      if (!audio) return;
-      const hasProgress = audio.currentTime > clipStartRef.current + 0.25;
-      if (audio.paused && hasProgress) {
-        resumePlayback();
-      } else {
+      if (!audio || userPausedRef.current) return;
+
+      if (mutedForAutoplayRef.current && volumeRef.current > 0) {
+        audio.muted = false;
+        mutedForAutoplayRef.current = false;
+        setNeedsInteraction(false);
+        if (audio.paused) {
+          runPlay(true);
+        }
+        return;
+      }
+
+      if (needsInteraction && audio.paused) {
         runPlay(true);
       }
     };
@@ -234,13 +352,15 @@ export default function ProfileAudio({
     document.addEventListener("pointerdown", unlock, { capture: true });
     document.addEventListener("touchstart", unlock, { capture: true, passive: true });
     document.addEventListener("keydown", unlock, { capture: true });
+    document.addEventListener("scroll", unlock, { capture: true, passive: true });
 
     return () => {
       document.removeEventListener("pointerdown", unlock, { capture: true });
       document.removeEventListener("touchstart", unlock, { capture: true });
       document.removeEventListener("keydown", unlock, { capture: true });
+      document.removeEventListener("scroll", unlock, { capture: true });
     };
-  }, [enabled, needsInteraction, runPlay, resumePlayback]);
+  }, [enabled, needsInteraction, runPlay]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -301,6 +421,8 @@ export default function ProfileAudio({
         ref={audioRef}
         src={src}
         preload="auto"
+        autoPlay
+        loop={clipBounds.nativeLoop}
         playsInline
         // eslint-disable-next-line react/no-unknown-property
         webkit-playsinline="true"

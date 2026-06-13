@@ -325,6 +325,7 @@ export interface Messages {
     titleBackground: string;
     dragHint: string;
     zoom: string;
+    reset: string;
     cancel: string;
     apply: string;
     saving: string;
@@ -760,6 +761,7 @@ export const es: Messages = {
     titleBackground: "Ajustar fondo",
     dragHint: "Arrastra la imagen para encuadrar · usa el zoom para acercar",
     zoom: "Zoom",
+    reset: "Restablecer",
     cancel: "Cancelar",
     apply: "Aplicar y subir",
     saving: "Guardando…",

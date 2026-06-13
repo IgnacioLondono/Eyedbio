@@ -437,12 +437,15 @@ function DashboardContent() {
                   label={t("dashboard.avatarLabel")}
                   hint={t("dashboard.avatarHint")}
                   currentUrl={profile.avatarUrl}
+                  mediaFocus={profile.settings.avatarFocus}
+                  onMediaFocusChange={(avatarFocus) => updateSettings({ avatarFocus })}
                   onUploaded={(url) => update({ avatarUrl: url })}
-                  onClear={() =>
+                  onClear={() => {
                     update({
                       avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`,
-                    })
-                  }
+                    });
+                    updateSettings({ avatarFocus: { x: 50, y: 50, zoom: 1 } });
+                  }}
                 />
               </>
             )}
@@ -499,8 +502,15 @@ function DashboardContent() {
                         label=""
                         hint={t("dashboard.bannerFileHint")}
                         currentUrl={profile.settings.bannerUrl}
+                        mediaFocus={profile.settings.bannerFocus}
+                        onMediaFocusChange={(bannerFocus) => updateSettings({ bannerFocus })}
                         onUploaded={(url) => updateSettings({ bannerUrl: url })}
-                        onClear={() => updateSettings({ bannerUrl: "" })}
+                        onClear={() =>
+                          updateSettings({
+                            bannerUrl: "",
+                            bannerFocus: { x: 50, y: 50, zoom: 1 },
+                          })
+                        }
                       />
                     </div>
                     <Field label={t("dashboard.bannerUrl")}>

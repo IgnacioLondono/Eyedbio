@@ -16,6 +16,7 @@ import {
   ProfileViews,
 } from "./ProfileCardParts";
 import { CardToolbarSlot } from "./ProfileCardToolbar";
+import { FocusedImage } from "@/components/FocusedMedia";
 
 export interface LayoutProps {
   profile: Profile;
@@ -160,15 +161,23 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
 
       <div className="relative z-10 overflow-hidden rounded-t-2xl">
         <div
-          className={`${bannerH} w-full bg-cover bg-center shrink-0`}
+          className={`${bannerH} w-full shrink-0 relative overflow-hidden`}
           style={
             bannerSrc
-              ? { backgroundImage: `url(${bannerSrc})` }
+              ? undefined
               : {
                   background: `linear-gradient(135deg, ${settings.accentColor} 0%, ${hexToRgba(settings.cardColorSecondary || settings.accentColor, 0.9)} 55%, ${hexToRgba(settings.cardColor, 1)} 100%)`,
                 }
           }
         >
+          {bannerSrc ? (
+            <FocusedImage
+              src={bannerSrc}
+              alt=""
+              focus={settings.bannerFocus}
+              wrapperClassName="absolute inset-0"
+            />
+          ) : null}
           <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/50" />
           <div
             className="absolute bottom-0 inset-x-0 h-6 pointer-events-none"
