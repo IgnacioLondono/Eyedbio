@@ -28,7 +28,8 @@ type Listener = () => void;
 
 let audio: HTMLAudioElement | null = null;
 let config: ProfileAudioEngineConfig | null = null;
-let volume = readInitialVolume();
+let volume = 0.7;
+let volumeInitialized = false;
 let duration = 0;
 let userPaused = false;
 let wantsPlay = true;
@@ -58,7 +59,53 @@ function readInitialVolume(): number {
   return touchCapable ? 1 : 0.7;
 }
 
+function ensureVolumeInitialized(): void {
+  if (volumeInitialized) return;
+  volumeInitialized = true;
+  if (typeof window !== "undefined") {
+    volume = readInitialVolume();
+    volumeBeforeMute = volume;
+  }
+}
+
+const SERVER_SNAPSHOT: ProfileAudioEngineSnapshot = {
+  isPlaying: false,
+  volume: 0.7,
+  duration: 0,
+  awaitingUnlock: false,
+  userPaused: false,
+};
+
+let snapshotCache: ProfileAudioEngineSnapshot = SERVER_SNAPSHOT;
+
+function refreshSnapshotCache(): ProfileAudioEngineSnapshot {
+  ensureVolumeInitialized();
+  const element = audio;
+  const isPlaying = Boolean(element && !element.paused && !element.ended);
+  const next: ProfileAudioEngineSnapshot = {
+    isPlaying,
+    volume,
+    duration,
+    awaitingUnlock: mutedForPolicy && volume > 0 && wantsPlay && !userPaused,
+    userPaused,
+  };
+
+  if (
+    snapshotCache.isPlaying === next.isPlaying &&
+    snapshotCache.volume === next.volume &&
+    snapshotCache.duration === next.duration &&
+    snapshotCache.awaitingUnlock === next.awaitingUnlock &&
+    snapshotCache.userPaused === next.userPaused
+  ) {
+    return snapshotCache;
+  }
+
+  snapshotCache = next;
+  return snapshotCache;
+}
+
 function notify(): void {
+  refreshSnapshotCache();
   listeners.forEach((listener) => listener());
 }
 
@@ -189,16 +236,11 @@ function resetPlaybackFlags(): void {
 }
 
 export function getProfileAudioEngineSnapshot(): ProfileAudioEngineSnapshot {
-  const element = audio;
-  const isPlaying = Boolean(element && !element.paused && !element.ended);
+  return refreshSnapshotCache();
+}
 
-  return {
-    isPlaying,
-    volume,
-    duration,
-    awaitingUnlock: mutedForPolicy && volume > 0 && wantsPlay && !userPaused,
-    userPaused,
-  };
+export function getProfileAudioEngineServerSnapshot(): ProfileAudioEngineSnapshot {
+  return SERVER_SNAPSHOT;
 }
 
 export function subscribeProfileAudioEngine(listener: Listener): () => void {

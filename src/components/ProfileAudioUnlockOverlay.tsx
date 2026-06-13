@@ -7,6 +7,7 @@ import {
   bindProfileAudioAutoplayEvents,
   configureProfileAudioEngine,
   getProfileAudioEngineSnapshot,
+  getProfileAudioEngineServerSnapshot,
   playProfileAudioFromUserGesture,
   subscribeProfileAudioEngine,
 } from "@/lib/profile-audio-engine";
@@ -29,7 +30,7 @@ export default function ProfileAudioUnlockOverlay({
   const snapshot = useSyncExternalStore(
     subscribeProfileAudioEngine,
     getProfileAudioEngineSnapshot,
-    getProfileAudioEngineSnapshot
+    getProfileAudioEngineServerSnapshot
   );
 
   const [visible, setVisible] = useState(false);

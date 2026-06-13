@@ -6,6 +6,7 @@ import { DEFAULT_CLIP_DURATION } from "@/lib/audio-config";
 import {
   configureProfileAudioEngine,
   getProfileAudioEngineSnapshot,
+  getProfileAudioEngineServerSnapshot,
   playProfileAudioFromUserGesture,
   setProfileAudioVolume,
   subscribeProfileAudioEngine,
@@ -33,7 +34,7 @@ export default function ProfileAudio({
   const snapshot = useSyncExternalStore(
     subscribeProfileAudioEngine,
     getProfileAudioEngineSnapshot,
-    getProfileAudioEngineSnapshot
+    getProfileAudioEngineServerSnapshot
   );
 
   const [showVolume, setShowVolume] = useState(false);
