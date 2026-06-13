@@ -11,7 +11,8 @@ import ClaimProfileCta from "@/components/ClaimProfileCta";
 import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/ProfileAccessGate";
 import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
-import { preloadBackgroundMedia } from "@/lib/media-url";
+import { preloadBackgroundMedia, preloadProfileAudio } from "@/lib/media-url";
+import { playProfileAudioFromGesture } from "@/lib/profile-audio-bridge";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
@@ -79,6 +80,9 @@ export default function ProfileView({ username }: Props) {
         nextProfile.settings.backgroundUrl,
         nextProfile.backgroundType
       );
+      if (nextProfile.audioEnabled && nextProfile.audioUrl) {
+        preloadProfileAudio(nextProfile.audioUrl);
+      }
       void recordView();
       return;
     } catch {
@@ -162,7 +166,10 @@ export default function ProfileView({ username }: Props) {
   const { settings } = profile;
 
   return (
-    <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">
+    <div
+      className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]"
+      onPointerDownCapture={() => playProfileAudioFromGesture()}
+    >
       <BackgroundMedia
         url={settings.backgroundUrl}
         type={profile.backgroundType}

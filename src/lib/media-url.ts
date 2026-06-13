@@ -31,6 +31,17 @@ export function isExternalMediaUrl(url: string): boolean {
   return Boolean(url?.trim()) && !isLocalMediaUrl(url) && /^https?:\/\//i.test(url);
 }
 
+/** Precarga la música del perfil antes de montar el reproductor. */
+export function preloadProfileAudio(url: string): void {
+  if (typeof window === "undefined" || !url?.trim()) return;
+
+  const src = getMediaSrc(url);
+  const audio = document.createElement("audio");
+  audio.preload = "auto";
+  audio.src = src;
+  audio.load();
+}
+
 /** Precarga el fondo en segundo plano para que aparezca antes en el perfil. */
 export function preloadBackgroundMedia(url: string, type: BackgroundType): void {
   if (typeof window === "undefined" || !url?.trim()) return;
