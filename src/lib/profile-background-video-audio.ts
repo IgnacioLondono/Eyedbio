@@ -1,4 +1,4 @@
-import { markMediaUnlockedSession } from "@/lib/media-gesture";
+import { canAttemptUnmutedAutoplay, markMediaUnlockedSession } from "@/lib/media-gesture";
 
 const VOLUME_STORAGE_KEY = "eyed-audio-volume";
 
@@ -10,7 +10,13 @@ export type BackgroundVideoAudioSnapshot = {
 };
 
 type Listener = () => void;
-type PendingPlay = { withAudio: boolean };
+type PendingPlay = { withAudio: boolean; fromGesture?: boolean };
+
+export type BackgroundVideoPlayOptions = {
+  withAudio: boolean;
+  /** true cuando el play se dispara en el mismo evento pointerdown de entrada. */
+  fromGesture?: boolean;
+};
 
 let activeVideo: HTMLVideoElement | null = null;
 let audioFromVideo = false;
@@ -140,33 +146,40 @@ function whenReady(element: HTMLVideoElement): Promise<void> {
   });
 }
 
-async function startPlayback(element: HTMLVideoElement, withAudio: boolean): Promise<void> {
+function beginMutedPlayback(element: HTMLVideoElement): Promise<void> {
+  element.muted = true;
+  element.volume = 0;
+  return element.play();
+}
+
+async function startPlayback(
+  element: HTMLVideoElement,
+  options: BackgroundVideoPlayOptions
+): Promise<void> {
+  const { withAudio, fromGesture = false } = options;
   const wantsAudio = withAudio && audioFromVideo;
+  const canUnmute = wantsAudio && (fromGesture || canAttemptUnmutedAutoplay());
+
+  // play() debe invocarse de forma síncrona (sin await previo) para no perder el gesto del usuario.
+  let playPromise = beginMutedPlayback(element);
 
   try {
-    await whenReady(element);
-
-    if (element.readyState >= HTMLMediaElement.HAVE_METADATA) {
-      element.currentTime = 0;
-    }
-
-    element.muted = true;
-    element.volume = 0;
-    await element.play();
-
-    if (wantsAudio) {
-      applyVideoAudioVolume(element);
-    } else {
-      applyMutedLoop(element);
-    }
+    await playPromise;
   } catch {
     try {
-      element.muted = true;
-      element.volume = 0;
-      await element.play();
+      await whenReady(element);
+      playPromise = beginMutedPlayback(element);
+      await playPromise;
     } catch {
-      /* autoplay bloqueado */
+      notify();
+      return;
     }
+  }
+
+  if (canUnmute) {
+    applyVideoAudioVolume(element);
+  } else {
+    applyMutedLoop(element);
   }
 
   notify();
@@ -207,7 +220,7 @@ export function setActiveBackgroundVideo(
   if (pendingPlay) {
     const opts = pendingPlay;
     pendingPlay = null;
-    void startPlayback(element, opts.withAudio);
+    void startPlayback(element, opts);
   }
 
   notify();
@@ -232,7 +245,7 @@ export function holdProfileBackgroundVideo(element?: HTMLVideoElement | null): v
 }
 
 export function playProfileBackgroundVideo(
-  options: { withAudio: boolean },
+  options: BackgroundVideoPlayOptions,
   element?: HTMLVideoElement | null
 ): void {
   const target = element ?? activeVideo;
@@ -241,8 +254,17 @@ export function playProfileBackgroundVideo(
     return;
   }
 
+  if (!target.paused && !options.fromGesture) {
+    const wantsAudio = options.withAudio && audioFromVideo;
+    if (wantsAudio && canAttemptUnmutedAutoplay() && target.muted) {
+      applyVideoAudioVolume(target);
+      notify();
+    }
+    return;
+  }
+
   pendingPlay = null;
-  void startPlayback(target, options.withAudio);
+  void startPlayback(target, options);
 }
 
 export function getBackgroundVideoAudioSnapshot(): BackgroundVideoAudioSnapshot {

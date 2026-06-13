@@ -36,6 +36,18 @@ function parseBadges(raw: string): string[] {
   return parseBadgesJson(raw);
 }
 
+/** Si el audio sale del fondo, el medio tiene que ser video aunque la BD diga image. */
+function resolveProfileBackgroundType(
+  backgroundUrl: string,
+  storedType: BackgroundType,
+  audioSource: AudioSource
+): BackgroundType {
+  const resolved = resolveBackgroundType(backgroundUrl, storedType);
+  if (resolved === "video") return "video";
+  if (audioSource === "background" && backgroundUrl.trim()) return "video";
+  return resolved;
+}
+
 export function userToProfile(user: UserWithLinks): Profile {
   const storedSettings = parseSettings(user.settings);
   const backgroundUrl =
@@ -56,6 +68,20 @@ export function userToProfile(user: UserWithLinks): Profile {
     backgroundFocus: parseMediaFocus(storedSettings.backgroundFocus),
   };
 
+  const storedBackgroundType = (user.backgroundType as BackgroundType) ?? "image";
+  const resolvedAudioSource = resolveAudioSource(
+    (user as User & { audioSource?: string }).audioSource as AudioSource | undefined,
+    {
+      settings: { ...merged, backgroundUrl },
+      backgroundType: storedBackgroundType,
+    }
+  );
+  const backgroundType = resolveProfileBackgroundType(
+    backgroundUrl,
+    storedBackgroundType,
+    resolvedAudioSource
+  );
+
   return {
     username: user.username,
     displayName: user.displayName,
@@ -63,10 +89,7 @@ export function userToProfile(user: UserWithLinks): Profile {
     avatarUrl:
       user.avatarUrl ??
       `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
-    backgroundType: resolveBackgroundType(
-      backgroundUrl,
-      (user.backgroundType as BackgroundType) ?? "image"
-    ),
+    backgroundType,
     audioUrl: user.audioUrl ?? undefined,
     audioStartTime: user.audioStartTime ?? 0,
     audioClipDuration:
@@ -77,10 +100,7 @@ export function userToProfile(user: UserWithLinks): Profile {
       (user as User & { audioSource?: string }).audioSource as AudioSource | undefined,
       {
         settings: merged,
-        backgroundType: resolveBackgroundType(
-          backgroundUrl,
-          (user.backgroundType as BackgroundType) ?? "image"
-        ),
+        backgroundType,
       }
     ),
     views: user.views,

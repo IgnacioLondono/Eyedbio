@@ -24,7 +24,7 @@ export function enterProfileFromGesture(profile: Profile): void {
     profile.audioEnabled && isBackgroundProfileAudio(profile);
 
   if (isVideoBackground) {
-    playProfileBackgroundVideo({ withAudio: backgroundVideoAudio });
+    playProfileBackgroundVideo({ withAudio: backgroundVideoAudio, fromGesture: true });
   }
 
   if (!profile.audioEnabled || backgroundVideoAudio) return;

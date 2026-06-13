@@ -74,7 +74,7 @@ export default function BackgroundMedia({
 
     // Vista previa del dashboard: solo bucle silencioso (sin gesto de usuario).
     const withAudio = videoAudioEnabled && !contained;
-    playProfileBackgroundVideo({ withAudio }, videoElement);
+    playProfileBackgroundVideo({ withAudio, fromGesture: false }, videoElement);
   }, [contained, deferPlayback, mediaType, videoAudioEnabled, videoElement, displayUrl]);
 
   useEffect(() => {

@@ -65,8 +65,9 @@ export function preloadBackgroundMedia(
 
   if (mediaType === "video") {
     const video = document.createElement("video");
-    video.preload = deferPlayback ? "metadata" : "auto";
+    video.preload = "auto";
     video.muted = true;
+    video.playsInline = true;
     video.src = src;
     video.load();
     return;
