@@ -54,6 +54,8 @@ interface VideoProps {
   wrapperClassName?: string;
   videoClassName?: string;
   priority?: boolean;
+  autoPlay?: boolean;
+  muted?: boolean;
   videoRef?: (element: HTMLVideoElement | null) => void;
   onReady?: () => void;
   onError?: () => void;
@@ -65,6 +67,8 @@ export function FocusedVideo({
   wrapperClassName = "",
   videoClassName = "",
   priority = false,
+  autoPlay = true,
+  muted = true,
   videoRef,
   onReady,
   onError,
@@ -77,9 +81,9 @@ export function FocusedVideo({
         src={src}
         className={`absolute inset-0 h-full w-full min-h-full min-w-full object-cover ${videoClassName}`}
         style={mediaFocusStyle(focus ?? DEFAULT_MEDIA_FOCUS)}
-        autoPlay
+        autoPlay={autoPlay}
         loop
-        muted
+        muted={muted}
         playsInline
         preload={priority ? "auto" : "metadata"}
         onLoadedData={onReady}

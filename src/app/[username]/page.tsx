@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ProfileView from "@/components/ProfileView";
 import { findProfileByUsername } from "@/lib/profile-query";
 import { userToProfile } from "@/lib/profile-mapper";
+import { getProfileMetadataTitle } from "@/lib/profile-display-config";
 import {
   getSiteUrlFromHeaders,
   profileOgImageUrl,
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const title = `${profile.displayName} (@${profile.username})`;
+  const title = getProfileMetadataTitle(profile);
   const description =
     profile.bio.trim() ||
     `Página link-in-bio de ${profile.displayName}. Enlaces, redes y más en Eyed.bio.`;

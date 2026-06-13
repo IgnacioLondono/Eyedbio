@@ -13,6 +13,8 @@ interface Props {
   volumeOnly?: boolean;
   audioEnabled?: boolean;
   accentColor?: string;
+  showShareButton?: boolean;
+  mediaActive?: boolean;
 }
 
 export default function ProfileCardControls({
@@ -24,13 +26,17 @@ export default function ProfileCardControls({
   volumeOnly = false,
   audioEnabled,
   accentColor,
+  showShareButton = true,
+  mediaActive = true,
 }: Props) {
   const site = useSiteSettings();
 
   return (
     <>
-      <ShareProfileButton username={username} displayName={displayName} variant="card" />
-      {site.profileAudioEnabled && audioEnabled && playbackUrl ? (
+      {showShareButton ? (
+        <ShareProfileButton username={username} displayName={displayName} variant="card" />
+      ) : null}
+      {site.profileAudioEnabled && audioEnabled && playbackUrl && mediaActive ? (
         <ProfileAudio
           url={playbackUrl}
           startTime={audioStartTime}

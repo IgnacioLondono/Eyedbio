@@ -103,18 +103,28 @@ function applyVolumeToVideo(): void {
   element.volume = volume;
 }
 
-export function registerProfileBackgroundVideo(element: HTMLVideoElement): () => void {
+export function registerProfileBackgroundVideo(
+  element: HTMLVideoElement,
+  options?: { deferPlayback?: boolean }
+): () => void {
   video = element;
   ensureVolumeInitialized();
-  applyVolumeToVideo();
 
   const sync = () => notify();
   element.addEventListener("play", sync);
   element.addEventListener("pause", sync);
   element.addEventListener("volumechange", sync);
 
-  if (element.paused) {
-    void element.play().catch(() => notify());
+  if (options?.deferPlayback) {
+    element.pause();
+    element.currentTime = 0;
+    element.muted = true;
+    element.volume = 0;
+  } else {
+    applyVolumeToVideo();
+    if (element.paused) {
+      void element.play().catch(() => notify());
+    }
   }
 
   notify();
@@ -145,6 +155,22 @@ export function getBackgroundVideoAudioServerSnapshot(): BackgroundVideoAudioSna
 export function subscribeBackgroundVideoAudio(listener: Listener): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
+}
+
+/** Arranca el video de fondo desde el inicio con sonido (gesto de entrada). */
+export function startBackgroundVideoFromEnter(): boolean {
+  const element = video;
+  if (!element || volume === 0) return false;
+
+  ensureVolumeInitialized();
+  element.currentTime = 0;
+  element.volume = volume;
+  element.muted = false;
+  markMediaUnlockedSession();
+
+  void element.play().catch(() => notify());
+  notify();
+  return true;
 }
 
 /** Desbloquea el sonido del video de fondo sin reiniciar la reproducción. */

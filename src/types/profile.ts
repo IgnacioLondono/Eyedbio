@@ -105,6 +105,22 @@ export interface ProfileSettings {
   cardLayout: CardLayout;
   linkStyle: LinkStyle;
   avatarStyle: AvatarStyle;
+  /** Pantalla "click to enter" antes de mostrar el perfil */
+  entryGateEnabled?: boolean;
+  entryGateText?: string;
+  /** Título personalizado de la pestaña del navegador (ej. @usuario) */
+  browserTabTitle?: string;
+  /** Mostrar contador de visitas en la tarjeta */
+  showViewCount?: boolean;
+  /** Mostrar botón compartir en el perfil público */
+  showShareButton?: boolean;
+  /** Ubicación visible en el perfil (ej. México 🇲🇽) */
+  location?: string;
+  showLocation?: boolean;
+  /** Widget de presencia de Discord (Lanyard) */
+  discordPresenceEnabled?: boolean;
+  /** ID numérico de Discord (snowflake) */
+  discordUserId?: string;
 }
 
 export interface Profile {

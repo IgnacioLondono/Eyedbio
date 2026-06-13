@@ -14,6 +14,7 @@ import {
 import { resolveAvatarStyle } from "@/lib/card-layout-config";
 import { BADGE_CONFIG } from "@/lib/badges";
 import { t as translate } from "@/lib/i18n";
+import { resolveProfileDisplay } from "@/lib/profile-display-config";
 import type { AvatarStyle } from "@/types/profile";
 import type { LucideIcon } from "lucide-react";
 
@@ -100,6 +101,11 @@ export interface CardScale {
   bio: string;
   views: string;
   eye: string;
+  location: string;
+  locationIcon: string;
+  discordCard: string;
+  discordName: string;
+  discordActivity: string;
 }
 
 export function getCardScale(compact: boolean): CardScale {
@@ -111,6 +117,11 @@ export function getCardScale(compact: boolean): CardScale {
     bio: compact ? "text-xs line-clamp-3" : "text-sm max-w-xs line-clamp-4",
     views: compact ? "text-[10px]" : "text-[11px]",
     eye: compact ? "w-3 h-3" : "w-3.5 h-3.5",
+    location: compact ? "text-[10px]" : "text-xs",
+    locationIcon: compact ? "w-3 h-3" : "w-3.5 h-3.5",
+    discordCard: compact ? "p-2.5" : "p-3",
+    discordName: compact ? "text-xs" : "text-sm",
+    discordActivity: compact ? "text-[10px]" : "text-xs",
   };
 }
 
@@ -249,6 +260,9 @@ export function ProfileViews({
   align?: "center" | "left";
 }) {
   const { textColor } = profile.settings;
+  const { showViewCount } = resolveProfileDisplay(profile.settings);
+  if (!showViewCount) return null;
+
   const alignClass = align === "left" ? "justify-start" : "justify-center";
   return (
     <div

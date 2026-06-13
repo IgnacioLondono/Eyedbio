@@ -24,6 +24,7 @@ import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
 import { getMessages } from "@/lib/i18n";
 import { resolveBackgroundType, getUploadLimitMb } from "@/lib/media-config";
 import { backgroundHasAudio, getEffectiveAudioUrl } from "@/lib/profile-audio";
+import { resolveProfileDisplay } from "@/lib/profile-display-config";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import ProfileCard from "@/components/ProfileCard";
@@ -462,6 +463,107 @@ function DashboardContent() {
                     updateSettings({ avatarFocus: { x: 50, y: 50, zoom: 1 } });
                   }}
                 />
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-white">
+                      {t("dashboard.entrySectionTitle")}
+                    </h3>
+                    <p className="text-xs text-white/40 mt-1">
+                      {t("dashboard.entrySectionHint")}
+                    </p>
+                  </div>
+                  <Toggle
+                    label={t("dashboard.entryGateEnabled")}
+                    checked={resolveProfileDisplay(profile.settings).entryGateEnabled}
+                    onChange={(entryGateEnabled) => updateSettings({ entryGateEnabled })}
+                  />
+                  <Field label={t("dashboard.entryGateText")}>
+                    <input
+                      type="text"
+                      value={profile.settings.entryGateText ?? ""}
+                      onChange={(e) => updateSettings({ entryGateText: e.target.value })}
+                      placeholder={t("dashboard.entryGateTextPlaceholder")}
+                      className="input-field"
+                    />
+                  </Field>
+                  <Field label={t("dashboard.browserTabTitle")}>
+                    <input
+                      type="text"
+                      value={profile.settings.browserTabTitle ?? ""}
+                      onChange={(e) => updateSettings({ browserTabTitle: e.target.value })}
+                      placeholder={t("dashboard.browserTabTitlePlaceholder")}
+                      className="input-field"
+                    />
+                    <p className="text-xs text-white/35 mt-2">{t("dashboard.browserTabTitleHint")}</p>
+                  </Field>
+                </div>
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-3">
+                  <h3 className="text-sm font-medium text-white">
+                    {t("dashboard.visibilitySectionTitle")}
+                  </h3>
+                  <Toggle
+                    label={t("dashboard.showViewCount")}
+                    checked={resolveProfileDisplay(profile.settings).showViewCount}
+                    onChange={(showViewCount) => updateSettings({ showViewCount })}
+                  />
+                  <Toggle
+                    label={t("dashboard.showShareButton")}
+                    checked={resolveProfileDisplay(profile.settings).showShareButton}
+                    onChange={(showShareButton) => updateSettings({ showShareButton })}
+                  />
+                </div>
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-white">
+                      {t("dashboard.discordSectionTitle")}
+                    </h3>
+                    <p className="text-xs text-white/40 mt-1">
+                      {t("dashboard.discordSectionHint")}
+                    </p>
+                  </div>
+                  <Toggle
+                    label={t("dashboard.showLocation")}
+                    checked={resolveProfileDisplay(profile.settings).showLocation}
+                    onChange={(showLocation) => updateSettings({ showLocation })}
+                  />
+                  <Field label={t("dashboard.locationLabel")}>
+                    <input
+                      type="text"
+                      value={profile.settings.location ?? ""}
+                      onChange={(e) => updateSettings({ location: e.target.value })}
+                      placeholder={t("dashboard.locationPlaceholder")}
+                      className="input-field"
+                    />
+                  </Field>
+                  <Toggle
+                    label={t("dashboard.discordPresenceEnabled")}
+                    checked={resolveProfileDisplay(profile.settings).discordPresenceEnabled}
+                    onChange={(discordPresenceEnabled) =>
+                      updateSettings({ discordPresenceEnabled })
+                    }
+                  />
+                  <Field label={t("dashboard.discordUserIdLabel")}>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={profile.settings.discordUserId ?? ""}
+                      onChange={(e) =>
+                        updateSettings({ discordUserId: e.target.value.replace(/\D/g, "") })
+                      }
+                      placeholder={t("dashboard.discordUserIdPlaceholder")}
+                      className="input-field font-mono text-sm"
+                    />
+                    <p className="text-xs text-white/35 mt-2">{t("dashboard.discordUserIdHint")}</p>
+                    <a
+                      href="https://discord.gg/lanyard"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                    >
+                      {t("dashboard.discordLanyardLink")} →
+                    </a>
+                  </Field>
+                </div>
               </>
             )}
 
@@ -841,6 +943,13 @@ function DashboardContent() {
                 </div>
               </div>
             </div>
+            {resolveProfileDisplay(profile.settings).entryGateEnabled ? (
+              <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none">
+                <span className="text-white/75 text-[10px] sm:text-xs tracking-[0.15em] lowercase">
+                  {resolveProfileDisplay(profile.settings).entryGateText}
+                </span>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

@@ -15,6 +15,7 @@ import {
   ProfileNameBlock,
   ProfileViews,
 } from "./ProfileCardParts";
+import ProfileExtrasSection from "./ProfileExtrasSection";
 import { CardToolbarSlot } from "./ProfileCardToolbar";
 import { FocusedImage } from "@/components/FocusedMedia";
 
@@ -87,6 +88,7 @@ export function LayoutClassic({ profile, compact }: LayoutProps) {
         <ProfileAvatar profile={profile} scale={scale} className="mb-3" />
         <ProfileNameBlock profile={profile} scale={scale} />
         <ProfileBio profile={profile} scale={scale} className="mt-1.5 mb-2" />
+        <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-2" />
         <ProfileViews profile={profile} scale={scale} className="mb-2" />
         <LinksBlock profile={profile} compact={compact} />
       </div>
@@ -108,6 +110,7 @@ export function LayoutHero({ profile, compact }: LayoutProps) {
         />
         <ProfileNameBlock profile={profile} scale={scale} />
         <ProfileBio profile={profile} scale={scale} className="mt-2 mb-2" />
+        <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-2" />
         <ProfileViews profile={profile} scale={scale} className="mb-4" />
         <LinksBlock profile={profile} compact={compact} />
       </div>
@@ -125,6 +128,13 @@ export function LayoutSplit({ profile, compact }: LayoutProps) {
         <div className="min-w-0 flex-1">
           <ProfileNameBlock profile={profile} scale={scale} align="left" />
           <ProfileBio profile={profile} scale={scale} align="left" className="mt-2 mb-2" />
+          <ProfileExtrasSection
+            profile={profile}
+            scale={scale}
+            compact={compact}
+            align="left"
+            className="mb-2"
+          />
           <ProfileViews profile={profile} scale={scale} align="left" className="mb-3" />
         </div>
       </div>
@@ -204,6 +214,7 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
         <div className="flex w-full flex-col items-center text-center">
           <ProfileNameBlock profile={profile} scale={scale} />
           <ProfileBio profile={profile} scale={scale} className="mt-1.5 mb-1.5" />
+          <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-1.5" />
           <ProfileViews profile={profile} scale={scale} className="mb-2" />
           <LinksBlock profile={profile} compact={compact} />
         </div>
@@ -237,6 +248,7 @@ export function LayoutMinimal({ profile, compact }: LayoutProps) {
       />
       <ProfileNameBlock profile={profile} scale={scale} />
       <ProfileBio profile={profile} scale={scale} className="mt-1 mb-2" />
+      <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-2" />
       <ProfileViews profile={profile} scale={scale} className="mb-3" />
       <LinksBlock profile={profile} compact={compact} />
       <CardToolbarSlot />
@@ -252,6 +264,7 @@ export function LayoutStack({ profile, compact }: LayoutProps) {
         <ProfileAvatar profile={profile} scale={scale} className="mb-2" />
         <ProfileNameBlock profile={profile} scale={scale} />
         <ProfileBio profile={profile} scale={scale} className="mt-1 mb-2" />
+        <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-2" />
         <ProfileViews profile={profile} scale={scale} />
       </div>
       <LinksBlock profile={profile} compact={compact} />
@@ -271,6 +284,7 @@ export function LayoutGlass({ profile, compact }: LayoutProps) {
         <ProfileAvatar profile={profile} scale={scale} className="mb-3" />
         <ProfileNameBlock profile={profile} scale={scale} />
         <ProfileBio profile={profile} scale={scale} className="mt-2 mb-3" />
+        <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-3" />
       </div>
       <div
         className={`flex w-full flex-col items-center gap-3 border-t border-white/10 pt-3 ${

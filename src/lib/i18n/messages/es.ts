@@ -298,6 +298,27 @@ export interface Messages {
     glowIcons: string;
     gradientCard: string;
     monochromeIcons: string;
+    entrySectionTitle: string;
+    entrySectionHint: string;
+    entryGateEnabled: string;
+    entryGateText: string;
+    entryGateTextPlaceholder: string;
+    browserTabTitle: string;
+    browserTabTitlePlaceholder: string;
+    browserTabTitleHint: string;
+    visibilitySectionTitle: string;
+    showViewCount: string;
+    showShareButton: string;
+    discordSectionTitle: string;
+    discordSectionHint: string;
+    showLocation: string;
+    locationLabel: string;
+    locationPlaceholder: string;
+    discordPresenceEnabled: string;
+    discordUserIdLabel: string;
+    discordUserIdPlaceholder: string;
+    discordUserIdHint: string;
+    discordLanyardLink: string;
   };
   linkEditor: {
     platformCount: string;
@@ -757,6 +778,30 @@ export const es: Messages = {
     glowIcons: "Brillo en iconos",
     gradientCard: "Gradiente en tarjeta",
     monochromeIcons: "Iconos monocromáticos",
+    entrySectionTitle: "Pantalla de entrada",
+    entrySectionHint:
+      "Como guns.lol: el visitante pulsa para entrar y el audio arranca sincronizado con el video.",
+    entryGateEnabled: "Mostrar pantalla de entrada",
+    entryGateText: "Texto de entrada",
+    entryGateTextPlaceholder: "click to enter...",
+    browserTabTitle: "Título de la pestaña",
+    browserTabTitlePlaceholder: "@tuusuario",
+    browserTabTitleHint: "Lo que aparece en la pestaña del navegador. Déjalo vacío para usar el nombre por defecto.",
+    visibilitySectionTitle: "Visibilidad del perfil",
+    showViewCount: "Mostrar contador de visitas",
+    showShareButton: "Mostrar botón compartir",
+    discordSectionTitle: "Discord y ubicación",
+    discordSectionHint:
+      "Muestra tu ubicación y un widget con tu estado de Discord en tiempo real, como en guns.lol.",
+    showLocation: "Mostrar ubicación",
+    locationLabel: "Ubicación",
+    locationPlaceholder: "México 🔥",
+    discordPresenceEnabled: "Mostrar widget de Discord",
+    discordUserIdLabel: "ID de usuario de Discord",
+    discordUserIdPlaceholder: "123456789012345678",
+    discordUserIdHint:
+      "Activa Modo desarrollador en Discord → clic derecho en tu perfil → Copiar ID. Para que aparezca tu estado, únete a Lanyard en discord.gg/lanyard.",
+    discordLanyardLink: "Unirse a Lanyard",
   },
   linkEditor: {
     platformCount: "{count}/{max} redes y plataformas",

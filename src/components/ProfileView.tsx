@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Profile } from "@/types/profile";
 import { isLockedPublicProfile, LockedPublicProfile } from "@/types/public-profile";
@@ -10,10 +10,12 @@ import ProfileCard from "@/components/ProfileCard";
 import ClaimProfileCta from "@/components/ClaimProfileCta";
 import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/ProfileAccessGate";
+import ProfileEntryGate from "@/components/ProfileEntryGate";
 import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
 import { preloadBackgroundMedia } from "@/lib/media-url";
 import { getEffectiveAudioUrl, isBackgroundProfileAudio } from "@/lib/profile-audio";
-import { playProfileAudioFromGesture } from "@/lib/profile-audio-bridge";
+import { getProfileDocumentTitle, resolveProfileDisplay } from "@/lib/profile-display-config";
+import { enterProfileFromGesture } from "@/lib/profile-enter";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
@@ -33,6 +35,8 @@ export default function ProfileView({ username }: Props) {
   const [lockedProfile, setLockedProfile] = useState<LockedPublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [entered, setEntered] = useState(false);
+  const viewPendingRef = useRef(false);
 
   const locale: AppLocale = profile?.locale ?? uiLocale;
   const t = (path: string) => translate(locale, path);
@@ -48,6 +52,8 @@ export default function ProfileView({ username }: Props) {
     setLockedProfile(null);
     setProfile(null);
     setLoadError(null);
+    setEntered(false);
+    viewPendingRef.current = false;
 
     try {
       const res = await fetch(`/api/profile/${username}`, {
@@ -81,7 +87,12 @@ export default function ProfileView({ username }: Props) {
         nextProfile.settings.backgroundUrl,
         nextProfile.backgroundType
       );
-      void recordView();
+
+      if (resolveProfileDisplay(nextProfile.settings).entryGateEnabled) {
+        viewPendingRef.current = true;
+      } else {
+        void recordView();
+      }
       return;
     } catch {
       setLoadError(translate(uiLocale, "profile.connectionError"));
@@ -97,7 +108,7 @@ export default function ProfileView({ username }: Props) {
 
   useEffect(() => {
     if (profile) {
-      document.title = `${profile.displayName} (@${profile.username}) — Eyed.bio`;
+      document.title = getProfileDocumentTitle(profile);
       return;
     }
     if (lockedProfile) {
@@ -108,6 +119,16 @@ export default function ProfileView({ username }: Props) {
       document.title = t("profile.pageTitleNotFound");
     }
   }, [profile, lockedProfile, loading, loadError, t]);
+
+  const handleEnter = useCallback(() => {
+    if (!profile || entered) return;
+    enterProfileFromGesture(profile);
+    setEntered(true);
+    if (viewPendingRef.current) {
+      viewPendingRef.current = false;
+      void recordView();
+    }
+  }, [profile, entered, recordView]);
 
   if (loading) {
     return (
@@ -162,22 +183,22 @@ export default function ProfileView({ username }: Props) {
   }
 
   const { settings } = profile;
+  const display = resolveProfileDisplay(settings);
   const playbackUrl = getEffectiveAudioUrl(profile);
   const showProfileAudio =
     site.profileAudioEnabled && profile.audioEnabled && Boolean(playbackUrl);
   const backgroundVideoAudio = showProfileAudio && isBackgroundProfileAudio(profile);
+  const needsGate = display.entryGateEnabled && !entered;
+  const mediaActive = !needsGate;
 
   return (
-    <div
-      className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]"
-      onPointerDownCapture={() => playProfileAudioFromGesture()}
-      onTouchStartCapture={() => playProfileAudioFromGesture()}
-    >
+    <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">
       <BackgroundMedia
         url={settings.backgroundUrl}
         type={profile.backgroundType}
         focus={settings.backgroundFocus}
         videoAudioEnabled={backgroundVideoAudio}
+        playbackActive={mediaActive}
       />
       <div className="fixed inset-0 z-[1] bg-black/50 pointer-events-none" />
       <BackgroundEffects effect={settings.backgroundEffect} />
@@ -186,12 +207,15 @@ export default function ProfileView({ username }: Props) {
       <div
         className={`relative z-20 flex min-h-[100dvh] w-full items-center justify-center px-6 py-6 ${
           reserveBottomForCta ? "pb-28" : ""
-        }`}
+        } ${needsGate ? "pointer-events-none" : ""}`}
       >
         <div className="mx-auto w-full max-w-md flex justify-center">
-          <ProfileCard profile={profile} showControls />
+          <ProfileCard profile={profile} showControls={mediaActive} mediaActive={mediaActive} />
         </div>
       </div>
+      {needsGate ? (
+        <ProfileEntryGate text={display.entryGateText} onEnter={handleEnter} />
+      ) : null}
     </div>
   );
 }

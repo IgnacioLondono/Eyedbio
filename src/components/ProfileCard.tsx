@@ -2,6 +2,7 @@
 
 import { Profile } from "@/types/profile";
 import { resolveCardLayout } from "@/lib/card-layout-config";
+import { resolveProfileDisplay } from "@/lib/profile-display-config";
 import { getEffectiveAudioUrl, getEffectiveAudioClipDuration, isBackgroundProfileAudio } from "@/lib/profile-audio";
 import {
   CARD_LAYOUT_COMPONENTS,
@@ -17,6 +18,8 @@ interface Props {
   showcase?: boolean;
   /** Controles de compartir y audio dentro de la tarjeta (solo perfil público). */
   showControls?: boolean;
+  /** Media activa tras la pantalla de entrada (evita autoplay antes del gesto). */
+  mediaActive?: boolean;
 }
 
 /** Ancho máximo uniforme en vista previa para que el cambio de layout no “salte” horizontalmente. */
@@ -27,8 +30,10 @@ export default function ProfileCard({
   compact = false,
   showcase = false,
   showControls = false,
+  mediaActive = true,
 }: Props) {
   const layout = resolveCardLayout(profile.settings);
+  const display = resolveProfileDisplay(profile.settings);
   const Layout = CARD_LAYOUT_COMPONENTS[layout];
   const maxWidth =
     compact && !showcase
@@ -59,6 +64,8 @@ export default function ProfileCard({
               volumeOnly={isBackgroundProfileAudio(profile)}
               audioEnabled={profile.audioEnabled}
               accentColor={profile.settings.accentColor}
+              showShareButton={display.showShareButton}
+              mediaActive={mediaActive}
             />
           }
         >
