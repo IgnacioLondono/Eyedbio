@@ -1,29 +1,32 @@
 import { SocialLink, SocialPlatform } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
 
+const COPY_ONLY_PLATFORMS = new Set<SocialPlatform>(["discord", "epicgames"]);
+
 /** Plataformas donde solo hay identificador (usuario), no URL clicable. */
 export function isCopyOnlySocialLink(platform: SocialPlatform): boolean {
-  return platform === "discord";
+  return COPY_ONLY_PLATFORMS.has(platform);
 }
 
-export function normalizeDiscordUsername(raw: string): string {
+export function isPlatformUsernameField(platform: SocialPlatform): boolean {
+  return isCopyOnlySocialLink(platform);
+}
+
+export function normalizePlatformUsername(raw: string): string {
   let value = raw.trim().replace(/^@+/, "").replace(/\s+/g, "");
   if (!value) return "";
-
-  if (/^https?:\/\//i.test(value)) {
-    return "";
-  }
-
+  if (/^https?:\/\//i.test(value)) return "";
   return value;
 }
 
-export function formatDiscordUsername(raw: string): string {
-  const user = normalizeDiscordUsername(raw);
-  return user ? `@${user}` : "";
+export function formatPlatformUsername(platform: SocialPlatform, raw: string): string {
+  const user = normalizePlatformUsername(raw);
+  if (!user) return "";
+  return platform === "discord" ? `@${user}` : user;
 }
 
 export function sanitizeSocialLinkInput(platform: SocialPlatform, raw: string): string {
-  if (platform === "discord") return normalizeDiscordUsername(raw);
+  if (isCopyOnlySocialLink(platform)) return normalizePlatformUsername(raw);
   return raw;
 }
 
@@ -35,15 +38,15 @@ export function getSocialLinkHref(link: SocialLink): string | undefined {
 
 export function getSocialLinkCopyValue(link: SocialLink): string | null {
   if (!isCopyOnlySocialLink(link.platform)) return null;
-  const user = normalizeDiscordUsername(link.url);
+  const user = normalizePlatformUsername(link.url);
   return user || null;
 }
 
 export function getSocialLinkTitle(link: SocialLink): string {
   const config = PLATFORM_CONFIG[link.platform];
   if (link.label?.trim()) return link.label.trim();
-  if (link.platform === "discord") {
-    const formatted = formatDiscordUsername(link.url);
+  if (isCopyOnlySocialLink(link.platform)) {
+    const formatted = formatPlatformUsername(link.platform, link.url);
     if (formatted) return formatted;
   }
   return config.label;
@@ -51,7 +54,7 @@ export function getSocialLinkTitle(link: SocialLink): string {
 
 export function isSocialLinkActive(link: Pick<SocialLink, "url" | "platform">): boolean {
   if (isCopyOnlySocialLink(link.platform)) {
-    return normalizeDiscordUsername(link.url).length > 0;
+    return normalizePlatformUsername(link.url).length > 0;
   }
   return link.url.trim().length > 0;
 }

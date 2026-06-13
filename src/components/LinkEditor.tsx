@@ -4,8 +4,8 @@ import { useRef, useState } from "react";
 import { Globe, Loader2, Trash2 } from "lucide-react";
 import { SocialLink, SocialPlatform } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
-import { PLATFORM_CATEGORIES, getPlatformUrlPlaceholder, isPlatformUsernameField } from "@/lib/platform-categories";
-import { sanitizeSocialLinkInput } from "@/lib/social-link-utils";
+import { PLATFORM_CATEGORIES, getPlatformUrlPlaceholder } from "@/lib/platform-categories";
+import { isPlatformUsernameField, sanitizeSocialLinkInput } from "@/lib/social-link-utils";
 import { PlatformIcon } from "@/components/PlatformIcons";
 import CustomLinkIcon from "@/components/CustomLinkIcon";
 import { createEmptyLink } from "@/lib/profile-mapper";
@@ -260,13 +260,13 @@ export default function LinkEditor({ links, onChange }: Props) {
                   className="input-field w-full text-sm mt-3"
                   aria-label={
                     isPlatformUsernameField(link.platform)
-                      ? tVars("linkEditor.discordUsernameFor", { label: config.label })
+                      ? tVars("linkEditor.usernameFor", { label: config.label })
                       : tVars("linkEditor.linkFor", { label: config.label })
                   }
                 />
                 {isPlatformUsernameField(link.platform) && (
                   <p className="text-[10px] text-white/35 mt-1.5 text-center w-full">
-                    {t("linkEditor.discordHint")}
+                    {t("linkEditor.usernameHint")}
                   </p>
                 )}
               </div>

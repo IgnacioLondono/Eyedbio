@@ -64,7 +64,7 @@ export function getPlatformUrlPlaceholder(platform: SocialPlatform): string {
     email: "mailto:tu@email.com",
     steam: "https://steamcommunity.com/id/tu-usuario",
     roblox: "https://www.roblox.com/users/123456789/profile",
-    epicgames: "https://store.epicgames.com/u/tu-usuario",
+    epicgames: "tu_usuario",
     xbox: "https://account.xbox.com/es-ES/Profile?gamertag=TuGamertag",
     playstation: "https://psnprofiles.com/tu-usuario",
     nintendo: "https://nintendoeverything.com/...",
@@ -75,8 +75,4 @@ export function getPlatformUrlPlaceholder(platform: SocialPlatform): string {
   };
 
   return placeholders[platform] ?? "https://...";
-}
-
-export function isPlatformUsernameField(platform: SocialPlatform): boolean {
-  return platform === "discord";
 }

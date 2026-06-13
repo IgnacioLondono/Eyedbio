@@ -77,8 +77,8 @@ function ProfileLinkWrap({
   motionProps?: MotionProps;
   children: React.ReactNode;
 }) {
-  const copyHint = translate(locale, "profile.discordCopyHint");
-  const copiedLabel = translate(locale, "profile.discordCopied");
+  const copyHint = translate(locale, "profile.copyUsernameHint");
+  const copiedLabel = translate(locale, "profile.usernameCopied");
   const { copyOnly, href, title, copied, activate } = useSocialLinkAction(link);
   const tooltip = copyOnly
     ? copied
@@ -334,8 +334,8 @@ export default function ProfileLinksDisplay({
         compact={compact}
         mutedColor={muted}
         emptyLabel={translate(locale, "profile.noLinks")}
-        copyHint={translate(locale, "profile.discordCopyHint")}
-        copiedLabel={translate(locale, "profile.discordCopied")}
+        copyHint={translate(locale, "profile.copyUsernameHint")}
+        copiedLabel={translate(locale, "profile.usernameCopied")}
       />
     );
   }
