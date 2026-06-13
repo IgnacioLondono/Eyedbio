@@ -378,7 +378,7 @@ export const en: Messages = {
     monochromeIcons: "Monochrome icons",
     entrySectionTitle: "Entry screen",
     entrySectionHint:
-      "Visitors tap to enter and audio starts in sync with the background video.",
+      "Every visitor sees this screen before entering. On tap, audio and video start together.",
     entryGateEnabled: "Show entry screen",
     entryGateText: "Entry text",
     entryGateTextPlaceholder: "click to enter...",

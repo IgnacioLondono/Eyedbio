@@ -26,7 +26,7 @@ export function resolveProfileDisplay(
   locale: "es" | "en" = "es"
 ): ResolvedProfileDisplay {
   return {
-    entryGateEnabled: settings.entryGateEnabled ?? true,
+    entryGateEnabled: true,
     entryGateText: resolveEntryGateText(settings, locale),
     browserTabTitle: settings.browserTabTitle?.trim() || "",
     showViewCount: settings.showViewCount ?? true,

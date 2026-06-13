@@ -18,10 +18,7 @@ import { getEffectiveAudioUrl, isBackgroundProfileAudio } from "@/lib/profile-au
 import { getProfileDocumentTitle, resolveProfileDisplay } from "@/lib/profile-display-config";
 import { resolveProfileTabIconUrl } from "@/lib/profile-tab-icon";
 import { enterProfileFromGesture } from "@/lib/profile-enter";
-import {
-  resetBackgroundVideoAudioState,
-  tryBackgroundVideoAutoplay,
-} from "@/lib/profile-background-video-audio";
+import { resetBackgroundVideoAudioState } from "@/lib/profile-background-video-audio";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
@@ -93,14 +90,10 @@ export default function ProfileView({ username }: Props) {
       preloadBackgroundMedia(
         nextProfile.settings.backgroundUrl,
         nextProfile.backgroundType,
-        resolveProfileDisplay(nextProfile.settings, nextProfile.locale).entryGateEnabled
+        true
       );
 
-      if (resolveProfileDisplay(nextProfile.settings, nextProfile.locale).entryGateEnabled) {
-        viewPendingRef.current = true;
-      } else {
-        void recordView();
-      }
+      viewPendingRef.current = true;
       return;
     } catch {
       setLoadError(translate(uiLocale, "profile.connectionError"));
@@ -108,7 +101,7 @@ export default function ProfileView({ username }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [username, recordView, uiLocale]);
+  }, [username, uiLocale]);
 
   useEffect(() => {
     void loadProfile();
@@ -127,20 +120,6 @@ export default function ProfileView({ username }: Props) {
       document.title = t("profile.pageTitleNotFound");
     }
   }, [profile, lockedProfile, loading, loadError, t]);
-
-  useEffect(() => {
-    if (!profile) return;
-
-    const display = resolveProfileDisplay(profile.settings, profile.locale);
-    const playbackUrl = getEffectiveAudioUrl(profile);
-    const showProfileAudio =
-      site.profileAudioEnabled && profile.audioEnabled && Boolean(playbackUrl);
-    const backgroundVideoAudio = showProfileAudio && isBackgroundProfileAudio(profile);
-
-    if (backgroundVideoAudio && !display.entryGateEnabled) {
-      tryBackgroundVideoAutoplay();
-    }
-  }, [profile, site.profileAudioEnabled]);
 
   const handleEnter = useCallback(() => {
     if (!profile || entered) return;
@@ -210,8 +189,8 @@ export default function ProfileView({ username }: Props) {
   const showProfileAudio =
     site.profileAudioEnabled && profile.audioEnabled && Boolean(playbackUrl);
   const backgroundVideoAudio = showProfileAudio && isBackgroundProfileAudio(profile);
-  const needsGate = display.entryGateEnabled && !entered;
-  const mediaActive = !needsGate;
+  const needsGate = !entered;
+  const mediaActive = entered;
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">

@@ -476,11 +476,6 @@ function DashboardContent() {
                       {t("dashboard.entrySectionHint")}
                     </p>
                   </div>
-                  <Toggle
-                    label={t("dashboard.entryGateEnabled")}
-                    checked={resolveProfileDisplay(profile.settings).entryGateEnabled}
-                    onChange={(entryGateEnabled) => updateSettings({ entryGateEnabled })}
-                  />
                   <Field label={t("dashboard.entryGateText")}>
                     <input
                       type="text"
@@ -978,8 +973,7 @@ function DashboardContent() {
           <p className="text-white/40 text-xs uppercase tracking-wider mb-3 text-center w-full">
             {t("dashboard.preview")}
           </p>
-          {profile &&
-          resolveProfileDisplay(profile.settings, profile.locale ?? locale).entryGateEnabled ? (
+          {profile ? (
             <div className="mb-3 w-full">
               <Toggle
                 label={t("dashboard.previewSimulateEntry")}
@@ -1008,9 +1002,7 @@ function DashboardContent() {
                 </div>
               </div>
             </div>
-            {profile &&
-            simulateEntryInPreview &&
-            resolveProfileDisplay(profile.settings, profile.locale ?? locale).entryGateEnabled ? (
+            {profile && simulateEntryInPreview ? (
               <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-md pointer-events-none">
                 <span className="text-white/75 text-[10px] sm:text-xs tracking-[0.15em] lowercase">
                   {resolveProfileDisplay(profile.settings, profile.locale ?? locale).entryGateText}

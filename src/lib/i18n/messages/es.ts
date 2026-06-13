@@ -812,7 +812,7 @@ export const es: Messages = {
     monochromeIcons: "Iconos monocromáticos",
     entrySectionTitle: "Pantalla de entrada",
     entrySectionHint:
-      "Los visitantes pulsan para entrar y el audio arranca sincronizado con el video de fondo.",
+      "Todos los visitantes ven esta pantalla antes de entrar. Al pulsar, el audio y el video arrancan juntos.",
     entryGateEnabled: "Mostrar pantalla de entrada",
     entryGateText: "Texto de entrada",
     entryGateTextPlaceholder: "pulsa para entrar...",

@@ -56,24 +56,17 @@ export default function BackgroundMedia({
   }, [url, type]);
 
   useLayoutEffect(() => {
-    if (mediaType !== "video" || !videoAudioEnabled) return;
+    if (mediaType !== "video") return;
     setBackgroundVideoAwaitEntryGate(deferPlayback);
-  }, [deferPlayback, mediaType, videoAudioEnabled]);
+  }, [deferPlayback, mediaType]);
 
   useEffect(() => {
-    if (!videoAudioEnabled || !videoElement) return;
-    return registerProfileBackgroundVideo(videoElement);
-  }, [videoAudioEnabled, videoElement, displayUrl]);
+    if (mediaType !== "video" || !videoElement) return;
+    return registerProfileBackgroundVideo(videoElement, { audioFromVideo: videoAudioEnabled });
+  }, [mediaType, videoElement, displayUrl, videoAudioEnabled]);
 
   useEffect(() => {
-    if (!videoElement || mediaType !== "video") return;
-
-    if (deferPlayback) {
-      videoElement.pause();
-      videoElement.currentTime = 0;
-      videoElement.muted = true;
-      return;
-    }
+    if (!videoElement || mediaType !== "video" || deferPlayback) return;
 
     if (videoAudioEnabled) {
       startBackgroundVideoFromEnter();
@@ -82,6 +75,26 @@ export default function BackgroundMedia({
 
     startBackgroundVideoMutedFromEnter();
   }, [deferPlayback, videoElement, mediaType, videoAudioEnabled]);
+
+  useEffect(() => {
+    if (!videoElement || mediaType !== "video") return;
+
+    const markReady = () => setLoaded(true);
+    if (videoElement.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      markReady();
+    }
+    videoElement.addEventListener("loadedmetadata", markReady);
+    videoElement.addEventListener("loadeddata", markReady);
+
+    if (videoElement.readyState === HTMLMediaElement.HAVE_NOTHING) {
+      videoElement.load();
+    }
+
+    return () => {
+      videoElement.removeEventListener("loadedmetadata", markReady);
+      videoElement.removeEventListener("loadeddata", markReady);
+    };
+  }, [videoElement, mediaType, displayUrl]);
 
   useEffect(() => {
     if (mediaType === "video" || !displayUrl?.trim()) return;
