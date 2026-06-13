@@ -2,7 +2,10 @@
 set -e
 
 mkdir -p /data/uploads
-chown -R nextjs:nodejs /data
+if [ ! -f /data/.chowned-by-entrypoint ]; then
+  chown -R nextjs:nodejs /data
+  touch /data/.chowned-by-entrypoint
+fi
 
 export DATABASE_URL="$(node -e "
   const user = process.env.POSTGRES_USER || 'eyedbio';
@@ -24,7 +27,7 @@ export DATABASE_URL="$(node -e "
 
 echo "Running database migrations..."
 attempt=1
-max_attempts=20
+max_attempts=12
 
 while [ "$attempt" -le "$max_attempts" ]; do
   if node ./node_modules/prisma/build/index.js migrate deploy; then
@@ -37,9 +40,9 @@ while [ "$attempt" -le "$max_attempts" ]; do
     exit 1
   fi
 
-  echo "Database not ready, retrying in 3s... (${attempt}/${max_attempts})"
+  echo "Database not ready, retrying in 2s... (${attempt}/${max_attempts})"
   attempt=$((attempt + 1))
-  sleep 3
+  sleep 2
 done
 
 if [ -f /data/admin.env ]; then

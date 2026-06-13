@@ -12,9 +12,10 @@ import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/ProfileAccessGate";
 import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
 import { preloadBackgroundMedia, preloadProfileAudio } from "@/lib/media-url";
-import { getEffectiveAudioUrl } from "@/lib/profile-audio";
+import { getEffectiveAudioUrl, getEffectiveAudioClipDuration } from "@/lib/profile-audio";
 import { playProfileAudioFromGesture } from "@/lib/profile-audio-bridge";
 import { useI18n } from "@/components/LocaleProvider";
+import ProfileAudioUnlockOverlay from "@/components/ProfileAudioUnlockOverlay";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
 import type { AppLocale } from "@/lib/i18n/types";
@@ -166,14 +167,24 @@ export default function ProfileView({ username }: Props) {
   }
 
   const { settings } = profile;
+  const playbackUrl = getEffectiveAudioUrl(profile);
+  const showProfileAudio =
+    site.profileAudioEnabled && profile.audioEnabled && Boolean(playbackUrl);
 
   return (
     <div
       className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]"
       onPointerDownCapture={() => playProfileAudioFromGesture()}
-      onClickCapture={() => playProfileAudioFromGesture()}
-      onTouchEndCapture={() => playProfileAudioFromGesture()}
+      onTouchStartCapture={() => playProfileAudioFromGesture()}
     >
+      {showProfileAudio && playbackUrl ? (
+        <ProfileAudioUnlockOverlay
+          url={playbackUrl}
+          startTime={profile.audioStartTime}
+          clipDuration={getEffectiveAudioClipDuration(profile)}
+          enabled={profile.audioEnabled}
+        />
+      ) : null}
       <BackgroundMedia
         url={settings.backgroundUrl}
         type={profile.backgroundType}

@@ -11,6 +11,17 @@ COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --ignore-scripts
 
+FROM deps AS prod-deps
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev --ignore-scripts
+
+COPY prisma ./prisma
+COPY prisma.config.ts ./
+RUN npx prisma generate
+
 FROM deps AS builder
 WORKDIR /app
 
@@ -24,7 +35,8 @@ COPY . .
 ENV DATABASE_URL="postgresql://eyedbio:eyedbio_secret@postgres:5432/eyedbio?schema=public"
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npm run build
+RUN --mount=type=cache,target=/app/.next/cache \
+    npx next build
 
 RUN node -e "require('@prisma/adapter-pg'); require('pg'); console.log('Prisma PG deps OK')"
 
@@ -45,11 +57,10 @@ ENV AUTH_TRUST_HOST="true"
 ENV HOSTNAME="0.0.0.0"
 ENV PORT=9090
 
-COPY --from=builder /app/node_modules/next/dist/compiled/@vercel/og ./node_modules/next/dist/compiled/@vercel/og
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/prisma.config.ts ./
 COPY --from=builder /app/src/generated ./src/generated
@@ -57,7 +68,7 @@ COPY docker-entrypoint.sh healthcheck.js ./
 
 RUN mkdir -p /data/uploads \
     && chmod +x docker-entrypoint.sh \
-    && chown -R nextjs:nodejs /app /data
+    && chown -R nextjs:nodejs /app
 
 EXPOSE 9090
 VOLUME ["/data"]

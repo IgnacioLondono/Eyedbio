@@ -32,8 +32,14 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          provenance: false
+          sbom: false
           tags: |
             ghcr.io/ignaciolondono/eyedbio:latest
             ghcr.io/ignaciolondono/eyedbio:${{ github.sha }}
-          cache-from: type=gha,scope=eyedbio-app
-          cache-to: type=gha,mode=max,scope=eyedbio-app
+          cache-from: |
+            type=gha,scope=eyedbio-app
+            type=registry,ref=ghcr.io/ignaciolondono/eyedbio:buildcache
+          cache-to: |
+            type=gha,mode=max,scope=eyedbio-app
+            type=registry,ref=ghcr.io/ignaciolondono/eyedbio:buildcache,mode=max

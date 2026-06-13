@@ -11,12 +11,14 @@ import CustomLinkIcon from "@/components/CustomLinkIcon";
 import { createEmptyLink } from "@/lib/profile-mapper";
 import {
   MAX_CUSTOM_LINKS,
+  MAX_PLATFORM_LINKS,
   MAX_PROFILE_LINKS,
   canAddCustomLink,
   canAddLink,
   canAddPlatformLink,
   canAddSocialLink,
   countActiveCustomLinks,
+  countActivePlatformLinks,
   countActiveSocialLinks,
   countDraftSocialLinks,
 } from "@/lib/links-config";
@@ -125,11 +127,14 @@ export default function LinkEditor({ links, onChange }: Props) {
   );
 
   const activeCount = countActiveSocialLinks(links);
+  const activePlatformCount = countActivePlatformLinks(links);
   const activeCustomCount = countActiveCustomLinks(links);
   const draftCount = countDraftSocialLinks(links);
   const atTotalLimit = !canAddSocialLink(links);
   const atCustomLimit = !canAddCustomLink(links);
   const atPlatformLimit = !canAddPlatformLink(links);
+  const atPlatformCountLimit = activePlatformCount >= MAX_PLATFORM_LINKS;
+  const atCustomCountLimit = activeCustomCount >= MAX_CUSTOM_LINKS;
 
   const insertLink = (platform: SocialPlatform) => {
     if (!canAddLink(links, platform)) return;
@@ -170,16 +175,32 @@ export default function LinkEditor({ links, onChange }: Props) {
 
   return (
     <div className="space-y-6">
-      <p className="text-xs text-white/40">
-        {tVars("linkEditor.count", { count: activeCount, max: MAX_PROFILE_LINKS })}
-        <span className="text-white/30">
+      <p className="text-xs">
+        <span className={atPlatformCountLimit ? "text-amber-300/90" : "text-white/40"}>
+          {tVars("linkEditor.platformCount", {
+            count: activePlatformCount,
+            max: MAX_PLATFORM_LINKS,
+          })}
+        </span>
+        <span className={atCustomCountLimit ? "text-amber-300/90" : "text-white/30"}>
           {tVars("linkEditor.customCount", {
             count: activeCustomCount,
             max: MAX_CUSTOM_LINKS,
           })}
         </span>
+        {!atPlatformCountLimit && !atCustomCountLimit && (
+          <span className="text-white/25">
+            {tVars("linkEditor.totalCount", {
+              count: activeCount,
+              max: MAX_PROFILE_LINKS,
+            })}
+          </span>
+        )}
         {draftCount > 0 && (
           <span className="text-white/30">{tVars("linkEditor.draftHint", { drafts: draftCount })}</span>
+        )}
+        {atPlatformCountLimit && !atTotalLimit && (
+          <span className="text-amber-300/90">{t("linkEditor.platformLimitReached")}</span>
         )}
         {atTotalLimit && activeCount >= MAX_PROFILE_LINKS && (
           <span className="text-amber-300/90">{t("linkEditor.limitReached")}</span>

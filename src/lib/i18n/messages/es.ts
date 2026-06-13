@@ -181,6 +181,7 @@ export interface Messages {
     loadError: string;
     connectionError: string;
     pageTitleNotFound: string;
+    tapForSound: string;
   };
   accessGate: {
     protected: string;
@@ -299,9 +300,11 @@ export interface Messages {
     monochromeIcons: string;
   };
   linkEditor: {
-    count: string;
+    platformCount: string;
     customCount: string;
+    totalCount: string;
     draftHint: string;
+    platformLimitReached: string;
     limitReached: string;
     customLimitReached: string;
     empty: string;
@@ -630,6 +633,7 @@ export const es: Messages = {
     loadError: "No se pudo cargar el perfil",
     connectionError: "Error de conexión. Comprueba tu red e inténtalo de nuevo.",
     pageTitleNotFound: "Perfil no encontrado — Eyed.bio",
+    tapForSound: "Pulsar para activar el sonido",
   },
   accessGate: {
     protected: "Perfil protegido",
@@ -755,10 +759,12 @@ export const es: Messages = {
     monochromeIcons: "Iconos monocromáticos",
   },
   linkEditor: {
-    count: "{count}/{max} enlaces activos",
+    platformCount: "{count}/{max} redes y plataformas",
     customCount: " · {count}/{max} URLs personalizadas",
+    totalCount: " · {count}/{max} en total",
     draftHint: " · {drafts} sin URL (no cuentan en el límite)",
-    limitReached: " · Límite alcanzado. Quita uno o completa los que faltan.",
+    platformLimitReached: " · Límite de redes alcanzado. Solo puedes añadir URLs personalizadas.",
+    limitReached: " · Límite total alcanzado.",
     customLimitReached: "Límite de URLs personalizadas alcanzado.",
     empty: "Elige un icono abajo para añadir tu primer enlace.",
     visibleName: "Nombre visible (opcional)",

@@ -241,6 +241,7 @@ export const en: Messages = {
     loadError: "Could not load profile",
     connectionError: "Connection error. Check your network and try again.",
     pageTitleNotFound: "Profile not found — Eyed.bio",
+    tapForSound: "Tap to enable sound",
   },
   accessGate: {
     protected: "Protected profile",
@@ -366,10 +367,12 @@ export const en: Messages = {
     monochromeIcons: "Monochrome icons",
   },
   linkEditor: {
-    count: "{count}/{max} active links",
+    platformCount: "{count}/{max} social & platform links",
     customCount: " · {count}/{max} custom URLs",
+    totalCount: " · {count}/{max} total",
     draftHint: " · {drafts} without URL (not counted toward the limit)",
-    limitReached: " · Limit reached. Remove one or complete the missing URLs.",
+    platformLimitReached: " · Platform limit reached. You can only add custom URLs now.",
+    limitReached: " · Total limit reached.",
     customLimitReached: "Custom URL limit reached.",
     empty: "Pick an icon below to add your first link.",
     visibleName: "Visible name (optional)",
