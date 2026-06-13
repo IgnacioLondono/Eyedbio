@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BackgroundType } from "@/types/profile";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { DEFAULT_MEDIA_FOCUS, type MediaFocus } from "@/lib/media-focus";
 import { getMediaSrc } from "@/lib/media-url";
 import {
-  bindProfileBackgroundVideo,
   holdProfileBackgroundVideo,
   playProfileBackgroundVideo,
+  setActiveBackgroundVideo,
 } from "@/lib/profile-background-video-audio";
 import { FocusedImage, FocusedVideo } from "@/components/FocusedMedia";
 
@@ -39,6 +39,10 @@ export default function BackgroundMedia({
   const [loaded, setLoaded] = useState(false);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
 
+  const attachVideoRef = useCallback((element: HTMLVideoElement | null) => {
+    setVideoElement(element);
+  }, []);
+
   const shellClass = contained
     ? "absolute inset-0 overflow-hidden"
     : "fixed inset-0 z-0 h-[100dvh] w-screen overflow-hidden";
@@ -47,7 +51,6 @@ export default function BackgroundMedia({
   const displayUrl = getMediaSrc(url);
   const mediaFocus =
     mediaType === "video" ? DEFAULT_MEDIA_FOCUS : (focus ?? DEFAULT_MEDIA_FOCUS);
-  const videoMuted = deferPlayback || !videoAudioEnabled;
 
   useEffect(() => {
     setBroken(false);
@@ -58,19 +61,21 @@ export default function BackgroundMedia({
 
   useEffect(() => {
     if (mediaType !== "video" || !videoElement) return;
+    return setActiveBackgroundVideo(videoElement, { audioFromVideo: videoAudioEnabled });
+  }, [mediaType, videoElement, videoAudioEnabled, displayUrl]);
 
-    const unbind = bindProfileBackgroundVideo(videoElement, {
-      audioFromVideo: videoAudioEnabled,
-    });
+  useEffect(() => {
+    if (mediaType !== "video" || !videoElement) return;
 
     if (deferPlayback) {
-      holdProfileBackgroundVideo();
-    } else {
-      playProfileBackgroundVideo({ withAudio: videoAudioEnabled });
+      holdProfileBackgroundVideo(videoElement);
+      return;
     }
 
-    return unbind;
-  }, [mediaType, videoElement, displayUrl, videoAudioEnabled, deferPlayback]);
+    // Vista previa del dashboard: solo bucle silencioso (sin gesto de usuario).
+    const withAudio = videoAudioEnabled && !contained;
+    playProfileBackgroundVideo({ withAudio }, videoElement);
+  }, [contained, deferPlayback, mediaType, videoAudioEnabled, videoElement, displayUrl]);
 
   useEffect(() => {
     if (!videoElement || mediaType !== "video") return;
@@ -130,8 +135,8 @@ export default function BackgroundMedia({
             src={displayUrl}
             priority
             autoPlay={false}
-            muted={videoMuted}
-            videoRef={setVideoElement}
+            muted
+            videoRef={attachVideoRef}
             wrapperClassName="absolute inset-0"
             onReady={() => setLoaded(true)}
             onError={() => setBroken(true)}

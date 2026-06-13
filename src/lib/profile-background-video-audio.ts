@@ -12,7 +12,7 @@ export type BackgroundVideoAudioSnapshot = {
 type Listener = () => void;
 type PendingPlay = { withAudio: boolean };
 
-let boundVideo: HTMLVideoElement | null = null;
+let activeVideo: HTMLVideoElement | null = null;
 let audioFromVideo = false;
 let volume = 0.7;
 let volumeInitialized = false;
@@ -58,12 +58,12 @@ function ensureVolumeInitialized(): void {
 }
 
 function isPlaying(): boolean {
-  return Boolean(boundVideo && !boundVideo.paused && !boundVideo.ended);
+  return Boolean(activeVideo && !activeVideo.paused && !activeVideo.ended);
 }
 
 function refreshSnapshot(): BackgroundVideoAudioSnapshot {
   ensureVolumeInitialized();
-  const element = boundVideo;
+  const element = activeVideo;
   const muted = !element || element.muted || volume === 0;
   const playing = isPlaying();
   const needsTap = Boolean(
@@ -121,27 +121,52 @@ function applyVideoAudioVolume(element: HTMLVideoElement): void {
   element.volume = 0;
 }
 
+function whenReady(element: HTMLVideoElement): Promise<void> {
+  if (element.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    const done = () => {
+      element.removeEventListener("canplay", done);
+      element.removeEventListener("loadeddata", done);
+      resolve();
+    };
+    element.addEventListener("canplay", done);
+    element.addEventListener("loadeddata", done);
+    if (element.readyState === HTMLMediaElement.HAVE_NOTHING) {
+      element.load();
+    }
+  });
+}
+
 async function startPlayback(element: HTMLVideoElement, withAudio: boolean): Promise<void> {
   const wantsAudio = withAudio && audioFromVideo;
 
-  if (element.readyState >= HTMLMediaElement.HAVE_METADATA) {
-    element.currentTime = 0;
-  }
-
-  element.muted = true;
-  element.volume = 0;
-
   try {
-    await element.play();
-  } catch {
-    notify();
-    return;
-  }
+    await whenReady(element);
 
-  if (wantsAudio) {
-    applyVideoAudioVolume(element);
-  } else {
-    applyMutedLoop(element);
+    if (element.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      element.currentTime = 0;
+    }
+
+    element.muted = true;
+    element.volume = 0;
+    await element.play();
+
+    if (wantsAudio) {
+      applyVideoAudioVolume(element);
+    } else {
+      applyMutedLoop(element);
+    }
+  } catch {
+    try {
+      element.muted = true;
+      element.volume = 0;
+      await element.play();
+    } catch {
+      /* autoplay bloqueado */
+    }
   }
 
   notify();
@@ -150,11 +175,11 @@ async function startPlayback(element: HTMLVideoElement, withAudio: boolean): Pro
 export function resetBackgroundVideoAudioState(): void {
   pendingPlay = null;
   audioFromVideo = false;
-  boundVideo = null;
+  activeVideo = null;
   notify();
 }
 
-export function bindProfileBackgroundVideo(
+export function setActiveBackgroundVideo(
   element: HTMLVideoElement | null,
   options?: { audioFromVideo?: boolean }
 ): () => void {
@@ -163,12 +188,14 @@ export function bindProfileBackgroundVideo(
   }
 
   if (!element) {
-    boundVideo = null;
-    notify();
+    if (activeVideo) {
+      activeVideo = null;
+      notify();
+    }
     return () => {};
   }
 
-  boundVideo = element;
+  activeVideo = element;
   ensureVolumeInitialized();
 
   const sync = () => notify();
@@ -190,29 +217,32 @@ export function bindProfileBackgroundVideo(
     element.removeEventListener("pause", sync);
     element.removeEventListener("volumechange", sync);
     element.removeEventListener("timeupdate", sync);
-    if (boundVideo === element) {
-      boundVideo = null;
+    if (activeVideo === element) {
+      activeVideo = null;
     }
     notify();
   };
 }
 
-export function holdProfileBackgroundVideo(): void {
-  const element = boundVideo;
-  if (!element) return;
-  holdElement(element);
+export function holdProfileBackgroundVideo(element?: HTMLVideoElement | null): void {
+  const target = element ?? activeVideo;
+  if (!target) return;
+  holdElement(target);
   notify();
 }
 
-export function playProfileBackgroundVideo(options: { withAudio: boolean }): void {
-  const element = boundVideo;
-  if (!element) {
+export function playProfileBackgroundVideo(
+  options: { withAudio: boolean },
+  element?: HTMLVideoElement | null
+): void {
+  const target = element ?? activeVideo;
+  if (!target) {
     pendingPlay = options;
     return;
   }
 
   pendingPlay = null;
-  void startPlayback(element, options.withAudio);
+  void startPlayback(target, options.withAudio);
 }
 
 export function getBackgroundVideoAudioSnapshot(): BackgroundVideoAudioSnapshot {
@@ -229,7 +259,7 @@ export function subscribeBackgroundVideoAudio(listener: Listener): () => void {
 }
 
 export function unmuteBackgroundVideoFromUserGesture(): boolean {
-  const element = boundVideo;
+  const element = activeVideo;
   if (!element || !audioFromVideo || volume === 0) return false;
 
   applyVideoAudioVolume(element);
@@ -243,7 +273,7 @@ export function unmuteBackgroundVideoFromUserGesture(): boolean {
 }
 
 export function unmuteBackgroundVideoIfNeeded(): void {
-  const element = boundVideo;
+  const element = activeVideo;
   if (!element || !audioFromVideo || volume === 0 || !element.muted) return;
   unmuteBackgroundVideoFromUserGesture();
 }
@@ -261,7 +291,7 @@ export function setBackgroundVideoVolume(nextVolume: number): void {
   volume = clamped;
   localStorage.setItem(VOLUME_STORAGE_KEY, String(clamped));
 
-  const element = boundVideo;
+  const element = activeVideo;
   if (!element) {
     notify();
     return;
@@ -282,4 +312,12 @@ export function setBackgroundVideoVolume(nextVolume: number): void {
 export function getBackgroundVideoVolumeBeforeMute(): number {
   ensureVolumeInitialized();
   return volumeBeforeMute > 0 ? volumeBeforeMute : 0.7;
+}
+
+/** @deprecated use setActiveBackgroundVideo */
+export function bindProfileBackgroundVideo(
+  element: HTMLVideoElement | null,
+  options?: { audioFromVideo?: boolean }
+): () => void {
+  return setActiveBackgroundVideo(element, options);
 }
