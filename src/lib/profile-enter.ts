@@ -5,7 +5,10 @@ import {
   getEffectiveAudioUrl,
   isBackgroundProfileAudio,
 } from "@/lib/profile-audio";
-import { startBackgroundVideoFromEnter } from "@/lib/profile-background-video-audio";
+import {
+  startBackgroundVideoFromEnter,
+  startBackgroundVideoMutedFromEnter,
+} from "@/lib/profile-background-video-audio";
 import {
   configureProfileAudioEngine,
   playProfileAudioFromUserGesture,
@@ -16,11 +19,16 @@ export function enterProfileFromGesture(profile: Profile): void {
   noteMediaUserActivation();
   markMediaUnlockedSession();
 
+  const isVideoBackground = profile.backgroundType === "video";
   const backgroundVideoAudio =
     profile.audioEnabled && isBackgroundProfileAudio(profile);
 
-  if (backgroundVideoAudio) {
-    startBackgroundVideoFromEnter();
+  if (isVideoBackground) {
+    if (backgroundVideoAudio) {
+      startBackgroundVideoFromEnter();
+    } else {
+      startBackgroundVideoMutedFromEnter();
+    }
   }
 
   if (!profile.audioEnabled || backgroundVideoAudio) return;

@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { BackgroundType } from "@/types/profile";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { DEFAULT_MEDIA_FOCUS, type MediaFocus } from "@/lib/media-focus";
 import { getMediaSrc } from "@/lib/media-url";
-import { registerProfileBackgroundVideo } from "@/lib/profile-background-video-audio";
+import {
+  registerProfileBackgroundVideo,
+  setBackgroundVideoAwaitEntryGate,
+  startBackgroundVideoFromEnter,
+  startBackgroundVideoMutedFromEnter,
+} from "@/lib/profile-background-video-audio";
 import { FocusedImage, FocusedVideo } from "@/components/FocusedMedia";
 
 interface Props {
@@ -50,6 +55,11 @@ export default function BackgroundMedia({
     setVideoElement(null);
   }, [url, type]);
 
+  useLayoutEffect(() => {
+    if (mediaType !== "video" || !videoAudioEnabled) return;
+    setBackgroundVideoAwaitEntryGate(deferPlayback);
+  }, [deferPlayback, mediaType, videoAudioEnabled]);
+
   useEffect(() => {
     if (!videoAudioEnabled || !videoElement) return;
     return registerProfileBackgroundVideo(videoElement);
@@ -65,10 +75,12 @@ export default function BackgroundMedia({
       return;
     }
 
-    if (videoAudioEnabled) return;
+    if (videoAudioEnabled) {
+      startBackgroundVideoFromEnter();
+      return;
+    }
 
-    videoElement.muted = true;
-    void videoElement.play().catch(() => {});
+    startBackgroundVideoMutedFromEnter();
   }, [deferPlayback, videoElement, mediaType, videoAudioEnabled]);
 
   useEffect(() => {
@@ -108,7 +120,7 @@ export default function BackgroundMedia({
           <FocusedVideo
             src={displayUrl}
             priority
-            autoPlay={!deferPlayback && !videoAudioEnabled}
+            autoPlay={false}
             muted
             videoRef={setVideoElement}
             wrapperClassName="absolute inset-0"

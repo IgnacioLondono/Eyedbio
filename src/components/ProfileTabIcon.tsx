@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { getMediaSrc } from "@/lib/media-url";
+import { profileTabIconType } from "@/lib/profile-tab-icon";
 
 const MARKER = "data-eyed-profile-favicon";
 
@@ -10,23 +11,35 @@ interface Props {
 }
 
 export default function ProfileTabIcon({ iconUrl }: Props) {
-  useEffect(() => {
+  useLayoutEffect(() => {
     const trimmed = iconUrl?.trim();
-    let link = document.querySelector<HTMLLinkElement>(`link[${MARKER}]`);
+    const href = trimmed ? getMediaSrc(trimmed) : null;
 
-    if (!trimmed) {
-      link?.remove();
+    const managed = document.querySelectorAll<HTMLLinkElement>(`link[${MARKER}]`);
+    const defaults = document.querySelectorAll<HTMLLinkElement>(
+      'link[rel="icon"], link[rel="shortcut icon"], link[rel="apple-touch-icon"]'
+    );
+
+    if (!href) {
+      managed.forEach((link) => link.remove());
       return;
     }
 
+    defaults.forEach((link) => {
+      if (!link.hasAttribute(MARKER)) link.remove();
+    });
+
+    let link = document.querySelector<HTMLLinkElement>(`link[${MARKER}]`);
     if (!link) {
       link = document.createElement("link");
       link.rel = "icon";
       link.setAttribute(MARKER, "true");
-      document.head.appendChild(link);
+      document.head.prepend(link);
     }
 
-    link.href = getMediaSrc(trimmed);
+    const typedHref = href.includes("?") ? href : `${href}?v=1`;
+    link.href = typedHref;
+    link.type = profileTabIconType(href);
 
     return () => {
       link?.remove();

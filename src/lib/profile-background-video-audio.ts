@@ -17,6 +17,7 @@ let volumeInitialized = false;
 let volumeBeforeMute = 0.7;
 let listeners = new Set<Listener>();
 let pendingEnterActivation = false;
+let pendingEnterMuted = false;
 let audioUnlocked = false;
 let awaitEntryGate = false;
 
@@ -123,6 +124,7 @@ function startMutedPreview(element: HTMLVideoElement): void {
 
 export function resetBackgroundVideoAudioState(): void {
   pendingEnterActivation = false;
+  pendingEnterMuted = false;
   audioUnlocked = false;
   awaitEntryGate = false;
   video = null;
@@ -131,6 +133,18 @@ export function resetBackgroundVideoAudioState(): void {
 
 export function setBackgroundVideoAwaitEntryGate(next: boolean): void {
   awaitEntryGate = next;
+  const element = video;
+  if (!element) return;
+  if (next) {
+    holdVideoUntilEnter(element);
+  }
+}
+
+function startMutedLoop(element: HTMLVideoElement): void {
+  element.currentTime = 0;
+  element.muted = true;
+  element.volume = 0;
+  void element.play().catch(() => notify());
 }
 
 export function tryBackgroundVideoAutoplay(): void {
@@ -165,7 +179,11 @@ export function registerProfileBackgroundVideo(element: HTMLVideoElement): () =>
 
   if (pendingEnterActivation || audioUnlocked) {
     pendingEnterActivation = false;
+    pendingEnterMuted = false;
     activateBackgroundVideoFromEnter();
+  } else if (pendingEnterMuted) {
+    pendingEnterMuted = false;
+    startMutedLoop(element);
   } else if (awaitEntryGate) {
     holdVideoUntilEnter(element);
   } else {
@@ -232,6 +250,21 @@ export function startBackgroundVideoFromEnter(): boolean {
   }
 
   pendingEnterActivation = true;
+  pendingEnterMuted = false;
+  return false;
+}
+
+/** Arranca video de fondo en bucle sin audio (gesto de entrada). */
+export function startBackgroundVideoMutedFromEnter(): boolean {
+  const element = video;
+  if (element) {
+    startMutedLoop(element);
+    notify();
+    return true;
+  }
+
+  pendingEnterMuted = true;
+  pendingEnterActivation = false;
   return false;
 }
 

@@ -3,7 +3,10 @@ import ProfileView from "@/components/ProfileView";
 import { findProfileByUsername } from "@/lib/profile-query";
 import { userToProfile } from "@/lib/profile-mapper";
 import { getProfileMetadataTitle } from "@/lib/profile-display-config";
-import { resolveProfileTabIconHref } from "@/lib/profile-tab-icon";
+import {
+  resolveProfileTabIconHref,
+  resolveProfileTabIconUrl,
+} from "@/lib/profile-tab-icon";
 import {
   getSiteUrlFromHeaders,
   profileOgImageUrl,
@@ -41,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     `Página link-in-bio de ${profile.displayName}. Enlaces, redes y más en Eyed.bio.`;
   const url = profilePublicUrl(profile.username, siteUrl);
   const ogImage = profileOgImageUrl(profile.username, siteUrl);
-  const tabIcon = resolveProfileTabIconHref(profile.settings.browserTabIconUrl, siteUrl);
+  const tabIcon = resolveProfileTabIconHref(resolveProfileTabIconUrl(profile), siteUrl);
 
   return {
     metadataBase: new URL(siteUrl),

@@ -16,10 +16,10 @@ import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
 import { preloadBackgroundMedia } from "@/lib/media-url";
 import { getEffectiveAudioUrl, isBackgroundProfileAudio } from "@/lib/profile-audio";
 import { getProfileDocumentTitle, resolveProfileDisplay } from "@/lib/profile-display-config";
+import { resolveProfileTabIconUrl } from "@/lib/profile-tab-icon";
 import { enterProfileFromGesture } from "@/lib/profile-enter";
 import {
   resetBackgroundVideoAudioState,
-  setBackgroundVideoAwaitEntryGate,
   tryBackgroundVideoAutoplay,
 } from "@/lib/profile-background-video-audio";
 import { useI18n } from "@/components/LocaleProvider";
@@ -137,12 +137,10 @@ export default function ProfileView({ username }: Props) {
       site.profileAudioEnabled && profile.audioEnabled && Boolean(playbackUrl);
     const backgroundVideoAudio = showProfileAudio && isBackgroundProfileAudio(profile);
 
-    setBackgroundVideoAwaitEntryGate(display.entryGateEnabled && !entered);
-
     if (backgroundVideoAudio && !display.entryGateEnabled) {
       tryBackgroundVideoAutoplay();
     }
-  }, [profile, entered, site.profileAudioEnabled]);
+  }, [profile, site.profileAudioEnabled]);
 
   const handleEnter = useCallback(() => {
     if (!profile || entered) return;
@@ -217,7 +215,7 @@ export default function ProfileView({ username }: Props) {
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">
-      <ProfileTabIcon iconUrl={settings.browserTabIconUrl} />
+      <ProfileTabIcon iconUrl={resolveProfileTabIconUrl(profile)} />
       <BackgroundMedia
         url={settings.backgroundUrl}
         type={profile.backgroundType}

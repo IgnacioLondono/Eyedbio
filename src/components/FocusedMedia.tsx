@@ -87,6 +87,7 @@ export function FocusedVideo({
         playsInline
         preload={priority ? "auto" : "metadata"}
         onLoadedData={onReady}
+        onLoadedMetadata={onReady}
         onCanPlay={onReady}
         onError={onError}
       />
