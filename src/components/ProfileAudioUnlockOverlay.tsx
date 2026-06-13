@@ -1,31 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 import { Volume2 } from "lucide-react";
 import { useI18n } from "@/components/LocaleProvider";
 import {
-  bindProfileAudioAutoplayEvents,
-  configureProfileAudioEngine,
   getProfileAudioEngineSnapshot,
   getProfileAudioEngineServerSnapshot,
   playProfileAudioFromUserGesture,
   subscribeProfileAudioEngine,
 } from "@/lib/profile-audio-engine";
-import { DEFAULT_CLIP_DURATION } from "@/lib/audio-config";
 
 interface Props {
-  url: string;
-  startTime?: number;
-  clipDuration?: number;
   enabled: boolean;
 }
 
-export default function ProfileAudioUnlockOverlay({
-  url,
-  startTime = 0,
-  clipDuration = DEFAULT_CLIP_DURATION,
-  enabled,
-}: Props) {
+export default function ProfileAudioUnlockOverlay({ enabled }: Props) {
   const { t } = useI18n();
   const snapshot = useSyncExternalStore(
     subscribeProfileAudioEngine,
@@ -33,44 +22,12 @@ export default function ProfileAudioUnlockOverlay({
     getProfileAudioEngineServerSnapshot
   );
 
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    if (!enabled || !url) return;
-
-    configureProfileAudioEngine({
-      src: url,
-      startTime,
-      clipDuration,
-      enabled,
-    });
-
-    const unbind = bindProfileAudioAutoplayEvents();
-
-    return () => {
-      unbind();
-    };
-  }, [clipDuration, enabled, startTime, url]);
-
-  useEffect(() => {
-    if (snapshot.awaitingUnlock && snapshot.volume > 0 && !snapshot.userPaused) {
-      setVisible(true);
-      return;
-    }
-    if (snapshot.isPlaying && !snapshot.awaitingUnlock) {
-      setVisible(false);
-    }
-  }, [snapshot.awaitingUnlock, snapshot.isPlaying, snapshot.userPaused, snapshot.volume]);
-
   const unlock = useCallback(() => {
-    const ok = playProfileAudioFromUserGesture();
-    if (ok) {
-      setVisible(false);
-    }
+    playProfileAudioFromUserGesture();
   }, []);
 
   useEffect(() => {
-    if (!enabled || !visible) return;
+    if (!enabled || !snapshot.needsTap) return;
 
     const onGesture = () => {
       unlock();
@@ -85,9 +42,9 @@ export default function ProfileAudioUnlockOverlay({
       document.removeEventListener("touchstart", onGesture, { capture: true });
       document.removeEventListener("keydown", onGesture, { capture: true });
     };
-  }, [enabled, unlock, visible]);
+  }, [enabled, snapshot.needsTap, unlock]);
 
-  if (!enabled || !url || !visible) return null;
+  if (!enabled || !snapshot.needsTap) return null;
 
   return (
     <div

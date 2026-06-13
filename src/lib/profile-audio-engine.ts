@@ -21,6 +21,7 @@ export type ProfileAudioEngineSnapshot = {
   volume: number;
   duration: number;
   awaitingUnlock: boolean;
+  needsTap: boolean;
   userPaused: boolean;
 };
 
@@ -39,6 +40,8 @@ let volumeBeforeMute = volume;
 let clipBounds = { start: 0, end: Infinity as number, nativeLoop: false };
 let loopIntervalId: number | null = null;
 let listeners = new Set<Listener>();
+let autoplayHandler: (() => void) | null = null;
+let autoplayHandlersBound = false;
 
 function readInitialVolume(): number {
   if (typeof window === "undefined") return 0.7;
@@ -73,6 +76,7 @@ const SERVER_SNAPSHOT: ProfileAudioEngineSnapshot = {
   volume: 0.7,
   duration: 0,
   awaitingUnlock: false,
+  needsTap: false,
   userPaused: false,
 };
 
@@ -82,11 +86,15 @@ function refreshSnapshotCache(): ProfileAudioEngineSnapshot {
   ensureVolumeInitialized();
   const element = audio;
   const isPlaying = Boolean(element && !element.paused && !element.ended);
+  const awaitingUnlock = mutedForPolicy && volume > 0 && wantsPlay && !userPaused;
+  const needsTap =
+    volume > 0 && !userPaused && (awaitingUnlock || (wantsPlay && !isPlaying));
   const next: ProfileAudioEngineSnapshot = {
     isPlaying,
     volume,
     duration,
-    awaitingUnlock: mutedForPolicy && volume > 0 && wantsPlay && !userPaused,
+    awaitingUnlock,
+    needsTap,
     userPaused,
   };
 
@@ -95,6 +103,7 @@ function refreshSnapshotCache(): ProfileAudioEngineSnapshot {
     snapshotCache.volume === next.volume &&
     snapshotCache.duration === next.duration &&
     snapshotCache.awaitingUnlock === next.awaitingUnlock &&
+    snapshotCache.needsTap === next.needsTap &&
     snapshotCache.userPaused === next.userPaused
   ) {
     return snapshotCache;
@@ -228,6 +237,30 @@ function bindAudioEvents(element: HTMLAudioElement): void {
   element.addEventListener("ended", onEnded);
 }
 
+function clearAutoplayHandlers(): void {
+  const element = audio;
+  if (!element || !autoplayHandler || !autoplayHandlersBound) return;
+
+  element.removeEventListener("loadedmetadata", autoplayHandler);
+  element.removeEventListener("loadeddata", autoplayHandler);
+  element.removeEventListener("canplay", autoplayHandler);
+  element.removeEventListener("canplaythrough", autoplayHandler);
+  autoplayHandlersBound = false;
+  autoplayHandler = null;
+}
+
+function ensureAutoplayHandlers(): void {
+  const element = audio;
+  if (!element || autoplayHandlersBound) return;
+
+  autoplayHandler = () => tryProfileAudioAutoplay();
+  element.addEventListener("loadedmetadata", autoplayHandler);
+  element.addEventListener("loadeddata", autoplayHandler);
+  element.addEventListener("canplay", autoplayHandler);
+  element.addEventListener("canplaythrough", autoplayHandler);
+  autoplayHandlersBound = true;
+}
+
 function resetPlaybackFlags(): void {
   userPaused = false;
   wantsPlay = true;
@@ -249,6 +282,7 @@ export function subscribeProfileAudioEngine(listener: Listener): () => void {
 }
 
 export function configureProfileAudioEngine(next: ProfileAudioEngineConfig): void {
+  ensureVolumeInitialized();
   const element = getAudioElement();
   const nextSrc = getMediaSrc(next.src);
   const srcChanged = config?.src !== next.src;
@@ -256,6 +290,7 @@ export function configureProfileAudioEngine(next: ProfileAudioEngineConfig): voi
   config = next;
 
   if (srcChanged) {
+    clearAutoplayHandlers();
     resetPlaybackFlags();
     element.pause();
     element.src = nextSrc;
@@ -265,11 +300,14 @@ export function configureProfileAudioEngine(next: ProfileAudioEngineConfig): voi
   updateClipBounds();
   applyVolumeToElement(volume);
   setupLoopInterval();
+  ensureAutoplayHandlers();
+  tryProfileAudioAutoplay();
   notify();
 }
 
 export function destroyProfileAudioEngine(): void {
   clearLoopInterval();
+  clearAutoplayHandlers();
   if (audio) {
     audio.pause();
     audio.removeAttribute("src");
@@ -284,8 +322,10 @@ export function destroyProfileAudioEngine(): void {
 
 /** Debe llamarse de forma síncrona dentro de pointerdown / click / touchstart. */
 export function playProfileAudioFromUserGesture(): boolean {
-  const element = audio;
-  if (!element || !config?.enabled || userPaused || volume === 0) return false;
+  ensureVolumeInitialized();
+  if (!config?.enabled || userPaused || volume === 0) return false;
+
+  const element = getAudioElement();
 
   wantsPlay = true;
   mutedForPolicy = false;
@@ -317,6 +357,7 @@ export function playProfileAudioFromUserGesture(): boolean {
 }
 
 export function tryProfileAudioAutoplay(): void {
+  ensureVolumeInitialized();
   const element = audio;
   if (!element || !config?.enabled || userPaused || volume === 0) return;
 
@@ -438,23 +479,5 @@ export function setProfileAudioVolume(nextVolume: number): void {
 }
 
 export function isProfileAudioAwaitingUnlock(): boolean {
-  return getProfileAudioEngineSnapshot().awaitingUnlock;
-}
-
-export function bindProfileAudioAutoplayEvents(): () => void {
-  const element = getAudioElement();
-  const start = () => tryProfileAudioAutoplay();
-
-  void tryProfileAudioAutoplay();
-  element.addEventListener("loadedmetadata", start);
-  element.addEventListener("loadeddata", start);
-  element.addEventListener("canplay", start);
-  element.addEventListener("canplaythrough", start);
-
-  return () => {
-    element.removeEventListener("loadedmetadata", start);
-    element.removeEventListener("loadeddata", start);
-    element.removeEventListener("canplay", start);
-    element.removeEventListener("canplaythrough", start);
-  };
+  return getProfileAudioEngineSnapshot().needsTap;
 }

@@ -59,21 +59,22 @@ export default function ProfileAudio({
 
   if (!enabled || !url) return null;
 
-  const { isPlaying, volume, awaitingUnlock } = snapshot;
+  const { isPlaying, volume, awaitingUnlock, needsTap } = snapshot;
   const muted = volume === 0;
-  const waitingForTap = awaitingUnlock && !muted;
+  const waitingForTap = needsTap && !muted;
   const volumeBeforeMuteRef = { current: volume > 0 ? volume : 0.7 };
 
   const handleVolumeChange = (value: number) => {
     setProfileAudioVolume(value);
   };
 
-  const handleVolumeButtonClick = () => {
-    if (awaitingUnlock) {
+  const handleVolumePointerDown = () => {
+    if (needsTap || awaitingUnlock) {
       playProfileAudioFromUserGesture();
-      if (volumeOnly) return;
     }
+  };
 
+  const handleVolumeButtonClick = () => {
     if (volumeOnly) {
       if (volume === 0) {
         handleVolumeChange(volumeBeforeMuteRef.current > 0 ? volumeBeforeMuteRef.current : isTouchDevice ? 1 : 0.7);
@@ -122,6 +123,7 @@ export default function ProfileAudio({
         {!volumeOnly ? (
           <button
             type="button"
+            onPointerDown={() => playProfileAudioFromUserGesture()}
             onClick={toggleProfileAudioPlayPause}
             className={`${buttonPadding} ${
               waitingForTap && !volumeOnly
@@ -136,6 +138,7 @@ export default function ProfileAudio({
 
         <button
           type="button"
+          onPointerDown={handleVolumePointerDown}
           onClick={handleVolumeButtonClick}
           className={`${buttonPadding} ${
             waitingForTap && volumeOnly

@@ -12,7 +12,7 @@ import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/ProfileAccessGate";
 import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
 import { preloadBackgroundMedia, preloadProfileAudio } from "@/lib/media-url";
-import { getEffectiveAudioUrl, getEffectiveAudioClipDuration } from "@/lib/profile-audio";
+import { getEffectiveAudioUrl } from "@/lib/profile-audio";
 import { playProfileAudioFromGesture } from "@/lib/profile-audio-bridge";
 import { useI18n } from "@/components/LocaleProvider";
 import ProfileAudioUnlockOverlay from "@/components/ProfileAudioUnlockOverlay";
@@ -177,13 +177,8 @@ export default function ProfileView({ username }: Props) {
       onPointerDownCapture={() => playProfileAudioFromGesture()}
       onTouchStartCapture={() => playProfileAudioFromGesture()}
     >
-      {showProfileAudio && playbackUrl ? (
-        <ProfileAudioUnlockOverlay
-          url={playbackUrl}
-          startTime={profile.audioStartTime}
-          clipDuration={getEffectiveAudioClipDuration(profile)}
-          enabled={profile.audioEnabled}
-        />
+      {showProfileAudio ? (
+        <ProfileAudioUnlockOverlay enabled={profile.audioEnabled} />
       ) : null}
       <BackgroundMedia
         url={settings.backgroundUrl}
