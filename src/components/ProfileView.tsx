@@ -105,6 +105,7 @@ export default function ProfileView({ username }: Props) {
 
   useEffect(() => {
     void loadProfile();
+    return () => resetBackgroundVideoAudioState();
   }, [loadProfile]);
 
   useEffect(() => {

@@ -1,14 +1,12 @@
 import type { Profile } from "@/types/profile";
+import { resolveBackgroundType } from "@/lib/media-config";
 import { noteMediaUserActivation, markMediaUnlockedSession } from "@/lib/media-gesture";
 import {
   getEffectiveAudioClipDuration,
   getEffectiveAudioUrl,
   isBackgroundProfileAudio,
 } from "@/lib/profile-audio";
-import {
-  startBackgroundVideoFromEnter,
-  startBackgroundVideoMutedFromEnter,
-} from "@/lib/profile-background-video-audio";
+import { playProfileBackgroundVideo } from "@/lib/profile-background-video-audio";
 import {
   configureProfileAudioEngine,
   playProfileAudioFromUserGesture,
@@ -19,16 +17,14 @@ export function enterProfileFromGesture(profile: Profile): void {
   noteMediaUserActivation();
   markMediaUnlockedSession();
 
-  const isVideoBackground = profile.backgroundType === "video";
+  const isVideoBackground =
+    resolveBackgroundType(profile.settings.backgroundUrl ?? "", profile.backgroundType) ===
+    "video";
   const backgroundVideoAudio =
     profile.audioEnabled && isBackgroundProfileAudio(profile);
 
   if (isVideoBackground) {
-    if (backgroundVideoAudio) {
-      startBackgroundVideoFromEnter();
-    } else {
-      startBackgroundVideoMutedFromEnter();
-    }
+    playProfileBackgroundVideo({ withAudio: backgroundVideoAudio });
   }
 
   if (!profile.audioEnabled || backgroundVideoAudio) return;

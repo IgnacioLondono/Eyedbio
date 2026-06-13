@@ -1,15 +1,14 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BackgroundType } from "@/types/profile";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { DEFAULT_MEDIA_FOCUS, type MediaFocus } from "@/lib/media-focus";
 import { getMediaSrc } from "@/lib/media-url";
 import {
-  registerProfileBackgroundVideo,
-  setBackgroundVideoAwaitEntryGate,
-  startBackgroundVideoFromEnter,
-  startBackgroundVideoMutedFromEnter,
+  bindProfileBackgroundVideo,
+  holdProfileBackgroundVideo,
+  playProfileBackgroundVideo,
 } from "@/lib/profile-background-video-audio";
 import { FocusedImage, FocusedVideo } from "@/components/FocusedMedia";
 
@@ -39,6 +38,9 @@ export default function BackgroundMedia({
   const [useBackgroundCss, setUseBackgroundCss] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+  const deferPlaybackRef = useRef(deferPlayback);
+  deferPlaybackRef.current = deferPlayback;
+
   const shellClass = contained
     ? "absolute inset-0 overflow-hidden"
     : "fixed inset-0 z-0 h-[100dvh] w-screen overflow-hidden";
@@ -55,25 +57,31 @@ export default function BackgroundMedia({
     setVideoElement(null);
   }, [url, type]);
 
-  useLayoutEffect(() => {
-    if (mediaType !== "video") return;
-    setBackgroundVideoAwaitEntryGate(deferPlayback);
-  }, [deferPlayback, mediaType]);
-
   useEffect(() => {
     if (mediaType !== "video" || !videoElement) return;
-    return registerProfileBackgroundVideo(videoElement, { audioFromVideo: videoAudioEnabled });
+
+    const unbind = bindProfileBackgroundVideo(videoElement, {
+      audioFromVideo: videoAudioEnabled,
+    });
+
+    if (deferPlaybackRef.current) {
+      holdProfileBackgroundVideo();
+    } else {
+      playProfileBackgroundVideo({ withAudio: videoAudioEnabled });
+    }
+
+    return unbind;
   }, [mediaType, videoElement, displayUrl, videoAudioEnabled]);
 
   useEffect(() => {
-    if (!videoElement || mediaType !== "video" || deferPlayback) return;
+    if (mediaType !== "video" || !videoElement) return;
 
-    if (videoAudioEnabled) {
-      startBackgroundVideoFromEnter();
+    if (deferPlayback) {
+      holdProfileBackgroundVideo();
       return;
     }
 
-    startBackgroundVideoMutedFromEnter();
+    playProfileBackgroundVideo({ withAudio: videoAudioEnabled });
   }, [deferPlayback, videoElement, mediaType, videoAudioEnabled]);
 
   useEffect(() => {
