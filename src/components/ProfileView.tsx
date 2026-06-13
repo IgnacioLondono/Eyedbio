@@ -40,6 +40,7 @@ export default function ProfileView({ username }: Props) {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [entered, setEntered] = useState(false);
   const viewPendingRef = useRef(false);
+  const enterAudioPendingRef = useRef(false);
 
   const locale: AppLocale = profile?.locale ?? uiLocale;
   const t = (path: string) => translate(locale, path);
@@ -124,13 +125,24 @@ export default function ProfileView({ username }: Props) {
 
   const handleEnter = useCallback(() => {
     if (!profile || entered) return;
-    enterProfileFromGesture(profile);
+    enterAudioPendingRef.current = true;
     setEntered(true);
     if (viewPendingRef.current) {
       viewPendingRef.current = false;
       void recordView();
     }
   }, [profile, entered, recordView]);
+
+  useEffect(() => {
+    if (!entered || !profile || !enterAudioPendingRef.current) return;
+    enterAudioPendingRef.current = false;
+
+    const frame = requestAnimationFrame(() => {
+      enterProfileFromGesture(profile);
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [entered, profile]);
 
   if (loading) {
     return (

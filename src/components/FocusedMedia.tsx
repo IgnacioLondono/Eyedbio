@@ -56,6 +56,8 @@ interface VideoProps {
   priority?: boolean;
   autoPlay?: boolean;
   muted?: boolean;
+  /** Fuerza remount al cambiar estado de reproducción (p. ej. pantalla de entrada). */
+  instanceKey?: string;
   videoRef?: (element: HTMLVideoElement | null) => void;
   onReady?: () => void;
   onError?: () => void;
@@ -69,6 +71,7 @@ export function FocusedVideo({
   priority = false,
   autoPlay = true,
   muted = true,
+  instanceKey,
   videoRef,
   onReady,
   onError,
@@ -77,7 +80,7 @@ export function FocusedVideo({
     <div className={`relative h-full w-full overflow-hidden ${wrapperClassName}`}>
       <video
         ref={videoRef}
-        key={src}
+        key={instanceKey ?? src}
         src={src}
         className={`absolute inset-0 h-full w-full min-h-full min-w-full object-cover ${videoClassName}`}
         style={mediaFocusStyle(focus ?? DEFAULT_MEDIA_FOCUS)}

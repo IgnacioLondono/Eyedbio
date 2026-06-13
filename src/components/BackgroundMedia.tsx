@@ -5,11 +5,7 @@ import { BackgroundType } from "@/types/profile";
 import { resolveBackgroundType } from "@/lib/media-config";
 import { DEFAULT_MEDIA_FOCUS, type MediaFocus } from "@/lib/media-focus";
 import { getMediaSrc } from "@/lib/media-url";
-import {
-  holdProfileBackgroundVideo,
-  playProfileBackgroundVideo,
-  setActiveBackgroundVideo,
-} from "@/lib/profile-background-video-audio";
+import { setActiveBackgroundVideo } from "@/lib/profile-background-video-audio";
 import { FocusedImage, FocusedVideo } from "@/components/FocusedMedia";
 
 interface Props {
@@ -51,6 +47,8 @@ export default function BackgroundMedia({
   const displayUrl = getMediaSrc(url);
   const mediaFocus =
     mediaType === "video" ? DEFAULT_MEDIA_FOCUS : (focus ?? DEFAULT_MEDIA_FOCUS);
+  const shouldPlay = !deferPlayback;
+  const videoInstanceKey = `${displayUrl}-${shouldPlay ? "play" : "hold"}`;
 
   useEffect(() => {
     setBroken(false);
@@ -63,19 +61,6 @@ export default function BackgroundMedia({
     if (mediaType !== "video" || !videoElement) return;
     return setActiveBackgroundVideo(videoElement, { audioFromVideo: videoAudioEnabled });
   }, [mediaType, videoElement, videoAudioEnabled, displayUrl]);
-
-  useEffect(() => {
-    if (mediaType !== "video" || !videoElement) return;
-
-    if (deferPlayback) {
-      holdProfileBackgroundVideo(videoElement);
-      return;
-    }
-
-    // Vista previa del dashboard: solo bucle silencioso (sin gesto de usuario).
-    const withAudio = videoAudioEnabled && !contained;
-    playProfileBackgroundVideo({ withAudio, fromGesture: false }, videoElement);
-  }, [contained, deferPlayback, mediaType, videoAudioEnabled, videoElement, displayUrl]);
 
   useEffect(() => {
     if (!videoElement || mediaType !== "video") return;
@@ -128,9 +113,10 @@ export default function BackgroundMedia({
         <div className={`absolute inset-0 ${FALLBACK_CLASS}`} />
         <div className={`absolute inset-0 ${mediaFadeClass}`}>
           <FocusedVideo
+            instanceKey={videoInstanceKey}
             src={displayUrl}
             priority
-            autoPlay={false}
+            autoPlay={shouldPlay}
             muted
             videoRef={attachVideoRef}
             wrapperClassName="absolute inset-0"

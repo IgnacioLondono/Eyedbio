@@ -254,12 +254,12 @@ export function playProfileBackgroundVideo(
     return;
   }
 
-  if (!target.paused && !options.fromGesture) {
+  if (!target.paused) {
     const wantsAudio = options.withAudio && audioFromVideo;
-    if (wantsAudio && canAttemptUnmutedAutoplay() && target.muted) {
+    if (wantsAudio && (options.fromGesture || canAttemptUnmutedAutoplay())) {
       applyVideoAudioVolume(target);
-      notify();
     }
+    notify();
     return;
   }
 
