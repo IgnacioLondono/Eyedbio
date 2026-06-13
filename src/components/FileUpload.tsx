@@ -257,12 +257,14 @@ export default function FileUpload({
   const handleFile = async (file: File) => {
     if (rejectInvalidFile(file)) return;
 
+    setLocalPreview(file);
     setError("");
     setUploading(true);
     setProgress(0);
 
     try {
       const data = await uploadFile(file, setProgress);
+      clearLocalPreview();
       onUploaded(data.url, data.backgroundType);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("fileUpload.uploadError"));
@@ -280,6 +282,38 @@ export default function FileUpload({
     if (file) onFilePicked(file);
   };
 
+  const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null);
+  const [localPreviewType, setLocalPreviewType] = useState<BackgroundType | undefined>();
+
+  useEffect(() => {
+    return () => {
+      if (localPreviewUrl?.startsWith("blob:")) URL.revokeObjectURL(localPreviewUrl);
+    };
+  }, [localPreviewUrl]);
+
+  const clearLocalPreview = () => {
+    setLocalPreviewUrl((prev) => {
+      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return null;
+    });
+    setLocalPreviewType(undefined);
+  };
+
+  const setLocalPreview = (file: File) => {
+    if (kind !== "background" && kind !== "banner" && kind !== "avatar") return;
+    setLocalPreviewUrl((prev) => {
+      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    if (kind === "background") {
+      if (file.type.startsWith("video/")) setLocalPreviewType("video");
+      else if (file.type === "image/gif") setLocalPreviewType("gif");
+      else setLocalPreviewType("image");
+    }
+  };
+
+  const previewUrl = localPreviewUrl ?? currentUrl;
+  const previewMediaType = localPreviewUrl ? localPreviewType ?? mediaType : mediaType;
   const isAudio = kind === "audio";
   const canAdjust = isAdjustableUploadKind(kind);
   const adjustPreset = IMAGE_ADJUST_PRESETS[kind];
@@ -375,19 +409,34 @@ export default function FileUpload({
         </div>
       )}
 
-      {currentUrl && !isAudio && (
+      {previewUrl && !isAudio && (
         <div className="space-y-2">
           <div className="relative rounded-xl overflow-hidden border border-white/10 bg-white/5">
             <MediaPreview
             kind={kind}
-            currentUrl={currentUrl}
-            mediaType={mediaType}
+            currentUrl={previewUrl}
+            mediaType={previewMediaType}
             mediaFocus={mediaFocus}
           />
-            {onClear && (
+            {uploading && (
+              <div className="absolute inset-0 z-10 flex items-end bg-gradient-to-t from-black/50 to-transparent pointer-events-none">
+                <div className="w-full px-3 pb-3">
+                  <div className="h-1 rounded-full bg-white/15 overflow-hidden">
+                    <div
+                      className="h-full bg-purple-500 transition-[width] duration-150"
+                      style={{ width: `${progress ?? 0}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            {onClear && !uploading && (
               <button
                 type="button"
-                onClick={onClear}
+                onClick={() => {
+                  clearLocalPreview();
+                  onClear();
+                }}
                 className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white z-10"
                 aria-label={t("fileUpload.removeFile")}
               >
@@ -395,7 +444,7 @@ export default function FileUpload({
               </button>
             )}
           </div>
-          {canAdjust && isAdjustableImageUrl(currentUrl, kind) && adjustPreset && (
+          {canAdjust && currentUrl && isAdjustableImageUrl(currentUrl, kind) && adjustPreset && (
             <button
               type="button"
               disabled={uploading}
@@ -438,7 +487,9 @@ export default function FileUpload({
                 : t("fileUpload.uploading")
               : currentUrl
                 ? t("fileUpload.changeFile")
-                : isBanner
+                : localPreviewUrl
+                  ? t("fileUpload.uploading")
+                  : isBanner
                   ? t("fileUpload.uploadBanner")
                   : isBackground
                     ? t("fileUpload.uploadBackground")

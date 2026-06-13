@@ -11,6 +11,7 @@ import ClaimProfileCta from "@/components/ClaimProfileCta";
 import ProfileQuickNavButton from "@/components/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/ProfileAccessGate";
 import { profileUnlockRequestHeaders } from "@/lib/profile-unlock-client";
+import { preloadBackgroundMedia } from "@/lib/media-url";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
@@ -71,8 +72,15 @@ export default function ProfileView({ username }: Props) {
         return;
       }
 
-      setProfile(data as Profile);
-      await recordView();
+      const nextProfile = data as Profile;
+      setProfile(nextProfile);
+      setLoading(false);
+      preloadBackgroundMedia(
+        nextProfile.settings.backgroundUrl,
+        nextProfile.backgroundType
+      );
+      void recordView();
+      return;
     } catch {
       setLoadError(translate(uiLocale, "profile.connectionError"));
       setProfile(null);

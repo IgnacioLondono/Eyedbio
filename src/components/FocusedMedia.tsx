@@ -13,6 +13,8 @@ interface ImageProps {
   focus?: MediaFocus;
   wrapperClassName?: string;
   imgClassName?: string;
+  priority?: boolean;
+  onLoad?: () => void;
   onError?: () => void;
 }
 
@@ -22,6 +24,8 @@ export function FocusedImage({
   focus,
   wrapperClassName = "",
   imgClassName = "",
+  priority = false,
+  onLoad,
   onError,
 }: ImageProps) {
   return (
@@ -32,8 +36,11 @@ export function FocusedImage({
         referrerPolicy="no-referrer"
         decoding="async"
         draggable={false}
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
         className={imgClassName}
         style={mediaFocusPositionStyle(focus ?? DEFAULT_MEDIA_FOCUS)}
+        onLoad={onLoad}
         onError={onError}
       />
     </div>
@@ -45,6 +52,8 @@ interface VideoProps {
   focus?: MediaFocus;
   wrapperClassName?: string;
   videoClassName?: string;
+  priority?: boolean;
+  onReady?: () => void;
   onError?: () => void;
 }
 
@@ -53,6 +62,8 @@ export function FocusedVideo({
   focus,
   wrapperClassName = "",
   videoClassName = "",
+  priority = false,
+  onReady,
   onError,
 }: VideoProps) {
   return (
@@ -66,7 +77,9 @@ export function FocusedVideo({
         loop
         muted
         playsInline
-        preload="auto"
+        preload={priority ? "auto" : "metadata"}
+        onLoadedData={onReady}
+        onCanPlay={onReady}
         onError={onError}
       />
     </div>

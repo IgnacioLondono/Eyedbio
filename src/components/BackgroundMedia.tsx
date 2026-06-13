@@ -25,6 +25,7 @@ export default function BackgroundMedia({
 }: Props) {
   const [broken, setBroken] = useState(false);
   const [useBackgroundCss, setUseBackgroundCss] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const shellClass = contained
     ? "absolute inset-0 overflow-hidden"
     : "fixed inset-0 z-0 h-[100dvh] w-screen overflow-hidden";
@@ -37,7 +38,18 @@ export default function BackgroundMedia({
   useEffect(() => {
     setBroken(false);
     setUseBackgroundCss(false);
+    setLoaded(false);
   }, [url, type]);
+
+  useEffect(() => {
+    if (!useBackgroundCss || !displayUrl) return;
+    const img = new Image();
+    img.onload = () => setLoaded(true);
+    img.src = displayUrl;
+    return () => {
+      img.onload = null;
+    };
+  }, [useBackgroundCss, displayUrl]);
 
   if (!url?.trim() || broken) {
     return (
@@ -48,48 +60,64 @@ export default function BackgroundMedia({
     );
   }
 
+  const mediaFadeClass = `transition-opacity duration-500 ease-out ${
+    loaded ? "opacity-100" : "opacity-0"
+  }`;
+
   if (mediaType === "video") {
     return (
       <div className={`${shellClass} ${pointerClass}`} aria-hidden="true">
-        <FocusedVideo
-          src={displayUrl}
-          wrapperClassName="absolute inset-0"
-          onError={() => setBroken(true)}
-        />
+        <div className={`absolute inset-0 ${FALLBACK_CLASS}`} />
+        <div className={`absolute inset-0 ${mediaFadeClass}`}>
+          <FocusedVideo
+            src={displayUrl}
+            priority
+            wrapperClassName="absolute inset-0"
+            onReady={() => setLoaded(true)}
+            onError={() => setBroken(true)}
+          />
+        </div>
       </div>
     );
   }
 
   if (useBackgroundCss) {
     return (
-      <div
-        className={`${shellClass} ${pointerClass}`}
-        style={{
-          backgroundImage: `url("${displayUrl}")`,
-          backgroundSize: `${mediaFocus.zoom * 100}%`,
-          backgroundPosition: `${mediaFocus.x}% ${mediaFocus.y}%`,
-          backgroundRepeat: "no-repeat",
-        }}
-        aria-hidden="true"
-      />
+      <div className={`${shellClass} ${pointerClass}`} aria-hidden="true">
+        <div className={`absolute inset-0 ${FALLBACK_CLASS}`} />
+        <div
+          className={`absolute inset-0 ${mediaFadeClass}`}
+          style={{
+            backgroundImage: `url("${displayUrl}")`,
+            backgroundSize: `${mediaFocus.zoom * 100}%`,
+            backgroundPosition: `${mediaFocus.x}% ${mediaFocus.y}%`,
+            backgroundRepeat: "no-repeat",
+          }}
+        />
+      </div>
     );
   }
 
   return (
     <div className={`${shellClass} ${pointerClass}`} aria-hidden="true">
-      <FocusedImage
-        src={displayUrl}
-        alt=""
-        focus={mediaFocus}
-        wrapperClassName="absolute inset-0"
-        onError={() => {
-          if (!useBackgroundCss) {
-            setUseBackgroundCss(true);
-            return;
-          }
-          setBroken(true);
-        }}
-      />
+      <div className={`absolute inset-0 ${FALLBACK_CLASS}`} />
+      <div className={`absolute inset-0 ${mediaFadeClass}`}>
+        <FocusedImage
+          src={displayUrl}
+          alt=""
+          focus={mediaFocus}
+          priority
+          wrapperClassName="absolute inset-0"
+          onLoad={() => setLoaded(true)}
+          onError={() => {
+            if (!useBackgroundCss) {
+              setUseBackgroundCss(true);
+              return;
+            }
+            setBroken(true);
+          }}
+        />
+      </div>
     </div>
   );
 }

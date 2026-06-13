@@ -1,3 +1,6 @@
+import type { BackgroundType } from "@/types/profile";
+import { resolveBackgroundType } from "@/lib/media-config";
+
 export function isLocalMediaUrl(url: string): boolean {
   if (!url) return false;
   return (
@@ -26,4 +29,25 @@ export function getMediaSrc(url: string): string {
 
 export function isExternalMediaUrl(url: string): boolean {
   return Boolean(url?.trim()) && !isLocalMediaUrl(url) && /^https?:\/\//i.test(url);
+}
+
+/** Precarga el fondo en segundo plano para que aparezca antes en el perfil. */
+export function preloadBackgroundMedia(url: string, type: BackgroundType): void {
+  if (typeof window === "undefined" || !url?.trim()) return;
+
+  const src = getMediaSrc(url);
+  const mediaType = resolveBackgroundType(url, type);
+
+  if (mediaType === "video") {
+    const video = document.createElement("video");
+    video.preload = "auto";
+    video.muted = true;
+    video.src = src;
+    video.load();
+    return;
+  }
+
+  const img = new Image();
+  img.fetchPriority = "high";
+  img.src = src;
 }
