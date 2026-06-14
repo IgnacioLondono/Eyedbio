@@ -92,11 +92,8 @@ function DashboardContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [tab, setTabState] = useState<Tab>(() => {
-    const fromUrl = parseTab(searchParams.get("tab"));
-    if (searchParams.get("tab")) return fromUrl;
-    return readStoredDashboardTab() ?? fromUrl;
-  });
+  const tabParam = searchParams.get("tab");
+  const tab: Tab = tabParam ? parseTab(tabParam) : readStoredDashboardTab() ?? "general";
   const [isDirty, setIsDirty] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -134,10 +131,6 @@ function DashboardContent() {
   }, []);
 
   useEffect(() => {
-    setTabState(parseTab(searchParams.get("tab")));
-  }, [searchParams]);
-
-  useEffect(() => {
     if (searchParams.get("tab")) return;
     const stored = readStoredDashboardTab();
     if (stored) {
@@ -146,7 +139,6 @@ function DashboardContent() {
   }, [pathname, router, searchParams]);
 
   const setTab = (nextTab: Tab) => {
-    setTabState(nextTab);
     try {
       localStorage.setItem(DASHBOARD_TAB_STORAGE_KEY, nextTab);
     } catch {

@@ -32,6 +32,14 @@ function limitForSort(sort: ProfileDirectorySort): number {
   return sort === "views" ? TOP_LIMIT : PAGE_SIZE;
 }
 
+function buildDiscoverHref(sort: ProfileDirectorySort, search?: string): string {
+  const params = new URLSearchParams();
+  params.set("sort", sort);
+  const q = search?.trim();
+  if (q) params.set("q", q);
+  return `/discover?${params.toString()}`;
+}
+
 interface Props {
   variant?: "page" | "embedded";
 }
@@ -185,19 +193,22 @@ function ProfileDirectoryContent({ variant = "embedded" }: Props) {
   const m = getMessages(locale).landing;
   const syncUrl = variant === "page";
 
-  const [sort, setSort] = useState<ProfileDirectorySort>(() =>
-    syncUrl ? parseSort(searchParams.get("sort")) : "views"
-  );
-  const [searchInput, setSearchInput] = useState(() =>
-    syncUrl ? searchParams.get("q") ?? "" : ""
-  );
-  const [searchQuery, setSearchQuery] = useState(() =>
-    syncUrl ? searchParams.get("q") ?? "" : ""
-  );
+  const sort = parseSort(searchParams.get("sort"));
+  const searchQuery = searchParams.get("q") ?? "";
+  const [searchInput, setSearchInput] = useState(searchQuery);
   const [profiles, setProfiles] = useState<ProfileDirectoryEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  useEffect(() => {
+    setSearchInput(searchQuery);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (!syncUrl || searchParams.get("sort")) return;
+    router.replace(buildDiscoverHref("views"), { scroll: false });
+  }, [router, searchParams, syncUrl]);
 
   const tabHint = useMemo(() => {
     if (sort === "views") return m.profilesTabTopHint;
@@ -247,30 +258,15 @@ function ProfileDirectoryContent({ variant = "embedded" }: Props) {
     void fetchProfiles({ nextSort: sort, nextSearch: searchQuery, offset: 0, append: false });
   }, [fetchProfiles, sort, searchQuery]);
 
-  useEffect(() => {
+  const applySearch = () => {
     if (!syncUrl) return;
-    const params = new URLSearchParams();
-    params.set("sort", sort);
-    if (searchQuery.trim()) params.set("q", searchQuery.trim());
-    router.replace(`/discover?${params.toString()}`, { scroll: false });
-  }, [router, searchQuery, sort, syncUrl]);
-
-  const handleSortChange = (nextSort: ProfileDirectorySort) => {
-    setSort(nextSort);
-    if (nextSort !== "name") {
-      setSearchInput("");
-      setSearchQuery("");
-    }
-  };
-
-  const handleSearchSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    setSearchQuery(searchInput.trim());
+    router.replace(buildDiscoverHref("name", searchInput), { scroll: false });
   };
 
   const clearSearch = () => {
+    if (!syncUrl) return;
     setSearchInput("");
-    setSearchQuery("");
+    router.replace(buildDiscoverHref("name"), { scroll: false });
   };
 
   const canLoadMore = sort !== "views" && profiles.length < total;
@@ -300,23 +296,37 @@ function ProfileDirectoryContent({ variant = "embedded" }: Props) {
         <div className="flex flex-wrap items-center justify-center gap-2 mb-3">
           {TABS.map(({ id, icon: Icon }) => {
             const active = sort === id;
+            const className = `inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              active
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/25"
+                : "bg-white/[0.04] text-white/60 border border-white/10 hover:text-white hover:bg-white/[0.07]"
+            }`;
+
+            const label =
+              id === "views"
+                ? m.profilesTabTop
+                : id === "recent"
+                  ? m.profilesTabRecent
+                  : m.profilesTabAll;
+
+            if (syncUrl) {
+              return (
+                <Link
+                  key={id}
+                  href={buildDiscoverHref(id, id === "name" ? searchQuery : undefined)}
+                  scroll={false}
+                  className={className}
+                >
+                  <Icon className="w-4 h-4 shrink-0" />
+                  {label}
+                </Link>
+              );
+            }
+
             return (
-              <button
-                key={id}
-                type="button"
-                onClick={() => handleSortChange(id)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  active
-                    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/25"
-                    : "bg-white/[0.04] text-white/60 border border-white/10 hover:text-white hover:bg-white/[0.07]"
-                }`}
-              >
+              <button key={id} type="button" className={className} disabled={active}>
                 <Icon className="w-4 h-4 shrink-0" />
-                {id === "views"
-                  ? m.profilesTabTop
-                  : id === "recent"
-                    ? m.profilesTabRecent
-                    : m.profilesTabAll}
+                {label}
               </button>
             );
           })}
@@ -325,7 +335,13 @@ function ProfileDirectoryContent({ variant = "embedded" }: Props) {
         <p className="text-center text-xs text-white/40 mb-6">{tabHint}</p>
 
         {sort === "name" ? (
-          <form onSubmit={handleSearchSubmit} className="max-w-md mx-auto mb-8">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              applySearch();
+            }}
+            className="max-w-md mx-auto mb-8"
+          >
             <div className="relative flex items-center">
               <Search className="absolute left-3 w-4 h-4 text-white/35 pointer-events-none" />
               <input
