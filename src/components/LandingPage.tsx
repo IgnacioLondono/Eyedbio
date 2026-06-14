@@ -71,7 +71,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
-      <Navbar showCommunityLink={false} />
+      <Navbar showCommunityLink />
 
       <section className="relative pt-32 pb-20 px-6">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">

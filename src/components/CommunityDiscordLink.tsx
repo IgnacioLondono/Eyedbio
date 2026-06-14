@@ -1,5 +1,7 @@
 import { DiscordIcon } from "@/components/PlatformIcons";
 import {
+  COMMUNITY_BOT_LABEL,
+  COMMUNITY_BOT_URL,
   COMMUNITY_DISCORD_LABEL,
   COMMUNITY_DISCORD_URL,
 } from "@/lib/community";
@@ -10,6 +12,9 @@ interface Props {
   className?: string;
 }
 
+const headerLinkClass =
+  "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-white/60 hover:text-white border border-white/10 rounded-lg transition-colors";
+
 export default function CommunityDiscordLink({
   variant = "button",
   className = "",
@@ -19,15 +24,25 @@ export default function CommunityDiscordLink({
 
   if (variant === "header") {
     return (
-      <a
-        href={COMMUNITY_DISCORD_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs text-white/60 hover:text-white border border-white/10 rounded-lg hover:bg-[#5865F2]/10 hover:border-[#5865F2]/30 transition-colors ${className}`}
-      >
-        <DiscordIcon />
-        <span className="hidden sm:inline">Discord</span>
-      </a>
+      <div className={`inline-flex items-center gap-2 ${className}`}>
+        <a
+          href={COMMUNITY_BOT_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${headerLinkClass} hover:bg-purple-500/10 hover:border-purple-500/30`}
+        >
+          <span className="font-medium text-purple-300/90">{COMMUNITY_BOT_LABEL}</span>
+        </a>
+        <a
+          href={COMMUNITY_DISCORD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`${headerLinkClass} hover:bg-[#5865F2]/10 hover:border-[#5865F2]/30`}
+        >
+          <DiscordIcon />
+          <span className="hidden sm:inline">Discord</span>
+        </a>
+      </div>
     );
   }
 
@@ -45,29 +60,49 @@ export default function CommunityDiscordLink({
             Comunidad en Discord para usuarios de Eyed.bio: soporte, novedades,
             ideas y feedback directo con el equipo.
           </p>
-          <a
-            href={COMMUNITY_DISCORD_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-xl transition-colors shadow-lg shadow-[#5865F2]/25"
-          >
-            <DiscordIcon />
-            Entrar al Discord
-          </a>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href={COMMUNITY_BOT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white rounded-xl transition-colors shadow-lg shadow-purple-500/25"
+            >
+              {COMMUNITY_BOT_LABEL}
+            </a>
+            <a
+              href={COMMUNITY_DISCORD_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold bg-[#5865F2] hover:bg-[#4752c4] text-white rounded-xl transition-colors shadow-lg shadow-[#5865F2]/25"
+            >
+              <DiscordIcon />
+              Entrar al Discord
+            </a>
+          </div>
         </div>
       </section>
     );
   }
 
   return (
-    <a
-      href={COMMUNITY_DISCORD_URL}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-[#5865F2]/30 bg-[#5865F2]/10 text-white rounded-xl hover:bg-[#5865F2]/20 transition-colors ${className}`}
-    >
-      <DiscordIcon />
-      Discord de {COMMUNITY_DISCORD_LABEL}
-    </a>
+    <div className={`inline-flex flex-wrap items-center gap-2 ${className}`}>
+      <a
+        href={COMMUNITY_BOT_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-purple-500/30 bg-purple-500/10 text-white rounded-xl hover:bg-purple-500/20 transition-colors"
+      >
+        {COMMUNITY_BOT_LABEL}
+      </a>
+      <a
+        href={COMMUNITY_DISCORD_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium border border-[#5865F2]/30 bg-[#5865F2]/10 text-white rounded-xl hover:bg-[#5865F2]/20 transition-colors"
+      >
+        <DiscordIcon />
+        Discord de {COMMUNITY_DISCORD_LABEL}
+      </a>
+    </div>
   );
 }
