@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ProfileView from "@/components/ProfileView";
+import { auth } from "@/lib/auth";
 import { findProfileByUsername } from "@/lib/profile-query";
 import { userToProfile } from "@/lib/profile-mapper";
 import { getProfileMetadataTitle } from "@/lib/profile-display-config";
@@ -79,5 +80,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function UserProfilePage({ params }: Props) {
   const { username } = await params;
-  return <ProfileView username={username} />;
+  const session = await auth();
+  const viewerIsOwner =
+    (session?.user?.username ?? "").toLowerCase() === username.toLowerCase();
+
+  return <ProfileView username={username} viewerIsOwner={viewerIsOwner} />;
 }

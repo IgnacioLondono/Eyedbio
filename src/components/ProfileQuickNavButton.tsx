@@ -7,25 +7,39 @@ import { useI18n } from "@/components/LocaleProvider";
 
 interface Props {
   profileUsername: string;
+  /** Resuelto en servidor para evitar href incorrecto mientras carga la sesión. */
+  viewerIsOwner?: boolean;
 }
 
-export default function ProfileQuickNavButton({ profileUsername }: Props) {
-  const { data: session } = useSession();
+export default function ProfileQuickNavButton({ profileUsername, viewerIsOwner }: Props) {
+  const { data: session, status } = useSession();
   const { t } = useI18n();
 
-  const isOwner =
+  const sessionIsOwner =
+    status === "authenticated" &&
     (session?.user?.username ?? "").toLowerCase() === profileUsername.toLowerCase();
 
+  const isOwner = viewerIsOwner ?? sessionIsOwner;
   const href = isOwner ? "/dashboard" : "/";
   const label = isOwner ? t("quickNav.dashboard") : t("quickNav.home");
 
+  const shellClass =
+    "fixed top-6 right-6 z-[210] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/80 backdrop-blur-md transition-colors hover:text-white hover:bg-black/55";
+
+  if (viewerIsOwner === undefined && status === "loading") {
+    return (
+      <span
+        className={`${shellClass} pointer-events-none opacity-60`}
+        aria-hidden="true"
+        title={t("common.loading")}
+      >
+        <House className="h-4 w-4" />
+      </span>
+    );
+  }
+
   return (
-    <Link
-      href={href}
-      className="fixed top-6 right-6 z-30 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/80 backdrop-blur-md transition-colors hover:text-white"
-      aria-label={label}
-      title={label}
-    >
+    <Link href={href} className={shellClass} aria-label={label} title={label}>
       <House className="h-4 w-4" />
     </Link>
   );

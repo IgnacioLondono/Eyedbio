@@ -26,9 +26,10 @@ import type { AppLocale } from "@/lib/i18n/types";
 
 interface Props {
   username: string;
+  viewerIsOwner?: boolean;
 }
 
-export default function ProfileView({ username }: Props) {
+export default function ProfileView({ username, viewerIsOwner }: Props) {
   const { locale: uiLocale } = useI18n();
   const { status } = useSession();
   const site = useSiteSettings();
@@ -155,7 +156,10 @@ export default function ProfileView({ username }: Props) {
   if (lockedProfile) {
     return (
       <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">
-        <ProfileQuickNavButton profileUsername={lockedProfile.username} />
+        <ProfileQuickNavButton
+          profileUsername={lockedProfile.username}
+          viewerIsOwner={viewerIsOwner}
+        />
         <ClaimProfileCta />
         <ProfileAccessGate profile={lockedProfile} onUnlocked={loadProfile} />
       </div>
@@ -217,7 +221,10 @@ export default function ProfileView({ username }: Props) {
       />
       <div className="fixed inset-0 z-[1] bg-black/50 pointer-events-none" />
       <BackgroundEffects effect={settings.backgroundEffect} />
-      <ProfileQuickNavButton profileUsername={profile.username} />
+      <ProfileQuickNavButton
+        profileUsername={profile.username}
+        viewerIsOwner={viewerIsOwner}
+      />
       <ClaimProfileCta />
       <div
         className={`relative z-20 flex min-h-[100dvh] w-full items-center justify-center px-6 py-6 ${
