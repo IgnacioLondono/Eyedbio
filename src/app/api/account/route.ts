@@ -125,6 +125,13 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Usuario no encontrado" }, { status: 404 });
     }
 
+    if (!user.passwordHash) {
+      return NextResponse.json(
+        { error: "Esta cuenta usa inicio de sesión social y no tiene contraseña local" },
+        { status: 400 }
+      );
+    }
+
     const valid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!valid) {
       return NextResponse.json({ error: "Contraseña actual incorrecta" }, { status: 403 });

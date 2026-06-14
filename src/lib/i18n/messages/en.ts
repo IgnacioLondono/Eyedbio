@@ -62,6 +62,10 @@ export const en: Messages = {
     showcaseBullet3: "Over {count} distinct visual combinations.",
     showcaseViewLabel: "View:",
     showcaseTabsLabel: "Example styles",
+    gunsShowcasePrev: "Previous image",
+    gunsShowcaseNext: "Next image",
+    gunsShowcaseAria: "Platform previews",
+    gunsShowcaseSlide: "Slide",
     profilesTitle: "Discover",
     profilesTitleHighlight: "profiles",
     profilesSubtitle:
@@ -150,7 +154,7 @@ export const en: Messages = {
   },
   auth: {
     loginTitle: "Welcome back",
-    loginSubtitle: "Sign in with your email and password.",
+    loginSubtitle: "Sign in with email, password, or a social account.",
     codeTitle: "Access code",
     codeSubtitle: "Enter the 6-digit code sent to {email}. Check spam too.",
     codeLabel: "Access code",
@@ -203,6 +207,10 @@ export const en: Messages = {
     noCode: "Don't have a code?",
     requestCode: "Request one",
     resetSubtitleWithCode: "Enter the 6-digit code you received and your new password.",
+    oauthDivider: "or continue with",
+    oauthRedirecting: "Redirecting…",
+    oauthOnlyAccount: "This account uses social sign-in. Use Google, Discord, or another linked platform.",
+    oauthError: "Could not sign in with that platform. Please try again.",
   },
   account: {
     language: "Language",

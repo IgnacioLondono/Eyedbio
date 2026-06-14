@@ -10,6 +10,7 @@ import AuthLayout, {
   AuthSubmitButton,
 } from "@/components/AuthLayout";
 import PasswordInput from "@/components/PasswordInput";
+import OAuthButtons from "@/components/OAuthButtons";
 import { useI18n } from "@/components/LocaleProvider";
 import { getMessages } from "@/lib/i18n";
 import { APP_LOCALES, LOCALE_LABELS } from "@/lib/i18n/types";
@@ -85,6 +86,8 @@ function SignupForm() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
+        <OAuthButtons callbackUrl="/dashboard" />
+
         <div>
           <label htmlFor="locale" className="auth-label">
             {m.language}

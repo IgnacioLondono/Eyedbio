@@ -19,6 +19,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
 import LandingStyleShowcase from "@/components/LandingStyleShowcase";
+import LandingGunsShowcase from "@/components/LandingGunsShowcase";
 import { useI18n } from "@/components/LocaleProvider";
 import { getMessages } from "@/lib/i18n";
 
@@ -78,7 +79,7 @@ export default function LandingPage() {
           <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-violet-500/10 rounded-full blur-[100px]" />
         </div>
 
-        <div className="relative max-w-4xl mx-auto text-center">
+        <div className="relative max-w-6xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -150,6 +151,8 @@ export default function LandingPage() {
               </Link>
             </div>
           </motion.div>
+
+          <LandingGunsShowcase />
         </div>
       </section>
 
@@ -174,7 +177,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-16 px-6 border-y border-white/5">
+      <section className="hidden py-16 px-6 border-y border-white/5" aria-hidden>
         <div className="max-w-2xl mx-auto text-center">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-5">
             <Compass className="w-6 h-6 text-purple-300" />
@@ -193,7 +196,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <LandingStyleShowcase />
+      <div className="hidden" aria-hidden>
+        <LandingStyleShowcase />
+      </div>
 
       <section id="features" className="py-24 px-6">
         <div className="max-w-5xl mx-auto">

@@ -56,6 +56,10 @@ export interface Messages {
     showcaseBullet3: string;
     showcaseViewLabel: string;
     showcaseTabsLabel: string;
+    gunsShowcasePrev: string;
+    gunsShowcaseNext: string;
+    gunsShowcaseAria: string;
+    gunsShowcaseSlide: string;
     profilesTitle: string;
     profilesTitleHighlight: string;
     profilesSubtitle: string;
@@ -148,6 +152,10 @@ export interface Messages {
     noCode: string;
     requestCode: string;
     resetSubtitleWithCode: string;
+    oauthDivider: string;
+    oauthRedirecting: string;
+    oauthOnlyAccount: string;
+    oauthError: string;
   };
   account: {
     language: string;
@@ -509,6 +517,10 @@ export const es: Messages = {
     showcaseBullet3: "Más de {count} combinaciones visuales distintas.",
     showcaseViewLabel: "Vista:",
     showcaseTabsLabel: "Estilos de ejemplo",
+    gunsShowcasePrev: "Imagen anterior",
+    gunsShowcaseNext: "Imagen siguiente",
+    gunsShowcaseAria: "Vistas de la plataforma",
+    gunsShowcaseSlide: "Diapositiva",
     profilesTitle: "Descubre",
     profilesTitleHighlight: "perfiles",
     profilesSubtitle:
@@ -597,7 +609,7 @@ export const es: Messages = {
   },
   auth: {
     loginTitle: "Bienvenido de nuevo",
-    loginSubtitle: "Inicia sesión con tu email y contraseña.",
+    loginSubtitle: "Inicia sesión con email, contraseña o una cuenta social.",
     codeTitle: "Código de acceso",
     codeSubtitle: "Introduce el código de 6 dígitos enviado a {email}. Revisa también spam.",
     codeLabel: "Código de acceso",
@@ -650,6 +662,10 @@ export const es: Messages = {
     noCode: "¿No tienes código?",
     requestCode: "Solicitar uno",
     resetSubtitleWithCode: "Introduce el código de 6 dígitos que recibiste y tu nueva contraseña.",
+    oauthDivider: "o continúa con",
+    oauthRedirecting: "Redirigiendo…",
+    oauthOnlyAccount: "Esta cuenta usa inicio de sesión social. Usa Google, Discord u otra plataforma vinculada.",
+    oauthError: "No se pudo iniciar sesión con esa plataforma. Inténtalo de nuevo.",
   },
   account: {
     language: "Idioma",

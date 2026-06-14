@@ -13,6 +13,7 @@ import AuthLayout, {
   AuthSuccess,
 } from "@/components/AuthLayout";
 import PasswordInput from "@/components/PasswordInput";
+import OAuthButtons from "@/components/OAuthButtons";
 import { useI18n } from "@/components/LocaleProvider";
 
 function LoginForm() {
@@ -29,6 +30,11 @@ function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const resetSuccess = searchParams.get("reset") === "success";
   const blockedNotice = searchParams.get("error") === "blocked";
+  const oauthError = searchParams.get("error");
+  const oauthErrorMessage =
+    oauthError && oauthError !== "blocked" && oauthError !== "CredentialsSignin"
+      ? t("auth.oauthError")
+      : "";
 
   const redirectAfterLogin = async () => {
     const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
@@ -207,6 +213,8 @@ function LoginForm() {
       }
     >
       <form onSubmit={requestCode} className="space-y-5">
+        <OAuthButtons callbackUrl={callbackUrl} />
+
         {resetSuccess && (
           <div className="rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-4 py-3 text-emerald-300 text-sm">
             {t("auth.resetSuccess")}
@@ -218,6 +226,8 @@ function LoginForm() {
             {t("auth.blockedNotice")}
           </div>
         )}
+
+        {oauthErrorMessage && <AuthError message={oauthErrorMessage} />}
 
         <div>
           <label htmlFor="email" className="auth-label">

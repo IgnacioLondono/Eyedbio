@@ -1,17 +1,31 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
+import type { Account as OAuthAccount } from "next-auth";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { authConfig } from "@/lib/auth.config";
 import { isUserBlocked, toAuthUser } from "@/lib/auth-user";
 import { isValidVerificationCode, normalizeVerificationCode } from "@/lib/password-reset";
 import { normalizeEmail } from "@/lib/validation";
+import { buildOAuthProviders } from "@/lib/oauth-providers";
+import { findUserByEmailForOAuth, resolveOAuthSignIn } from "@/lib/oauth-user";
 
 type AuthIntent = "login" | "signup" | "refresh";
+
+function applyAuthUserToToken(
+  token: Record<string, unknown>,
+  user: { id: string; username: string; role: string; blockedAt: Date | null }
+) {
+  token.id = user.id;
+  token.username = user.username;
+  token.role = user.role === "admin" ? "admin" : "user";
+  token.blocked = Boolean(user.blockedAt);
+}
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   providers: [
+    ...buildOAuthProviders(),
     Credentials({
       name: "credentials",
       credentials: {
@@ -41,7 +55,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         };
 
         if (intent === "signup" || intent === "refresh") {
-          if (!password) return null;
+          if (!password || !user.passwordHash) return null;
           const valid = await bcrypt.compare(password, user.passwordHash);
           if (!valid) return null;
 
@@ -51,7 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         if (intent === "login") {
           if (!user.loginCodeEnabled) {
-            if (!password) return null;
+            if (!password || !user.passwordHash) return null;
             const valid = await bcrypt.compare(password, user.passwordHash);
             if (!valid) return null;
 
@@ -86,4 +100,60 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  callbacks: {
+    ...authConfig.callbacks,
+    async signIn({ user, account, profile }) {
+      if (!account || account.provider === "credentials") return true;
+
+      const email = normalizeEmail(user.email ?? "");
+      if (!email) return false;
+
+      const oauthAccount = account as OAuthAccount;
+      const dbUser = await resolveOAuthSignIn(
+        {
+          email,
+          name: user.name,
+          image: user.image,
+          locale:
+            typeof profile === "object" && profile && "locale" in profile
+              ? String(profile.locale ?? "")
+              : null,
+        },
+        {
+          type: oauthAccount.type,
+          provider: oauthAccount.provider,
+          providerAccountId: oauthAccount.providerAccountId,
+          refresh_token: oauthAccount.refresh_token ?? null,
+          access_token: oauthAccount.access_token ?? null,
+          expires_at: oauthAccount.expires_at ?? null,
+          token_type: oauthAccount.token_type ?? null,
+          scope: oauthAccount.scope ?? null,
+          id_token: oauthAccount.id_token ?? null,
+          session_state:
+            typeof oauthAccount.session_state === "string"
+              ? oauthAccount.session_state
+              : null,
+        }
+      );
+
+      return Boolean(dbUser);
+    },
+    async jwt({ token, user, account }) {
+      if (user && account?.provider && account.provider !== "credentials") {
+        const dbUser = await findUserByEmailForOAuth(user.email ?? String(token.email ?? ""));
+        if (dbUser) applyAuthUserToToken(token, dbUser);
+        return token;
+      }
+
+      if (user && "username" in user && user.id) {
+        token.id = user.id;
+        token.username = user.username;
+        token.role = user.role;
+        token.blocked = user.blocked;
+        return token;
+      }
+
+      return token;
+    },
+  },
 });

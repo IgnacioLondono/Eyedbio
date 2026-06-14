@@ -50,6 +50,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Email o contraseña incorrectos" }, { status: 401 });
     }
 
+    if (!user.passwordHash) {
+      return NextResponse.json({ error: "Esta cuenta usa inicio de sesión social" }, { status: 401 });
+    }
+
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
       console.warn("[login/start] Contraseña incorrecta", {
