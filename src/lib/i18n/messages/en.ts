@@ -22,6 +22,7 @@ export const en: Messages = {
     signup: "Sign up free",
     myProfile: "My profile",
     dashboard: "Dashboard",
+    editProfile: "Edit profile",
     discover: "Discover",
     appAreas: "App sections",
     menu: "Menu",
@@ -283,7 +284,7 @@ export const en: Messages = {
     login: "Log in",
   },
   quickNav: {
-    dashboard: "Back to dashboard",
+    dashboard: "Edit profile",
     home: "Go to home",
   },
   share: {

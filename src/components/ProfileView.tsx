@@ -128,11 +128,26 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
     if (!profile || entered) return;
     enterAudioPendingRef.current = true;
     setEntered(true);
+    window.history.pushState({ eyedProfileEntered: true }, "", window.location.href);
     if (viewPendingRef.current) {
       viewPendingRef.current = false;
       void recordView();
     }
   }, [profile, entered, recordView]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      setEntered((wasEntered) => {
+        if (!wasEntered) return wasEntered;
+        enterAudioPendingRef.current = false;
+        resetBackgroundVideoAudioState();
+        return false;
+      });
+    };
+
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   useEffect(() => {
     if (!entered || !profile || !enterAudioPendingRef.current) return;

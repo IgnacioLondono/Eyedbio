@@ -19,7 +19,7 @@ export default function AppAreaNav({ active }: Props) {
   const { t } = useI18n();
 
   const labels: Record<AppArea, string> = {
-    dashboard: t("nav.dashboard"),
+    dashboard: t("nav.editProfile"),
     discover: t("nav.discover"),
   };
 

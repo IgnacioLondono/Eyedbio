@@ -20,6 +20,7 @@ export interface Messages {
     signup: string;
     myProfile: string;
     dashboard: string;
+    editProfile: string;
     discover: string;
     appAreas: string;
     menu: string;
@@ -468,6 +469,7 @@ export const es: Messages = {
     signup: "Registrarse gratis",
     myProfile: "Mi perfil",
     dashboard: "Dashboard",
+    editProfile: "Editar perfil",
     discover: "Descubre",
     appAreas: "Secciones de la app",
     menu: "Menú",
@@ -729,7 +731,7 @@ export const es: Messages = {
     login: "Iniciar sesión",
   },
   quickNav: {
-    dashboard: "Volver al dashboard",
+    dashboard: "Editar perfil",
     home: "Ir al inicio",
   },
   share: {
