@@ -55,6 +55,12 @@ export default function Navbar({ showCommunityLink = true }: Props) {
 
         <div className="hidden md:flex items-center gap-8">
           {showCommunityLink && <CommunityDiscordLink variant="header" />}
+          <Link
+            href="/discover"
+            className="text-white/60 hover:text-white text-sm transition-colors"
+          >
+            {t("nav.discover")}
+          </Link>
           {!isLoggedIn && (
             <>
               <Link href="#features" className="text-white/60 hover:text-white text-sm transition-colors">
@@ -71,6 +77,12 @@ export default function Navbar({ showCommunityLink = true }: Props) {
           <LocaleSwitcher />
           {isLoggedIn ? (
             <>
+              <Link
+                href="/discover"
+                className="px-4 py-2 text-sm text-white/80 hover:text-white transition-colors"
+              >
+                {t("nav.discover")}
+              </Link>
               {session.user.username && (
                 <Link
                   href={`/${session.user.username}`}
@@ -122,6 +134,13 @@ export default function Navbar({ showCommunityLink = true }: Props) {
           {isLoggedIn ? (
             <>
               <Link
+                href="/discover"
+                className="block text-white/60 hover:text-white text-sm"
+                onClick={() => setOpen(false)}
+              >
+                {t("nav.discover")}
+              </Link>
+              <Link
                 href="/dashboard"
                 className="block w-full text-center px-4 py-2 text-sm font-medium bg-gradient-to-r from-purple-600 to-violet-600 text-white rounded-lg"
                 onClick={() => setOpen(false)}
@@ -140,6 +159,13 @@ export default function Navbar({ showCommunityLink = true }: Props) {
             </>
           ) : (
             <>
+              <Link
+                href="/discover"
+                className="block text-white/60 hover:text-white text-sm"
+                onClick={() => setOpen(false)}
+              >
+                {t("nav.discover")}
+              </Link>
               <Link href="#features" className="block text-white/60 hover:text-white text-sm" onClick={() => setOpen(false)}>
                 {t("nav.features")}
               </Link>

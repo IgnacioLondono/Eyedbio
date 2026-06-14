@@ -36,6 +36,7 @@ import BackgroundMedia from "@/components/BackgroundMedia";
 import FileUpload from "@/components/FileUpload";
 import AudioClipSelector from "@/components/AudioClipSelector";
 import Logo from "@/components/Logo";
+import AppAreaNav from "@/components/AppAreaNav";
 import AccountSettings from "@/components/AccountSettings";
 import LinkEditor from "@/components/LinkEditor";
 import ShareProfileButton from "@/components/ShareProfileButton";
@@ -295,10 +296,13 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <header className="border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Logo href="/" size="sm" />
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <Logo href="/" size="sm" />
+            <AppAreaNav active="dashboard" />
+          </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <CommunityDiscordLink variant="header" />
             <Link
               href={`/${profile.username}`}

@@ -22,6 +22,8 @@ export const en: Messages = {
     signup: "Sign up free",
     myProfile: "My profile",
     dashboard: "Dashboard",
+    discover: "Discover",
+    appAreas: "App sections",
     menu: "Menu",
   },
   landing: {
@@ -69,6 +71,8 @@ export const en: Messages = {
     profilesCount: "{count} profiles",
     profilesViewsLabel: "views",
     profilesEmpty: "No public profiles yet. Be the first!",
+    exploreProfilesCta: "Browse real profiles from the Eyed.bio community.",
+    exploreProfilesButton: "Browse profiles",
     features: [
       {
         title: "All your links",

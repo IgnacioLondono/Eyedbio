@@ -13,12 +13,12 @@ import {
   Users,
   Eye,
   Upload,
+  Compass,
 } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
 import LandingStyleShowcase from "@/components/LandingStyleShowcase";
-import LandingProfilesSection from "@/components/LandingProfilesSection";
 import { useI18n } from "@/components/LocaleProvider";
 import { getMessages } from "@/lib/i18n";
 
@@ -174,7 +174,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <LandingProfilesSection />
+      <section className="py-16 px-6 border-y border-white/5">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-5">
+            <Compass className="w-6 h-6 text-purple-300" />
+          </div>
+          <h2 className="text-2xl md:text-3xl font-bold mb-3">
+            {m.profilesTitle}{" "}
+            <span className="text-purple-400">{m.profilesTitleHighlight}</span>
+          </h2>
+          <p className="text-white/50 text-sm md:text-base mb-6">{m.exploreProfilesCta}</p>
+          <Link
+            href="/discover"
+            className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-lg shadow-purple-500/25"
+          >
+            {m.exploreProfilesButton}
+          </Link>
+        </div>
+      </section>
 
       <LandingStyleShowcase />
 

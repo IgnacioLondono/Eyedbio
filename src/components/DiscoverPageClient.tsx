@@ -1,0 +1,66 @@
+"use client";
+
+import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
+import { LogOut, UserRound } from "lucide-react";
+import Navbar from "@/components/Navbar";
+import AppAreaNav from "@/components/AppAreaNav";
+import Logo from "@/components/Logo";
+import CommunityDiscordLink from "@/components/CommunityDiscordLink";
+import ProfileDirectorySection from "@/components/ProfileDirectorySection";
+import { useI18n } from "@/components/LocaleProvider";
+
+export default function DiscoverPageClient() {
+  const { data: session, status } = useSession();
+  const { t } = useI18n();
+  const isLoggedIn = status === "authenticated" && !!session?.user;
+
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
+      {isLoggedIn ? (
+        <header className="border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+              <Logo href="/" size="sm" />
+              <AppAreaNav active="discover" />
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <CommunityDiscordLink variant="header" />
+              {session.user.username ? (
+                <Link
+                  href={`/${session.user.username}`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-white/60 hover:text-white border border-white/10 hover:bg-white/5 rounded-lg transition-colors"
+                >
+                  <UserRound className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{t("nav.myProfile")}</span>
+                </Link>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="p-1.5 text-white/40 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+                title={t("dashboard.signOut")}
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </header>
+      ) : (
+        <Navbar />
+      )}
+
+      <main className={isLoggedIn ? "" : "pt-16"}>
+        <ProfileDirectorySection variant="page" />
+      </main>
+    </div>
+  );
+}

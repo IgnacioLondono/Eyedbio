@@ -20,6 +20,8 @@ export interface Messages {
     signup: string;
     myProfile: string;
     dashboard: string;
+    discover: string;
+    appAreas: string;
     menu: string;
   };
   landing: {
@@ -62,6 +64,8 @@ export interface Messages {
     profilesCount: string;
     profilesViewsLabel: string;
     profilesEmpty: string;
+    exploreProfilesCta: string;
+    exploreProfilesButton: string;
     features: readonly { title: string; desc: string }[];
     faqs: readonly { q: string; a: string }[];
   };
@@ -456,6 +460,8 @@ export const es: Messages = {
     signup: "Registrarse gratis",
     myProfile: "Mi perfil",
     dashboard: "Dashboard",
+    discover: "Descubre",
+    appAreas: "Secciones de la app",
     menu: "Menú",
   },
   landing: {
@@ -503,6 +509,8 @@ export const es: Messages = {
     profilesCount: "{count} perfiles",
     profilesViewsLabel: "visitas",
     profilesEmpty: "Aún no hay perfiles públicos. ¡Sé el primero!",
+    exploreProfilesCta: "Explora perfiles reales de la comunidad Eyed.bio.",
+    exploreProfilesButton: "Ver perfiles",
     features: [
       {
         title: "Todos tus enlaces",

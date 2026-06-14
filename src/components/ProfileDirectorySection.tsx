@@ -19,7 +19,11 @@ const TABS: { id: ProfileDirectorySort; icon: typeof Crown }[] = [
   { id: "name", icon: Users },
 ];
 
-export default function LandingProfilesSection() {
+interface Props {
+  variant?: "page" | "embedded";
+}
+
+export default function ProfileDirectorySection({ variant = "embedded" }: Props) {
   const { locale, tVars } = useI18n();
   const m = getMessages(locale).landing;
   const [sort, setSort] = useState<ProfileDirectorySort>("views");
@@ -53,14 +57,27 @@ export default function LandingProfilesSection() {
     return m.profilesTabAll;
   };
 
+  const isPage = variant === "page";
+
   return (
-    <section id="profiles" className="py-20 px-6 border-y border-white/5">
+    <section
+      id={isPage ? undefined : "profiles"}
+      className={
+        isPage
+          ? "py-8 px-6"
+          : "py-20 px-6 border-y border-white/5"
+      }
+    >
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+        <div className={`text-center ${isPage ? "mb-8" : "mb-10"}`}>
+          <h1
+            className={`font-bold mb-3 ${
+              isPage ? "text-2xl md:text-3xl" : "text-3xl md:text-4xl"
+            }`}
+          >
             {m.profilesTitle}{" "}
             <span className="text-purple-400">{m.profilesTitleHighlight}</span>
-          </h2>
+          </h1>
           <p className="text-white/50 max-w-2xl mx-auto text-sm md:text-base">
             {m.profilesSubtitle}
           </p>
