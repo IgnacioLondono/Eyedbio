@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { LogOut, UserRound } from "lucide-react";
@@ -59,7 +60,15 @@ export default function DiscoverPageClient() {
       )}
 
       <main className={isLoggedIn ? "" : "pt-16"}>
-        <ProfileDirectorySection variant="page" />
+        <Suspense
+          fallback={
+            <div className="py-20 flex justify-center">
+              <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          }
+        >
+          <ProfileDirectorySection variant="page" />
+        </Suspense>
       </main>
     </div>
   );

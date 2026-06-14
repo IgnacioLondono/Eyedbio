@@ -27,12 +27,24 @@ export async function listPublicProfiles(options: {
   sort?: ProfileDirectorySort;
   limit?: number;
   offset?: number;
+  search?: string;
 }): Promise<ProfileDirectoryResult> {
   const sort = options.sort ?? "views";
   const limit = Math.min(Math.max(options.limit ?? 48, 1), 100);
   const offset = Math.max(options.offset ?? 0, 0);
+  const search = options.search?.trim();
 
-  const where = { blockedAt: null };
+  const where = {
+    blockedAt: null,
+    ...(search
+      ? {
+          OR: [
+            { username: { contains: search, mode: "insensitive" as const } },
+            { displayName: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : {}),
+  };
 
   const orderBy =
     sort === "views"

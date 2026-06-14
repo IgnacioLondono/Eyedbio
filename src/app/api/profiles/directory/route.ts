@@ -16,9 +16,10 @@ export async function GET(request: Request) {
     : "views";
   const limit = Number(searchParams.get("limit") ?? "48");
   const offset = Number(searchParams.get("offset") ?? "0");
+  const search = searchParams.get("q")?.trim() || undefined;
 
   try {
-    const result = await listPublicProfiles({ sort, limit, offset });
+    const result = await listPublicProfiles({ sort, limit, offset, search });
     return NextResponse.json(result, {
       headers: {
         "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",

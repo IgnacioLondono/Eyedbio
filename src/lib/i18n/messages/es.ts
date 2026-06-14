@@ -66,6 +66,14 @@ export interface Messages {
     profilesEmpty: string;
     exploreProfilesCta: string;
     exploreProfilesButton: string;
+    profilesTabTopHint: string;
+    profilesTabRecentHint: string;
+    profilesTabAllHint: string;
+    profilesSearchPlaceholder: string;
+    profilesLoadMore: string;
+    profilesShowingCount: string;
+    profilesNoResults: string;
+    profilesTopRank: string;
     features: readonly { title: string; desc: string }[];
     faqs: readonly { q: string; a: string }[];
   };
@@ -511,6 +519,14 @@ export const es: Messages = {
     profilesEmpty: "Aún no hay perfiles públicos. ¡Sé el primero!",
     exploreProfilesCta: "Explora perfiles reales de la comunidad Eyed.bio.",
     exploreProfilesButton: "Ver perfiles",
+    profilesTabTopHint: "Solo los 3 perfiles con más visitas.",
+    profilesTabRecentHint: "Perfiles creados recientemente.",
+    profilesTabAllHint: "Todos los perfiles, orden alfabético. Busca por nombre o usuario.",
+    profilesSearchPlaceholder: "Buscar por nombre o @usuario…",
+    profilesLoadMore: "Cargar más",
+    profilesShowingCount: "{shown} de {total} perfiles",
+    profilesNoResults: "Ningún perfil coincide con tu búsqueda.",
+    profilesTopRank: "Top {rank}",
     features: [
       {
         title: "Todos tus enlaces",

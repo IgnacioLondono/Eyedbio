@@ -73,6 +73,14 @@ export const en: Messages = {
     profilesEmpty: "No public profiles yet. Be the first!",
     exploreProfilesCta: "Browse real profiles from the Eyed.bio community.",
     exploreProfilesButton: "Browse profiles",
+    profilesTabTopHint: "The 3 most viewed profiles only.",
+    profilesTabRecentHint: "Recently created profiles.",
+    profilesTabAllHint: "Every profile, A–Z. Search by name or username.",
+    profilesSearchPlaceholder: "Search by name or @username…",
+    profilesLoadMore: "Load more",
+    profilesShowingCount: "{shown} of {total} profiles",
+    profilesNoResults: "No profiles match your search.",
+    profilesTopRank: "Top {rank}",
     features: [
       {
         title: "All your links",
