@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { House } from "lucide-react";
 import { useI18n } from "@/components/LocaleProvider";
-import { writeProfileEnteredHistory } from "@/lib/client-navigation";
 
 interface Props {
   profileUsername: string;
@@ -31,7 +30,6 @@ export default function ProfileQuickNavButton({ profileUsername, viewerIsOwner }
 
   const leaveProfile = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    writeProfileEnteredHistory(false, "replace");
     router.push(href);
   };
 
