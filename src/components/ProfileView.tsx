@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Profile } from "@/types/profile";
 import { isLockedPublicProfile, LockedPublicProfile } from "@/types/public-profile";
@@ -21,6 +20,7 @@ import { resolveProfileTabIconUrl } from "@/lib/profile-tab-icon";
 import { enterProfileFromGesture } from "@/lib/profile-enter";
 import { resetBackgroundVideoAudioState } from "@/lib/profile-background-video-audio";
 import { PROFILE_VIEW_ROOT_ATTR, teardownProfilePresentation } from "@/lib/profile-teardown";
+import { pathsMatchRoute, useBrowserPathname } from "@/lib/use-browser-pathname";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
@@ -32,9 +32,9 @@ interface Props {
 }
 
 export default function ProfileView({ username, viewerIsOwner }: Props) {
-  const pathname = usePathname();
+  const browserPathname = useBrowserPathname();
   const profilePath = `/${username.toLowerCase()}`;
-  const isActiveRoute = pathname.toLowerCase() === profilePath;
+  const isActiveRoute = pathsMatchRoute(browserPathname, profilePath);
 
   const { locale: uiLocale } = useI18n();
   const { status } = useSession();

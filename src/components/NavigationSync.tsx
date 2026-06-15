@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { teardownProfilePresentation } from "@/lib/profile-teardown";
+import { teardownProfilePresentation, PROFILE_VIEW_ROOT_ATTR } from "@/lib/profile-teardown";
+import { useBrowserPathname } from "@/lib/use-browser-pathname";
 
 /**
  * Si la URL del navegador y el router de Next.js divergen (atrás/adelante),
@@ -10,6 +11,7 @@ import { teardownProfilePresentation } from "@/lib/profile-teardown";
  */
 export default function NavigationSync() {
   const pathname = usePathname();
+  const browserPathname = useBrowserPathname();
 
   useEffect(() => {
     const syncFromBrowser = () => {
@@ -35,6 +37,15 @@ export default function NavigationSync() {
       window.removeEventListener("pageshow", onPageShow);
     };
   }, [pathname]);
+
+  useEffect(() => {
+    if (browserPathname === pathname) return;
+    if (!document.querySelector(`[${PROFILE_VIEW_ROOT_ATTR}]`)) return;
+
+    teardownProfilePresentation();
+    const target = `${browserPathname}${window.location.search}${window.location.hash}`;
+    window.location.assign(target);
+  }, [browserPathname, pathname]);
 
   return null;
 }

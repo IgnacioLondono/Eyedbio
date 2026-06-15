@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { House } from "lucide-react";
 import { useI18n } from "@/components/LocaleProvider";
@@ -16,7 +15,6 @@ interface Props {
 export default function ProfileQuickNavButton({ profileUsername, viewerIsOwner }: Props) {
   const { data: session, status } = useSession();
   const { t } = useI18n();
-  const router = useRouter();
 
   const sessionIsOwner =
     status === "authenticated" &&
@@ -32,7 +30,7 @@ export default function ProfileQuickNavButton({ profileUsername, viewerIsOwner }
   const leaveProfile = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     teardownProfilePresentation();
-    router.push(href);
+    window.location.assign(href);
   };
 
   if (viewerIsOwner === undefined && status === "loading") {
