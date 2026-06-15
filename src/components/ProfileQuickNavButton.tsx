@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { House } from "lucide-react";
 import { useI18n } from "@/components/LocaleProvider";
+import { teardownProfilePresentation } from "@/lib/profile-teardown";
 
 interface Props {
   profileUsername: string;
@@ -26,10 +27,11 @@ export default function ProfileQuickNavButton({ profileUsername, viewerIsOwner }
   const label = isOwner ? t("quickNav.dashboard") : t("quickNav.home");
 
   const shellClass =
-    "fixed top-6 right-6 z-[210] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/80 backdrop-blur-md transition-colors hover:text-white hover:bg-black/55";
+    "absolute top-6 right-6 z-[210] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/80 backdrop-blur-md transition-colors hover:text-white hover:bg-black/55";
 
   const leaveProfile = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
+    teardownProfilePresentation();
     router.push(href);
   };
 

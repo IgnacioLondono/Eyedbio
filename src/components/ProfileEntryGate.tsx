@@ -10,7 +10,7 @@ export default function ProfileEntryGate({ text, onEnter }: Props) {
     <button
       type="button"
       aria-label={text}
-      className="fixed inset-0 z-[200] flex cursor-pointer items-center justify-center border-0 bg-black/45 backdrop-blur-xl transition-opacity duration-300"
+      className="absolute inset-0 z-[200] flex cursor-pointer items-center justify-center border-0 bg-black/45 backdrop-blur-xl transition-opacity duration-300"
       onPointerDown={(event) => {
         event.preventDefault();
         onEnter();
