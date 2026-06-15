@@ -178,7 +178,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
   if (loading) {
     return (
       <div {...shellProps}>
-        <div className="flex min-h-full items-center justify-center">
+        <div className="flex min-h-[100dvh] items-center justify-center">
           <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
@@ -188,7 +188,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
   if (lockedProfile) {
     return (
       <div {...shellProps}>
-        <div className="relative min-h-full w-full overflow-hidden">
+        <div className="relative h-[100dvh] w-full overflow-hidden">
           <ProfileQuickNavButton
             profileUsername={lockedProfile.username}
             viewerIsOwner={viewerIsOwner}
@@ -204,7 +204,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
     if (loadError) {
       return (
         <div {...shellProps}>
-          <div className="flex min-h-full flex-col items-center justify-center text-white px-6 text-center">
+          <div className="flex min-h-[100dvh] flex-col items-center justify-center text-white px-6 text-center">
             <p className="text-white/70 mb-2">{t("profile.loadError")}</p>
             <p className="text-white/45 text-sm mb-6 max-w-sm">{loadError}</p>
             <button
@@ -221,7 +221,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
 
     return (
       <div {...shellProps}>
-        <div className="flex min-h-full flex-col items-center justify-center text-white px-6">
+        <div className="flex min-h-[100dvh] flex-col items-center justify-center text-white px-6">
           <h1 className="text-6xl font-bold text-white/10 mb-4">404</h1>
           <p className="text-white/50 mb-2">{t("profile.notFoundTitle")}</p>
           <p className="text-white/35 text-sm mb-6">
@@ -249,7 +249,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
 
   return (
     <div {...shellProps}>
-      <div className="relative min-h-full w-full overflow-hidden">
+      <div className="relative h-[100dvh] w-full overflow-hidden">
         <ProfileTabIcon iconUrl={resolveProfileTabIconUrl(profile)} />
         <BackgroundMedia
           url={settings.backgroundUrl}
@@ -267,7 +267,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
         />
         <ClaimProfileCta />
         <div
-          className={`relative z-20 flex min-h-full w-full items-center justify-center px-6 py-6 ${
+          className={`absolute inset-0 z-20 flex items-center justify-center overflow-y-auto px-6 py-6 ${
             reserveBottomForCta ? "pb-28" : ""
           } ${needsGate ? "pointer-events-none" : ""}`}
         >
