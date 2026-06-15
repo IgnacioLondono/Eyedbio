@@ -7,6 +7,11 @@ import {
   resolveCardLayout,
   resolveLinkStyle,
 } from "@/lib/card-layout-config";
+import {
+  resolveIconColorMode,
+  resolveIconShape,
+  resolveProfileNameIconShape,
+} from "@/lib/icon-style-config";
 import { parseLocale } from "@/lib/i18n/types";
 import { parseMediaFocus } from "@/lib/media-focus";
 import { resolveBackgroundType } from "@/lib/media-config";
@@ -61,6 +66,9 @@ export function userToProfile(user: UserWithLinks): Profile {
     cardLayout: resolveCardLayout(storedSettings),
     linkStyle: resolveLinkStyle(storedSettings),
     avatarStyle: resolveAvatarStyle(storedSettings),
+    iconColorMode: resolveIconColorMode(storedSettings),
+    iconShape: resolveIconShape(storedSettings),
+    profileNameIconShape: resolveProfileNameIconShape(storedSettings),
     backgroundEffect: resolveBackgroundEffect(storedSettings.backgroundEffect),
     bannerUrl: storedSettings.bannerUrl ?? DEFAULT_SETTINGS.bannerUrl,
     avatarFocus: parseMediaFocus(storedSettings.avatarFocus),

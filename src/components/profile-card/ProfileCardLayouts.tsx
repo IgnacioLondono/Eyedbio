@@ -65,9 +65,7 @@ function LinksBlock({
     <ProfileLinksDisplay
       links={profile.links}
       linkStyle={linkStyle}
-      accentColor={settings.accentColor}
-      glowIcons={settings.glowIcons}
-      monochromeIcons={settings.monochromeIcons}
+      settings={settings}
       textColor={settings.textColor}
       compact={compact}
       locale={profile.locale}

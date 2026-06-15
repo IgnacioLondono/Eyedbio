@@ -329,6 +329,25 @@ export interface Messages {
     glowIcons: string;
     gradientCard: string;
     monochromeIcons: string;
+    iconsSection: string;
+    iconsSectionHint: string;
+    linkIconsSubsection: string;
+    profileIconsSubsection: string;
+    iconColorMode: string;
+    iconColorModePlatform: string;
+    iconColorModeUnified: string;
+    iconColor: string;
+    customLinkIconColor: string;
+    iconBackgroundColor: string;
+    iconBackgroundDefault: string;
+    iconShape: string;
+    iconShapeRounded: string;
+    iconShapeCircle: string;
+    iconShapeSquare: string;
+    profileNameIconShape: string;
+    profileNameIconRingColor: string;
+    profileNameIconRingDefault: string;
+    customLinkIconsHint: string;
     entrySectionTitle: string;
     entrySectionHint: string;
     entryGateEnabled: string;
@@ -852,6 +871,26 @@ export const es: Messages = {
     glowIcons: "Brillo en iconos",
     gradientCard: "Gradiente en tarjeta",
     monochromeIcons: "Iconos monocromáticos",
+    iconsSection: "Iconos",
+    iconsSectionHint: "Vista previa de cómo se verán los iconos de tus enlaces.",
+    linkIconsSubsection: "Enlaces",
+    profileIconsSubsection: "Perfil",
+    iconColorMode: "Color de iconos",
+    iconColorModePlatform: "Por plataforma",
+    iconColorModeUnified: "Un solo color",
+    iconColor: "Color de iconos",
+    customLinkIconColor: "Color de iconos personalizados",
+    iconBackgroundColor: "Fondo de iconos",
+    iconBackgroundDefault: "Por defecto (sin color)",
+    iconShape: "Forma de iconos de enlaces",
+    iconShapeRounded: "Redondeado",
+    iconShapeCircle: "Circular",
+    iconShapeSquare: "Cuadrado",
+    profileNameIconShape: "Forma del icono del nombre",
+    profileNameIconRingColor: "Borde del icono del nombre",
+    profileNameIconRingDefault: "Color de acento",
+    customLinkIconsHint:
+      "Sube un icono distinto por enlace en la pestaña Enlaces. Los colores de arriba se aplican al perfil público.",
     entrySectionTitle: "Pantalla de entrada",
     entrySectionHint:
       "Todos los visitantes ven esta pantalla antes de entrar. Al pulsar, arrancan el video y el audio.",
@@ -862,11 +901,11 @@ export const es: Messages = {
     browserTabTitlePlaceholder: "@tuusuario",
     browserTabTitleHint: "Lo que aparece en la pestaña del navegador. Déjalo vacío para usar el nombre por defecto.",
     browserTabSectionTitle: "Pestaña del navegador",
-    browserTabSectionHint: "Personaliza el título y el icono que ven los visitantes en la pestaña del navegador.",
+    browserTabSectionHint: "Personaliza el título de la pestaña. El icono se configura en Estilo.",
     browserTabIconLabel: "Icono de la pestaña",
     browserTabIconHint: "PNG, JPG, WebP o GIF · máx. 1 MB · recomendado 32×32 o 64×64 px",
     profileNameSectionTitle: "Nombre en el perfil",
-    profileNameSectionHint: "Animación e icono junto a tu nombre en la tarjeta. El brillo/neón está en Estilo.",
+    profileNameSectionHint: "Animación del nombre en la tarjeta. El icono y sus colores están en Estilo.",
     nameAnimation: "Animación de letras",
     profileNameIconLabel: "Icono junto al nombre",
     profileNameIconHint: "PNG, JPG, WebP o GIF · máx. 2 MB · se muestra al lado de tu nombre",

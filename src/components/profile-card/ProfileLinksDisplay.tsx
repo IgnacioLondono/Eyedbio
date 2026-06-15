@@ -2,7 +2,7 @@
 
 import { motion, type MotionProps } from "framer-motion";
 import { Globe } from "lucide-react";
-import { SocialLink, SocialPlatform } from "@/types/profile";
+import { SocialLink, SocialPlatform, ProfileSettings } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
 import { PlatformIcon } from "@/components/PlatformIcons";
 import CustomLinkIcon from "@/components/CustomLinkIcon";
@@ -12,13 +12,28 @@ import SocialLinks from "@/components/SocialLinks";
 import { t as translate } from "@/lib/i18n";
 import { getSocialLinkTitle, isSocialLinkActive } from "@/lib/social-link-utils";
 import { useSocialLinkAction } from "@/components/profile-card/useSocialLinkAction";
+import {
+  getIconContainerStyle,
+  getIconShapeClass,
+  getLinkIconColor,
+  getPlatformLinkColor,
+  resolveIconStyle,
+} from "@/lib/icon-style-config";
 
 interface Props {
   links: SocialLink[];
   linkStyle: LinkStyle;
-  accentColor: string;
-  glowIcons: boolean;
-  monochromeIcons: boolean;
+  settings: Pick<
+    ProfileSettings,
+    | "accentColor"
+    | "glowIcons"
+    | "monochromeIcons"
+    | "iconColorMode"
+    | "iconColor"
+    | "customLinkIconColor"
+    | "iconBackgroundColor"
+    | "iconShape"
+  >;
   textColor: string;
   compact?: boolean;
   locale?: "es" | "en";
@@ -29,13 +44,11 @@ function LinkIcon({
   link,
   color,
   sizeClass,
-  monochromeIcons,
   glowIcons,
 }: {
   link: SocialLink;
   color: string;
   sizeClass: string;
-  monochromeIcons?: boolean;
   glowIcons?: boolean;
 }) {
   if (link.iconUrl) {
@@ -149,22 +162,25 @@ function ProfileLinkWrap({
 
 function PillsLinks({
   links,
-  accentColor,
-  glowIcons,
-  monochromeIcons,
+  settings,
   textColor,
   compact,
   locale = "es",
   mutedColor,
 }: Omit<Props, "linkStyle">) {
+  const iconStyle = resolveIconStyle(settings as ProfileSettings);
   const visible = links.filter(isSocialLinkActive);
   if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
+
+  const iconShapeClass = getIconShapeClass(iconStyle.iconShape);
+  const containerStyle = getIconContainerStyle(iconStyle);
 
   return (
     <div className={`w-full flex flex-col ${compact ? "gap-1" : "gap-1.5"}`}>
       {visible.map((link, i) => {
         const config = PLATFORM_CONFIG[link.platform];
-        const color = monochromeIcons ? accentColor : config.color;
+        const color = getPlatformLinkColor(iconStyle, config.color);
+        const iconColor = getLinkIconColor(iconStyle, config.color, Boolean(link.iconUrl));
         const title = getSocialLinkTitle(link);
         const iconSize = compact ? "w-3.5 h-3.5" : "w-4 h-4";
 
@@ -193,17 +209,18 @@ function PillsLinks({
             }}
           >
             <span
-              className={`flex shrink-0 items-center justify-center ${compact ? "w-7 h-7" : "w-8 h-8"} rounded-md bg-white/5`}
+              className={`flex shrink-0 items-center justify-center ${compact ? "w-7 h-7" : "w-8 h-8"} ${iconShapeClass} bg-white/5`}
               style={{
                 color: link.iconUrl ? undefined : color,
-                filter: glowIcons && !link.iconUrl ? `drop-shadow(0 0 6px ${color})` : undefined,
+                filter: iconStyle.glowIcons ? `drop-shadow(0 0 6px ${color})` : undefined,
+                ...containerStyle,
               }}
             >
               <LinkIcon
                 link={link}
-                color={link.iconUrl ? accentColor : color}
+                color={iconColor}
                 sizeClass={iconSize}
-                glowIcons={glowIcons}
+                glowIcons={iconStyle.glowIcons}
               />
             </span>
             <span className="font-medium truncate" style={{ color: textColor }}>
@@ -218,41 +235,44 @@ function PillsLinks({
 
 function RowLinks({
   links,
-  accentColor,
-  glowIcons,
-  monochromeIcons,
+  settings,
   compact,
   locale = "es",
   mutedColor,
 }: Omit<Props, "linkStyle" | "textColor">) {
+  const iconStyle = resolveIconStyle(settings as ProfileSettings);
   const visible = links.filter(isSocialLinkActive);
   if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
 
   const btn = compact ? "w-8 h-8" : "w-10 h-10";
   const icon = compact ? "w-4 h-4" : "w-4 h-4";
+  const iconShapeClass = getIconShapeClass(iconStyle.iconShape);
+  const containerStyle = getIconContainerStyle(iconStyle);
 
   return (
     <div className={`flex flex-wrap justify-center gap-2 ${compact ? "" : "gap-2.5"}`}>
       {visible.map((link) => {
         const config = PLATFORM_CONFIG[link.platform];
-        const color = monochromeIcons ? accentColor : config.color;
+        const color = getPlatformLinkColor(iconStyle, config.color);
+        const iconColor = getLinkIconColor(iconStyle, config.color, Boolean(link.iconUrl));
 
         return (
           <ProfileLinkWrap
             key={link.id}
             link={link}
             locale={locale}
-            className={`flex items-center justify-center ${btn} rounded-full bg-white/10 border border-white/15 hover:bg-white/20 transition-colors`}
+            className={`flex items-center justify-center ${btn} ${iconShapeClass} bg-white/10 border border-white/15 hover:bg-white/20 transition-colors`}
             style={{
               color: link.iconUrl ? undefined : color,
-              filter: glowIcons && !link.iconUrl ? `drop-shadow(0 0 6px ${color})` : undefined,
+              filter: iconStyle.glowIcons ? `drop-shadow(0 0 6px ${color})` : undefined,
+              ...containerStyle,
             }}
           >
             <LinkIcon
               link={link}
-              color={link.iconUrl ? accentColor : color}
+              color={iconColor}
               sizeClass={icon}
-              glowIcons={glowIcons}
+              glowIcons={iconStyle.glowIcons}
             />
           </ProfileLinkWrap>
         );
@@ -263,14 +283,13 @@ function RowLinks({
 
 function ChipsLinks({
   links,
-  accentColor,
-  glowIcons,
-  monochromeIcons,
+  settings,
   textColor,
   compact,
   locale = "es",
   mutedColor,
 }: Omit<Props, "linkStyle">) {
+  const iconStyle = resolveIconStyle(settings as ProfileSettings);
   const visible = links.filter(isSocialLinkActive);
   if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
 
@@ -278,7 +297,8 @@ function ChipsLinks({
     <div className={`flex flex-wrap justify-center ${compact ? "gap-1.5" : "gap-2"}`}>
       {visible.map((link) => {
         const config = PLATFORM_CONFIG[link.platform];
-        const color = monochromeIcons ? accentColor : config.color;
+        const color = getPlatformLinkColor(iconStyle, config.color);
+        const iconColor = getLinkIconColor(iconStyle, config.color, Boolean(link.iconUrl));
         const title = getSocialLinkTitle(link);
         const iconSize = compact ? "w-3.5 h-3.5" : "w-4 h-4";
 
@@ -292,15 +312,15 @@ function ChipsLinks({
             }`}
             style={{
               color: textColor,
-              filter: glowIcons ? `drop-shadow(0 0 4px ${hexToRgba(color, 0.4)})` : undefined,
+              filter: iconStyle.glowIcons ? `drop-shadow(0 0 4px ${hexToRgba(color, 0.4)})` : undefined,
             }}
           >
             <span style={{ color: link.iconUrl ? undefined : color }}>
               <LinkIcon
                 link={link}
-                color={link.iconUrl ? accentColor : color}
+                color={iconColor}
                 sizeClass={iconSize}
-                glowIcons={glowIcons}
+                glowIcons={iconStyle.glowIcons}
               />
             </span>
             <span className="truncate max-w-[100px]">{title}</span>
@@ -314,9 +334,7 @@ function ChipsLinks({
 export default function ProfileLinksDisplay({
   links,
   linkStyle,
-  accentColor,
-  glowIcons,
-  monochromeIcons,
+  settings,
   textColor,
   compact = false,
   locale = "es",
@@ -328,9 +346,7 @@ export default function ProfileLinksDisplay({
     return (
       <SocialLinks
         links={links}
-        accentColor={accentColor}
-        glowIcons={glowIcons}
-        monochromeIcons={monochromeIcons}
+        settings={settings}
         compact={compact}
         mutedColor={muted}
         emptyLabel={translate(locale, "profile.noLinks")}
@@ -342,9 +358,7 @@ export default function ProfileLinksDisplay({
 
   const shared = {
     links,
-    accentColor,
-    glowIcons,
-    monochromeIcons,
+    settings,
     textColor,
     compact,
     locale,

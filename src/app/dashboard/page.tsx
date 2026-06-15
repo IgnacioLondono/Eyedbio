@@ -42,6 +42,7 @@ import LinkEditor from "@/components/LinkEditor";
 import ShareProfileButton from "@/components/ShareProfileButton";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
 import CardLayoutPicker from "@/components/CardLayoutPicker";
+import IconStylePicker from "@/components/IconStylePicker";
 import {
   resolveCardLayout,
   resolveLinkStyle,
@@ -516,14 +517,6 @@ function DashboardContent() {
                     />
                     <p className="text-xs text-white/35 mt-2">{t("dashboard.browserTabTitleHint")}</p>
                   </Field>
-                  <FileUpload
-                    kind="favicon"
-                    label={t("dashboard.browserTabIconLabel")}
-                    hint={t("dashboard.browserTabIconHint")}
-                    currentUrl={profile.settings.browserTabIconUrl}
-                    onUploaded={(url) => updateSettings({ browserTabIconUrl: url })}
-                    onClear={() => updateSettings({ browserTabIconUrl: "" })}
-                  />
                 </div>
                 <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
                   <div>
@@ -549,14 +542,6 @@ function DashboardContent() {
                       ))}
                     </select>
                   </Field>
-                  <FileUpload
-                    kind="profileIcon"
-                    label={t("dashboard.profileNameIconLabel")}
-                    hint={t("dashboard.profileNameIconHint")}
-                    currentUrl={profile.settings.profileNameIconUrl}
-                    onUploaded={(url) => updateSettings({ profileNameIconUrl: url })}
-                    onClear={() => updateSettings({ profileNameIconUrl: "" })}
-                  />
                 </div>
                 <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-3">
                   <h3 className="text-sm font-medium text-white">
@@ -948,21 +933,39 @@ function DashboardContent() {
                     ))}
                   </select>
                 </Field>
-                <Toggle
-                  label={t("dashboard.glowIcons")}
-                  checked={profile.settings.glowIcons}
-                  onChange={(v) => updateSettings({ glowIcons: v })}
-                />
+
+                <p className="text-xs uppercase tracking-wider text-white/40 pt-2">
+                  {t("dashboard.iconsSection")}
+                </p>
+
+                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
+                  <IconStylePicker
+                    settings={profile.settings}
+                    onChange={(patch) => updateSettings(patch)}
+                  />
+                  <FileUpload
+                    kind="profileIcon"
+                    label={t("dashboard.profileNameIconLabel")}
+                    hint={t("dashboard.profileNameIconHint")}
+                    currentUrl={profile.settings.profileNameIconUrl}
+                    onUploaded={(url) => updateSettings({ profileNameIconUrl: url })}
+                    onClear={() => updateSettings({ profileNameIconUrl: "" })}
+                  />
+                  <FileUpload
+                    kind="favicon"
+                    label={t("dashboard.browserTabIconLabel")}
+                    hint={t("dashboard.browserTabIconHint")}
+                    currentUrl={profile.settings.browserTabIconUrl}
+                    onUploaded={(url) => updateSettings({ browserTabIconUrl: url })}
+                    onClear={() => updateSettings({ browserTabIconUrl: "" })}
+                  />
+                </div>
+
                 <Toggle
                   label={t("dashboard.gradientCard")}
                   checked={profile.settings.gradientEnabled}
                   onChange={(v) => updateSettings({ gradientEnabled: v })}
                   disabled={profile.settings.transparentCard}
-                />
-                <Toggle
-                  label={t("dashboard.monochromeIcons")}
-                  checked={profile.settings.monochromeIcons}
-                  onChange={(v) => updateSettings({ monochromeIcons: v })}
                 />
               </>
             )}

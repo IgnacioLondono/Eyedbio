@@ -14,6 +14,7 @@ import {
 import { resolveNameAnimation } from "@/lib/name-animations";
 import AnimatedDisplayName from "@/components/AnimatedDisplayName";
 import { resolveAvatarStyle } from "@/lib/card-layout-config";
+import { getIconShapeClass, resolveProfileNameIconShape } from "@/lib/icon-style-config";
 import { BADGE_CONFIG } from "@/lib/badges";
 import { t as translate } from "@/lib/i18n";
 import { resolveProfileDisplay } from "@/lib/profile-display-config";
@@ -175,6 +176,9 @@ export function ProfileNameBlock({
   const nameEffectClass = getNameEffectClass(nameEffect);
   const nameEffectStyle = getNameEffectStyle(nameEffect, settings.accentColor, textColor);
   const profileNameIcon = settings.profileNameIconUrl?.trim();
+  const profileNameIconShape = resolveProfileNameIconShape(settings);
+  const profileNameIconRing =
+    settings.profileNameIconRingColor?.trim() || settings.accentColor;
   const centered = align === "center";
   const rowAlign = centered ? "justify-center" : "justify-start";
   const textAlign = centered ? "text-center" : "text-left";
@@ -186,7 +190,12 @@ export function ProfileNameBlock({
           <img
             src={getMediaSrc(profileNameIcon)}
             alt=""
-            className={`${scale.compact ? "h-7 w-7" : "h-9 w-9"} shrink-0 rounded-lg object-cover ring-1 ring-white/15`}
+            className={`${scale.compact ? "h-7 w-7" : "h-9 w-9"} shrink-0 object-cover ${getIconShapeClass(profileNameIconShape)}`}
+            style={{
+              boxShadow: `0 0 0 1px ${hexToRgba(profileNameIconRing, 0.45)}${
+                settings.glowIcons ? `, 0 0 10px ${hexToRgba(profileNameIconRing, 0.35)}` : ""
+              }`,
+            }}
             draggable={false}
             referrerPolicy="no-referrer"
           />

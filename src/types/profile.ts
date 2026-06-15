@@ -102,6 +102,20 @@ export interface ProfileSettings {
   glowIcons: boolean;
   gradientEnabled: boolean;
   monochromeIcons: boolean;
+  /** Colorear todos los iconos con un solo color (sustituye monochromeIcons) */
+  iconColorMode?: "platform" | "unified";
+  /** Color unificado de iconos de plataforma */
+  iconColor?: string;
+  /** Color de iconos personalizados subidos por enlace */
+  customLinkIconColor?: string;
+  /** Fondo de los botones de icono */
+  iconBackgroundColor?: string;
+  /** Forma del contenedor de iconos de enlaces */
+  iconShape?: "rounded" | "circle" | "square";
+  /** Forma del icono junto al nombre */
+  profileNameIconShape?: "rounded" | "circle" | "square";
+  /** Borde del icono junto al nombre */
+  profileNameIconRingColor?: string;
   transparentCard: boolean;
   showCardBorder: boolean;
   showCardShadow: boolean;

@@ -2,18 +2,23 @@
 
 import { motion } from "framer-motion";
 import { Globe } from "lucide-react";
-import { SocialLink, SocialPlatform } from "@/types/profile";
+import { SocialLink, SocialPlatform, ProfileSettings } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/platforms";
 import { PlatformIcon } from "@/components/PlatformIcons";
 import CustomLinkIcon from "@/components/CustomLinkIcon";
 import { isSocialLinkActive } from "@/lib/social-link-utils";
 import { useSocialLinkAction } from "@/components/profile-card/useSocialLinkAction";
+import {
+  getIconContainerStyle,
+  getIconShapeClass,
+  getLinkIconColor,
+  getPlatformLinkColor,
+  resolveIconStyle,
+} from "@/lib/icon-style-config";
 
 interface Props {
   links: SocialLink[];
-  accentColor: string;
-  glowIcons: boolean;
-  monochromeIcons: boolean;
+  settings: Pick<ProfileSettings, "accentColor" | "glowIcons" | "monochromeIcons" | "iconColorMode" | "iconColor" | "customLinkIconColor" | "iconBackgroundColor" | "iconShape">;
   compact?: boolean;
   mutedColor?: string;
   emptyLabel?: string;
@@ -54,38 +59,38 @@ function LinkIcon({
 
 function SocialLinkButton({
   link,
-  accentColor,
-  glowIcons,
-  monochromeIcons,
+  settings,
   compact,
   copyHint,
   copiedLabel,
   index,
 }: {
   link: SocialLink;
-  accentColor: string;
-  glowIcons: boolean;
-  monochromeIcons: boolean;
+  settings: Props["settings"];
   compact: boolean;
   copyHint?: string;
   copiedLabel?: string;
   index: number;
 }) {
+  const iconStyle = resolveIconStyle(settings as ProfileSettings);
   const config = PLATFORM_CONFIG[link.platform];
-  const color = monochromeIcons ? accentColor : config.color;
-  const iconColor = link.iconUrl ? accentColor : color;
+  const color = getPlatformLinkColor(iconStyle, config.color);
+  const iconColor = getLinkIconColor(iconStyle, config.color, Boolean(link.iconUrl));
   const { copyOnly, href, title, copied, activate } = useSocialLinkAction(link);
   const iconSize = compact ? "w-9 h-9" : "w-12 h-12";
+  const shapeClass = getIconShapeClass(iconStyle.iconShape);
+  const containerStyle = getIconContainerStyle(iconStyle);
   const tooltip = copyOnly
     ? copied
       ? (copiedLabel ?? title)
       : `${title}${copyHint ? ` · ${copyHint}` : ""}`
     : title;
 
-  const className = `flex items-center justify-center ${iconSize} rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors overflow-hidden`;
+  const className = `flex items-center justify-center ${iconSize} ${shapeClass} bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors overflow-hidden`;
   const style = {
     color: link.iconUrl ? undefined : color,
-    filter: glowIcons && !link.iconUrl ? `drop-shadow(0 0 8px ${color})` : undefined,
+    filter: iconStyle.glowIcons ? `drop-shadow(0 0 8px ${color})` : undefined,
+    ...containerStyle,
   } as const;
 
   if (copyOnly) {
@@ -104,7 +109,7 @@ function SocialLinkButton({
         className={`${className} cursor-copy`}
         style={style}
       >
-        <LinkIcon link={link} color={iconColor} compact={compact} glowIcons={glowIcons} />
+        <LinkIcon link={link} color={iconColor} compact={compact} glowIcons={iconStyle.glowIcons} />
       </motion.button>
     );
   }
@@ -124,16 +129,14 @@ function SocialLinkButton({
       className={className}
       style={style}
     >
-      <LinkIcon link={link} color={iconColor} compact={compact} glowIcons={glowIcons} />
+      <LinkIcon link={link} color={iconColor} compact={compact} glowIcons={iconStyle.glowIcons} />
     </motion.a>
   );
 }
 
 export default function SocialLinks({
   links,
-  accentColor,
-  glowIcons,
-  monochromeIcons,
+  settings,
   compact = false,
   mutedColor = "rgba(255,255,255,0.3)",
   emptyLabel = "Sin enlaces aún",
@@ -166,9 +169,7 @@ export default function SocialLinks({
         <SocialLinkButton
           key={link.id}
           link={link}
-          accentColor={accentColor}
-          glowIcons={glowIcons}
-          monochromeIcons={monochromeIcons}
+          settings={settings}
           compact={compact}
           copyHint={copyHint}
           copiedLabel={copiedLabel}
