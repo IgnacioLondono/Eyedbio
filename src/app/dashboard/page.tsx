@@ -93,7 +93,7 @@ function DashboardContent() {
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const tabParam = searchParams.get("tab");
-  const tab: Tab = tabParam ? parseTab(tabParam) : readStoredDashboardTab() ?? "general";
+  const tab: Tab = tabParam ? parseTab(tabParam) : "general";
   const [isDirty, setIsDirty] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -133,18 +133,17 @@ function DashboardContent() {
   useEffect(() => {
     if (searchParams.get("tab")) return;
     const stored = readStoredDashboardTab();
-    if (stored) {
+    if (stored && stored !== "general") {
       router.replace(`${pathname}?tab=${stored}`, { scroll: false });
     }
   }, [pathname, router, searchParams]);
 
-  const setTab = (nextTab: Tab) => {
+  const persistTab = (nextTab: Tab) => {
     try {
       localStorage.setItem(DASHBOARD_TAB_STORAGE_KEY, nextTab);
     } catch {
       /* ignore */
     }
-    router.replace(`${pathname}?tab=${nextTab}`, { scroll: false });
   };
 
   const update = (partial: Partial<Profile>) => {
@@ -396,20 +395,36 @@ function DashboardContent() {
       >
         <div className="relative z-20 min-w-0 w-full max-w-2xl">
           <div className="grid grid-cols-5 gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6 w-full max-w-xl">
-            {tabs.map((tabItem) => (
-              <button
+            {tabs.map((tabItem) => {
+              const href = `/dashboard?tab=${tabItem.id}`;
+              const isCurrent = tab === tabItem.id;
+
+              return (
+              <Link
                 key={tabItem.id}
-                onClick={() => setTab(tabItem.id)}
+                href={href}
+                replace
+                scroll={false}
+                onClick={(event) => {
+                  persistTab(tabItem.id);
+                  if (isCurrent) {
+                    event.preventDefault();
+                    return;
+                  }
+                  event.preventDefault();
+                  router.push(href);
+                }}
                 className={`flex items-center justify-center gap-1 py-2.5 px-1 rounded-lg text-[11px] sm:text-xs font-medium transition-all ${
-                  tab === tabItem.id
+                  isCurrent
                     ? "bg-purple-600 text-white shadow-lg"
                     : "text-white/50 hover:text-white hover:bg-white/5"
                 }`}
               >
                 <tabItem.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
                 <span className="truncate">{tabItem.label}</span>
-              </button>
-            ))}
+              </Link>
+            );
+            })}
           </div>
 
           <div className="space-y-5">

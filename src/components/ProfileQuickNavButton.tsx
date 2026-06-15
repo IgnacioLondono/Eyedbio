@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { House } from "lucide-react";
 import { useI18n } from "@/components/LocaleProvider";
+import { writeProfileEnteredHistory } from "@/lib/client-navigation";
 
 interface Props {
   profileUsername: string;
@@ -14,6 +16,7 @@ interface Props {
 export default function ProfileQuickNavButton({ profileUsername, viewerIsOwner }: Props) {
   const { data: session, status } = useSession();
   const { t } = useI18n();
+  const router = useRouter();
 
   const sessionIsOwner =
     status === "authenticated" &&
@@ -25,6 +28,12 @@ export default function ProfileQuickNavButton({ profileUsername, viewerIsOwner }
 
   const shellClass =
     "fixed top-6 right-6 z-[210] inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/40 text-white/80 backdrop-blur-md transition-colors hover:text-white hover:bg-black/55";
+
+  const leaveProfile = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    writeProfileEnteredHistory(false, "replace");
+    router.push(href);
+  };
 
   if (viewerIsOwner === undefined && status === "loading") {
     return (
@@ -39,7 +48,13 @@ export default function ProfileQuickNavButton({ profileUsername, viewerIsOwner }
   }
 
   return (
-    <Link href={href} className={shellClass} aria-label={label} title={label}>
+    <Link
+      href={href}
+      className={shellClass}
+      aria-label={label}
+      title={label}
+      onClick={leaveProfile}
+    >
       <House className="h-4 w-4" />
     </Link>
   );
