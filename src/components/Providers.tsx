@@ -4,6 +4,8 @@ import { SessionProvider } from "next-auth/react";
 import { LocaleProvider } from "@/components/LocaleProvider";
 import { SiteSettingsProvider } from "@/components/SiteSettingsProvider";
 import MediaGestureTracker from "@/components/MediaGestureTracker";
+import NavigationSync from "@/components/NavigationSync";
+import RouteKey from "@/components/RouteKey";
 import type { AppLocale } from "@/lib/i18n/types";
 import type { SiteSettingsConfig } from "@/lib/site-settings-config";
 
@@ -21,7 +23,8 @@ export default function Providers({
       <LocaleProvider initialLocale={initialLocale}>
         <SiteSettingsProvider initialSettings={initialSiteSettings}>
           <MediaGestureTracker />
-          {children}
+          <NavigationSync />
+          <RouteKey>{children}</RouteKey>
         </SiteSettingsProvider>
       </LocaleProvider>
     </SessionProvider>
