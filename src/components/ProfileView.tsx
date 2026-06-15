@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Profile } from "@/types/profile";
 import { isLockedPublicProfile, LockedPublicProfile } from "@/types/public-profile";
@@ -19,6 +20,7 @@ import { getProfileDocumentTitle, resolveProfileDisplay } from "@/lib/profile-di
 import { resolveProfileTabIconUrl } from "@/lib/profile-tab-icon";
 import { enterProfileFromGesture } from "@/lib/profile-enter";
 import { resetBackgroundVideoAudioState } from "@/lib/profile-background-video-audio";
+import { PROFILE_VIEW_ROOT_ATTR, teardownProfilePresentation } from "@/lib/profile-teardown";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
@@ -30,6 +32,10 @@ interface Props {
 }
 
 export default function ProfileView({ username, viewerIsOwner }: Props) {
+  const pathname = usePathname();
+  const profilePath = `/${username.toLowerCase()}`;
+  const isActiveRoute = pathname.toLowerCase() === profilePath;
+
   const { locale: uiLocale } = useI18n();
   const { status } = useSession();
   const site = useSiteSettings();
@@ -106,23 +112,33 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
   }, [username, uiLocale]);
 
   useEffect(() => {
+    if (!isActiveRoute) return;
     void loadProfile();
-    return () => resetBackgroundVideoAudioState();
-  }, [loadProfile]);
+    return () => teardownProfilePresentation();
+  }, [loadProfile, isActiveRoute]);
 
   useEffect(() => {
-    if (profile) {
-      document.title = getProfileDocumentTitle(profile);
-      return;
+    if (!isActiveRoute) {
+      teardownProfilePresentation();
     }
-    if (lockedProfile) {
-      document.title = `${lockedProfile.displayName} (@${lockedProfile.username}) — Eyed.bio`;
-      return;
-    }
-    if (!loading && !loadError) {
-      document.title = t("profile.pageTitleNotFound");
-    }
-  }, [profile, lockedProfile, loading, loadError, t]);
+  }, [isActiveRoute]);
+
+  useEffect(() => () => teardownProfilePresentation(), []);
+
+  useEffect(() => {
+    if (!isActiveRoute || !profile) return;
+    document.title = getProfileDocumentTitle(profile);
+  }, [isActiveRoute, profile]);
+
+  useEffect(() => {
+    if (!isActiveRoute || !lockedProfile) return;
+    document.title = `${lockedProfile.displayName} (@${lockedProfile.username}) — Eyed.bio`;
+  }, [isActiveRoute, lockedProfile]);
+
+  useEffect(() => {
+    if (!isActiveRoute || loading || loadError || profile || lockedProfile) return;
+    document.title = t("profile.pageTitleNotFound");
+  }, [isActiveRoute, loading, loadError, profile, lockedProfile, t]);
 
   useEffect(() => {
     setEntered(false);
@@ -149,23 +165,37 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
     return () => cancelAnimationFrame(frame);
   }, [entered, profile]);
 
+  if (!isActiveRoute) {
+    return null;
+  }
+
+  const shellProps = {
+    [PROFILE_VIEW_ROOT_ATTR]: username,
+    className:
+      "fixed inset-0 z-40 overflow-hidden bg-[#0a0a0f] isolate [transform:translateZ(0)]",
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+      <div {...shellProps}>
+        <div className="flex min-h-full items-center justify-center">
+          <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        </div>
       </div>
     );
   }
 
   if (lockedProfile) {
     return (
-      <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">
-        <ProfileQuickNavButton
-          profileUsername={lockedProfile.username}
-          viewerIsOwner={viewerIsOwner}
-        />
-        <ClaimProfileCta />
-        <ProfileAccessGate profile={lockedProfile} onUnlocked={loadProfile} />
+      <div {...shellProps}>
+        <div className="relative min-h-full w-full overflow-hidden">
+          <ProfileQuickNavButton
+            profileUsername={lockedProfile.username}
+            viewerIsOwner={viewerIsOwner}
+          />
+          <ClaimProfileCta />
+          <ProfileAccessGate profile={lockedProfile} onUnlocked={loadProfile} />
+        </div>
       </div>
     );
   }
@@ -173,33 +203,37 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
   if (!profile) {
     if (loadError) {
       return (
-        <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center text-white px-6 text-center">
-          <p className="text-white/70 mb-2">{t("profile.loadError")}</p>
-          <p className="text-white/45 text-sm mb-6 max-w-sm">{loadError}</p>
-          <button
-            type="button"
-            onClick={() => void loadProfile()}
-            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium transition-colors"
-          >
-            {t("common.retry")}
-          </button>
+        <div {...shellProps}>
+          <div className="flex min-h-full flex-col items-center justify-center text-white px-6 text-center">
+            <p className="text-white/70 mb-2">{t("profile.loadError")}</p>
+            <p className="text-white/45 text-sm mb-6 max-w-sm">{loadError}</p>
+            <button
+              type="button"
+              onClick={() => void loadProfile()}
+              className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium transition-colors"
+            >
+              {t("common.retry")}
+            </button>
+          </div>
         </div>
       );
     }
 
     return (
-      <div className="min-h-screen bg-[#0a0a0f] flex flex-col items-center justify-center text-white px-6">
-        <h1 className="text-6xl font-bold text-white/10 mb-4">404</h1>
-        <p className="text-white/50 mb-2">{t("profile.notFoundTitle")}</p>
-        <p className="text-white/35 text-sm mb-6">
-          {tV("profile.notFoundHint", { username: username.toLowerCase() })}
-        </p>
-        <a
-          href="/signup"
-          className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium transition-colors"
-        >
-          {t("profile.createProfile")}
-        </a>
+      <div {...shellProps}>
+        <div className="flex min-h-full flex-col items-center justify-center text-white px-6">
+          <h1 className="text-6xl font-bold text-white/10 mb-4">404</h1>
+          <p className="text-white/50 mb-2">{t("profile.notFoundTitle")}</p>
+          <p className="text-white/35 text-sm mb-6">
+            {tV("profile.notFoundHint", { username: username.toLowerCase() })}
+          </p>
+          <a
+            href="/signup"
+            className="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 rounded-lg text-sm font-medium transition-colors"
+          >
+            {t("profile.createProfile")}
+          </a>
+        </div>
       </div>
     );
   }
@@ -214,34 +248,37 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
   const mediaActive = entered;
 
   return (
-    <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#0a0a0f]">
-      <ProfileTabIcon iconUrl={resolveProfileTabIconUrl(profile)} />
-      <BackgroundMedia
-        url={settings.backgroundUrl}
-        type={profile.backgroundType}
-        focus={settings.backgroundFocus}
-        videoAudioEnabled={backgroundVideoAudio}
-        deferPlayback={needsGate}
-      />
-      <div className="fixed inset-0 z-[1] bg-black/50 pointer-events-none" />
-      <BackgroundEffects effect={settings.backgroundEffect} />
-      <ProfileQuickNavButton
-        profileUsername={profile.username}
-        viewerIsOwner={viewerIsOwner}
-      />
-      <ClaimProfileCta />
-      <div
-        className={`relative z-20 flex min-h-[100dvh] w-full items-center justify-center px-6 py-6 ${
-          reserveBottomForCta ? "pb-28" : ""
-        } ${needsGate ? "pointer-events-none" : ""}`}
-      >
-        <div className="mx-auto w-full max-w-md flex justify-center">
-          <ProfileCard profile={profile} showControls={mediaActive} mediaActive={mediaActive} />
+    <div {...shellProps}>
+      <div className="relative min-h-full w-full overflow-hidden">
+        <ProfileTabIcon iconUrl={resolveProfileTabIconUrl(profile)} />
+        <BackgroundMedia
+          url={settings.backgroundUrl}
+          type={profile.backgroundType}
+          focus={settings.backgroundFocus}
+          videoAudioEnabled={backgroundVideoAudio}
+          deferPlayback={needsGate}
+          contained
+        />
+        <div className="absolute inset-0 z-[1] bg-black/50 pointer-events-none" />
+        <BackgroundEffects effect={settings.backgroundEffect} contained />
+        <ProfileQuickNavButton
+          profileUsername={profile.username}
+          viewerIsOwner={viewerIsOwner}
+        />
+        <ClaimProfileCta />
+        <div
+          className={`relative z-20 flex min-h-full w-full items-center justify-center px-6 py-6 ${
+            reserveBottomForCta ? "pb-28" : ""
+          } ${needsGate ? "pointer-events-none" : ""}`}
+        >
+          <div className="mx-auto w-full max-w-md flex justify-center">
+            <ProfileCard profile={profile} showControls={mediaActive} mediaActive={mediaActive} />
+          </div>
         </div>
+        {needsGate ? (
+          <ProfileEntryGate text={display.entryGateText} onEnter={handleEnter} />
+        ) : null}
       </div>
-      {needsGate ? (
-        <ProfileEntryGate text={display.entryGateText} onEnter={handleEnter} />
-      ) : null}
     </div>
   );
 }

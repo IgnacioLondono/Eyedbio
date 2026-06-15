@@ -14,7 +14,7 @@ export default function ClaimProfileCta() {
   if (!site.claimProfileCtaEnabled || status !== "unauthenticated") return null;
 
   return (
-    <div className="fixed bottom-8 md:bottom-10 left-1/2 z-30 w-[calc(100%-2rem)] max-w-md -translate-x-1/2">
+    <div className="absolute bottom-8 md:bottom-10 left-1/2 z-30 w-[calc(100%-2rem)] max-w-md -translate-x-1/2">
       <div className="rounded-2xl border border-white/10 bg-black/70 px-5 py-4 shadow-2xl backdrop-blur-md text-center">
         <span className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-purple-500/20 text-purple-300">
           <Sparkles className="h-4 w-4" />
