@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { Compass, LayoutDashboard } from "lucide-react";
 import { useI18n } from "@/components/LocaleProvider";
+import { pathsMatch } from "@/lib/client-navigation";
 
 export type AppArea = "dashboard" | "discover";
 
@@ -17,6 +19,8 @@ const AREAS: { id: AppArea; href: string; icon: typeof LayoutDashboard }[] = [
 
 export default function AppAreaNav({ active }: Props) {
   const { t } = useI18n();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const labels: Record<AppArea, string> = {
     dashboard: t("nav.editProfile"),
@@ -30,10 +34,22 @@ export default function AppAreaNav({ active }: Props) {
     >
       {AREAS.map(({ id, href, icon: Icon }) => {
         const isActive = active === id;
+        const isCurrentPath = pathsMatch(pathname, href);
+
         return (
           <Link
             key={id}
             href={href}
+            scroll={false}
+            aria-current={isActive ? "page" : undefined}
+            onClick={(event) => {
+              if (isCurrentPath) {
+                event.preventDefault();
+                return;
+              }
+              event.preventDefault();
+              router.push(href);
+            }}
             className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
               isActive
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"

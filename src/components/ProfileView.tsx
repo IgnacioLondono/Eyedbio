@@ -19,6 +19,10 @@ import { getProfileDocumentTitle, resolveProfileDisplay } from "@/lib/profile-di
 import { resolveProfileTabIconUrl } from "@/lib/profile-tab-icon";
 import { enterProfileFromGesture } from "@/lib/profile-enter";
 import { resetBackgroundVideoAudioState } from "@/lib/profile-background-video-audio";
+import {
+  readProfileEnteredFromHistory,
+  writeProfileEnteredHistory,
+} from "@/lib/client-navigation";
 import { useI18n } from "@/components/LocaleProvider";
 import { useSiteSettings } from "@/components/SiteSettingsProvider";
 import { t as translate, tVars as translateVars } from "@/lib/i18n";
@@ -39,7 +43,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
   const [lockedProfile, setLockedProfile] = useState<LockedPublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [entered, setEntered] = useState(false);
+  const [entered, setEntered] = useState(() => readProfileEnteredFromHistory());
   const viewPendingRef = useRef(false);
   const enterAudioPendingRef = useRef(false);
 
@@ -58,6 +62,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
     setProfile(null);
     setLoadError(null);
     setEntered(false);
+    writeProfileEnteredHistory(false, "replace");
     viewPendingRef.current = false;
     resetBackgroundVideoAudioState();
 
@@ -124,30 +129,46 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
     }
   }, [profile, lockedProfile, loading, loadError, t]);
 
+  useEffect(() => {
+    setEntered(readProfileEnteredFromHistory());
+  }, [username]);
+
+  useEffect(() => {
+    const onPopState = (event: PopStateEvent) => {
+      const nextEntered = Boolean(
+        (event.state as { eyedProfileEntered?: boolean } | null)?.eyedProfileEntered
+      );
+      if (!nextEntered) {
+        enterAudioPendingRef.current = false;
+        resetBackgroundVideoAudioState();
+      }
+      setEntered(nextEntered);
+    };
+
+    const onPageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setEntered(readProfileEnteredFromHistory());
+      }
+    };
+
+    window.addEventListener("popstate", onPopState);
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      window.removeEventListener("popstate", onPopState);
+      window.removeEventListener("pageshow", onPageShow);
+    };
+  }, []);
+
   const handleEnter = useCallback(() => {
     if (!profile || entered) return;
     enterAudioPendingRef.current = true;
     setEntered(true);
-    window.history.pushState({ eyedProfileEntered: true }, "", window.location.href);
+    writeProfileEnteredHistory(true, "push");
     if (viewPendingRef.current) {
       viewPendingRef.current = false;
       void recordView();
     }
   }, [profile, entered, recordView]);
-
-  useEffect(() => {
-    const onPopState = () => {
-      setEntered((wasEntered) => {
-        if (!wasEntered) return wasEntered;
-        enterAudioPendingRef.current = false;
-        resetBackgroundVideoAudioState();
-        return false;
-      });
-    };
-
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, []);
 
   useEffect(() => {
     if (!entered || !profile || !enterAudioPendingRef.current) return;

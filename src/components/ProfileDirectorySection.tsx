@@ -310,11 +310,22 @@ function ProfileDirectoryContent({ variant = "embedded" }: Props) {
                   : m.profilesTabAll;
 
             if (syncUrl) {
+              const href = buildDiscoverHref(id, id === "name" ? searchQuery : undefined);
+              const isCurrent = sort === id;
+
               return (
                 <Link
                   key={id}
-                  href={buildDiscoverHref(id, id === "name" ? searchQuery : undefined)}
+                  href={href}
                   scroll={false}
+                  onClick={(event) => {
+                    if (isCurrent) {
+                      event.preventDefault();
+                      return;
+                    }
+                    event.preventDefault();
+                    router.push(href);
+                  }}
                   className={className}
                 >
                   <Icon className="w-4 h-4 shrink-0" />
