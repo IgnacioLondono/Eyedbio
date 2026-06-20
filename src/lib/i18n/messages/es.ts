@@ -310,6 +310,13 @@ export interface Messages {
     audioClipStop: string;
     playAudio: string;
     backgroundEffect: string;
+    backgroundDimLabel: string;
+    pageOverlay: string;
+    pageOverlayNone: string;
+    pageOverlayScanlines: string;
+    pageOverlayGrain: string;
+    pageOverlayVignette: string;
+    pageOverlayCrt: string;
     effectCategory: string;
     opacityLabel: string;
     opacityDisabled: string;
@@ -852,6 +859,13 @@ export const es: Messages = {
     audioClipStop: "Detener",
     playAudio: "Reproducir audio en el perfil",
     backgroundEffect: "Efecto de fondo",
+    backgroundDimLabel: "Oscurecer fondo ({percent}%)",
+    pageOverlay: "Overlay visual",
+    pageOverlayNone: "Ninguno",
+    pageOverlayScanlines: "Scanlines",
+    pageOverlayGrain: "Grano",
+    pageOverlayVignette: "Viñeta",
+    pageOverlayCrt: "CRT (scanlines + viñeta)",
     effectCategory: "Categoría",
     opacityLabel: "Opacidad del fondo ({percent}%)",
     opacityDisabled: "Desactivado en modo transparente.",
@@ -999,9 +1013,10 @@ export const es: Messages = {
     hero: { label: "Hero", description: "Avatar grande, nombre destacado y fila de iconos." },
     split: { label: "Lateral", description: "Avatar a la izquierda y texto al lado." },
     banner: { label: "Banner", description: "Cabecera visual con avatar superpuesto." },
-    minimal: { label: "Minimal", description: "Poco contenedor; contenido flotando sobre el fondo." },
+    minimal: { label: "Minimal", description: "Avatar y nombre flotando sobre el fondo, sin caja." },
     stack: { label: "Stack", description: "Enlaces anchos tipo botón debajo del perfil." },
     glass: { label: "Cristal", description: "Panel ancho con pie dividido (visitas + redes)." },
+    bar: { label: "Barra", description: "Tarjeta horizontal ancha estilo guns.lol." },
   },
   linkStyles: {
     icons: { label: "Iconos", description: "Cuadrícula de iconos con hover." },

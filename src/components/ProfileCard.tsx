@@ -1,7 +1,7 @@
 "use client";
 
 import { Profile } from "@/types/profile";
-import { resolveCardLayout } from "@/lib/card-layout-config";
+import { resolveCardLayout, getCardMaxWidthClass } from "@/lib/card-layout-config";
 import { resolveProfileDisplay } from "@/lib/profile-display-config";
 import { getEffectiveAudioUrl, getEffectiveAudioClipDuration, isBackgroundProfileAudio } from "@/lib/profile-audio";
 import {
@@ -23,7 +23,6 @@ interface Props {
 }
 
 /** Ancho máximo uniforme en vista previa para que el cambio de layout no “salte” horizontalmente. */
-const COMPACT_CARD_MAX_WIDTH = "max-w-[280px]";
 
 export default function ProfileCard({
   profile,
@@ -36,11 +35,9 @@ export default function ProfileCard({
   const display = resolveProfileDisplay(profile.settings);
   const Layout = CARD_LAYOUT_COMPONENTS[layout];
   const maxWidth =
-    compact && !showcase
-      ? COMPACT_CARD_MAX_WIDTH
-      : showcase
-        ? COMPACT_CARD_MAX_WIDTH
-        : undefined;
+    compact || showcase
+      ? getCardMaxWidthClass(layout, true)
+      : getCardMaxWidthClass(layout, false);
   const embedControls = showControls && !compact && !showcase;
 
   const layoutNode = <Layout profile={profile} compact={compact || showcase} />;

@@ -306,11 +306,13 @@ export function destroyProfileAudioEngine(): void {
 /** Debe llamarse de forma síncrona dentro de pointerdown / click / touchstart. */
 export function playProfileAudioFromUserGesture(): boolean {
   ensureVolumeInitialized();
-  if (!config?.enabled || userPaused || volume === 0) return false;
+  if (!config?.enabled || volume === 0) return false;
+
+  userPaused = false;
+  wantsPlay = true;
 
   const element = getAudioElement();
 
-  wantsPlay = true;
   mutedForPolicy = false;
   element.muted = false;
   element.volume = volume;
@@ -405,11 +407,13 @@ export function pauseProfileAudio(userInitiated: boolean): void {
 
 export function resumeProfileAudio(): void {
   const element = audio;
-  if (!element || !config?.enabled || userPaused || volume === 0) return;
+  if (!element || !config?.enabled || volume === 0) return;
   if (isElementPlaying()) return;
 
+  userPaused = false;
   wantsPlay = true;
   applyVolumeToElement(volume);
+  seekToClipStart();
   void element
     .play()
     .then(() => notify())

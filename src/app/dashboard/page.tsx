@@ -47,7 +47,11 @@ import {
   resolveCardLayout,
   resolveLinkStyle,
   suggestedSettingsForLayout,
+  getCardMaxWidthClass,
 } from "@/lib/card-layout-config";
+import ProfilePageOverlay, { ProfileBackgroundDim } from "@/components/ProfilePageOverlay";
+import { resolveBackgroundDim, resolvePageOverlay, PAGE_OVERLAY_OPTIONS } from "@/lib/profile-overlay-config";
+import type { PageOverlay } from "@/lib/profile-overlay-config";
 
 type Tab = "general" | "links" | "media" | "appearance" | "account";
 
@@ -148,8 +152,10 @@ function DashboardContent() {
   };
 
   const update = (partial: Partial<Profile>) => {
-    if (!profile) return;
-    setProfile({ ...profile, ...partial });
+    setProfile((current) => {
+      if (!current) return current;
+      return { ...current, ...partial };
+    });
     setIsDirty(true);
   };
 
@@ -781,6 +787,40 @@ function DashboardContent() {
                 </Field>
 
                 <Field
+                  label={tVars("dashboard.backgroundDimLabel", {
+                    percent: Math.round(resolveBackgroundDim(profile.settings) * 100),
+                  })}
+                >
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={resolveBackgroundDim(profile.settings)}
+                    onChange={(e) =>
+                      updateSettings({ backgroundDim: parseFloat(e.target.value) })
+                    }
+                    className="w-full accent-purple-500"
+                  />
+                </Field>
+
+                <Field label={t("dashboard.pageOverlay")}>
+                  <select
+                    value={resolvePageOverlay(profile.settings)}
+                    onChange={(e) =>
+                      updateSettings({ pageOverlay: e.target.value as PageOverlay })
+                    }
+                    className="input-field"
+                  >
+                    {PAGE_OVERLAY_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {t(opt.labelKey)}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field
                   label={tVars("dashboard.opacityLabel", {
                     percent: Math.round(profile.settings.profileOpacity * 100),
                   })}
@@ -1009,11 +1049,15 @@ function DashboardContent() {
               }
               deferPlayback={simulateEntryInPreview}
             />
-            <div className="absolute inset-0 bg-black/50 pointer-events-none z-[2]" />
+            <ProfileBackgroundDim
+              dim={resolveBackgroundDim(profile.settings)}
+              className="z-[2]"
+            />
+            <ProfilePageOverlay overlay={resolvePageOverlay(profile.settings)} className="z-[3]" />
             <BackgroundEffects effect={profile.settings.backgroundEffect} contained />
             <div className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden">
               <div className="min-h-full w-full flex items-center justify-center px-5 py-4 sm:px-6 sm:py-6 pointer-events-none">
-                <div className="pointer-events-auto shrink-0 w-full max-w-[280px] mx-auto">
+                <div className="pointer-events-auto shrink-0 w-full mx-auto max-w-[320px]">
                   <ProfileCard
                     key={`${profile.settings.cardLayout}-${profile.settings.linkStyle}`}
                     profile={profile}

@@ -1,4 +1,5 @@
 import type { MediaFocus } from "@/lib/media-focus";
+import type { PageOverlay } from "@/lib/profile-overlay-config";
 
 export type { MediaFocus } from "@/lib/media-focus";
 
@@ -70,7 +71,8 @@ export type CardLayout =
   | "banner"
   | "minimal"
   | "stack"
-  | "glass";
+  | "glass"
+  | "bar";
 
 /** Cómo se muestran los enlaces sociales */
 export type LinkStyle = "icons" | "pills" | "row" | "chips";
@@ -88,6 +90,10 @@ export interface SocialLink {
 export interface ProfileSettings {
   backgroundUrl: string;
   backgroundEffect: BackgroundEffect;
+  /** Oscurecimiento sobre imagen/video de fondo (0–1) */
+  backgroundDim?: number;
+  /** Efecto visual sobre el fondo: scanlines, grain, viñeta */
+  pageOverlay?: PageOverlay;
   accentColor: string;
   cardColor: string;
   cardColorSecondary: string;
@@ -176,6 +182,8 @@ export interface Profile {
 export const DEFAULT_SETTINGS: ProfileSettings = {
   backgroundUrl: "",
   backgroundEffect: "stars",
+  backgroundDim: 0.5,
+  pageOverlay: "none",
   accentColor: "#a855f7",
   cardColor: "#ffffff",
   cardColorSecondary: "#a855f7",

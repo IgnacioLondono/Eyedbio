@@ -3,6 +3,10 @@ import { parseBadgesJson } from "@/lib/badges";
 import { DEFAULT_CLIP_DURATION } from "@/lib/audio-config";
 import { resolveBackgroundEffect } from "@/lib/background-effects-config";
 import {
+  resolveBackgroundDim,
+  resolvePageOverlay,
+} from "@/lib/profile-overlay-config";
+import {
   resolveAvatarStyle,
   resolveCardLayout,
   resolveLinkStyle,
@@ -70,6 +74,8 @@ export function userToProfile(user: UserWithLinks): Profile {
     iconShape: resolveIconShape(storedSettings),
     profileNameIconShape: resolveProfileNameIconShape(storedSettings),
     backgroundEffect: resolveBackgroundEffect(storedSettings.backgroundEffect),
+    backgroundDim: resolveBackgroundDim(storedSettings),
+    pageOverlay: resolvePageOverlay(storedSettings),
     bannerUrl: storedSettings.bannerUrl ?? DEFAULT_SETTINGS.bannerUrl,
     avatarFocus: parseMediaFocus(storedSettings.avatarFocus),
     bannerFocus: parseMediaFocus(storedSettings.bannerFocus),

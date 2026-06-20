@@ -1,9 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { MapPin } from "lucide-react";
 import { Profile } from "@/types/profile";
 import { hexToRgba } from "@/lib/color-utils";
 import { getMediaSrc } from "@/lib/media-url";
+import { resolveProfileDisplay } from "@/lib/profile-display-config";
 import { getCardSurfaceStyle, getCardFrameStyle } from "@/lib/card-styles";
 import { resolveLinkStyle } from "@/lib/card-layout-config";
 import ProfileLinksDisplay from "./ProfileLinksDisplay";
@@ -225,25 +227,57 @@ export function LayoutBanner({ profile, compact }: LayoutProps) {
 
 export function LayoutMinimal({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
+  const { settings } = profile;
+  const display = resolveProfileDisplay(settings);
+  const location = display.location.trim();
+  const showLocation = display.showLocation && location.length > 0;
+  const avatarSize = compact ? "w-14 h-14" : "w-[72px] h-[72px]";
+
+  if (!compact) {
+    return (
+      <div className="relative flex w-full flex-col items-center gap-4 px-2 text-center">
+        <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-5 sm:text-left">
+          <ProfileAvatar
+            profile={profile}
+            scale={scale}
+            sizeOverride={avatarSize}
+            className="shrink-0"
+          />
+          <div className="min-w-0 flex flex-col items-center sm:items-start">
+            <ProfileNameBlock profile={profile} scale={scale} align="center" />
+          </div>
+        </div>
+        <ProfileBio profile={profile} scale={scale} className="max-w-sm" />
+        <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-1" />
+        <LinksBlock profile={profile} compact={compact} />
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <ProfileViews profile={profile} scale={scale} />
+          {showLocation ? (
+            <div
+              className={`inline-flex items-center gap-1.5 ${scale.location}`}
+              style={{ color: hexToRgba(settings.textColor, 0.45) }}
+            >
+              <MapPin className={scale.locationIcon} style={{ color: hexToRgba(settings.accentColor, 0.85) }} />
+              <span>{location}</span>
+            </div>
+          ) : null}
+        </div>
+        <CardToolbarSlot />
+      </div>
+    );
+  }
+
   const cardStyle = getCardSurfaceStyle(profile.settings);
-  const minimalStyle =
-    profile.settings.transparentCard
-      ? { ...cardStyle, background: "transparent", border: "none", boxShadow: "none" }
-      : cardStyle;
+  const minimalStyle = profile.settings.transparentCard
+    ? { ...cardStyle, background: "transparent", border: "none", boxShadow: "none" }
+    : cardStyle;
 
   return (
     <div
-      className={`relative flex w-full flex-col items-center rounded-2xl text-center ${
-        compact ? "p-2" : "p-4"
-      }`}
+      className="relative flex w-full flex-col items-center rounded-2xl p-2 text-center"
       style={minimalStyle}
     >
-      <ProfileAvatar
-        profile={profile}
-        scale={scale}
-        sizeOverride={compact ? "w-14 h-14" : "w-20 h-20"}
-        className="mb-2"
-      />
+      <ProfileAvatar profile={profile} scale={scale} sizeOverride={avatarSize} className="mb-2" />
       <ProfileNameBlock profile={profile} scale={scale} />
       <ProfileBio profile={profile} scale={scale} className="mt-1 mb-2" />
       <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-2" />
@@ -251,6 +285,71 @@ export function LayoutMinimal({ profile, compact }: LayoutProps) {
       <LinksBlock profile={profile} compact={compact} />
       <CardToolbarSlot />
     </div>
+  );
+}
+
+function LayoutBarFooter({ profile, scale, compact }: { profile: Profile; scale: ReturnType<typeof getCardScale>; compact?: boolean }) {
+  const { settings } = profile;
+  const display = resolveProfileDisplay(settings);
+  const location = display.location.trim();
+  const showLocation = display.showLocation && location.length > 0;
+  const showViews = display.showViewCount;
+
+  if (!showViews && !showLocation) return null;
+
+  return (
+    <div
+      className={`mt-2.5 flex w-full flex-wrap items-center gap-x-3 gap-y-1 border-t border-white/10 pt-2.5 ${
+        compact ? "text-[10px]" : "text-xs"
+      }`}
+      style={{ color: hexToRgba(settings.textColor, 0.42) }}
+    >
+      {showViews ? <ProfileViews profile={profile} scale={scale} align="left" className="w-auto" /> : null}
+      {showViews && showLocation ? (
+        <span className="hidden sm:inline text-white/20" aria-hidden>
+          |
+        </span>
+      ) : null}
+      {showLocation ? (
+        <div className="inline-flex items-center gap-1.5">
+          <MapPin className={scale.locationIcon} style={{ color: hexToRgba(settings.accentColor, 0.8) }} />
+          <span className="truncate">{location}</span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function LayoutBar({ profile, compact }: LayoutProps) {
+  const scale = getCardScale(!!compact);
+  const avatarSize = compact ? "w-11 h-11" : "w-14 h-14";
+
+  return (
+    <CardShell profile={profile} compact={compact}>
+      <div className="flex gap-3 items-start text-left">
+        <ProfileAvatar
+          profile={profile}
+          scale={scale}
+          sizeOverride={avatarSize}
+          className="shrink-0"
+        />
+        <div className="min-w-0 flex-1">
+          <ProfileNameBlock profile={profile} scale={scale} align="left" />
+          <ProfileBio profile={profile} scale={scale} align="left" className="mt-1 mb-1.5" />
+          <ProfileExtrasSection
+            profile={profile}
+            scale={scale}
+            compact={compact}
+            align="left"
+            className="mb-1"
+          />
+        </div>
+      </div>
+      <div className="mt-3 border-t border-white/10 pt-3">
+        <LinksBlock profile={profile} compact={compact} centered />
+      </div>
+      <LayoutBarFooter profile={profile} scale={scale} compact={compact} />
+    </CardShell>
   );
 }
 
@@ -304,6 +403,7 @@ export const CARD_LAYOUT_COMPONENTS = {
   minimal: LayoutMinimal,
   stack: LayoutStack,
   glass: LayoutGlass,
+  bar: LayoutBar,
 } as const;
 
 export function ProfileCardMotionWrapper({

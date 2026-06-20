@@ -41,6 +41,11 @@ export const CARD_LAYOUT_OPTIONS: {
     label: "Cristal",
     description: "Panel ancho con pie dividido (visitas + redes).",
   },
+  {
+    value: "bar",
+    label: "Barra",
+    description: "Tarjeta horizontal ancha estilo guns.lol.",
+  },
 ];
 
 export const LINK_STYLE_OPTIONS: {
@@ -90,6 +95,7 @@ export function resolveLinkStyle(settings: Partial<ProfileSettings>): LinkStyle 
   const value = settings.linkStyle;
 
   if (layout === "minimal") return "row";
+  if (layout === "bar") return value === "pills" || value === "chips" ? value : "row";
   if (layout === "stack") return value === "icons" || value === "row" ? "pills" : value ?? "pills";
 
   if (value && LINK_STYLE_OPTIONS.some((o) => o.value === value)) return value;
@@ -102,6 +108,20 @@ export function resolveAvatarStyle(settings: Partial<ProfileSettings>): AvatarSt
   return "circle";
 }
 
+export function getCardMaxWidthClass(layout: CardLayout, compact: boolean): string {
+  if (compact) return "max-w-[280px]";
+  switch (layout) {
+    case "bar":
+      return "max-w-xl";
+    case "minimal":
+      return "max-w-sm";
+    case "glass":
+      return "max-w-md";
+    default:
+      return "max-w-md";
+  }
+}
+
 /** Sugerencias al cambiar layout (no forzado en UI, solo hints). */
 export function suggestedSettingsForLayout(layout: CardLayout): Partial<ProfileSettings> {
   switch (layout) {
@@ -109,8 +129,10 @@ export function suggestedSettingsForLayout(layout: CardLayout): Partial<ProfileS
       return {
         transparentCard: true,
         showCardShadow: false,
+        showCardBorder: false,
         profileBlur: 0,
         linkStyle: "row",
+        nameEffect: "glow",
       };
     case "stack":
       return { linkStyle: "pills", profileOpacity: 0.12, profileBlur: 24 };
@@ -118,6 +140,14 @@ export function suggestedSettingsForLayout(layout: CardLayout): Partial<ProfileS
       return { linkStyle: "chips", showCardBorder: true };
     case "glass":
       return { linkStyle: "row", profileBlur: 28, gradientEnabled: true };
+    case "bar":
+      return {
+        linkStyle: "row",
+        profileBlur: 24,
+        profileOpacity: 0.12,
+        gradientEnabled: false,
+        glowIcons: true,
+      };
     case "hero":
       return { linkStyle: "row", nameEffect: "glow" };
     case "split":

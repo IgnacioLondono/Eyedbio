@@ -56,7 +56,7 @@ export default function CardLayoutPicker({
           {msg.cardPicker.structure}
         </p>
         <div
-          className="grid grid-cols-2 sm:grid-cols-3 gap-2"
+          className="grid grid-cols-2 sm:grid-cols-4 gap-2"
           role="radiogroup"
           aria-label={msg.cardPicker.structureAria}
         >

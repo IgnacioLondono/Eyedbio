@@ -19,6 +19,8 @@ import { getProfileDocumentTitle, resolveProfileDisplay } from "@/lib/profile-di
 import { resolveProfileTabIconUrl } from "@/lib/profile-tab-icon";
 import { enterProfileFromGesture } from "@/lib/profile-enter";
 import { resetBackgroundVideoAudioState } from "@/lib/profile-background-video-audio";
+import ProfilePageOverlay, { ProfileBackgroundDim } from "@/components/ProfilePageOverlay";
+import { resolveBackgroundDim, resolvePageOverlay } from "@/lib/profile-overlay-config";
 import { PROFILE_VIEW_ROOT_ATTR, teardownProfilePresentation } from "@/lib/profile-teardown";
 import { pathsMatchRoute, useBrowserPathname } from "@/lib/use-browser-pathname";
 import { useI18n } from "@/components/LocaleProvider";
@@ -240,6 +242,8 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
 
   const { settings } = profile;
   const display = resolveProfileDisplay(settings, profile.locale);
+  const pageOverlay = resolvePageOverlay(settings);
+  const backgroundDim = resolveBackgroundDim(settings);
   const backgroundVideoAudio =
     site.profileAudioEnabled &&
     profile.audioEnabled &&
@@ -259,7 +263,8 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
           deferPlayback={needsGate}
           contained
         />
-        <div className="absolute inset-0 z-[1] bg-black/50 pointer-events-none" />
+        <ProfileBackgroundDim dim={backgroundDim} className="z-[1]" />
+        <ProfilePageOverlay overlay={pageOverlay} />
         <BackgroundEffects effect={settings.backgroundEffect} contained />
         <ProfileQuickNavButton
           profileUsername={profile.username}

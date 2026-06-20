@@ -43,9 +43,21 @@ export default function AudioClipSelector({
   const [previewing, setPreviewing] = useState(false);
   const [dragging, setDragging] = useState(false);
 
+  const emitClipChange = useCallback(
+    (next: { startTime: number; clipDuration: number }) => {
+      startTimeRef.current = next.startTime;
+      clipDurationRef.current = next.clipDuration;
+      onChangeRef.current(next);
+    },
+    []
+  );
+
   onChangeRef.current = onChange;
-  startTimeRef.current = startTime;
-  clipDurationRef.current = clipDuration;
+
+  useEffect(() => {
+    startTimeRef.current = startTime;
+    clipDurationRef.current = clipDuration;
+  }, [startTime, clipDuration]);
 
   const src = getMediaSrc(audioUrl);
   const effectiveClipDuration = getEffectiveClipDuration(clipDuration, duration);
@@ -86,7 +98,7 @@ export default function AudioClipSelector({
         normalizedDuration !== clipDurationRef.current ||
         clampedStart !== startTimeRef.current
       ) {
-        onChangeRef.current({
+        emitClipChange({
           startTime: clampedStart,
           clipDuration: normalizedDuration,
         });
@@ -97,7 +109,7 @@ export default function AudioClipSelector({
 
     audio.addEventListener("loadedmetadata", onLoaded);
     return () => audio.removeEventListener("loadedmetadata", onLoaded);
-  }, [audioUrl]);
+  }, [audioUrl, emitClipChange]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -175,7 +187,7 @@ export default function AudioClipSelector({
       const maxLeftPx = rect.width - clipWidthPx;
       const clampedLeftPx = Math.max(0, Math.min(leftPx, maxLeftPx));
       const nextStart = (clampedLeftPx / rect.width) * duration;
-      onChangeRef.current({
+      emitClipChange({
         startTime: clampAudioStart(nextStart, duration, clipDurationRef.current),
         clipDuration: clipDurationRef.current,
       });
@@ -189,13 +201,13 @@ export default function AudioClipSelector({
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     };
-  }, [clipWidthPercent, dragging, duration]);
+  }, [clipWidthPercent, dragging, duration, emitClipChange]);
 
   const handleTrackClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!needsSelection || dragging) return;
     const time = timeFromClientX(event.clientX);
     const centered = time - activeClipDuration / 2;
-    onChange({
+    emitClipChange({
       startTime: clampAudioStart(centered, duration, clipDuration),
       clipDuration,
     });
@@ -203,7 +215,7 @@ export default function AudioClipSelector({
 
   const handleDurationSelect = (nextDuration: number) => {
     const normalized = normalizeClipDuration(nextDuration, duration);
-    onChange({
+    emitClipChange({
       clipDuration: normalized,
       startTime: clampAudioStart(startTime, duration, normalized),
     });
@@ -304,14 +316,14 @@ export default function AudioClipSelector({
               const step = event.shiftKey ? 5 : 1;
               if (event.key === "ArrowLeft") {
                 event.preventDefault();
-                onChange({
+                emitClipChange({
                   startTime: clampAudioStart(startTime - step, duration, clipDuration),
                   clipDuration,
                 });
               }
               if (event.key === "ArrowRight") {
                 event.preventDefault();
-                onChange({
+                emitClipChange({
                   startTime: clampAudioStart(startTime + step, duration, clipDuration),
                   clipDuration,
                 });
@@ -350,7 +362,7 @@ export default function AudioClipSelector({
             step={0.1}
             value={startTime}
             onChange={(event) =>
-              onChange({
+              emitClipChange({
                 startTime: clampAudioStart(parseFloat(event.target.value), duration, clipDuration),
                 clipDuration,
               })
