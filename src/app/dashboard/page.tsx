@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -97,6 +97,7 @@ function DashboardContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
+  const profileRef = useRef<Profile | null>(null);
   const tabParam = searchParams.get("tab");
   const tab: Tab = tabParam ? parseTab(tabParam) : "general";
   const [isDirty, setIsDirty] = useState(false);
@@ -123,6 +124,7 @@ function DashboardContent() {
         return res.json();
       })
       .then((data) => {
+        profileRef.current = data;
         setProfile(data);
         setIsDirty(false);
       })
@@ -151,12 +153,18 @@ function DashboardContent() {
     }
   };
 
-  const update = (partial: Partial<Profile>) => {
+  const patchProfile = (updater: (current: Profile) => Profile) => {
     setProfile((current) => {
       if (!current) return current;
-      return { ...current, ...partial };
+      const next = updater(current);
+      profileRef.current = next;
+      return next;
     });
     setIsDirty(true);
+  };
+
+  const update = (partial: Partial<Profile>) => {
+    patchProfile((current) => ({ ...current, ...partial }));
   };
 
   const updateSettings = (
@@ -164,57 +172,56 @@ function DashboardContent() {
       | Partial<Profile["settings"]>
       | ((current: Profile["settings"]) => Partial<Profile["settings"]>)
   ) => {
-    setProfile((current) => {
-      if (!current) return current;
+    patchProfile((current) => {
       const patch = typeof partial === "function" ? partial(current.settings) : partial;
       return {
         ...current,
         settings: { ...current.settings, ...patch },
       };
     });
-    setIsDirty(true);
   };
 
   const updateBackground = (url: string, backgroundType?: BackgroundType) => {
-    if (!profile) return;
-    const nextType = backgroundType ?? resolveBackgroundType(url, profile.backgroundType);
-    const losesBackgroundAudio =
-      nextType !== "video" && profile.audioSource === "background";
-    setProfile({
-      ...profile,
-      backgroundType: nextType,
-      ...(losesBackgroundAudio ? { audioSource: "upload" as AudioSource } : {}),
-      ...(losesBackgroundAudio && !profile.audioUrl ? { audioEnabled: false } : {}),
-      settings: {
-        ...profile.settings,
-        backgroundUrl: url,
-        ...(nextType === "video"
-          ? { backgroundFocus: { x: 50, y: 50, zoom: 1 } }
-          : {}),
-      },
+    patchProfile((current) => {
+      const nextType = backgroundType ?? resolveBackgroundType(url, current.backgroundType);
+      const losesBackgroundAudio =
+        nextType !== "video" && current.audioSource === "background";
+      return {
+        ...current,
+        backgroundType: nextType,
+        ...(losesBackgroundAudio ? { audioSource: "upload" as AudioSource } : {}),
+        ...(losesBackgroundAudio && !current.audioUrl ? { audioEnabled: false } : {}),
+        settings: {
+          ...current.settings,
+          backgroundUrl: url,
+          ...(nextType === "video"
+            ? { backgroundFocus: { x: 50, y: 50, zoom: 1 } }
+            : {}),
+        },
+      };
     });
-    setIsDirty(true);
   };
 
   const clearBackground = () => {
-    if (!profile) return;
-    const losesBackgroundAudio = profile.audioSource === "background";
-    setProfile({
-      ...profile,
-      backgroundType: "image",
-      ...(losesBackgroundAudio ? { audioSource: "upload" as AudioSource } : {}),
-      ...(losesBackgroundAudio && !profile.audioUrl ? { audioEnabled: false } : {}),
-      settings: {
-        ...profile.settings,
-        backgroundUrl: "",
-        backgroundFocus: { x: 50, y: 50, zoom: 1 },
-      },
+    patchProfile((current) => {
+      const losesBackgroundAudio = current.audioSource === "background";
+      return {
+        ...current,
+        backgroundType: "image",
+        ...(losesBackgroundAudio ? { audioSource: "upload" as AudioSource } : {}),
+        ...(losesBackgroundAudio && !current.audioUrl ? { audioEnabled: false } : {}),
+        settings: {
+          ...current.settings,
+          backgroundUrl: "",
+          backgroundFocus: { x: 50, y: 50, zoom: 1 },
+        },
+      };
     });
-    setIsDirty(true);
   };
 
   const handleSave = async (): Promise<boolean> => {
-    if (!profile) return false;
+    const snapshot = profileRef.current ?? profile;
+    if (!snapshot) return false;
     setSaving(true);
     setError("");
 
@@ -222,7 +229,7 @@ function DashboardContent() {
       const res = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify(snapshot),
       });
 
       const data = await res.json();
@@ -231,6 +238,7 @@ function DashboardContent() {
       }
       if (!res.ok) throw new Error(data.error ?? t("dashboard.saveError"));
 
+      profileRef.current = data;
       setProfile(data);
       setIsDirty(false);
       setJustSaved(true);
@@ -760,7 +768,16 @@ function DashboardContent() {
                         startTime={profile.audioStartTime}
                         clipDuration={profile.audioClipDuration}
                         onChange={({ startTime, clipDuration }) =>
-                          update({ audioStartTime: startTime, audioClipDuration: clipDuration })
+                          patchProfile((current) => ({
+                            ...current,
+                            audioStartTime: startTime,
+                            audioClipDuration: clipDuration,
+                            settings: {
+                              ...current.settings,
+                              audioStartTime: startTime,
+                              audioClipDuration: clipDuration,
+                            },
+                          }))
                         }
                       />
                     ) : null}

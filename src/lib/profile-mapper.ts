@@ -45,6 +45,29 @@ function parseBadges(raw: string): string[] {
   return parseBadgesJson(raw);
 }
 
+function readStoredNumber(value: unknown, fallback: number): number {
+  if (typeof value === "number" && !Number.isNaN(value)) return value;
+  return fallback;
+}
+
+function resolveProfileAudioStartTime(
+  user: UserWithLinks,
+  storedSettings: Partial<ProfileSettings>
+): number {
+  const fromColumn = user.audioStartTime;
+  if (typeof fromColumn === "number" && !Number.isNaN(fromColumn)) return fromColumn;
+  return readStoredNumber(storedSettings.audioStartTime, 0);
+}
+
+function resolveProfileAudioClipDuration(
+  user: UserWithLinks,
+  storedSettings: Partial<ProfileSettings>
+): number {
+  const fromColumn = user.audioClipDuration;
+  if (typeof fromColumn === "number" && !Number.isNaN(fromColumn)) return fromColumn;
+  return readStoredNumber(storedSettings.audioClipDuration, DEFAULT_CLIP_DURATION);
+}
+
 /** Si el audio sale del fondo, el medio tiene que ser video aunque la BD diga image. */
 function resolveProfileBackgroundType(
   backgroundUrl: string,
@@ -105,10 +128,8 @@ export function userToProfile(user: UserWithLinks): Profile {
       `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`,
     backgroundType,
     audioUrl: user.audioUrl ?? undefined,
-    audioStartTime: user.audioStartTime ?? 0,
-    audioClipDuration:
-      (user as User & { audioClipDuration?: number }).audioClipDuration ??
-      DEFAULT_CLIP_DURATION,
+    audioStartTime: resolveProfileAudioStartTime(user, storedSettings),
+    audioClipDuration: resolveProfileAudioClipDuration(user, storedSettings),
     audioEnabled: user.audioEnabled,
     audioSource: resolveAudioSource(
       (user as User & { audioSource?: string }).audioSource as AudioSource | undefined,
@@ -138,6 +159,14 @@ export function userToProfile(user: UserWithLinks): Profile {
 export function profileToUserUpdateData(profile: Profile): Prisma.UserUpdateInput {
   const { backgroundUrl, ...restSettings } = profile.settings;
   const backgroundType = resolveBackgroundType(backgroundUrl, profile.backgroundType);
+  const audioStartTime =
+    typeof profile.audioStartTime === "number" && !Number.isNaN(profile.audioStartTime)
+      ? Math.max(0, profile.audioStartTime)
+      : 0;
+  const audioClipDuration =
+    typeof profile.audioClipDuration === "number" && !Number.isNaN(profile.audioClipDuration)
+      ? profile.audioClipDuration
+      : DEFAULT_CLIP_DURATION;
 
   return {
     displayName: profile.displayName,
@@ -146,12 +175,16 @@ export function profileToUserUpdateData(profile: Profile): Prisma.UserUpdateInpu
     backgroundUrl,
     backgroundType,
     audioUrl: profile.audioUrl ?? null,
-    audioStartTime: profile.audioStartTime,
-    audioClipDuration: profile.audioClipDuration,
+    audioStartTime,
+    audioClipDuration,
     audioEnabled: profile.audioEnabled,
     audioSource: resolveAudioSource(profile.audioSource, profile),
     badges: JSON.stringify(profile.badges),
-    settings: JSON.stringify(restSettings),
+    settings: JSON.stringify({
+      ...restSettings,
+      audioStartTime,
+      audioClipDuration,
+    }),
   };
 }
 

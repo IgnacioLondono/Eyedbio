@@ -185,6 +185,9 @@ function bindAudioEvents(element: HTMLAudioElement): void {
     if (Number.isFinite(element.duration)) {
       duration = element.duration;
       updateClipBounds();
+      if (wantsPlay && !userPaused && volume > 0) {
+        seekToClipStart();
+      }
       notify();
     }
   };
@@ -280,8 +283,11 @@ export function configureProfileAudioEngine(next: ProfileAudioEngineConfig): voi
 
   if (srcChanged) {
     tryProfileAudioAutoplay();
-  } else if (timingChanged && isElementPlaying()) {
+  } else if (timingChanged) {
     seekToClipStart();
+    if (!userPaused && volume > 0 && !isElementPlaying()) {
+      tryProfileAudioAutoplay();
+    }
   } else if (!isElementPlaying()) {
     tryProfileAudioAutoplay();
   }

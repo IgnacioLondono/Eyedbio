@@ -516,6 +516,11 @@ export const en: Messages = {
     loadError: "Could not load the image to adjust",
     exportError: "Could not process the image",
     focusHint: "Drag to choose the visible area · zoom out to show more without cropping the file",
+    bannerFocusHint:
+      "Drag to frame · the outline shows exactly what will appear on your profile banner",
+    bannerVisibleArea: "Profile preview",
+    bannerPreviewHint:
+      "The frame matches the wide strip ratio used on your profile card banner.",
     zoomOutHint: "Below 1× zooms out to show more of the image (helpful on wide screens).",
     applyFocus: "Save framing",
   },

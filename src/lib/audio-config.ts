@@ -75,7 +75,11 @@ export function getAudioClipBounds(
   clipDuration: number = DEFAULT_CLIP_DURATION
 ): AudioClipBounds {
   if (!Number.isFinite(duration) || duration <= 0) {
-    return { start: 0, end: Infinity, nativeLoop: false };
+    if (isFullAudioClip(clipDuration)) {
+      return { start: 0, end: Infinity, nativeLoop: false };
+    }
+    const start = Math.max(0, startTime);
+    return { start, end: start + clipDuration, nativeLoop: false };
   }
 
   const effective = getEffectiveClipDuration(clipDuration, duration);

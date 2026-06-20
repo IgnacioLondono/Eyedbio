@@ -444,6 +444,9 @@ export interface Messages {
     loadError: string;
     exportError: string;
     focusHint: string;
+    bannerFocusHint: string;
+    bannerVisibleArea: string;
+    bannerPreviewHint: string;
     zoomOutHint: string;
     applyFocus: string;
   };
@@ -997,6 +1000,11 @@ export const es: Messages = {
     loadError: "No se pudo cargar la imagen para ajustar",
     exportError: "No se pudo procesar la imagen",
     focusHint: "Arrastra para elegir qué parte se ve · el zoom aleja o acerca sin recortar la imagen",
+    bannerFocusHint:
+      "Arrastra para encuadrar · el marco muestra exactamente lo que se verá en el banner del perfil",
+    bannerVisibleArea: "Vista en el perfil",
+    bannerPreviewHint:
+      "El recuadro tiene la misma proporción que el banner en tu tarjeta (franja ancha).",
     zoomOutHint: "Menos de 1× aleja y muestra más imagen (útil en pantallas anchas).",
     applyFocus: "Guardar encuadre",
   },

@@ -156,6 +156,9 @@ export interface ProfileSettings {
   discordPresenceEnabled?: boolean;
   /** ID numérico de Discord (snowflake) */
   discordUserId?: string;
+  /** Respaldo en settings si la columna de BD no está migrada */
+  audioStartTime?: number;
+  audioClipDuration?: number;
 }
 
 export interface Profile {

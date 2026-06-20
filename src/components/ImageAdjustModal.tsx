@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { Loader2, Move, RotateCcw, X, ZoomIn } from "lucide-react";
 import type { ImageAdjustPreset } from "@/lib/image-adjust-config";
 import {
@@ -37,6 +37,7 @@ export default function ImageAdjustModal({
   const { t } = useI18n();
   const minZoom = preset.minZoom ?? 0.5;
   const maxZoom = preset.maxZoom ?? 3;
+  const isBannerStrip = !preset.circular && preset.aspect >= 2.5;
 
   const [focus, setFocus] = useState<MediaFocus>(DEFAULT_MEDIA_FOCUS);
   const [exporting, setExporting] = useState(false);
@@ -125,11 +126,17 @@ export default function ImageAdjustModal({
 
   if (!open) return null;
 
+  const frameStyle: CSSProperties = preset.circular
+    ? {}
+    : {
+        aspectRatio: preset.aspect,
+        width: "100%",
+        maxHeight: isBannerStrip ? "min(24vh, 160px)" : "min(42vh, 320px)",
+      };
+
   const frameClass = preset.circular
     ? "aspect-square max-h-[min(52vh,360px)] w-full max-w-[min(52vh,360px)] mx-auto rounded-full"
-    : preset.aspect >= 1
-      ? "aspect-video w-full max-h-[42vh]"
-      : "aspect-[9/16] w-full max-w-[220px] mx-auto max-h-[48vh]";
+    : "w-full mx-auto rounded-lg";
 
   return (
     <div
@@ -157,12 +164,13 @@ export default function ImageAdjustModal({
         <div className="p-4 space-y-4">
           <p className="text-xs text-white/45 flex items-center gap-1.5">
             <Move className="w-3.5 h-3.5 shrink-0" />
-            {t("imageAdjust.focusHint")}
+            {isBannerStrip ? t("imageAdjust.bannerFocusHint") : t("imageAdjust.focusHint")}
           </p>
 
           <div
             ref={frameRef}
             className={`relative overflow-hidden border border-white/15 bg-black/40 touch-none cursor-grab active:cursor-grabbing ${frameClass}`}
+            style={frameStyle}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
@@ -175,7 +183,24 @@ export default function ImageAdjustModal({
               className="select-none"
               style={mediaFocusPositionStyle(focus, { minZoom, maxZoom })}
             />
+            {isBannerStrip ? (
+              <>
+                <div
+                  className="pointer-events-none absolute inset-0 ring-2 ring-inset ring-purple-400/70 rounded-[inherit]"
+                  aria-hidden
+                />
+                <div className="pointer-events-none absolute top-1.5 left-1.5 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-purple-200/90">
+                  {t("imageAdjust.bannerVisibleArea")}
+                </div>
+              </>
+            ) : null}
           </div>
+
+          {isBannerStrip ? (
+            <p className="text-[10px] text-white/35 leading-relaxed">
+              {t("imageAdjust.bannerPreviewHint")}
+            </p>
+          ) : null}
 
           <div className="space-y-2">
             <div className="flex items-center justify-between gap-2">

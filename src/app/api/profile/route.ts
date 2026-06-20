@@ -8,6 +8,7 @@ import { validateSocialLinksCount } from "@/lib/links-config";
 import { saveUserProfile } from "@/lib/profile-save";
 import { userToProfile } from "@/lib/profile-mapper";
 import { resolveAudioSource } from "@/lib/profile-audio";
+import { DEFAULT_CLIP_DURATION, isFullAudioClip } from "@/lib/audio-config";
 import { Profile, type AudioSource } from "@/types/profile";
 import { getSiteSettings } from "@/lib/site-settings";
 
@@ -57,6 +58,25 @@ export async function PATCH(request: Request) {
 
   try {
     const profile = (await request.json()) as Profile;
+
+    if (typeof profile.audioStartTime !== "number" || Number.isNaN(profile.audioStartTime)) {
+      const fromSettings = profile.settings?.audioStartTime;
+      profile.audioStartTime =
+        typeof fromSettings === "number" && !Number.isNaN(fromSettings) ? fromSettings : 0;
+    } else {
+      profile.audioStartTime = Math.max(0, profile.audioStartTime);
+    }
+
+    if (typeof profile.audioClipDuration !== "number" || Number.isNaN(profile.audioClipDuration)) {
+      const fromSettings = profile.settings?.audioClipDuration;
+      profile.audioClipDuration =
+        typeof fromSettings === "number" && !Number.isNaN(fromSettings)
+          ? fromSettings
+          : DEFAULT_CLIP_DURATION;
+    }
+
+    const rawClip = Number(profile.audioClipDuration);
+    profile.audioClipDuration = isFullAudioClip(rawClip) || Number.isNaN(rawClip) ? 0 : rawClip;
 
     const linksError = validateSocialLinksCount(profile.links ?? []);
     if (linksError) {

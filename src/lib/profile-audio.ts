@@ -1,3 +1,4 @@
+import { DEFAULT_CLIP_DURATION } from "@/lib/audio-config";
 import { resolveBackgroundType } from "@/lib/media-config";
 import type { AudioSource, Profile } from "@/types/profile";
 
@@ -31,7 +32,11 @@ export function getEffectiveAudioClipDuration(profile: Profile): number {
   if (resolveAudioSource(profile.audioSource, profile) === "background") {
     return 0;
   }
-  return profile.audioClipDuration;
+  const stored = profile.audioClipDuration;
+  if (typeof stored === "number" && !Number.isNaN(stored)) {
+    return stored;
+  }
+  return DEFAULT_CLIP_DURATION;
 }
 
 export function isBackgroundProfileAudio(profile: Profile): boolean {
