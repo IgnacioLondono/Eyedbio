@@ -351,6 +351,7 @@ export interface Messages {
     iconShapeRounded: string;
     iconShapeCircle: string;
     iconShapeSquare: string;
+    iconShapeNone: string;
     profileNameIconShape: string;
     profileNameIconRingColor: string;
     profileNameIconRingDefault: string;
@@ -384,7 +385,7 @@ export interface Messages {
     discordUserIdLabel: string;
     discordUserIdPlaceholder: string;
     discordUserIdHint: string;
-    discordLanyardLink: string;
+    discordBotLink: string;
     previewSimulateEntry: string;
   };
   linkEditor: {
@@ -757,7 +758,7 @@ export const es: Messages = {
     connectionError: "Error de conexión. Comprueba tu red e inténtalo de nuevo.",
     pageTitleNotFound: "Perfil no encontrado — Eyed.bio",
     tapForSound: "Pulsar para activar el sonido",
-    discordLanyardHint: "Únete a Lanyard para ver tu estado en vivo",
+    discordLanyardHint: "Conecta EyedBot para ver tu estado en vivo",
   },
   accessGate: {
     protected: "Perfil protegido",
@@ -903,6 +904,7 @@ export const es: Messages = {
     iconShapeRounded: "Redondeado",
     iconShapeCircle: "Circular",
     iconShapeSquare: "Cuadrado",
+    iconShapeNone: "Solo icono",
     profileNameIconShape: "Forma del icono del nombre",
     profileNameIconRingColor: "Borde del icono del nombre",
     profileNameIconRingDefault: "Color de acento",
@@ -939,8 +941,8 @@ export const es: Messages = {
     discordUserIdLabel: "ID de usuario de Discord",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "Activa Modo desarrollador en Discord → clic derecho en tu perfil → Copiar ID. Para que aparezca tu estado, únete a Lanyard en discord.gg/lanyard.",
-    discordLanyardLink: "Unirse a Lanyard",
+      "Activa Modo desarrollador en Discord → clic derecho en tu perfil → Copiar ID. Luego vincula tu cuenta en el panel de EyedBot para que aparezca tu estado en el perfil.",
+    discordBotLink: "Abrir panel de EyedBot",
     previewSimulateEntry: "Simular pantalla de entrada",
   },
   linkEditor: {

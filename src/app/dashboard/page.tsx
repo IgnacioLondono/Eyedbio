@@ -41,6 +41,7 @@ import AccountSettings from "@/components/AccountSettings";
 import LinkEditor from "@/components/LinkEditor";
 import ShareProfileButton from "@/components/ShareProfileButton";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
+import { COMMUNITY_BOT_URL } from "@/lib/community";
 import CardLayoutPicker from "@/components/CardLayoutPicker";
 import IconStylePicker from "@/components/IconStylePicker";
 import {
@@ -302,41 +303,54 @@ function DashboardContent() {
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
       <header className="border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-            <Logo href="/" size="sm" />
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 h-12 sm:h-14 flex items-center justify-between gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink">
+            <Logo href="/" size="sm" responsiveText />
             <AppAreaNav active="dashboard" />
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <CommunityDiscordLink variant="header" />
             <Link
               href={`/${profile.username}`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={handleViewProfileClick}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs border rounded-lg transition-colors ${
+              title={t("dashboard.viewProfile")}
+              aria-label={t("dashboard.viewProfile")}
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 p-1.5 sm:px-3 sm:py-1.5 text-xs border rounded-lg transition-colors shrink-0 ${
                 isDirty
                   ? "text-amber-200/90 border-amber-400/30 hover:bg-amber-500/10"
                   : "text-white/60 hover:text-white border-white/10 hover:bg-white/5"
               }`}
             >
-              <UserRound className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t("dashboard.viewProfile")}</span>
-              <ExternalLink className="w-3 h-3" />
+              <UserRound className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden md:inline">{t("dashboard.viewProfile")}</span>
+              <ExternalLink className="w-3 h-3 shrink-0 hidden sm:block" />
             </Link>
             <button
+              type="button"
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-lg transition-colors"
+              title={
+                justSaved ? t("dashboard.saved") : saving ? t("dashboard.saving") : t("dashboard.save")
+              }
+              aria-label={
+                justSaved ? t("dashboard.saved") : saving ? t("dashboard.saving") : t("dashboard.save")
+              }
+              className="flex items-center justify-center gap-1.5 p-1.5 sm:px-4 sm:py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-500 disabled:opacity-50 rounded-lg transition-colors shrink-0"
             >
-              <Save className="w-3.5 h-3.5" />
-              {justSaved ? t("dashboard.saved") : saving ? t("dashboard.saving") : t("dashboard.save")}
+              <Save className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">
+                {justSaved ? t("dashboard.saved") : saving ? t("dashboard.saving") : t("dashboard.save")}
+              </span>
             </button>
             <button
+              type="button"
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="p-1.5 text-white/40 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+              className="p-1.5 text-white/40 hover:text-white rounded-lg hover:bg-white/5 transition-colors shrink-0"
               title={t("dashboard.signOut")}
+              aria-label={t("dashboard.signOut")}
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -345,7 +359,7 @@ function DashboardContent() {
       </header>
 
       {error && (
-        <div className="max-w-7xl mx-auto px-6 pt-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 pt-4">
           <p className="text-red-400 text-sm bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-2">
             {error}
           </p>
@@ -404,12 +418,12 @@ function DashboardContent() {
       )}
 
       <div
-        className={`max-w-7xl mx-auto px-6 py-8 grid gap-8 items-start ${
+        className={`max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8 grid gap-8 items-start ${
           tab === "account" ? "lg:grid-cols-1" : "lg:grid-cols-2"
         }`}
       >
         <div className="relative z-20 min-w-0 w-full max-w-2xl">
-          <div className="grid grid-cols-5 gap-1 p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6 w-full max-w-xl">
+          <div className="grid grid-cols-5 gap-0.5 sm:gap-1 p-0.5 sm:p-1 bg-white/[0.03] border border-white/5 rounded-xl mb-6 w-full max-w-xl">
             {tabs.map((tabItem) => {
               const href = `/dashboard?tab=${tabItem.id}`;
               const isCurrent = tab === tabItem.id;
@@ -420,6 +434,8 @@ function DashboardContent() {
                 href={href}
                 replace
                 scroll={false}
+                title={tabItem.label}
+                aria-label={tabItem.label}
                 onClick={(event) => {
                   persistTab(tabItem.id);
                   if (isCurrent) {
@@ -429,14 +445,16 @@ function DashboardContent() {
                   event.preventDefault();
                   router.push(href);
                 }}
-                className={`flex items-center justify-center gap-1 py-2.5 px-1 rounded-lg text-[11px] sm:text-xs font-medium transition-all ${
+                className={`flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 py-2 sm:py-2.5 px-0.5 sm:px-1 rounded-lg text-[10px] sm:text-xs font-medium transition-all min-w-0 ${
                   isCurrent
                     ? "bg-purple-600 text-white shadow-lg"
                     : "text-white/50 hover:text-white hover:bg-white/5"
                 }`}
               >
-                <tabItem.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span className="truncate">{tabItem.label}</span>
+                <tabItem.icon className="w-4 h-4 shrink-0" />
+                <span className="truncate max-w-full hidden sm:inline leading-tight">
+                  {tabItem.label}
+                </span>
               </Link>
             );
             })}
@@ -615,12 +633,12 @@ function DashboardContent() {
                     />
                     <p className="text-xs text-white/35 mt-2">{t("dashboard.discordUserIdHint")}</p>
                     <a
-                      href="https://discord.gg/lanyard"
+                      href={COMMUNITY_BOT_URL}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-block mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
                     >
-                      {t("dashboard.discordLanyardLink")} →
+                      {t("dashboard.discordBotLink")} →
                     </a>
                   </Field>
                 </div>

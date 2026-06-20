@@ -117,7 +117,7 @@ export interface ProfileSettings {
   /** Fondo de los botones de icono */
   iconBackgroundColor?: string;
   /** Forma del contenedor de iconos de enlaces */
-  iconShape?: "rounded" | "circle" | "square";
+  iconShape?: "rounded" | "circle" | "square" | "none";
   /** Forma del icono junto al nombre */
   profileNameIconShape?: "rounded" | "circle" | "square";
   /** Borde del icono junto al nombre */

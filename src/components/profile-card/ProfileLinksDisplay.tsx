@@ -14,9 +14,11 @@ import { getSocialLinkTitle, isSocialLinkActive } from "@/lib/social-link-utils"
 import { useSocialLinkAction } from "@/components/profile-card/useSocialLinkAction";
 import {
   getIconContainerStyle,
+  getIconLinkWrapperClass,
   getIconShapeClass,
   getLinkIconColor,
   getPlatformLinkColor,
+  isPlainLinkIcons,
   resolveIconStyle,
 } from "@/lib/icon-style-config";
 
@@ -174,6 +176,7 @@ function PillsLinks({
 
   const iconShapeClass = getIconShapeClass(iconStyle.iconShape);
   const containerStyle = getIconContainerStyle(iconStyle);
+  const plainIcons = isPlainLinkIcons(iconStyle.iconShape);
 
   return (
     <div className={`w-full flex flex-col ${compact ? "gap-1" : "gap-1.5"}`}>
@@ -209,11 +212,15 @@ function PillsLinks({
             }}
           >
             <span
-              className={`flex shrink-0 items-center justify-center ${compact ? "w-7 h-7" : "w-8 h-8"} ${iconShapeClass} bg-white/5`}
+              className={
+                plainIcons
+                  ? "flex shrink-0 items-center justify-center"
+                  : `flex shrink-0 items-center justify-center ${compact ? "w-7 h-7" : "w-8 h-8"} ${iconShapeClass} bg-white/5`
+              }
               style={{
                 color: link.iconUrl ? undefined : color,
                 filter: iconStyle.glowIcons ? `drop-shadow(0 0 6px ${color})` : undefined,
-                ...containerStyle,
+                ...(plainIcons ? {} : containerStyle),
               }}
             >
               <LinkIcon
@@ -245,8 +252,8 @@ function RowLinks({
   if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
 
   const btn = compact ? "w-8 h-8" : "w-10 h-10";
-  const icon = compact ? "w-4 h-4" : "w-4 h-4";
-  const iconShapeClass = getIconShapeClass(iconStyle.iconShape);
+  const icon = compact ? "w-4 h-4" : "w-5 h-5";
+  const plainIcon = compact ? "w-5 h-5" : "w-6 h-6";
   const containerStyle = getIconContainerStyle(iconStyle);
 
   return (
@@ -261,7 +268,7 @@ function RowLinks({
             key={link.id}
             link={link}
             locale={locale}
-            className={`flex items-center justify-center ${btn} ${iconShapeClass} bg-white/10 border border-white/15 hover:bg-white/20 transition-colors`}
+            className={getIconLinkWrapperClass(iconStyle, btn, "row")}
             style={{
               color: link.iconUrl ? undefined : color,
               filter: iconStyle.glowIcons ? `drop-shadow(0 0 6px ${color})` : undefined,
@@ -271,7 +278,7 @@ function RowLinks({
             <LinkIcon
               link={link}
               color={iconColor}
-              sizeClass={icon}
+              sizeClass={isPlainLinkIcons(iconStyle.iconShape) ? plainIcon : icon}
               glowIcons={iconStyle.glowIcons}
             />
           </ProfileLinkWrap>

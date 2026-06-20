@@ -3,7 +3,8 @@ import type { ProfileSettings } from "@/types/profile";
 import { hexToRgba } from "@/lib/color-utils";
 
 export type IconColorMode = "platform" | "unified";
-export type IconShape = "rounded" | "circle" | "square";
+export type IconShape = "rounded" | "circle" | "square" | "none";
+export type ProfileNameIconShape = "rounded" | "circle" | "square";
 
 export const ICON_COLOR_MODE_OPTIONS: {
   value: IconColorMode;
@@ -15,12 +16,22 @@ export const ICON_COLOR_MODE_OPTIONS: {
 
 export const ICON_SHAPE_OPTIONS: {
   value: IconShape;
-  labelKey: "dashboard.iconShapeRounded" | "dashboard.iconShapeCircle" | "dashboard.iconShapeSquare";
+  labelKey:
+    | "dashboard.iconShapeRounded"
+    | "dashboard.iconShapeCircle"
+    | "dashboard.iconShapeSquare"
+    | "dashboard.iconShapeNone";
 }[] = [
+  { value: "none", labelKey: "dashboard.iconShapeNone" },
   { value: "rounded", labelKey: "dashboard.iconShapeRounded" },
   { value: "circle", labelKey: "dashboard.iconShapeCircle" },
   { value: "square", labelKey: "dashboard.iconShapeSquare" },
 ];
+
+/** Formas con contenedor visible (fondo/borde). El icono junto al nombre no usa "none". */
+export const PROFILE_NAME_ICON_SHAPE_OPTIONS = ICON_SHAPE_OPTIONS.filter(
+  (opt) => opt.value !== "none"
+);
 
 export interface ResolvedIconStyle {
   unifiedColor: boolean;
@@ -40,6 +51,7 @@ export function resolveIconColorMode(settings: Partial<ProfileSettings>): IconCo
 
 export function resolveIconShape(settings: Partial<ProfileSettings>): IconShape {
   if (
+    settings.iconShape === "none" ||
     settings.iconShape === "rounded" ||
     settings.iconShape === "circle" ||
     settings.iconShape === "square"
@@ -49,7 +61,13 @@ export function resolveIconShape(settings: Partial<ProfileSettings>): IconShape 
   return "rounded";
 }
 
-export function resolveProfileNameIconShape(settings: Partial<ProfileSettings>): IconShape {
+export function isPlainLinkIcons(shape: IconShape): boolean {
+  return shape === "none";
+}
+
+export function resolveProfileNameIconShape(
+  settings: Partial<ProfileSettings>
+): ProfileNameIconShape {
   if (
     settings.profileNameIconShape === "rounded" ||
     settings.profileNameIconShape === "circle" ||
@@ -89,14 +107,33 @@ export function getLinkIconColor(
 }
 
 export function getIconShapeClass(shape: IconShape): string {
+  if (shape === "none") return "";
   if (shape === "circle") return "rounded-full";
   if (shape === "square") return "rounded-none";
   return "rounded-xl";
 }
 
+export function getIconLinkWrapperClass(
+  iconStyle: ResolvedIconStyle,
+  containerSize: string,
+  variant: "icons" | "row" = "icons"
+): string {
+  if (isPlainLinkIcons(iconStyle.iconShape)) {
+    return `flex items-center justify-center ${containerSize} hover:opacity-80 active:opacity-65 transition-opacity`;
+  }
+
+  const shapeClass = getIconShapeClass(iconStyle.iconShape);
+  if (variant === "row") {
+    return `flex items-center justify-center ${containerSize} ${shapeClass} bg-white/10 border border-white/15 hover:bg-white/20 transition-colors overflow-hidden`;
+  }
+
+  return `flex items-center justify-center ${containerSize} ${shapeClass} bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors overflow-hidden`;
+}
+
 export function getIconContainerStyle(
   iconStyle: ResolvedIconStyle
 ): CSSProperties | undefined {
+  if (isPlainLinkIcons(iconStyle.iconShape)) return undefined;
   if (!iconStyle.iconBackgroundColor) return undefined;
   return {
     backgroundColor: hexToRgba(iconStyle.iconBackgroundColor, 0.18),

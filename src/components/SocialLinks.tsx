@@ -10,9 +10,10 @@ import { isSocialLinkActive } from "@/lib/social-link-utils";
 import { useSocialLinkAction } from "@/components/profile-card/useSocialLinkAction";
 import {
   getIconContainerStyle,
-  getIconShapeClass,
+  getIconLinkWrapperClass,
   getLinkIconColor,
   getPlatformLinkColor,
+  isPlainLinkIcons,
   resolveIconStyle,
 } from "@/lib/icon-style-config";
 
@@ -29,29 +30,27 @@ interface Props {
 function LinkIcon({
   link,
   color,
-  compact,
+  sizeClass,
   glowIcons,
 }: {
   link: SocialLink;
   color: string;
-  compact: boolean;
+  sizeClass: string;
   glowIcons?: boolean;
 }) {
-  const size = compact ? "w-4 h-4" : "w-5 h-5";
-
   if (link.iconUrl) {
     return (
       <CustomLinkIcon
         iconUrl={link.iconUrl}
         color={color}
-        sizeClass={size}
+        sizeClass={sizeClass}
         glowIcons={glowIcons}
       />
     );
   }
 
   if (link.platform === "custom") {
-    return <Globe className={`${size} text-white/70`} style={{ color }} />;
+    return <Globe className={`${sizeClass} text-white/70`} style={{ color }} />;
   }
 
   return <PlatformIcon platform={link.platform as SocialPlatform} />;
@@ -77,8 +76,21 @@ function SocialLinkButton({
   const color = getPlatformLinkColor(iconStyle, config.color);
   const iconColor = getLinkIconColor(iconStyle, config.color, Boolean(link.iconUrl));
   const { copyOnly, href, title, copied, activate } = useSocialLinkAction(link);
-  const iconSize = compact ? "w-9 h-9" : "w-12 h-12";
-  const shapeClass = getIconShapeClass(iconStyle.iconShape);
+  const plain = isPlainLinkIcons(iconStyle.iconShape);
+  const iconSize = plain
+    ? compact
+      ? "w-8 h-8"
+      : "w-10 h-10"
+    : compact
+      ? "w-9 h-9"
+      : "w-12 h-12";
+  const linkIconSize = plain
+    ? compact
+      ? "w-5 h-5"
+      : "w-6 h-6"
+    : compact
+      ? "w-4 h-4"
+      : "w-5 h-5";
   const containerStyle = getIconContainerStyle(iconStyle);
   const tooltip = copyOnly
     ? copied
@@ -86,7 +98,7 @@ function SocialLinkButton({
       : `${title}${copyHint ? ` · ${copyHint}` : ""}`
     : title;
 
-  const className = `flex items-center justify-center ${iconSize} ${shapeClass} bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 transition-colors overflow-hidden`;
+  const className = getIconLinkWrapperClass(iconStyle, iconSize, "icons");
   const style = {
     color: link.iconUrl ? undefined : color,
     filter: iconStyle.glowIcons ? `drop-shadow(0 0 8px ${color})` : undefined,
@@ -109,7 +121,7 @@ function SocialLinkButton({
         className={`${className} cursor-copy`}
         style={style}
       >
-        <LinkIcon link={link} color={iconColor} compact={compact} glowIcons={iconStyle.glowIcons} />
+        <LinkIcon link={link} color={iconColor} sizeClass={linkIconSize} glowIcons={iconStyle.glowIcons} />
       </motion.button>
     );
   }
@@ -129,7 +141,7 @@ function SocialLinkButton({
       className={className}
       style={style}
     >
-      <LinkIcon link={link} color={iconColor} compact={compact} glowIcons={iconStyle.glowIcons} />
+      <LinkIcon link={link} color={iconColor} sizeClass={linkIconSize} glowIcons={iconStyle.glowIcons} />
     </motion.a>
   );
 }

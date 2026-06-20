@@ -273,7 +273,7 @@ export const en: Messages = {
     connectionError: "Connection error. Check your network and try again.",
     pageTitleNotFound: "Profile not found — Eyed.bio",
     tapForSound: "Tap to enable sound",
-    discordLanyardHint: "Join Lanyard to show live status",
+    discordLanyardHint: "Connect EyedBot to show live status",
   },
   accessGate: {
     protected: "Protected profile",
@@ -419,6 +419,7 @@ export const en: Messages = {
     iconShapeRounded: "Rounded",
     iconShapeCircle: "Circle",
     iconShapeSquare: "Square",
+    iconShapeNone: "Icon only",
     profileNameIconShape: "Name icon shape",
     profileNameIconRingColor: "Name icon border",
     profileNameIconRingDefault: "Accent color",
@@ -455,8 +456,8 @@ export const en: Messages = {
     discordUserIdLabel: "Discord user ID",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "Enable Developer Mode in Discord → right-click your profile → Copy User ID. Join Lanyard at discord.gg/lanyard for live status.",
-    discordLanyardLink: "Join Lanyard",
+      "Enable Developer Mode in Discord → right-click your profile → Copy User ID. Then link your account in the EyedBot panel to show live status on your profile.",
+    discordBotLink: "Open EyedBot panel",
     previewSimulateEntry: "Simulate entry screen",
   },
   linkEditor: {

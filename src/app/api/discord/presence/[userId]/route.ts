@@ -25,7 +25,7 @@ export async function GET(_request: Request, { params }: Props) {
     const presence = await fetchLanyardPresence(userId);
     if (!presence) {
       return NextResponse.json(
-        { error: "Presencia no disponible. ¿Tienes Lanyard activado?" },
+        { error: "Presencia no disponible. ¿Tienes EyedBot vinculado?" },
         { status: 404 }
       );
     }

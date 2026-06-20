@@ -8,6 +8,8 @@ type LogoProps = {
   size?: "sm" | "md";
   href?: string | null;
   showText?: boolean;
+  /** Oculta el texto en pantallas pequeñas (solo icono). */
+  responsiveText?: boolean;
   className?: string;
   title?: string;
 };
@@ -21,6 +23,7 @@ export default function Logo({
   size = "md",
   href = "/",
   showText = true,
+  responsiveText = false,
   className = "",
   title = "Ir al inicio",
 }: LogoProps) {
@@ -35,7 +38,9 @@ export default function Logo({
         <Eye className={`${s.icon} text-white`} aria-hidden />
       </div>
       {showText && (
-        <span className={`font-bold text-white ${s.text}`}>
+        <span
+          className={`font-bold text-white ${s.text} ${responsiveText ? "hidden sm:inline" : ""}`}
+        >
           Eyed<span className="text-purple-400">.bio</span>
         </span>
       )}

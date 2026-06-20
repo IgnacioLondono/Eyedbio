@@ -2,13 +2,16 @@
 
 import type { ReactNode } from "react";
 import { Globe } from "lucide-react";
-import type { IconShape } from "@/lib/icon-style-config";
+import type { IconShape, ProfileNameIconShape } from "@/lib/icon-style-config";
 import {
   ICON_COLOR_MODE_OPTIONS,
   ICON_SHAPE_OPTIONS,
+  PROFILE_NAME_ICON_SHAPE_OPTIONS,
   getIconContainerStyle,
+  getIconLinkWrapperClass,
   getIconShapeClass,
   getPlatformLinkColor,
+  isPlainLinkIcons,
   resolveIconStyle,
   settingsForIconColorMode,
 } from "@/lib/icon-style-config";
@@ -56,6 +59,7 @@ function ShapeButton({
 
 function IconPreview({ settings }: { settings: ProfileSettings }) {
   const iconStyle = resolveIconStyle(settings);
+  const plain = isPlainLinkIcons(iconStyle.iconShape);
   const shapeClass = getIconShapeClass(iconStyle.iconShape);
   const containerStyle = getIconContainerStyle(iconStyle);
   const samples = [
@@ -69,11 +73,15 @@ function IconPreview({ settings }: { settings: ProfileSettings }) {
       {samples.map(({ key, color }) => (
         <span
           key={key}
-          className={`flex h-10 w-10 items-center justify-center border border-white/10 bg-white/5 ${shapeClass}`}
+          className={
+            plain
+              ? "flex h-10 w-10 items-center justify-center"
+              : `flex h-10 w-10 items-center justify-center border border-white/10 bg-white/5 ${shapeClass}`
+          }
           style={{
             color,
             filter: iconStyle.glowIcons ? `drop-shadow(0 0 6px ${color})` : undefined,
-            ...containerStyle,
+            ...(plain ? {} : containerStyle),
           }}
         >
           {key === "custom" ? (
@@ -156,13 +164,13 @@ export default function IconStylePicker({ settings, onChange }: Props) {
         />
 
         <Field label={t("dashboard.iconShape")}>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {ICON_SHAPE_OPTIONS.map((opt) => (
               <ShapeButton
                 key={opt.value}
                 active={iconShape === opt.value}
                 label={t(opt.labelKey)}
-                previewClass={getIconShapeClass(opt.value)}
+                previewClass={opt.value === "none" ? undefined : getIconShapeClass(opt.value)}
                 onClick={() => onChange({ iconShape: opt.value as IconShape })}
               />
             ))}
@@ -173,13 +181,13 @@ export default function IconStylePicker({ settings, onChange }: Props) {
       <Subsection title={t("dashboard.profileIconsSubsection")}>
         <Field label={t("dashboard.profileNameIconShape")}>
           <div className="grid grid-cols-3 gap-2">
-            {ICON_SHAPE_OPTIONS.map((opt) => (
+            {PROFILE_NAME_ICON_SHAPE_OPTIONS.map((opt) => (
               <ShapeButton
                 key={opt.value}
                 active={profileNameIconShape === opt.value}
                 label={t(opt.labelKey)}
                 previewClass={getIconShapeClass(opt.value)}
-                onClick={() => onChange({ profileNameIconShape: opt.value as IconShape })}
+                onClick={() => onChange({ profileNameIconShape: opt.value as ProfileNameIconShape })}
               />
             ))}
           </div>

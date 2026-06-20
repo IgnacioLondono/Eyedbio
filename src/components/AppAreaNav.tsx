@@ -29,7 +29,7 @@ export default function AppAreaNav({ active }: Props) {
 
   return (
     <nav
-      className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/5"
+      className="flex items-center gap-0.5 sm:gap-1 p-0.5 sm:p-1 rounded-xl bg-white/[0.03] border border-white/5 shrink-0"
       aria-label={t("nav.appAreas")}
     >
       {AREAS.map(({ id, href, icon: Icon }) => {
@@ -50,7 +50,7 @@ export default function AppAreaNav({ active }: Props) {
               event.preventDefault();
               router.push(href);
             }}
-            className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`inline-flex items-center justify-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 ${
               isActive
                 ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20"
                 : "text-white/50 hover:text-white hover:bg-white/5"
