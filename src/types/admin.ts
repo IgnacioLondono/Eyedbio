@@ -17,4 +17,5 @@ export interface AdminStats {
   admins: number;
   profileViews: number;
   links: number;
+  openSupportTickets: number;
 }

@@ -13,6 +13,7 @@ import {
   Settings,
   Music,
   LogOut,
+  LifeBuoy,
 } from "lucide-react";
 import {
   Profile,
@@ -311,6 +312,17 @@ function DashboardContent() {
 
           <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             <CommunityDiscordLink variant="header" />
+            {site.supportEnabled ? (
+              <Link
+                href="/support"
+                title={t("dashboard.supportLink")}
+                aria-label={t("dashboard.supportLink")}
+                className="flex items-center justify-center p-1.5 sm:px-3 sm:py-1.5 text-xs text-white/60 hover:text-white border border-white/10 rounded-lg hover:bg-white/5 transition-colors shrink-0"
+              >
+                <LifeBuoy className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden lg:inline ml-1.5">{t("nav.support")}</span>
+              </Link>
+            ) : null}
             <Link
               href={`/${profile.username}`}
               target="_blank"

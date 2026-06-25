@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Save, Settings2 } from "lucide-react";
+import AdminPageHeader from "@/components/admin/AdminPageHeader";
 import {
   DEFAULT_SITE_SETTINGS,
   SITE_SETTING_KEYS,
@@ -42,6 +43,11 @@ const SETTING_META: Record<
     label: "Código de acceso al perfil",
     description:
       "Permite proteger el perfil público con un código. Si está off, los usuarios no pueden activarlo.",
+  },
+  supportEnabled: {
+    label: "Centro de soporte",
+    description:
+      "Permite a los usuarios abrir tickets desde /support cuando tienen problemas con la web.",
   },
 };
 
@@ -101,19 +107,12 @@ export default function AdminSiteSettings() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-2xl">
-      <div className="flex items-start gap-3 mb-8">
-        <div className="p-2 rounded-lg bg-red-500/15 text-red-300">
-          <Settings2 className="w-5 h-5" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold mb-1">Configuración del sitio</h1>
-          <p className="text-white/45 text-sm leading-relaxed">
-            Activa o desactiva funciones para todos los usuarios. Los cambios se aplican al
-            guardar.
-          </p>
-        </div>
-      </div>
+    <div className="p-4 sm:p-6 md:p-8 max-w-2xl">
+      <AdminPageHeader
+        title="Configuración del sitio"
+        description="Activa o desactiva funciones para todos los usuarios. Los cambios se aplican al guardar."
+        icon={<Settings2 className="w-5 h-5" />}
+      />
 
       <div className="space-y-3">
         {SITE_SETTING_KEYS.map((key) => {

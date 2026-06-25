@@ -24,6 +24,7 @@ export interface Messages {
     discover: string;
     appAreas: string;
     menu: string;
+    support: string;
   };
   landing: {
     heroBadge: string;
@@ -387,6 +388,35 @@ export interface Messages {
     discordUserIdHint: string;
     discordBotLink: string;
     previewSimulateEntry: string;
+    supportLink: string;
+    supportLinkHint: string;
+  };
+  support: {
+    title: string;
+    subtitle: string;
+    newTicket: string;
+    category: string;
+    subject: string;
+    subjectPlaceholder: string;
+    message: string;
+    messagePlaceholder: string;
+    submit: string;
+    sending: string;
+    yourTickets: string;
+    empty: string;
+    selectTicket: string;
+    staff: string;
+    you: string;
+    replyPlaceholder: string;
+    send: string;
+    closedHint: string;
+    loadError: string;
+    createError: string;
+    replyError: string;
+    disabled: string;
+    discordFallback: string;
+    discordAlso: string;
+    backDashboard: string;
   };
   linkEditor: {
     platformCount: string;
@@ -511,6 +541,7 @@ export const es: Messages = {
     discover: "Descubre",
     appAreas: "Secciones de la app",
     menu: "Menú",
+    support: "Soporte",
   },
   landing: {
     heroBadge: "La plataforma link-in-bio moderna",
@@ -944,6 +975,35 @@ export const es: Messages = {
       "Activa Modo desarrollador en Discord → clic derecho en tu perfil → Copiar ID. Luego vincula tu cuenta en el panel de EyedBot para que aparezca tu estado en el perfil.",
     discordBotLink: "Abrir panel de EyedBot",
     previewSimulateEntry: "Simular pantalla de entrada",
+    supportLink: "Centro de soporte",
+    supportLinkHint: "¿Problemas con tu perfil, subidas o cuenta? Abre un ticket y te respondemos.",
+  },
+  support: {
+    title: "Soporte",
+    subtitle: "Cuéntanos qué falla y te ayudamos a resolverlo.",
+    newTicket: "Nuevo ticket",
+    category: "Categoría",
+    subject: "Asunto",
+    subjectPlaceholder: "Ej. No se guarda el audio del perfil",
+    message: "Mensaje",
+    messagePlaceholder: "Describe qué esperabas, qué hiciste y qué ves en pantalla…",
+    submit: "Enviar ticket",
+    sending: "Enviando…",
+    yourTickets: "Tus tickets",
+    empty: "Aún no tienes tickets. Crea uno si algo no funciona.",
+    selectTicket: "Selecciona un ticket para ver la conversación.",
+    staff: "Equipo Eyed.bio",
+    you: "Tú",
+    replyPlaceholder: "Escribe un mensaje…",
+    send: "Enviar",
+    closedHint: "Este ticket está cerrado. Abre uno nuevo si necesitas más ayuda.",
+    loadError: "No se pudo cargar el soporte",
+    createError: "No se pudo crear el ticket",
+    replyError: "No se pudo enviar el mensaje",
+    disabled: "El centro de soporte no está disponible ahora.",
+    discordFallback: "Únete a Discord",
+    discordAlso: "También puedes preguntar en",
+    backDashboard: "Volver al dashboard",
   },
   linkEditor: {
     platformCount: "{count}/{max} redes y plataformas",

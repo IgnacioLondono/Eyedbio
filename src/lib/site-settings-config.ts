@@ -13,6 +13,8 @@ export interface SiteSettingsConfig {
   profileAudioEnabled: boolean;
   /** Código de acceso para ocultar perfil público */
   profileAccessCodeEnabled: boolean;
+  /** Centro de soporte con tickets en el dashboard */
+  supportEnabled: boolean;
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsConfig = {
@@ -23,6 +25,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsConfig = {
   communityDiscordEnabled: true,
   profileAudioEnabled: true,
   profileAccessCodeEnabled: true,
+  supportEnabled: true,
 };
 
 export function mergeSiteSettings(partial?: Partial<SiteSettingsConfig>): SiteSettingsConfig {

@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
-import { Shield, Mail, AtSign, KeyRound, CalendarDays, ArrowRight, Lock } from "lucide-react";
+import Link from "next/link";
+import { Shield, Mail, AtSign, KeyRound, CalendarDays, ArrowRight, Lock, LifeBuoy } from "lucide-react";
 import { USERNAME_CHANGE_COOLDOWN_DAYS } from "@/lib/validation";
 import PasswordInput from "@/components/PasswordInput";
 import { useI18n } from "@/components/LocaleProvider";
@@ -196,6 +197,22 @@ export default function AccountSettings({ profileUsername, onUsernameUpdated }: 
   return (
     <>
       <form onSubmit={handleSave} className="space-y-6 max-w-lg">
+        {site.supportEnabled ? (
+          <Link
+            href="/support"
+            className="flex items-start gap-3 p-4 rounded-xl border border-purple-500/25 bg-purple-500/10 hover:bg-purple-500/15 transition-colors"
+          >
+            <div className="p-2 rounded-lg bg-purple-500/20 text-purple-300 shrink-0">
+              <LifeBuoy className="w-4 h-4" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-white">{t("dashboard.supportLink")}</p>
+              <p className="text-xs text-white/45 mt-1">{t("dashboard.supportLinkHint")}</p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-white/30 shrink-0 mt-1" />
+          </Link>
+        ) : null}
+
         <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-3">
           <div>
             <label htmlFor="account-locale" className="block text-sm text-white/60 mb-2">
