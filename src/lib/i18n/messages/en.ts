@@ -27,6 +27,7 @@ export const en: Messages = {
     appAreas: "App sections",
     menu: "Menu",
     support: "Support",
+    goDashboard: "Go to dashboard",
   },
   landing: {
     heroBadge: "The modern link-in-bio platform",

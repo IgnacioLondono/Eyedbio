@@ -15,6 +15,8 @@ export interface SiteSettingsConfig {
   profileAccessCodeEnabled: boolean;
   /** Centro de soporte con tickets en el dashboard */
   supportEnabled: boolean;
+  /** Ocultar cuentas admin en Descubre (podio y listado) */
+  hideAdminProfilesInDiscover: boolean;
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsConfig = {
@@ -26,6 +28,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsConfig = {
   profileAudioEnabled: true,
   profileAccessCodeEnabled: true,
   supportEnabled: true,
+  hideAdminProfilesInDiscover: false,
 };
 
 export function mergeSiteSettings(partial?: Partial<SiteSettingsConfig>): SiteSettingsConfig {

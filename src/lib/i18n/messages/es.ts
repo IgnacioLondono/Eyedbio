@@ -25,6 +25,7 @@ export interface Messages {
     appAreas: string;
     menu: string;
     support: string;
+    goDashboard: string;
   };
   landing: {
     heroBadge: string;
@@ -542,6 +543,7 @@ export const es: Messages = {
     appAreas: "Secciones de la app",
     menu: "Menú",
     support: "Soporte",
+    goDashboard: "Ir al dashboard",
   },
   landing: {
     heroBadge: "La plataforma link-in-bio moderna",

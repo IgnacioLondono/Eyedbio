@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -20,6 +20,7 @@ import {
 } from "@/lib/support-config";
 import type { SupportTicketDetail, SupportTicketSummary } from "@/types/support";
 import { COMMUNITY_DISCORD_URL } from "@/lib/community";
+import { useIntervalWhenVisible } from "@/hooks/useIntervalWhenVisible";
 
 function formatWhen(iso: string, locale: "es" | "en") {
   return new Date(iso).toLocaleString(locale === "es" ? "es-ES" : "en-US", {
@@ -46,9 +47,10 @@ export default function SupportCenter() {
     subject: "",
     message: "",
   });
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const loadTickets = useCallback(async () => {
-    setLoading(true);
+  const loadTickets = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError("");
     try {
       const res = await fetch("/api/support");
@@ -56,31 +58,50 @@ export default function SupportCenter() {
       if (!res.ok) throw new Error(data.error ?? t("support.loadError"));
       setTickets(data.tickets ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("support.loadError"));
-      setTickets([]);
+      if (!silent) {
+        setError(err instanceof Error ? err.message : t("support.loadError"));
+        setTickets([]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [t]);
 
   const loadDetail = useCallback(
-    async (id: string) => {
-      setDetailLoading(true);
-      setError("");
+    async (id: string, silent = false) => {
+      if (!silent) setDetailLoading(true);
+      if (!silent) setError("");
       try {
         const res = await fetch(`/api/support/${id}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data.error ?? t("support.loadError"));
         setDetail(data.ticket);
       } catch (err) {
-        setError(err instanceof Error ? err.message : t("support.loadError"));
-        setDetail(null);
+        if (!silent) {
+          setError(err instanceof Error ? err.message : t("support.loadError"));
+          setDetail(null);
+        }
       } finally {
-        setDetailLoading(false);
+        if (!silent) setDetailLoading(false);
       }
     },
     [t]
   );
+
+  const pollDetail = useCallback(() => {
+    if (selectedId && !sending) void loadDetail(selectedId, true);
+  }, [selectedId, sending, loadDetail]);
+
+  const pollTickets = useCallback(() => {
+    if (!creating) void loadTickets(true);
+  }, [creating, loadTickets]);
+
+  useIntervalWhenVisible(pollDetail, 3000, Boolean(selectedId) && site.supportEnabled);
+  useIntervalWhenVisible(pollTickets, 8000, site.supportEnabled);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [detail?.messages.length, detail?.messages.at(-1)?.id]);
 
   useEffect(() => {
     if (!site.supportEnabled) {
@@ -332,6 +353,7 @@ export default function SupportCenter() {
                     <p className="whitespace-pre-wrap text-white/85">{msg.body}</p>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
               {detail.status !== "closed" ? (
                 <div className="p-4 border-t border-white/10 flex gap-2">

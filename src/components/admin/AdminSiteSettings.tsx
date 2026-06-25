@@ -49,6 +49,11 @@ const SETTING_META: Record<
     description:
       "Permite a los usuarios abrir tickets desde /support cuando tienen problemas con la web.",
   },
+  hideAdminProfilesInDiscover: {
+    label: "Ocultar admins en Descubre",
+    description:
+      "Excluye las cuentas con rol admin del podio y del listado en /discover.",
+  },
 };
 
 export default function AdminSiteSettings() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Loader2, Search, Send } from "lucide-react";
 import {
@@ -11,6 +11,7 @@ import {
   type SupportStatus,
 } from "@/lib/support-config";
 import type { AdminSupportTicketRow } from "@/types/support";
+import { useIntervalWhenVisible } from "@/hooks/useIntervalWhenVisible";
 
 function formatWhen(iso: string) {
   return new Date(iso).toLocaleString("es-ES", {
@@ -33,6 +34,7 @@ export default function AdminSupportQueue() {
   const [saving, setSaving] = useState(false);
   const [reply, setReply] = useState("");
   const [error, setError] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   async function fetchDetail(id: string) {
     const res = await fetch(`/api/admin/support/${id}`);
@@ -49,9 +51,9 @@ export default function AdminSupportQueue() {
     };
   }
 
-  const loadList = useCallback(async () => {
-    setLoading(true);
-    setError("");
+  const loadList = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    if (!silent) setError("");
     try {
       const params = new URLSearchParams({
         page: String(page),
@@ -66,26 +68,45 @@ export default function AdminSupportQueue() {
       setTickets(data.tickets ?? []);
       setTotalPages(data.totalPages ?? 1);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error");
-      setTickets([]);
+      if (!silent) {
+        setError(err instanceof Error ? err.message : "Error");
+        setTickets([]);
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [page, query, statusFilter]);
 
-  const loadDetail = useCallback(async (id: string) => {
-    setDetailLoading(true);
-    setError("");
+  const loadDetail = useCallback(async (id: string, silent = false) => {
+    if (!silent) setDetailLoading(true);
+    if (!silent) setError("");
     try {
       const ticket = await fetchDetail(id);
       setDetail(ticket);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Error");
-      setDetail(null);
+      if (!silent) {
+        setError(err instanceof Error ? err.message : "Error");
+        setDetail(null);
+      }
     } finally {
-      setDetailLoading(false);
+      if (!silent) setDetailLoading(false);
     }
   }, []);
+
+  const pollDetail = useCallback(() => {
+    if (selectedId && !saving) void loadDetail(selectedId, true);
+  }, [selectedId, saving, loadDetail]);
+
+  const pollList = useCallback(() => {
+    if (!saving) void loadList(true);
+  }, [saving, loadList]);
+
+  useIntervalWhenVisible(pollDetail, 3000, Boolean(selectedId));
+  useIntervalWhenVisible(pollList, 8000, true);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [detail?.messages.length, detail?.messages.at(-1)?.id]);
 
   useEffect(() => {
     void loadList();
@@ -294,6 +315,7 @@ export default function AdminSupportQueue() {
                     <p className="whitespace-pre-wrap text-white/85">{msg.body}</p>
                   </div>
                 ))}
+                <div ref={messagesEndRef} />
               </div>
 
               {detail.status !== "closed" ? (

@@ -51,7 +51,7 @@ export default function AdminShell({ children, adminEmail }: Props) {
 
   const sidebar = (
     <>
-      <div className="p-5 border-b border-white/10">
+      <div className="shrink-0 p-5 border-b border-white/10">
         <Logo href="/admin" size="sm" responsiveText />
         <div className="mt-3 flex items-center gap-2 text-xs text-red-300/90">
           <Shield className="w-3.5 h-3.5" />
@@ -62,7 +62,7 @@ export default function AdminShell({ children, adminEmail }: Props) {
         ) : null}
       </div>
 
-      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+      <nav className="flex-1 min-h-0 p-3 space-y-1 overflow-y-auto">
         {nav.map((item) => {
           const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
           const badge = item.badgeKey === "support" && openTickets > 0 ? openTickets : 0;
@@ -91,7 +91,7 @@ export default function AdminShell({ children, adminEmail }: Props) {
         })}
       </nav>
 
-      <div className="p-3 border-t border-white/10 space-y-1">
+      <div className="shrink-0 mt-auto p-3 border-t border-white/10 space-y-1">
         <Link
           href="/dashboard"
           className="flex items-center gap-2 px-3 py-2 text-xs text-white/50 hover:text-white rounded-lg hover:bg-white/5"
@@ -136,7 +136,7 @@ export default function AdminShell({ children, adminEmail }: Props) {
         ) : null}
 
         <aside
-          className={`fixed lg:static inset-y-0 left-0 z-50 w-64 shrink-0 border-r border-white/10 bg-[#0c0c14] flex flex-col transform transition-transform duration-200 ${
+          className={`fixed inset-y-0 lg:sticky lg:top-0 lg:h-svh lg:max-h-svh lg:inset-y-auto left-0 z-50 w-64 shrink-0 border-r border-white/10 bg-[#0c0c14] flex flex-col transform transition-transform duration-200 ${
             mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }`}
         >

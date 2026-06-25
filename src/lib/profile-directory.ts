@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { USER_ROLE_ADMIN } from "@/lib/roles";
 
 export type ProfileDirectorySort = "views" | "recent" | "name";
 
@@ -28,6 +29,7 @@ export async function listPublicProfiles(options: {
   limit?: number;
   offset?: number;
   search?: string;
+  hideAdminProfiles?: boolean;
 }): Promise<ProfileDirectoryResult> {
   const sort = options.sort ?? "views";
   const limit = Math.min(Math.max(options.limit ?? 48, 1), 100);
@@ -36,6 +38,7 @@ export async function listPublicProfiles(options: {
 
   const where = {
     blockedAt: null,
+    ...(options.hideAdminProfiles ? { role: { not: USER_ROLE_ADMIN } } : {}),
     ...(search
       ? {
           OR: [

@@ -3,6 +3,7 @@ import {
   listPublicProfiles,
   type ProfileDirectorySort,
 } from "@/lib/profile-directory";
+import { getSiteSettings } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,14 @@ export async function GET(request: Request) {
   const search = searchParams.get("q")?.trim() || undefined;
 
   try {
-    const result = await listPublicProfiles({ sort, limit, offset, search });
+    const site = await getSiteSettings();
+    const result = await listPublicProfiles({
+      sort,
+      limit,
+      offset,
+      search,
+      hideAdminProfiles: site.hideAdminProfilesInDiscover,
+    });
     return NextResponse.json(result, {
       headers: {
         "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120",
