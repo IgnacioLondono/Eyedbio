@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Loader2, Search, Send } from "lucide-react";
+import { Loader2, Search, Send, CircleX, RotateCcw } from "lucide-react";
 import {
   SUPPORT_STATUSES,
   supportCategoryLabel,
@@ -24,7 +24,7 @@ export default function AdminSupportQueue() {
   const [tickets, setTickets] = useState<AdminSupportTicketRow[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [detail, setDetail] = useState<Awaited<ReturnType<typeof fetchDetail>> | null>(null);
-  const [statusFilter, setStatusFilter] = useState("open");
+  const [statusFilter, setStatusFilter] = useState("active");
   const [q, setQ] = useState("");
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -140,6 +140,27 @@ export default function AdminSupportQueue() {
     }
   };
 
+  const closeTicket = async (withReply = false) => {
+    if (!selectedId || detail?.status === "closed") return;
+
+    const message = withReply
+      ? "¿Enviar la respuesta y cerrar el ticket? El usuario no podrá escribir más."
+      : "¿Cerrar este ticket? El usuario no podrá enviar más mensajes.";
+
+    if (!window.confirm(message)) return;
+
+    if (withReply && reply.trim()) {
+      await updateTicket({ reply: reply.trim(), status: "closed" });
+    } else {
+      await updateTicket({ status: "closed" });
+    }
+  };
+
+  const reopenTicket = async () => {
+    if (!selectedId || detail?.status !== "closed") return;
+    await updateTicket({ status: "in_progress" });
+  };
+
   return (
     <div className="space-y-4">
       <form
@@ -167,6 +188,7 @@ export default function AdminSupportQueue() {
           }}
           className="rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm"
         >
+          <option value="active">Activos (abiertos y en revisión)</option>
           <option value="all">Todos los estados</option>
           {SUPPORT_STATUSES.map((s) => (
             <option key={s} value={s}>
@@ -280,7 +302,28 @@ export default function AdminSupportQueue() {
                     @{detail.user.username}
                   </Link>
                 </div>
-                <div className="flex flex-wrap gap-2 pt-1">
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {detail.status !== "closed" ? (
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => void closeTicket(false)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-white/15 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white disabled:opacity-50"
+                    >
+                      <CircleX className="w-3.5 h-3.5" />
+                      Cerrar ticket
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={() => void reopenTicket()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/30 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/15 disabled:opacity-50"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      Reabrir ticket
+                    </button>
+                  )}
                   {SUPPORT_STATUSES.map((status) => (
                     <button
                       key={status}
@@ -327,21 +370,36 @@ export default function AdminSupportQueue() {
                     className="w-full min-h-[80px] rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm resize-y focus:outline-none focus:border-red-500/40"
                     maxLength={4000}
                   />
-                  <button
-                    type="button"
-                    disabled={saving || !reply.trim()}
-                    onClick={() => void updateTicket({ reply })}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-sm font-medium disabled:opacity-50"
-                  >
-                    {saving ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                    Enviar respuesta
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      disabled={saving || !reply.trim()}
+                      onClick={() => void updateTicket({ reply })}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-sm font-medium disabled:opacity-50"
+                    >
+                      {saving ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                      Enviar respuesta
+                    </button>
+                    <button
+                      type="button"
+                      disabled={saving || !reply.trim()}
+                      onClick={() => void closeTicket(true)}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-sm font-medium text-white/80 disabled:opacity-50"
+                    >
+                      <CircleX className="w-4 h-4" />
+                      Responder y cerrar
+                    </button>
+                  </div>
                 </div>
-              ) : null}
+              ) : (
+                <p className="p-4 border-t border-white/10 text-xs text-white/40 text-center">
+                  Ticket cerrado. El usuario ya no puede enviar mensajes.
+                </p>
+              )}
             </>
           ) : null}
         </div>

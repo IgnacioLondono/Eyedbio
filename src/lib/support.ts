@@ -102,7 +102,7 @@ export async function listAdminSupportTickets(options: {
   const skip = (page - 1) * limit;
 
   const where: {
-    status?: string;
+    status?: string | { in: string[] };
     OR?: Array<
       | { subject: { contains: string; mode: "insensitive" } }
       | { user: { email: { contains: string; mode: "insensitive" } } }
@@ -112,7 +112,9 @@ export async function listAdminSupportTickets(options: {
   } = {};
 
   if (options.status && options.status !== "all") {
-    if (isSupportStatus(options.status)) {
+    if (options.status === "active") {
+      where.status = { in: OPEN_SUPPORT_STATUSES };
+    } else if (isSupportStatus(options.status)) {
       where.status = options.status;
     }
   }
