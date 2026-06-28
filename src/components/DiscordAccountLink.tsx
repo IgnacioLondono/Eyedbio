@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Unlink } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/components/LocaleProvider";
@@ -13,6 +13,8 @@ interface DiscordStatus {
 }
 
 interface Props {
+  /** ID ya guardado en el perfil local; evita re-sincronizar en bucle. */
+  currentDiscordUserId?: string;
   onLinked: (discordUserId: string) => void;
   onUnlinked: () => void;
 }
@@ -25,35 +27,65 @@ const DISCORD_ERROR_KEYS: Record<string, string> = {
   failed: "dashboard.discordLinkError",
 };
 
-export default function DiscordAccountLink({ onLinked, onUnlinked }: Props) {
+export default function DiscordAccountLink({
+  currentDiscordUserId = "",
+  onLinked,
+  onUnlinked,
+}: Props) {
   const { t } = useI18n();
   const searchParams = useSearchParams();
+  const onLinkedRef = useRef(onLinked);
+  const onUnlinkedRef = useRef(onUnlinked);
   const [status, setStatus] = useState<DiscordStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
+  useEffect(() => {
+    onLinkedRef.current = onLinked;
+    onUnlinkedRef.current = onUnlinked;
+  }, [onLinked, onUnlinked]);
+
+  const profileIdRef = useRef(currentDiscordUserId);
+  profileIdRef.current = currentDiscordUserId;
+  const hasLoadedOnceRef = useRef(false);
+
+  const load = useCallback(async (silent = false) => {
+    const showSpinner = !silent && !hasLoadedOnceRef.current;
+    if (showSpinner) setLoading(true);
+    if (!silent) setError("");
     try {
       const res = await fetch("/api/account/discord");
       const data = (await res.json()) as DiscordStatus & { error?: string };
       if (!res.ok) throw new Error(data.error ?? t("dashboard.discordLinkError"));
 
       setStatus(data);
-      if (data.discordUserId) onLinked(data.discordUserId);
+
+      const apiId = data.discordUserId?.trim() ?? "";
+      const profileId = profileIdRef.current.trim();
+      if (apiId && apiId !== profileId) {
+        onLinkedRef.current(apiId);
+      } else if (!apiId && profileId) {
+        onUnlinkedRef.current();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t("dashboard.discordLinkError"));
-      setStatus(null);
+      if (!silent) setStatus(null);
     } finally {
-      setLoading(false);
+      hasLoadedOnceRef.current = true;
+      if (showSpinner) setLoading(false);
     }
-  }, [onLinked, t]);
+  }, [t]);
 
   useEffect(() => {
-    void load();
+    void load(false);
   }, [load]);
+
+  useEffect(() => {
+    if (searchParams.get("discordLinked") === "1") {
+      void load(true);
+    }
+  }, [load, searchParams]);
 
   useEffect(() => {
     const code = searchParams.get("discordError");
@@ -73,7 +105,7 @@ export default function DiscordAccountLink({ onLinked, onUnlinked }: Props) {
       if (!res.ok) throw new Error(data.error ?? t("dashboard.discordLinkError"));
 
       onUnlinked();
-      await load();
+      await load(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("dashboard.discordLinkError"));
     } finally {

@@ -196,6 +196,7 @@ function DashboardContent() {
   ) => {
     patchProfile((current) => {
       const patch = typeof partial === "function" ? partial(current.settings) : partial;
+      if (Object.keys(patch).length === 0) return current;
       return {
         ...current,
         settings: { ...current.settings, ...patch },
@@ -654,13 +655,26 @@ function DashboardContent() {
                   />
                   <Field label={t("dashboard.discordAccountLabel")}>
                     <DiscordAccountLink
+                      currentDiscordUserId={profile.settings.discordUserId ?? ""}
                       onLinked={(discordUserId) =>
-                        updateSettings({
-                          discordUserId,
-                          discordPresenceEnabled: true,
+                        updateSettings((settings) => {
+                          if (
+                            settings.discordUserId === discordUserId &&
+                            settings.discordPresenceEnabled
+                          ) {
+                            return {};
+                          }
+                          return {
+                            discordUserId,
+                            discordPresenceEnabled: true,
+                          };
                         })
                       }
-                      onUnlinked={() => updateSettings({ discordUserId: "" })}
+                      onUnlinked={() =>
+                        updateSettings((settings) =>
+                          settings.discordUserId ? { discordUserId: "" } : {}
+                        )
+                      }
                     />
                   </Field>
                 </div>
