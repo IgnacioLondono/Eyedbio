@@ -291,6 +291,9 @@ export interface Messages {
     bannerTitle: string;
     bannerHint: string;
     bannerFileHint: string;
+    mediaResourcesTitle: string;
+    mediaResourcesHint: string;
+    mediaResourcesLink: string;
     audioLabel: string;
     audioHint: string;
     audioSource: string;
@@ -873,6 +876,10 @@ export const es: Messages = {
     bannerHint:
       "Imagen horizontal para la cabecera del layout Banner. Independiente del fondo de pantalla.",
     bannerFileHint: "JPG, PNG, WEBP o GIF · máx. 10 MB",
+    mediaResourcesTitle: "Recursos multimedia",
+    mediaResourcesHint:
+      "Descarga audios y otros archivos multimedia listos para usar en tu perfil.",
+    mediaResourcesLink: "Abrir recursos en eyedbio.eyedcomun.me",
     audioLabel: "Audio de fondo",
     audioHint:
       "MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, AIFF, MIDI · máx. 25MB · elige fragmento o audio completo",

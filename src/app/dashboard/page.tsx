@@ -42,7 +42,7 @@ import AccountSettings from "@/components/AccountSettings";
 import LinkEditor from "@/components/LinkEditor";
 import ShareProfileButton from "@/components/ShareProfileButton";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
-import { COMMUNITY_BOT_URL } from "@/lib/community";
+import { COMMUNITY_BOT_URL, COMMUNITY_MEDIA_HUB_URL } from "@/lib/community";
 import CardLayoutPicker from "@/components/CardLayoutPicker";
 import IconStylePicker from "@/components/IconStylePicker";
 import {
@@ -666,6 +666,20 @@ function DashboardContent() {
 
             {tab === "media" && (
               <>
+                <a
+                  href={COMMUNITY_MEDIA_HUB_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block p-4 rounded-xl border border-purple-500/25 bg-purple-500/10 hover:bg-purple-500/15 transition-colors"
+                >
+                  <p className="text-sm font-medium text-white">{t("dashboard.mediaResourcesTitle")}</p>
+                  <p className="text-xs text-white/45 mt-1">{t("dashboard.mediaResourcesHint")}</p>
+                  <span className="inline-flex items-center gap-1 mt-2 text-xs text-purple-400">
+                    {t("dashboard.mediaResourcesLink")}
+                    <ExternalLink className="w-3 h-3 shrink-0" />
+                  </span>
+                </a>
+
                 <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
                   <div>
                     <h3 className="text-sm font-medium text-white">{t("dashboard.backgroundTitle")}</h3>

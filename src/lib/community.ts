@@ -7,3 +7,8 @@ export const COMMUNITY_DISCORD_LABEL = "EyedComun";
 export const COMMUNITY_BOT_URL = "https://eyedbot.eyedcomun.me/";
 
 export const COMMUNITY_BOT_LABEL = "EyedBot";
+
+/** Recursos multimedia y herramientas para perfiles Eyed.bio. */
+export const COMMUNITY_MEDIA_HUB_URL = "https://eyedbio.eyedcomun.me/";
+
+export const COMMUNITY_MEDIA_HUB_LABEL = "Eyed.bio Recursos";
