@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { isUserBlocked } from "@/lib/auth-user";
+import { auth } from "@/lib/auth/auth";
+import { isUserBlocked } from "@/lib/auth/auth-user";
 import { safeRevalidateTag } from "@/lib/cache-utils";
 import { prisma } from "@/lib/prisma";
-import { profileCacheTag } from "@/lib/cached-profile";
-import { validateSocialLinksCount } from "@/lib/links-config";
-import { saveUserProfile } from "@/lib/profile-save";
-import { userToProfile } from "@/lib/profile-mapper";
-import { ensureDiscordUserIdSynced } from "@/lib/discord-account";
-import { resolveAudioSource } from "@/lib/profile-audio";
-import { DEFAULT_CLIP_DURATION, isFullAudioClip } from "@/lib/audio-config";
+import { profileCacheTag } from "@/lib/profile/cached-profile";
+import { validateSocialLinksCount } from "@/lib/config/links-config";
+import { saveUserProfile } from "@/lib/profile/profile-save";
+import { userToProfile } from "@/lib/profile/profile-mapper";
+import { ensureDiscordUserIdSynced } from "@/lib/auth/discord-account";
+import { resolveAudioSource } from "@/lib/profile/profile-audio";
+import { DEFAULT_CLIP_DURATION, isFullAudioClip } from "@/lib/config/audio-config";
 import { Profile, type AudioSource } from "@/types/profile";
 import { getSiteSettings } from "@/lib/site-settings";
 

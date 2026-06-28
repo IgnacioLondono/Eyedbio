@@ -1,10 +1,10 @@
-import { getPublicProfile } from "@/lib/get-public-profile";
+import { getPublicProfile } from "@/lib/profile/get-public-profile";
 import {
   pngResponse,
   renderFallbackStoryPng,
   renderStoryPng,
 } from "@/lib/render-og-png";
-import { getSiteUrlFromHeaders, profilePublicUrl } from "@/lib/site-url";
+import { getSiteUrlFromHeaders, profilePublicUrl } from "@/lib/config/site-url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

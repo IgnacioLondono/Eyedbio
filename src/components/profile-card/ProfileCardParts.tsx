@@ -2,9 +2,9 @@
 
 import { Eye } from "lucide-react";
 import { Profile } from "@/types/profile";
-import { hexToRgba } from "@/lib/color-utils";
-import { getMediaSrc } from "@/lib/media-url";
-import { FocusedImage } from "@/components/FocusedMedia";
+import { hexToRgba } from "@/lib/config/color-utils";
+import { getMediaSrc } from "@/lib/media/media-url";
+import { FocusedImage } from "@/components/media/FocusedMedia";
 import {
   getAvatarGlowStyle,
   getNameEffectClass,
@@ -12,12 +12,12 @@ import {
   resolveNameEffect,
 } from "@/lib/name-effects";
 import { resolveNameAnimation } from "@/lib/name-animations";
-import AnimatedDisplayName from "@/components/AnimatedDisplayName";
-import { resolveAvatarStyle } from "@/lib/card-layout-config";
-import { getIconShapeClass, resolveProfileNameIconShape } from "@/lib/icon-style-config";
-import { BADGE_CONFIG } from "@/lib/badges";
+import AnimatedDisplayName from "@/components/profile/AnimatedDisplayName";
+import { resolveAvatarStyle } from "@/lib/config/card-layout-config";
+import { getIconShapeClass, resolveProfileNameIconShape } from "@/lib/config/icon-style-config";
+import { BADGE_CONFIG } from "@/lib/config/badges";
 import { t as translate } from "@/lib/i18n";
-import { resolveProfileDisplay } from "@/lib/profile-display-config";
+import { resolveProfileDisplay } from "@/lib/profile/profile-display-config";
 import type { AvatarStyle } from "@/types/profile";
 import type { LucideIcon } from "lucide-react";
 

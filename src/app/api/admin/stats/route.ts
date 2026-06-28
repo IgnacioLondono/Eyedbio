@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/admin-guard";
+import { requireAdminApi } from "@/lib/auth/admin-guard";
 import { USER_ROLE_ADMIN } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 import { countOpenSupportTickets } from "@/lib/support";

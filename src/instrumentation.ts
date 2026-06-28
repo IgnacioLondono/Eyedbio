@@ -3,7 +3,7 @@ export async function register() {
     const { loadAdminEnvFromFile } = await import("@/lib/load-admin-env");
     loadAdminEnvFromFile();
 
-    const { ensureAdminFromEnv } = await import("@/lib/ensure-admin");
+    const { ensureAdminFromEnv } = await import("@/lib/auth/ensure-admin");
     await ensureAdminFromEnv().catch((err) => {
       console.error("[instrumentation] ensure-admin failed:", err);
     });

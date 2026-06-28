@@ -1,4 +1,4 @@
-import type { SupportCategory, SupportStatus } from "@/lib/support-config";
+import type { SupportCategory, SupportStatus } from "@/lib/config/support-config";
 
 export interface SupportMessageRow {
   id: string;

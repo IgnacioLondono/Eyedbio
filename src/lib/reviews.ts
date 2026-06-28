@@ -4,7 +4,7 @@ import {
   REVIEW_COMMENT_MAX_LENGTH,
   REVIEW_RATING_MAX,
   REVIEW_RATING_MIN,
-} from "@/lib/reviews-config";
+} from "@/lib/config/reviews-config";
 import { isPrismaSchemaMismatch } from "@/lib/prisma-errors";
 import { prisma } from "@/lib/prisma";
 import { ProfileReview, ReviewSummary, ReviewUserSnippet } from "@/types/review";

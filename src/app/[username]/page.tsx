@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import ProfileView from "@/components/ProfileView";
-import { auth } from "@/lib/auth";
-import { findProfileByUsername } from "@/lib/profile-query";
-import { userToProfile } from "@/lib/profile-mapper";
-import { getProfileMetadataTitle } from "@/lib/profile-display-config";
+import ProfileView from "@/components/profile/ProfileView";
+import { auth } from "@/lib/auth/auth";
+import { findProfileByUsername } from "@/lib/profile/profile-query";
+import { userToProfile } from "@/lib/profile/profile-mapper";
+import { getProfileMetadataTitle } from "@/lib/profile/profile-display-config";
 import {
   resolveProfileTabIconHref,
   resolveProfileTabIconUrl,
-} from "@/lib/profile-tab-icon";
+} from "@/lib/profile/profile-tab-icon";
 import {
   getSiteUrlFromHeaders,
   profileOgImageUrl,
   profilePublicUrl,
-} from "@/lib/site-url";
+} from "@/lib/config/site-url";
 
 export const dynamic = "force-dynamic";
 

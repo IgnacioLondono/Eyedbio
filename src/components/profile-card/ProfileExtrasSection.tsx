@@ -2,9 +2,9 @@
 
 import { MapPin } from "lucide-react";
 import { Profile } from "@/types/profile";
-import { hexToRgba } from "@/lib/color-utils";
-import { resolveProfileDisplay } from "@/lib/profile-display-config";
-import { isValidDiscordUserId } from "@/lib/lanyard";
+import { hexToRgba } from "@/lib/config/color-utils";
+import { resolveProfileDisplay } from "@/lib/profile/profile-display-config";
+import { isValidDiscordUserId } from "@/lib/discord/lanyard";
 import {
   getSocialLinkCopyValue,
   isSocialLinkActive,

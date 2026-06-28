@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { sendVerificationCodeEmail } from "@/lib/mail";
-import { createVerificationCode, getCodeExpiry } from "@/lib/password-reset";
+import { sendVerificationCodeEmail } from "@/lib/email/mail";
+import { createVerificationCode, getCodeExpiry } from "@/lib/auth/password-reset";
 import { normalizeEmail, validateEmail } from "@/lib/validation";
 
 const GENERIC_MESSAGE =

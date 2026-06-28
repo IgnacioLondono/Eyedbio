@@ -3,7 +3,7 @@ import { stat } from "fs/promises";
 import path from "path";
 import { Readable } from "stream";
 import { NextResponse } from "next/server";
-import { EXT_TO_MIME } from "@/lib/media-config";
+import { EXT_TO_MIME } from "@/lib/media/media-config";
 
 const UPLOAD_ROOT = process.env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads");
 

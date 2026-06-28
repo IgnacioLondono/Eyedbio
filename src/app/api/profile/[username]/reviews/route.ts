@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { safeRevalidateTag } from "@/lib/cache-utils";
 import { isPrismaSchemaMismatch } from "@/lib/prisma-errors";
 import { prisma } from "@/lib/prisma";
@@ -10,7 +10,7 @@ import {
   validateReviewComment,
   validateReviewRating,
 } from "@/lib/reviews";
-import { REVIEW_PAGE_SIZE } from "@/lib/reviews-config";
+import { REVIEW_PAGE_SIZE } from "@/lib/config/reviews-config";
 import { getSiteSettings } from "@/lib/site-settings";
 
 interface Props {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/admin-guard";
+import { requireAdminApi } from "@/lib/auth/admin-guard";
 import {
   SITE_SETTING_KEYS,
   getSiteSettings,

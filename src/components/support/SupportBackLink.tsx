@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { useI18n } from "@/components/LocaleProvider";
+import { useI18n } from "@/components/providers/LocaleProvider";
 
 export default function SupportBackLink() {
   const { t } = useI18n();

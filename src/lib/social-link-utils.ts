@@ -1,5 +1,5 @@
 import { SocialLink, SocialPlatform } from "@/types/profile";
-import { PLATFORM_CONFIG } from "@/lib/platforms";
+import { PLATFORM_CONFIG } from "@/lib/config/platforms";
 
 const COPY_ONLY_PLATFORMS = new Set<SocialPlatform>(["discord", "epicgames"]);
 

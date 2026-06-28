@@ -7,7 +7,7 @@ import {
   DEFAULT_SITE_SETTINGS,
   SITE_SETTING_KEYS,
   type SiteSettingsConfig,
-} from "@/lib/site-settings-config";
+} from "@/lib/config/site-settings-config";
 
 const SETTING_META: Record<
   keyof SiteSettingsConfig,

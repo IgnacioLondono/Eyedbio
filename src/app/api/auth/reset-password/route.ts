@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import {
   isValidVerificationCode,
   normalizeVerificationCode,
-} from "@/lib/password-reset";
+} from "@/lib/auth/password-reset";
 import { normalizeEmail, validateEmail, validatePassword } from "@/lib/validation";
 
 export async function POST(request: Request) {

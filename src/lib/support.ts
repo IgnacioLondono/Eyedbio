@@ -5,7 +5,7 @@ import {
   OPEN_SUPPORT_STATUSES,
   type SupportCategory,
   type SupportStatus,
-} from "@/lib/support-config";
+} from "@/lib/config/support-config";
 import type {
   AdminSupportTicketRow,
   SupportMessageRow,

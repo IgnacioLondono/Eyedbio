@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@/generated/prisma/client";
-import { requireAdminApi } from "@/lib/admin-guard";
+import { requireAdminApi } from "@/lib/auth/admin-guard";
 import { prisma } from "@/lib/prisma";
 import { AdminUserRow } from "@/types/admin";
-import { parseBadgesJson } from "@/lib/badges";
+import { parseBadgesJson } from "@/lib/config/badges";
 
 const PAGE_SIZE = 20;
 

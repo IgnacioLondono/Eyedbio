@@ -1,7 +1,7 @@
-import type { MediaFocus } from "@/lib/media-focus";
-import type { PageOverlay } from "@/lib/profile-overlay-config";
+import type { MediaFocus } from "@/lib/media/media-focus";
+import type { PageOverlay } from "@/lib/profile/profile-overlay-config";
 
-export type { MediaFocus } from "@/lib/media-focus";
+export type { MediaFocus } from "@/lib/media/media-focus";
 
 export type SocialPlatform =
   | "discord"

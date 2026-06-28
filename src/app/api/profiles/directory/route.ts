@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import {
   listPublicProfiles,
   type ProfileDirectorySort,
-} from "@/lib/profile-directory";
+} from "@/lib/profile/profile-directory";
 import { getSiteSettings } from "@/lib/site-settings";
 
 export const dynamic = "force-dynamic";

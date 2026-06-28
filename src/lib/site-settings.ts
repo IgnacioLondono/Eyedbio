@@ -3,14 +3,14 @@ import {
   DEFAULT_SITE_SETTINGS,
   mergeSiteSettings,
   type SiteSettingsConfig,
-} from "@/lib/site-settings-config";
+} from "@/lib/config/site-settings-config";
 
-export type { SiteSettingsConfig } from "@/lib/site-settings-config";
+export type { SiteSettingsConfig } from "@/lib/config/site-settings-config";
 export {
   DEFAULT_SITE_SETTINGS,
   mergeSiteSettings,
   SITE_SETTING_KEYS,
-} from "@/lib/site-settings-config";
+} from "@/lib/config/site-settings-config";
 
 const SITE_SETTINGS_ID = "default";
 

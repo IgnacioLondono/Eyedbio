@@ -3,12 +3,12 @@
 import { motion, type MotionProps } from "framer-motion";
 import { Globe } from "lucide-react";
 import { SocialLink, SocialPlatform, ProfileSettings } from "@/types/profile";
-import { PLATFORM_CONFIG } from "@/lib/platforms";
-import { PlatformIcon } from "@/components/PlatformIcons";
-import CustomLinkIcon from "@/components/CustomLinkIcon";
-import { hexToRgba } from "@/lib/color-utils";
+import { PLATFORM_CONFIG } from "@/lib/config/platforms";
+import { PlatformIcon } from "@/components/shared/PlatformIcons";
+import CustomLinkIcon from "@/components/profile/CustomLinkIcon";
+import { hexToRgba } from "@/lib/config/color-utils";
 import type { LinkStyle } from "@/types/profile";
-import SocialLinks from "@/components/SocialLinks";
+import SocialLinks from "@/components/profile/SocialLinks";
 import { t as translate } from "@/lib/i18n";
 import { getSocialLinkTitle, isSocialLinkActive } from "@/lib/social-link-utils";
 import { useSocialLinkAction } from "@/components/profile-card/useSocialLinkAction";
@@ -20,7 +20,7 @@ import {
   getPlatformLinkColor,
   isPlainLinkIcons,
   resolveIconStyle,
-} from "@/lib/icon-style-config";
+} from "@/lib/config/icon-style-config";
 
 interface Props {
   links: SocialLink[];

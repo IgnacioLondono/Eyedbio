@@ -9,7 +9,7 @@ import {
   supportStatusLabel,
   supportStatusTone,
   type SupportStatus,
-} from "@/lib/support-config";
+} from "@/lib/config/support-config";
 import type { AdminSupportTicketRow } from "@/types/support";
 import { useIntervalWhenVisible } from "@/hooks/useIntervalWhenVisible";
 

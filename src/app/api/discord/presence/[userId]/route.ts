@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { fetchDiscordPresence } from "@/lib/discord-presence";
+import { fetchDiscordPresence } from "@/lib/discord/discord-presence";
 import {
   formatPresenceActivity,
   isValidDiscordUserId,
   discordAvatarUrl,
   discordDisplayName,
   discordStatusColor,
-} from "@/lib/lanyard";
+} from "@/lib/discord/lanyard";
 
 export const dynamic = "force-dynamic";
 

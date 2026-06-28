@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { parseBadgesJson, toggleBadgeList, MANAGED_BADGES } from "@/lib/badges";
-import { requireAdminApi } from "@/lib/admin-guard";
+import { parseBadgesJson, toggleBadgeList, MANAGED_BADGES } from "@/lib/config/badges";
+import { requireAdminApi } from "@/lib/auth/admin-guard";
 import { isAdminRole } from "@/lib/roles";
 import { prisma } from "@/lib/prisma";
 
@@ -141,7 +141,7 @@ export async function PATCH(request: Request, { params }: Props) {
       });
 
       const { safeRevalidateTag } = await import("@/lib/cache-utils");
-      const { profileCacheTag } = await import("@/lib/cached-profile");
+      const { profileCacheTag } = await import("@/lib/profile/cached-profile");
       safeRevalidateTag(profileCacheTag(updated.username));
 
       return NextResponse.json({

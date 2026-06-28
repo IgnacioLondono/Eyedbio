@@ -8,9 +8,9 @@ import AuthLayout, {
   AuthError,
   AuthFooterLink,
   AuthSubmitButton,
-} from "@/components/AuthLayout";
-import PasswordInput from "@/components/PasswordInput";
-import { useI18n } from "@/components/LocaleProvider";
+} from "@/components/auth/AuthLayout";
+import PasswordInput from "@/components/auth/PasswordInput";
+import { useI18n } from "@/components/providers/LocaleProvider";
 
 function ResetPasswordForm() {
   const { t } = useI18n();

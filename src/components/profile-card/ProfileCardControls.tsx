@@ -1,8 +1,8 @@
 "use client";
 
-import ShareProfileButton from "@/components/ShareProfileButton";
-import ProfileAudio from "@/components/ProfileAudio";
-import { useSiteSettings } from "@/components/SiteSettingsProvider";
+import ShareProfileButton from "@/components/profile/ShareProfileButton";
+import ProfileAudio from "@/components/profile/ProfileAudio";
+import { useSiteSettings } from "@/components/providers/SiteSettingsProvider";
 
 interface Props {
   username: string;

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { hexToRgba } from "@/lib/color-utils";
-import { proxiedDiscordAvatarUrl, isValidDiscordUserId } from "@/lib/lanyard";
+import { hexToRgba } from "@/lib/config/color-utils";
+import { proxiedDiscordAvatarUrl, isValidDiscordUserId } from "@/lib/discord/lanyard";
 import { t as translate } from "@/lib/i18n";
 import type { CardScale } from "./ProfileCardParts";
 

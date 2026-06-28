@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Eyed.bio
 
-## Getting Started
+Plataforma link-in-bio (Next.js + PostgreSQL + Docker).
 
-First, run the development server:
+## Desarrollo local
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env
+npm run dev:db    # PostgreSQL en Docker
+npm run db:setup  # migraciones + seed
+npm run dev       # http://localhost:9090
 ```
 
-Open [http://localhost:9090](http://localhost:9090) with your browser to see the result.
+## Estructura del repositorio
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+├── config/env/          # Ejemplos de variables (Portainer, admin)
+├── docker/
+│   ├── compose/         # docker-compose.yml, .dev.yml, .ghcr.yml
+│   ├── nginx/           # Proxy reverso
+│   ├── Dockerfile
+│   ├── docker-entrypoint.sh
+│   └── healthcheck.js
+├── docs/                # AGENTS.md (reglas para IA)
+├── prisma/              # Schema y migraciones
+├── public/              # Assets estáticos
+├── scripts/             # Utilidades (hooks, reorganización)
+└── src/
+    ├── app/             # Rutas Next.js + API
+    ├── components/      # UI por dominio (auth, dashboard, profile…)
+    ├── hooks/
+    ├── lib/             # Lógica (auth, profile, media, config…)
+    └── types/
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Docker (producción)
 
-## Learn More
+```bash
+docker compose -f docker/compose/docker-compose.yml up -d --build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Variables de entorno: ver `.env.example` y `config/env/portainer.env.example`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Imagen GHCR (sin compilar en servidor):
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+docker compose -f docker/compose/docker-compose.ghcr.yml up -d
+```

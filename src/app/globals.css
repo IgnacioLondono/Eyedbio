@@ -27,7 +27,11 @@ body {
   color: white;
 }
 
-details summary::-webkit-details-marker {
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
   display: none;
 }
 

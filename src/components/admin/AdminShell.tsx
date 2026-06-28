@@ -15,7 +15,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import Logo from "@/components/Logo";
+import Logo from "@/components/layout/Logo";
 
 interface Props {
   children: React.ReactNode;

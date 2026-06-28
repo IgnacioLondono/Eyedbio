@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import DiscoverPageClient from "@/components/DiscoverPageClient";
+import DiscoverPageClient from "@/components/discover/DiscoverPageClient";
 
 export const metadata: Metadata = {
   title: "Descubre perfiles — Eyed.bio",

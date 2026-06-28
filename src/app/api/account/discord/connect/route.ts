@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import {
   isDiscordLinkAvailable,
   isDiscordOAuthAvailable,
-} from "@/lib/discord-account";
-import { setDiscordLinkIntent } from "@/lib/discord-link-intent";
-import { buildEyedBotLinkStartUrl } from "@/lib/eyedbot-link";
-import { absoluteUrl } from "@/lib/site-url";
+} from "@/lib/auth/discord-account";
+import { setDiscordLinkIntent } from "@/lib/auth/discord-link-intent";
+import { buildEyedBotLinkStartUrl } from "@/lib/discord/eyedbot-link";
+import { absoluteUrl } from "@/lib/config/site-url";
 
 function redirect(path: string): NextResponse {
   return NextResponse.redirect(absoluteUrl(path));

@@ -9,17 +9,17 @@ import {
   Send,
   LifeBuoy,
 } from "lucide-react";
-import { useI18n } from "@/components/LocaleProvider";
-import { useSiteSettings } from "@/components/SiteSettingsProvider";
+import { useI18n } from "@/components/providers/LocaleProvider";
+import { useSiteSettings } from "@/components/providers/SiteSettingsProvider";
 import {
   SUPPORT_CATEGORIES,
   supportCategoryLabel,
   supportStatusLabel,
   supportStatusTone,
   type SupportCategory,
-} from "@/lib/support-config";
+} from "@/lib/config/support-config";
 import type { SupportTicketDetail, SupportTicketSummary } from "@/types/support";
-import { COMMUNITY_DISCORD_URL } from "@/lib/community";
+import { COMMUNITY_DISCORD_URL } from "@/lib/config/community";
 import { useIntervalWhenVisible } from "@/hooks/useIntervalWhenVisible";
 
 function formatWhen(iso: string, locale: "es" | "en") {

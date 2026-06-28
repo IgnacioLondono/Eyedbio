@@ -8,10 +8,10 @@ import AuthLayout, {
   AuthError,
   AuthFooterLink,
   AuthSubmitButton,
-} from "@/components/AuthLayout";
-import PasswordInput from "@/components/PasswordInput";
-import OAuthButtons from "@/components/OAuthButtons";
-import { useI18n } from "@/components/LocaleProvider";
+} from "@/components/auth/AuthLayout";
+import PasswordInput from "@/components/auth/PasswordInput";
+import OAuthButtons from "@/components/auth/OAuthButtons";
+import { useI18n } from "@/components/providers/LocaleProvider";
 import { getMessages } from "@/lib/i18n";
 import { APP_LOCALES, LOCALE_LABELS } from "@/lib/i18n/types";
 import type { AppLocale } from "@/lib/i18n/types";

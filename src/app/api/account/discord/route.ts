@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import {
   ensureDiscordUserIdSynced,
   getLinkedDiscordAccount,
   isDiscordLinkAvailable,
   unlinkDiscordAccount,
-} from "@/lib/discord-account";
+} from "@/lib/auth/discord-account";
 
 export async function GET() {
   const session = await auth();

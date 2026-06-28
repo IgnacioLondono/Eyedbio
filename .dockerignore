@@ -13,14 +13,11 @@ prisma/dev.db-journal
 .env.*
 !.env.example
 README.md
-docker-compose.yml
-docker-compose.dev.yml
-docker-compose.ghcr.yml
-portainer.env.example
+docker/compose
+config/env
+docs
 *.md
 .cursor
-AGENTS.md
-CLAUDE.md
 **/*.test.ts
 **/*.test.tsx
 **/*.spec.ts

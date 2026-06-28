@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { sendVerificationCodeEmail } from "@/lib/mail";
-import { createVerificationCode, getCodeExpiry } from "@/lib/password-reset";
-import { isUserBlocked } from "@/lib/auth-user";
+import { sendVerificationCodeEmail } from "@/lib/email/mail";
+import { createVerificationCode, getCodeExpiry } from "@/lib/auth/password-reset";
+import { isUserBlocked } from "@/lib/auth/auth-user";
 import {
   getAdminEnvPassword,
   isAdminConfigured,
   isAdminEnvEmail,
   syncAdminFromEnvIfEmail,
-} from "@/lib/admin-credentials";
+} from "@/lib/auth/admin-credentials";
 import { normalizeEmail } from "@/lib/validation";
 import { getSiteSettings } from "@/lib/site-settings";
 

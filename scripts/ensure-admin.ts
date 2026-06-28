@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { ensureAdminFromEnv } from "../src/lib/ensure-admin";
+import { ensureAdminFromEnv } from "../src/lib/auth/ensure-admin";
 
 async function main() {
   await ensureAdminFromEnv();

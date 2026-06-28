@@ -3,11 +3,11 @@
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
 import { Profile } from "@/types/profile";
-import { hexToRgba } from "@/lib/color-utils";
-import { getMediaSrc } from "@/lib/media-url";
-import { resolveProfileDisplay } from "@/lib/profile-display-config";
-import { getCardSurfaceStyle, getCardFrameStyle } from "@/lib/card-styles";
-import { resolveLinkStyle } from "@/lib/card-layout-config";
+import { hexToRgba } from "@/lib/config/color-utils";
+import { getMediaSrc } from "@/lib/media/media-url";
+import { resolveProfileDisplay } from "@/lib/profile/profile-display-config";
+import { getCardSurfaceStyle, getCardFrameStyle } from "@/lib/config/card-styles";
+import { resolveLinkStyle } from "@/lib/config/card-layout-config";
 import ProfileLinksDisplay from "./ProfileLinksDisplay";
 import {
   getCardScale,
@@ -19,7 +19,7 @@ import {
 } from "./ProfileCardParts";
 import ProfileExtrasSection from "./ProfileExtrasSection";
 import { CardToolbarSlot } from "./ProfileCardToolbar";
-import { FocusedImage } from "@/components/FocusedMedia";
+import { FocusedImage } from "@/components/media/FocusedMedia";
 
 export interface LayoutProps {
   profile: Profile;

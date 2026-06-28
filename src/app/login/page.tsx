@@ -11,10 +11,10 @@ import AuthLayout, {
   AuthFooterLink,
   AuthSubmitButton,
   AuthSuccess,
-} from "@/components/AuthLayout";
-import PasswordInput from "@/components/PasswordInput";
-import OAuthButtons from "@/components/OAuthButtons";
-import { useI18n } from "@/components/LocaleProvider";
+} from "@/components/auth/AuthLayout";
+import PasswordInput from "@/components/auth/PasswordInput";
+import OAuthButtons from "@/components/auth/OAuthButtons";
+import { useI18n } from "@/components/providers/LocaleProvider";
 
 function LoginForm() {
   const { t, tVars } = useI18n();

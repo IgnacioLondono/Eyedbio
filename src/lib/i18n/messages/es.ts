@@ -263,6 +263,16 @@ export interface Messages {
       appearance: string;
       account: string;
     };
+    tabDescriptions: {
+      general: string;
+      links: string;
+      media: string;
+      appearance: string;
+      account: string;
+    };
+    editorNav: string;
+    unsavedBadge: string;
+    previewHint: string;
     viewProfile: string;
     save: string;
     saving: string;
@@ -856,6 +866,16 @@ export const es: Messages = {
       appearance: "Estilo",
       account: "Cuenta",
     },
+    tabDescriptions: {
+      general: "Nombre, bio, avatar y visibilidad",
+      links: "Redes sociales y botones",
+      media: "Fondo, audio y banner",
+      appearance: "Colores, tarjeta y efectos",
+      account: "Usuario, contraseña e idioma",
+    },
+    editorNav: "Editor",
+    unsavedBadge: "Sin guardar",
+    previewHint: "Así se verá tu perfil en móvil",
     viewProfile: "Ver perfil",
     save: "Guardar",
     saving: "Guardando...",

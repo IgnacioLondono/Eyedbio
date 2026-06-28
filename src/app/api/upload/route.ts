@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { saveUpload, UploadKind, validateUpload } from "@/lib/upload";
+import { auth } from "@/lib/auth/auth";
+import { saveUpload, UploadKind, validateUpload } from "@/lib/media/upload";
 import { getSiteSettings } from "@/lib/site-settings";
 import {
   ImageModerationError,
   moderateUploadFile,
-} from "@/lib/image-moderation";
+} from "@/lib/media/image-moderation";
 
 export const maxDuration = 120;
 export const dynamic = "force-dynamic";

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/admin-guard";
+import { requireAdminApi } from "@/lib/auth/admin-guard";
 import { listAdminSupportTickets } from "@/lib/support";
 
 export async function GET(request: Request) {

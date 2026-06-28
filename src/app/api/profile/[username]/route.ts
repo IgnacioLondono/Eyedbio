@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { auth } from "@/lib/auth";
-import { findProfileByUsername } from "@/lib/profile-query";
-import { userToProfile } from "@/lib/profile-mapper";
+import { auth } from "@/lib/auth/auth";
+import { findProfileByUsername } from "@/lib/profile/profile-query";
+import { userToProfile } from "@/lib/profile/profile-mapper";
 import {
   profileUnlockCookieName,
   verifyProfileUnlockToken,
-} from "@/lib/profile-access";
-import { PROFILE_UNLOCK_HEADER } from "@/lib/profile-unlock-client";
+} from "@/lib/profile/profile-access";
+import { PROFILE_UNLOCK_HEADER } from "@/lib/profile/profile-unlock-client";
 import { LockedPublicProfile } from "@/types/public-profile";
 import { getSiteSettings } from "@/lib/site-settings";
 

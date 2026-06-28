@@ -8,7 +8,7 @@ import {
   profileUnlockCookieName,
   signProfileUnlockToken,
   verifyAccessCode,
-} from "@/lib/profile-access";
+} from "@/lib/profile/profile-access";
 import { getSiteSettings } from "@/lib/site-settings";
 
 interface Props {

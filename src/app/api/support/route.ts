@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { isUserBlocked } from "@/lib/auth-user";
+import { auth } from "@/lib/auth/auth";
+import { isUserBlocked } from "@/lib/auth/auth-user";
 import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/site-settings";
-import { OPEN_SUPPORT_STATUSES, MAX_OPEN_TICKETS_PER_USER } from "@/lib/support-config";
+import { OPEN_SUPPORT_STATUSES, MAX_OPEN_TICKETS_PER_USER } from "@/lib/config/support-config";
 import {
   listUserSupportTickets,
   validateSupportCreateInput,

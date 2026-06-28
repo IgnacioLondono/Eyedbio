@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { safeRevalidateTag } from "@/lib/cache-utils";
-import { profileCacheTag } from "@/lib/cached-profile";
+import { profileCacheTag } from "@/lib/profile/cached-profile";
 import bcrypt from "bcryptjs";
-import { auth } from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { prisma } from "@/lib/prisma";
 import { ensureUserPublicUid } from "@/lib/public-uid";
 import { getSiteSettings } from "@/lib/site-settings";
-import { hashAccessCode } from "@/lib/profile-access";
+import { hashAccessCode } from "@/lib/profile/profile-access";
 import {
   getUsernameChangeStatus,
   normalizeAccessCode,
