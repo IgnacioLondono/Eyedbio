@@ -396,6 +396,9 @@ export interface Messages {
     discordUnlink: string;
     discordUnlinkConfirm: string;
     discordLinkError: string;
+    discordLinkErrorInvalid: string;
+    discordLinkErrorSession: string;
+    discordLinkErrorAlreadyLinked: string;
     discordLinkUnavailable: string;
     discordJoinEyedComun: string;
     discordBotLink: string;
@@ -989,15 +992,21 @@ export const es: Messages = {
     discordUserIdLabel: "ID de usuario de Discord",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "Vincula tu cuenta de Discord con el botón de arriba. Debes estar en el servidor EyedComun para que EyedBot muestre tu estado en el perfil.",
+      "El botón te lleva a EyedBot para autorizar Discord (callback en eyedbot.eyedcomun.me). Debes estar en el servidor EyedComun para que tu estado aparezca en el perfil.",
     discordAccountLabel: "Cuenta de Discord",
     discordLinkButton: "Vincular con Discord",
     discordLinkedTitle: "Discord vinculado",
     discordUnlink: "Desvincular",
     discordUnlinkConfirm: "¿Desvincular tu cuenta de Discord del perfil?",
     discordLinkError: "No se pudo vincular Discord",
+    discordLinkErrorInvalid:
+      "La respuesta de EyedBot no es válida. Vuelve a intentarlo desde el dashboard.",
+    discordLinkErrorSession:
+      "La sesión no coincide. Inicia sesión en Eyed.bio e intenta vincular de nuevo.",
+    discordLinkErrorAlreadyLinked:
+      "Esa cuenta de Discord ya está vinculada a otro perfil de Eyed.bio.",
     discordLinkUnavailable:
-      "Vincular Discord no está disponible. Configura DISCORD_CLIENT_ID y DISCORD_CLIENT_SECRET en el servidor.",
+      "Vincular Discord no está disponible. Configura EYEDBOT_API_KEY o las credenciales OAuth de Discord en el servidor.",
     discordJoinEyedComun: "Unirse a EyedComun en Discord",
     discordBotLink: "Abrir panel de EyedBot",
     previewSimulateEntry: "Simular pantalla de entrada",

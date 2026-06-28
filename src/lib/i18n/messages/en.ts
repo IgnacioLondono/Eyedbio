@@ -462,15 +462,21 @@ export const en: Messages = {
     discordUserIdLabel: "Discord user ID",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "Link your Discord account with the button above. You must be in the EyedComun Discord server for EyedBot to show live status on your profile.",
+      "The button sends you to EyedBot to authorize Discord (callback at eyedbot.eyedcomun.me). You must be in the EyedComun server for live status on your profile.",
     discordAccountLabel: "Discord account",
     discordLinkButton: "Link with Discord",
     discordLinkedTitle: "Discord linked",
     discordUnlink: "Unlink",
     discordUnlinkConfirm: "Unlink your Discord account from your profile?",
     discordLinkError: "Could not link Discord",
+    discordLinkErrorInvalid:
+      "EyedBot returned an invalid response. Try again from the dashboard.",
+    discordLinkErrorSession:
+      "Session mismatch. Sign in to Eyed.bio and try linking again.",
+    discordLinkErrorAlreadyLinked:
+      "That Discord account is already linked to another Eyed.bio profile.",
     discordLinkUnavailable:
-      "Discord linking is unavailable. Configure DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET on the server.",
+      "Discord linking is unavailable. Configure EYEDBOT_API_KEY or Discord OAuth credentials on the server.",
     discordJoinEyedComun: "Join EyedComun on Discord",
     discordBotLink: "Open EyedBot panel",
     previewSimulateEntry: "Simulate entry screen",

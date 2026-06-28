@@ -26,6 +26,7 @@ function isPrivateHost(host: string): boolean {
   const hostname = host.split(":")[0]?.toLowerCase() ?? "";
   return (
     hostname === "localhost" ||
+    hostname === "0.0.0.0" ||
     hostname.startsWith("127.") ||
     hostname.startsWith("192.168.") ||
     hostname.startsWith("10.") ||

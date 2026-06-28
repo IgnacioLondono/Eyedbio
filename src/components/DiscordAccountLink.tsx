@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, Unlink } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/components/LocaleProvider";
 import { COMMUNITY_DISCORD_URL } from "@/lib/community";
 
@@ -16,8 +17,17 @@ interface Props {
   onUnlinked: () => void;
 }
 
+const DISCORD_ERROR_KEYS: Record<string, string> = {
+  unavailable: "dashboard.discordLinkUnavailable",
+  invalid: "dashboard.discordLinkErrorInvalid",
+  session: "dashboard.discordLinkErrorSession",
+  already_linked: "dashboard.discordLinkErrorAlreadyLinked",
+  failed: "dashboard.discordLinkError",
+};
+
 export default function DiscordAccountLink({ onLinked, onUnlinked }: Props) {
   const { t } = useI18n();
+  const searchParams = useSearchParams();
   const [status, setStatus] = useState<DiscordStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -44,6 +54,13 @@ export default function DiscordAccountLink({ onLinked, onUnlinked }: Props) {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    const code = searchParams.get("discordError");
+    if (!code) return;
+    const key = DISCORD_ERROR_KEYS[code] ?? "dashboard.discordLinkError";
+    setError(t(key));
+  }, [searchParams, t]);
 
   const unlink = async () => {
     if (!window.confirm(t("dashboard.discordUnlinkConfirm"))) return;

@@ -2,6 +2,7 @@ import type { Account } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isValidDiscordUserId } from "@/lib/lanyard";
 import { getEnabledOAuthProviderIds } from "@/lib/oauth-providers";
+import { isEyedBotLinkAvailable } from "@/lib/eyedbot-link";
 
 type OAuthAccountInput = Pick<
   Account,
@@ -42,6 +43,10 @@ function accountData(input: OAuthAccountInput) {
 
 export function isDiscordOAuthAvailable(): boolean {
   return getEnabledOAuthProviderIds().includes("discord");
+}
+
+export function isDiscordLinkAvailable(): boolean {
+  return isEyedBotLinkAvailable() || isDiscordOAuthAvailable();
 }
 
 export async function getLinkedDiscordAccount(userId: string) {
@@ -107,6 +112,48 @@ export async function ensureDiscordUserIdSynced(userId: string): Promise<string 
 export type LinkDiscordResult =
   | { ok: true; discordUserId: string }
   | { ok: false; error: "ALREADY_LINKED_OTHER" | "NOT_FOUND" };
+
+export async function linkDiscordByProviderId(
+  userId: string,
+  discordUserId: string
+): Promise<LinkDiscordResult> {
+  if (!isValidDiscordUserId(discordUserId)) {
+    return { ok: false, error: "NOT_FOUND" };
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true },
+  });
+  if (!user) return { ok: false, error: "NOT_FOUND" };
+
+  const existing = await prisma.account.findUnique({
+    where: {
+      provider_providerAccountId: {
+        provider: "discord",
+        providerAccountId: discordUserId,
+      },
+    },
+  });
+
+  if (existing && existing.userId !== userId) {
+    return { ok: false, error: "ALREADY_LINKED_OTHER" };
+  }
+
+  if (!existing) {
+    await prisma.account.create({
+      data: {
+        userId,
+        type: "oauth",
+        provider: "discord",
+        providerAccountId: discordUserId,
+      },
+    });
+  }
+
+  await syncDiscordUserIdToProfile(userId, discordUserId);
+  return { ok: true, discordUserId };
+}
 
 export async function linkDiscordAccountForUser(
   userId: string,

@@ -15,9 +15,13 @@ function sign(userId: string, ts: number): string {
   return createHmac("sha256", getSecret()).update(`${userId}.${ts}`).digest("hex");
 }
 
-function pack(userId: string): string {
+export function packDiscordLinkState(userId: string): string {
   const ts = Date.now();
   return `${userId}.${ts}.${sign(userId, ts)}`;
+}
+
+export function unpackDiscordLinkState(value: string): string | null {
+  return unpack(value);
 }
 
 function unpack(value: string | undefined): string | null {
@@ -45,7 +49,7 @@ function unpack(value: string | undefined): string | null {
 
 export async function setDiscordLinkIntent(userId: string): Promise<void> {
   const jar = await cookies();
-  jar.set(LINK_COOKIE, pack(userId), {
+  jar.set(LINK_COOKIE, packDiscordLinkState(userId), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -63,7 +67,7 @@ export async function consumeDiscordLinkIntent(): Promise<string | null> {
 
 export async function setDiscordLinkSessionRestore(userId: string): Promise<void> {
   const jar = await cookies();
-  jar.set(RESTORE_COOKIE, pack(userId), {
+  jar.set(RESTORE_COOKIE, packDiscordLinkState(userId), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",

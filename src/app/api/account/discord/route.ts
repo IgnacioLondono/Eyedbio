@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import {
   ensureDiscordUserIdSynced,
   getLinkedDiscordAccount,
-  isDiscordOAuthAvailable,
+  isDiscordLinkAvailable,
   unlinkDiscordAccount,
 } from "@/lib/discord-account";
 
@@ -13,7 +13,7 @@ export async function GET() {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const available = isDiscordOAuthAvailable();
+  const available = isDiscordLinkAvailable();
   const linked = await getLinkedDiscordAccount(session.user.id);
   const discordUserId =
     (await ensureDiscordUserIdSynced(session.user.id)) ??

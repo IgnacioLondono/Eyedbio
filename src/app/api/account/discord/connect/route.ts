@@ -1,25 +1,41 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import {
+  isDiscordLinkAvailable,
+  isDiscordOAuthAvailable,
+} from "@/lib/discord-account";
 import { setDiscordLinkIntent } from "@/lib/discord-link-intent";
-import { isDiscordOAuthAvailable } from "@/lib/discord-account";
+import { buildEyedBotLinkStartUrl } from "@/lib/eyedbot-link";
+import { absoluteUrl } from "@/lib/site-url";
 
-export async function GET(request: Request) {
+function redirect(path: string): NextResponse {
+  return NextResponse.redirect(absoluteUrl(path));
+}
+
+export async function GET() {
   const session = await auth();
   if (!session?.user?.id) {
-    return NextResponse.redirect(new URL("/login?callbackUrl=/dashboard?tab=general", request.url));
+    return redirect("/login?callbackUrl=/dashboard?tab=general");
   }
 
-  if (!isDiscordOAuthAvailable()) {
-    return NextResponse.redirect(
-      new URL("/dashboard?tab=general&discordError=unavailable", request.url)
-    );
+  if (!isDiscordLinkAvailable()) {
+    return redirect("/dashboard?tab=general&discordError=unavailable");
   }
 
   await setDiscordLinkIntent(session.user.id);
 
-  const callbackUrl = new URL("/dashboard?tab=general&discordLinked=1", request.url).toString();
-  const signInUrl = new URL("/api/auth/signin/discord", request.url);
+  const eyedBotUrl = buildEyedBotLinkStartUrl(session.user.id);
+  if (eyedBotUrl) {
+    return NextResponse.redirect(eyedBotUrl);
+  }
+
+  if (!isDiscordOAuthAvailable()) {
+    return redirect("/dashboard?tab=general&discordError=unavailable");
+  }
+
+  const callbackUrl = absoluteUrl("/dashboard?tab=general&discordLinked=1");
+  const signInUrl = new URL("/api/auth/signin/discord", absoluteUrl("/"));
   signInUrl.searchParams.set("callbackUrl", callbackUrl);
 
-  return NextResponse.redirect(signInUrl);
+  return NextResponse.redirect(signInUrl.toString());
 }
