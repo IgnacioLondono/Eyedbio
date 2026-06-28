@@ -273,6 +273,11 @@ export interface Messages {
     editorNav: string;
     unsavedBadge: string;
     previewHint: string;
+    previewHintMobile: string;
+    previewHintDesktop: string;
+    previewModeLabel: string;
+    previewModeMobile: string;
+    previewModeDesktop: string;
     viewProfile: string;
     save: string;
     saving: string;
@@ -875,7 +880,12 @@ export const es: Messages = {
     },
     editorNav: "Editor",
     unsavedBadge: "Sin guardar",
-    previewHint: "Así se verá tu perfil en móvil",
+    previewHint: "Así se verá tu perfil público",
+    previewHintMobile: "Así se verá en móvil",
+    previewHintDesktop: "Así se verá en escritorio",
+    previewModeLabel: "Modo de vista previa",
+    previewModeMobile: "Móvil",
+    previewModeDesktop: "Web",
     viewProfile: "Ver perfil",
     save: "Guardar",
     saving: "Guardando...",

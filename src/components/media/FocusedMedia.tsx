@@ -39,7 +39,7 @@ export function FocusedImage({
         draggable={false}
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}
-        className={`absolute inset-0 h-full w-full min-h-full min-w-full object-cover ${imgClassName}`}
+        className={`absolute inset-0 h-full w-full object-cover ${imgClassName}`}
         style={focusStyle}
         onLoad={onLoad}
         onError={onError}
@@ -76,14 +76,16 @@ export function FocusedVideo({
   onReady,
   onError,
 }: VideoProps) {
+  const focusStyle = mediaFocusStyle(focus ?? DEFAULT_MEDIA_FOCUS);
+
   return (
     <div className={`relative h-full w-full overflow-hidden ${wrapperClassName}`}>
       <video
         ref={videoRef}
         key={instanceKey ?? src}
         src={src}
-        className={`absolute inset-0 h-full w-full min-h-full min-w-full object-cover ${videoClassName}`}
-        style={mediaFocusStyle(focus ?? DEFAULT_MEDIA_FOCUS)}
+        className={`absolute inset-0 h-full w-full object-cover ${videoClassName}`}
+        style={focusStyle}
         autoPlay={autoPlay}
         loop
         muted={muted}

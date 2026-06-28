@@ -16,8 +16,8 @@ import { ACCEPT_ATTR, UploadKind, getUploadLimitMb, getUploadValidationError, re
 import { getMediaSrc } from "@/lib/media/media-url";
 import {
   IMAGE_ADJUST_PRESETS,
-  isAdjustableImageFile,
-  isAdjustableImageUrl,
+  isAdjustableMediaFile,
+  isAdjustableMediaUrl,
   isAdjustableUploadKind,
 } from "@/lib/config/image-adjust-config";
 import ImageAdjustModal from "@/components/media/ImageAdjustModal";
@@ -341,6 +341,7 @@ export default function FileUpload({
   const adjustPreset = IMAGE_ADJUST_PRESETS[kind];
   const [adjustSrc, setAdjustSrc] = useState<string | null>(null);
   const [adjustFileName, setAdjustFileName] = useState("image.jpg");
+  const [adjustMediaKind, setAdjustMediaKind] = useState<"image" | "video">("image");
 
   useEffect(() => {
     return () => {
@@ -348,8 +349,9 @@ export default function FileUpload({
     };
   }, [adjustSrc]);
 
-  const openAdjust = async (source: string, fileName: string) => {
+  const openAdjust = async (source: string, fileName: string, mediaKind: "image" | "video") => {
     setAdjustFileName(fileName);
+    setAdjustMediaKind(mediaKind);
     setAdjustSrc(source);
   };
 
@@ -362,20 +364,22 @@ export default function FileUpload({
   const startAdjustFromFile = (file: File) => {
     pendingFileRef.current = file;
     const src = URL.createObjectURL(file);
-    void openAdjust(src, file.name);
+    const mediaKind = file.type.startsWith("video/") ? "video" : "image";
+    void openAdjust(src, file.name, mediaKind);
   };
 
   const startAdjustFromUrl = async () => {
     if (!currentUrl || !canAdjust) return;
     pendingFileRef.current = null;
+    const isVideo = previewMediaType === "video";
     try {
       const res = await fetch(getMediaSrc(currentUrl));
       if (!res.ok) throw new Error();
       const blob = await res.blob();
-      if (!blob.type.startsWith("image/")) return;
+      if (!blob.type.startsWith("image/") && !blob.type.startsWith("video/")) return;
       const src = URL.createObjectURL(blob);
-      const name = currentUrl.split("/").pop()?.split("?")[0] || "image.jpg";
-      void openAdjust(src, name);
+      const name = currentUrl.split("/").pop()?.split("?")[0] || (isVideo ? "video.mp4" : "image.jpg");
+      void openAdjust(src, name, blob.type.startsWith("video/") || isVideo ? "video" : "image");
     } catch {
       setError(t("imageAdjust.loadError"));
     }
@@ -396,7 +400,7 @@ export default function FileUpload({
   const onFilePicked = (file: File) => {
     if (rejectInvalidFile(file)) return;
 
-    if (canAdjust && isAdjustableImageFile(file, kind) && adjustPreset) {
+    if (canAdjust && isAdjustableMediaFile(file, kind) && adjustPreset) {
       startAdjustFromFile(file);
       return;
     }
@@ -466,7 +470,7 @@ export default function FileUpload({
               </button>
             )}
           </div>
-          {canAdjust && currentUrl && isAdjustableImageUrl(currentUrl, kind) && adjustPreset && (
+          {canAdjust && currentUrl && isAdjustableMediaUrl(currentUrl, kind) && adjustPreset && (
             <button
               type="button"
               disabled={uploading}
@@ -548,6 +552,7 @@ export default function FileUpload({
         <ImageAdjustModal
           open
           imageSrc={adjustSrc}
+          mediaKind={adjustMediaKind}
           preset={adjustPreset}
           title={adjustTitle}
           initialFocus={mediaFocus}

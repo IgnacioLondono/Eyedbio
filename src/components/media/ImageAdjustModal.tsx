@@ -18,6 +18,7 @@ export interface ImageAdjustResult {
 interface Props {
   open: boolean;
   imageSrc: string;
+  mediaKind?: "image" | "video";
   preset: ImageAdjustPreset;
   title: string;
   initialFocus?: MediaFocus;
@@ -28,6 +29,7 @@ interface Props {
 export default function ImageAdjustModal({
   open,
   imageSrc,
+  mediaKind = "image",
   preset,
   title,
   initialFocus,
@@ -126,6 +128,9 @@ export default function ImageAdjustModal({
 
   if (!open) return null;
 
+  const isVideo = mediaKind === "video";
+  const focusStyle = mediaFocusPositionStyle(focus, { minZoom, maxZoom });
+
   const frameStyle: CSSProperties = preset.circular
     ? {}
     : {
@@ -176,13 +181,26 @@ export default function ImageAdjustModal({
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
           >
-            <img
-              src={imageSrc}
-              alt=""
-              draggable={false}
-              className="select-none"
-              style={mediaFocusPositionStyle(focus, { minZoom, maxZoom })}
-            />
+            {isVideo ? (
+              <video
+                src={imageSrc}
+                muted
+                loop
+                autoPlay
+                playsInline
+                draggable={false}
+                className="select-none"
+                style={focusStyle}
+              />
+            ) : (
+              <img
+                src={imageSrc}
+                alt=""
+                draggable={false}
+                className="select-none"
+                style={focusStyle}
+              />
+            )}
             {isBannerStrip ? (
               <>
                 <div

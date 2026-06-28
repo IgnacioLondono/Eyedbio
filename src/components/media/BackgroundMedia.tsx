@@ -45,8 +45,7 @@ export default function BackgroundMedia({
   const pointerClass = "pointer-events-none";
   const mediaType = resolveBackgroundType(url, type);
   const displayUrl = getMediaSrc(url);
-  const mediaFocus =
-    mediaType === "video" ? DEFAULT_MEDIA_FOCUS : (focus ?? DEFAULT_MEDIA_FOCUS);
+  const mediaFocus = focus ?? DEFAULT_MEDIA_FOCUS;
   const shouldPlay = !deferPlayback;
   const videoInstanceKey = `${displayUrl}-${shouldPlay ? "play" : "hold"}`;
 
@@ -115,6 +114,7 @@ export default function BackgroundMedia({
           <FocusedVideo
             instanceKey={videoInstanceKey}
             src={displayUrl}
+            focus={mediaFocus}
             priority
             autoPlay={shouldPlay}
             muted

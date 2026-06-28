@@ -46,3 +46,20 @@ export function isAdjustableImageUrl(url: string, kind?: UploadKind): boolean {
   if (kind === "background" && /\.gif(\?|$)/i.test(url)) return false;
   return /\.(jpe?g|png|webp|gif|avif|bmp)(\?|$)/i.test(url) || url.startsWith("/");
 }
+
+export function isAdjustableVideoUrl(url: string, kind?: UploadKind): boolean {
+  if (kind !== "background" || !url?.trim()) return false;
+  return /\.(mp4|webm|mov)(\?|$)/i.test(url);
+}
+
+export function isAdjustableVideoFile(file: File, kind?: UploadKind): boolean {
+  return kind === "background" && file.type.startsWith("video/");
+}
+
+export function isAdjustableMediaUrl(url: string, kind?: UploadKind): boolean {
+  return isAdjustableImageUrl(url, kind) || isAdjustableVideoUrl(url, kind);
+}
+
+export function isAdjustableMediaFile(file: File, kind?: UploadKind): boolean {
+  return isAdjustableImageFile(file, kind) || isAdjustableVideoFile(file, kind);
+}
