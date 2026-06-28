@@ -42,7 +42,8 @@ import AccountSettings from "@/components/AccountSettings";
 import LinkEditor from "@/components/LinkEditor";
 import ShareProfileButton from "@/components/ShareProfileButton";
 import CommunityDiscordLink from "@/components/CommunityDiscordLink";
-import { COMMUNITY_BOT_URL, COMMUNITY_MEDIA_HUB_URL } from "@/lib/community";
+import DiscordAccountLink from "@/components/DiscordAccountLink";
+import { COMMUNITY_MEDIA_HUB_URL } from "@/lib/community";
 import CardLayoutPicker from "@/components/CardLayoutPicker";
 import IconStylePicker from "@/components/IconStylePicker";
 import {
@@ -138,6 +139,25 @@ function DashboardContent() {
         setError(err instanceof Error ? err.message : t("dashboard.loadError"));
       });
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get("discordLinked") !== "1") return;
+
+    fetch("/api/profile")
+      .then(async (res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) return;
+        profileRef.current = data;
+        setProfile(data);
+        setIsDirty(false);
+      })
+      .finally(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("discordLinked");
+        const qs = params.toString();
+        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      });
+  }, [pathname, router, searchParams]);
 
   useEffect(() => {
     if (searchParams.get("tab")) return;
@@ -632,26 +652,16 @@ function DashboardContent() {
                       updateSettings({ discordPresenceEnabled })
                     }
                   />
-                  <Field label={t("dashboard.discordUserIdLabel")}>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      value={profile.settings.discordUserId ?? ""}
-                      onChange={(e) =>
-                        updateSettings({ discordUserId: e.target.value.replace(/\D/g, "") })
+                  <Field label={t("dashboard.discordAccountLabel")}>
+                    <DiscordAccountLink
+                      onLinked={(discordUserId) =>
+                        updateSettings({
+                          discordUserId,
+                          discordPresenceEnabled: true,
+                        })
                       }
-                      placeholder={t("dashboard.discordUserIdPlaceholder")}
-                      className="input-field font-mono text-sm"
+                      onUnlinked={() => updateSettings({ discordUserId: "" })}
                     />
-                    <p className="text-xs text-white/35 mt-2">{t("dashboard.discordUserIdHint")}</p>
-                    <a
-                      href={COMMUNITY_BOT_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-2 text-xs text-purple-400 hover:text-purple-300 transition-colors"
-                    >
-                      {t("dashboard.discordBotLink")} →
-                    </a>
                   </Field>
                 </div>
               </>

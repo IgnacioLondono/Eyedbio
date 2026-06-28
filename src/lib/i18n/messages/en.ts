@@ -462,7 +462,16 @@ export const en: Messages = {
     discordUserIdLabel: "Discord user ID",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "Enable Developer Mode in Discord → right-click your profile → Copy User ID. You must be in the EyedComun Discord server for EyedBot to show live status on your profile.",
+      "Link your Discord account with the button above. You must be in the EyedComun Discord server for EyedBot to show live status on your profile.",
+    discordAccountLabel: "Discord account",
+    discordLinkButton: "Link with Discord",
+    discordLinkedTitle: "Discord linked",
+    discordUnlink: "Unlink",
+    discordUnlinkConfirm: "Unlink your Discord account from your profile?",
+    discordLinkError: "Could not link Discord",
+    discordLinkUnavailable:
+      "Discord linking is unavailable. Configure DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET on the server.",
+    discordJoinEyedComun: "Join EyedComun on Discord",
     discordBotLink: "Open EyedBot panel",
     previewSimulateEntry: "Simulate entry screen",
     supportLink: "Help center",

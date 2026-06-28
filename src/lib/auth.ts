@@ -9,6 +9,15 @@ import { isValidVerificationCode, normalizeVerificationCode } from "@/lib/passwo
 import { normalizeEmail } from "@/lib/validation";
 import { buildOAuthProviders } from "@/lib/oauth-providers";
 import { findUserByEmailForOAuth, resolveOAuthSignIn } from "@/lib/oauth-user";
+import {
+  consumeDiscordLinkIntent,
+  consumeDiscordLinkSessionRestore,
+  setDiscordLinkSessionRestore,
+} from "@/lib/discord-link-intent";
+import {
+  linkDiscordAccountForUser,
+  syncDiscordUserIdToProfile,
+} from "@/lib/discord-account";
 
 type AuthIntent = "login" | "signup" | "refresh";
 
@@ -105,10 +114,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async signIn({ user, account, profile }) {
       if (!account || account.provider === "credentials") return true;
 
+      const oauthAccount = account as OAuthAccount;
+      const linkUserId = await consumeDiscordLinkIntent();
+
+      if (linkUserId && oauthAccount.provider === "discord") {
+        const linked = await linkDiscordAccountForUser(linkUserId, {
+          type: oauthAccount.type,
+          provider: oauthAccount.provider,
+          providerAccountId: oauthAccount.providerAccountId,
+          refresh_token: oauthAccount.refresh_token ?? null,
+          access_token: oauthAccount.access_token ?? null,
+          expires_at: oauthAccount.expires_at ?? null,
+          token_type: oauthAccount.token_type ?? null,
+          scope: oauthAccount.scope ?? null,
+          id_token: oauthAccount.id_token ?? null,
+          session_state:
+            typeof oauthAccount.session_state === "string"
+              ? oauthAccount.session_state
+              : null,
+        });
+
+        if (!linked.ok) return false;
+
+        await setDiscordLinkSessionRestore(linkUserId);
+        return true;
+      }
+
       const email = normalizeEmail(user.email ?? "");
       if (!email) return false;
 
-      const oauthAccount = account as OAuthAccount;
       const dbUser = await resolveOAuthSignIn(
         {
           email,
@@ -136,9 +170,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       );
 
+      if (dbUser && oauthAccount.provider === "discord") {
+        await syncDiscordUserIdToProfile(dbUser.id, oauthAccount.providerAccountId);
+      }
+
       return Boolean(dbUser);
     },
     async jwt({ token, user, account }) {
+      const restoreUserId = await consumeDiscordLinkSessionRestore();
+      if (restoreUserId) {
+        const dbUser = await prisma.user.findUnique({ where: { id: restoreUserId } });
+        if (dbUser && !isUserBlocked(dbUser)) {
+          applyAuthUserToToken(token, dbUser);
+          return token;
+        }
+      }
+
       if (user && account?.provider && account.provider !== "credentials") {
         const dbUser = await findUserByEmailForOAuth(user.email ?? String(token.email ?? ""));
         if (dbUser) applyAuthUserToToken(token, dbUser);

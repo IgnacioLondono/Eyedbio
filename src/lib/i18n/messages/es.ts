@@ -390,6 +390,14 @@ export interface Messages {
     discordUserIdLabel: string;
     discordUserIdPlaceholder: string;
     discordUserIdHint: string;
+    discordAccountLabel: string;
+    discordLinkButton: string;
+    discordLinkedTitle: string;
+    discordUnlink: string;
+    discordUnlinkConfirm: string;
+    discordLinkError: string;
+    discordLinkUnavailable: string;
+    discordJoinEyedComun: string;
     discordBotLink: string;
     previewSimulateEntry: string;
     supportLink: string;
@@ -981,7 +989,16 @@ export const es: Messages = {
     discordUserIdLabel: "ID de usuario de Discord",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "Activa Modo desarrollador en Discord → clic derecho en tu perfil → Copiar ID. Debes estar en el Discord de EyedComun para que EyedBot muestre tu estado en el perfil.",
+      "Vincula tu cuenta de Discord con el botón de arriba. Debes estar en el servidor EyedComun para que EyedBot muestre tu estado en el perfil.",
+    discordAccountLabel: "Cuenta de Discord",
+    discordLinkButton: "Vincular con Discord",
+    discordLinkedTitle: "Discord vinculado",
+    discordUnlink: "Desvincular",
+    discordUnlinkConfirm: "¿Desvincular tu cuenta de Discord del perfil?",
+    discordLinkError: "No se pudo vincular Discord",
+    discordLinkUnavailable:
+      "Vincular Discord no está disponible. Configura DISCORD_CLIENT_ID y DISCORD_CLIENT_SECRET en el servidor.",
+    discordJoinEyedComun: "Unirse a EyedComun en Discord",
     discordBotLink: "Abrir panel de EyedBot",
     previewSimulateEntry: "Simular pantalla de entrada",
     supportLink: "Centro de soporte",

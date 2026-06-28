@@ -7,6 +7,7 @@ import { profileCacheTag } from "@/lib/cached-profile";
 import { validateSocialLinksCount } from "@/lib/links-config";
 import { saveUserProfile } from "@/lib/profile-save";
 import { userToProfile } from "@/lib/profile-mapper";
+import { ensureDiscordUserIdSynced } from "@/lib/discord-account";
 import { resolveAudioSource } from "@/lib/profile-audio";
 import { DEFAULT_CLIP_DURATION, isFullAudioClip } from "@/lib/audio-config";
 import { Profile, type AudioSource } from "@/types/profile";
@@ -34,6 +35,8 @@ export async function GET() {
 
   const blocked = await rejectIfBlocked(session.user.id);
   if (blocked) return blocked;
+
+  await ensureDiscordUserIdSynced(session.user.id);
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
