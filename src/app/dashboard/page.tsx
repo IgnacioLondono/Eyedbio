@@ -113,6 +113,7 @@ function DashboardContent() {
   const [error, setError] = useState("");
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [simulateEntryInPreview, setSimulateEntryInPreview] = useState(false);
+  const [previewMode, setPreviewMode] = useState<"mobile" | "desktop">("mobile");
 
   useEffect(() => {
     if (profile?.locale) void setLocale(profile.locale, false);
@@ -416,7 +417,11 @@ function DashboardContent() {
 
           <div
             className={`grid items-start gap-8 ${
-              tab === "account" ? "grid-cols-1" : "grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px]"
+              tab === "account"
+                ? "grid-cols-1"
+                : previewMode === "desktop"
+                  ? "grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px]"
+                  : "grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px]"
             }`}
           >
             <div className="relative z-20 min-w-0 space-y-4">
@@ -1019,6 +1024,7 @@ function DashboardContent() {
                 profileAudioEnabled={site.profileAudioEnabled}
                 simulateEntry={simulateEntryInPreview}
                 onSimulateEntryChange={setSimulateEntryInPreview}
+                onPreviewModeChange={setPreviewMode}
               />
             ) : null}
           </div>

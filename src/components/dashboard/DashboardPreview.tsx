@@ -20,6 +20,7 @@ interface Props {
   profileAudioEnabled: boolean;
   simulateEntry: boolean;
   onSimulateEntryChange: (value: boolean) => void;
+  onPreviewModeChange?: (mode: PreviewMode) => void;
 }
 
 function PreviewSurface({
@@ -27,11 +28,13 @@ function PreviewSurface({
   profileAudioEnabled,
   simulateEntry,
   compact,
+  desktop,
 }: {
   profile: Profile;
   profileAudioEnabled: boolean;
   simulateEntry: boolean;
   compact: boolean;
+  desktop?: boolean;
 }) {
   const { locale } = useI18n();
 
@@ -50,11 +53,11 @@ function PreviewSurface({
       <ProfileBackgroundDim dim={resolveBackgroundDim(profile.settings)} className="z-[2]" />
       <ProfilePageOverlay overlay={resolvePageOverlay(profile.settings)} className="z-[3]" />
       <BackgroundEffects effect={profile.settings.backgroundEffect} contained />
-      <div className="absolute inset-0 z-10 overflow-y-auto overflow-x-hidden">
+      <div className="absolute inset-0 z-10 overflow-hidden">
         <div
-          className={`pointer-events-none flex min-h-full w-full items-center justify-center ${
-            compact ? "px-4 py-6" : "px-6 py-6"
-          }`}
+          className={`pointer-events-none flex h-full w-full items-center justify-center overflow-y-auto overscroll-none ${
+            desktop ? "px-5 py-5" : "px-4 py-6"
+          } [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
         >
           <div
             className={`pointer-events-auto mx-auto w-full shrink-0 ${
@@ -85,15 +88,21 @@ export default function DashboardPreview({
   profileAudioEnabled,
   simulateEntry,
   onSimulateEntryChange,
+  onPreviewModeChange,
 }: Props) {
   const { t } = useI18n();
   const [previewMode, setPreviewMode] = useState<PreviewMode>("mobile");
   const isMobile = previewMode === "mobile";
 
+  const setMode = (mode: PreviewMode) => {
+    setPreviewMode(mode);
+    onPreviewModeChange?.(mode);
+  };
+
   return (
     <aside
       className={`lg:sticky lg:top-[4.5rem] lg:self-start w-full mx-auto lg:mx-0 transition-[max-width] duration-300 ${
-        isMobile ? "max-w-[340px]" : "max-w-[540px]"
+        isMobile ? "max-w-[340px]" : "max-w-[420px]"
       }`}
     >
       <div className="mb-4 flex items-start justify-between gap-3">
@@ -112,7 +121,7 @@ export default function DashboardPreview({
         >
           <button
             type="button"
-            onClick={() => setPreviewMode("mobile")}
+            onClick={() => setMode("mobile")}
             aria-pressed={isMobile}
             className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] transition-colors ${
               isMobile
@@ -125,7 +134,7 @@ export default function DashboardPreview({
           </button>
           <button
             type="button"
-            onClick={() => setPreviewMode("desktop")}
+            onClick={() => setMode("desktop")}
             aria-pressed={!isMobile}
             className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] transition-colors ${
               !isMobile
@@ -165,22 +174,22 @@ export default function DashboardPreview({
         </div>
       ) : (
         <div className="relative mx-auto mt-4 w-full">
-          <div className="absolute -inset-2 rounded-2xl bg-purple-500/8 blur-xl" aria-hidden />
-          <div className="relative overflow-hidden rounded-xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-black/40">
-            <div className="flex items-center gap-1.5 border-b border-white/5 bg-zinc-950/90 px-3 py-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-red-500/75" aria-hidden />
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-500/75" aria-hidden />
-              <span className="h-2.5 w-2.5 rounded-full bg-emerald-500/75" aria-hidden />
-              <span className="ml-2 min-w-0 flex-1 truncate rounded-md bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/35">
+          <div className="overflow-hidden rounded-xl border border-zinc-700/70 bg-zinc-950 shadow-2xl shadow-black/50">
+            <div className="flex items-center gap-1.5 border-b border-white/5 bg-zinc-900/95 px-3 py-1.5">
+              <span className="h-2 w-2 rounded-full bg-red-500/70" aria-hidden />
+              <span className="h-2 w-2 rounded-full bg-amber-500/70" aria-hidden />
+              <span className="h-2 w-2 rounded-full bg-emerald-500/70" aria-hidden />
+              <span className="ml-1.5 min-w-0 flex-1 truncate rounded bg-white/[0.05] px-2 py-0.5 text-[9px] text-white/30">
                 eyedbio.eyedcomun.me/{profile.username}
               </span>
             </div>
-            <div className="relative aspect-[16/10] max-h-[min(420px,52vh)] overflow-hidden bg-[#0a0a0f] isolate">
+            <div className="relative h-[min(560px,calc(100vh-13rem))] min-h-[480px] w-full overflow-hidden bg-[#0a0a0f] isolate">
               <PreviewSurface
                 profile={profile}
                 profileAudioEnabled={profileAudioEnabled}
                 simulateEntry={simulateEntry}
                 compact={false}
+                desktop
               />
             </div>
           </div>
