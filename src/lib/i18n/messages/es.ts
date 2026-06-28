@@ -394,6 +394,7 @@ export interface Messages {
     discordLinkButton: string;
     discordLinkedTitle: string;
     discordUnlink: string;
+    discordUnlinkModalTitle: string;
     discordUnlinkConfirm: string;
     discordLinkError: string;
     discordLinkErrorInvalid: string;
@@ -992,11 +993,12 @@ export const es: Messages = {
     discordUserIdLabel: "ID de usuario de Discord",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "El botón te lleva a EyedBot para autorizar Discord (callback en eyedbot.eyedcomun.me). Debes estar en el servidor EyedComun para que tu estado aparezca en el perfil.",
+      "Vincula tu cuenta para ponerla en tu perfil. Para que funcione la actividad, únete al servidor EyedComun.",
     discordAccountLabel: "Cuenta de Discord",
     discordLinkButton: "Vincular con Discord",
     discordLinkedTitle: "Discord vinculado",
     discordUnlink: "Desvincular",
+    discordUnlinkModalTitle: "Desvincular Discord",
     discordUnlinkConfirm: "¿Desvincular tu cuenta de Discord del perfil?",
     discordLinkError: "No se pudo vincular Discord",
     discordLinkErrorInvalid:

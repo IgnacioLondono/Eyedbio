@@ -462,11 +462,12 @@ export const en: Messages = {
     discordUserIdLabel: "Discord user ID",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "The button sends you to EyedBot to authorize Discord (callback at eyedbot.eyedcomun.me). You must be in the EyedComun server for live status on your profile.",
+      "Link your account to show it on your profile. To display live activity, join the EyedComun server.",
     discordAccountLabel: "Discord account",
     discordLinkButton: "Link with Discord",
     discordLinkedTitle: "Discord linked",
     discordUnlink: "Unlink",
+    discordUnlinkModalTitle: "Unlink Discord",
     discordUnlinkConfirm: "Unlink your Discord account from your profile?",
     discordLinkError: "Could not link Discord",
     discordLinkErrorInvalid:

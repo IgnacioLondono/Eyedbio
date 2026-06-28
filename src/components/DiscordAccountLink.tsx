@@ -40,6 +40,7 @@ export default function DiscordAccountLink({
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [showUnlinkModal, setShowUnlinkModal] = useState(false);
 
   useEffect(() => {
     onLinkedRef.current = onLinked;
@@ -95,8 +96,6 @@ export default function DiscordAccountLink({
   }, [searchParams, t]);
 
   const unlink = async () => {
-    if (!window.confirm(t("dashboard.discordUnlinkConfirm"))) return;
-
     setBusy(true);
     setError("");
     try {
@@ -104,6 +103,7 @@ export default function DiscordAccountLink({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? t("dashboard.discordLinkError"));
 
+      setShowUnlinkModal(false);
       onUnlinked();
       await load(true);
     } catch (err) {
@@ -137,7 +137,7 @@ export default function DiscordAccountLink({
           <button
             type="button"
             disabled={busy}
-            onClick={() => void unlink()}
+            onClick={() => setShowUnlinkModal(true)}
             className="inline-flex items-center gap-1.5 mt-3 text-xs text-white/55 hover:text-white disabled:opacity-50"
           >
             {busy ? (
@@ -172,6 +172,53 @@ export default function DiscordAccountLink({
       </a>
 
       {error ? <p className="text-xs text-red-400">{error}</p> : null}
+
+      {showUnlinkModal ? (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="discord-unlink-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => !busy && setShowUnlinkModal(false)}
+            aria-label={t("common.close")}
+          />
+          <div className="relative w-full max-w-md rounded-2xl border border-[#5865F2]/25 bg-[#12121a] p-6 shadow-2xl">
+            <h2 id="discord-unlink-title" className="text-lg font-semibold text-white">
+              {t("dashboard.discordUnlinkModalTitle")}
+            </h2>
+            <p className="mt-2 text-sm text-white/50 leading-relaxed">
+              {t("dashboard.discordUnlinkConfirm")}
+            </p>
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setShowUnlinkModal(false)}
+                className="px-4 py-2.5 text-sm text-white/70 hover:text-white rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void unlink()}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium bg-[#5865F2] hover:bg-[#4752c4] disabled:opacity-50 rounded-lg transition-colors"
+              >
+                {busy ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Unlink className="w-4 h-4" />
+                )}
+                {t("dashboard.discordUnlink")}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
