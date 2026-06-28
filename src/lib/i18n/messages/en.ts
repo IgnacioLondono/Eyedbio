@@ -357,10 +357,10 @@ export const en: Messages = {
     bannerHint:
       "Horizontal image for the Banner layout header. Separate from the page background.",
     bannerFileHint: "JPG, PNG, WEBP or GIF · max 10 MB",
-    mediaResourcesTitle: "Media resources",
+    mediaResourcesTitle: "EyeDownload",
     mediaResourcesHint:
-      "Download audio and other media files ready to use on your profile.",
-    mediaResourcesLink: "Open resources at eyedbio.eyedcomun.me",
+      "Download video and audio from YouTube, TikTok and other platforms to use on your profile.",
+    mediaResourcesLink: "Open EyeDownload",
     audioLabel: "Background audio",
     audioHint:
       "MP3, WAV, OGG, M4A, AAC, FLAC, OPUS, AIFF, MIDI · max 25MB · pick a clip or full track",

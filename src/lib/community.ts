@@ -8,7 +8,7 @@ export const COMMUNITY_BOT_URL = "https://eyedbot.eyedcomun.me/";
 
 export const COMMUNITY_BOT_LABEL = "EyedBot";
 
-/** Recursos multimedia y herramientas para perfiles Eyed.bio. */
-export const COMMUNITY_MEDIA_HUB_URL = "https://eyedbio.eyedcomun.me/";
+/** Descargador de video y audio (EyeDownload). */
+export const COMMUNITY_MEDIA_HUB_URL = "https://eyedownload.eyedcomun.me/";
 
-export const COMMUNITY_MEDIA_HUB_LABEL = "Eyed.bio Recursos";
+export const COMMUNITY_MEDIA_HUB_LABEL = "EyeDownload";
