@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { fetchDiscordPresence } from "@/lib/discord-presence";
 import {
-  fetchLanyardPresence,
   formatPresenceActivity,
   isValidDiscordUserId,
   discordAvatarUrl,
@@ -22,10 +22,13 @@ export async function GET(_request: Request, { params }: Props) {
   }
 
   try {
-    const presence = await fetchLanyardPresence(userId);
+    const presence = await fetchDiscordPresence(userId);
     if (!presence) {
       return NextResponse.json(
-        { error: "Presencia no disponible. ¿Tienes EyedBot vinculado?" },
+        {
+          error:
+            "Presencia no disponible. Únete a EyedComun en Discord, pon tu ID aquí y comprueba que EyedBot esté activo.",
+        },
         { status: 404 }
       );
     }

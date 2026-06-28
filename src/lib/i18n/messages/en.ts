@@ -275,7 +275,7 @@ export const en: Messages = {
     connectionError: "Connection error. Check your network and try again.",
     pageTitleNotFound: "Profile not found — Eyed.bio",
     tapForSound: "Tap to enable sound",
-    discordLanyardHint: "Connect EyedBot to show live status",
+    discordLanyardHint: "Join EyedComun on Discord and add your ID here",
   },
   accessGate: {
     protected: "Protected profile",
@@ -462,7 +462,7 @@ export const en: Messages = {
     discordUserIdLabel: "Discord user ID",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "Enable Developer Mode in Discord → right-click your profile → Copy User ID. Then link your account in the EyedBot panel to show live status on your profile.",
+      "Enable Developer Mode in Discord → right-click your profile → Copy User ID. You must be in the EyedComun Discord server for EyedBot to show live status on your profile.",
     discordBotLink: "Open EyedBot panel",
     previewSimulateEntry: "Simulate entry screen",
     supportLink: "Help center",

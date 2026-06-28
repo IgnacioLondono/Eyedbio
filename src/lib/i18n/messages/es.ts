@@ -794,7 +794,7 @@ export const es: Messages = {
     connectionError: "Error de conexión. Comprueba tu red e inténtalo de nuevo.",
     pageTitleNotFound: "Perfil no encontrado — Eyed.bio",
     tapForSound: "Pulsar para activar el sonido",
-    discordLanyardHint: "Conecta EyedBot para ver tu estado en vivo",
+    discordLanyardHint: "Únete a EyedComun en Discord y añade tu ID aquí",
   },
   accessGate: {
     protected: "Perfil protegido",
@@ -981,7 +981,7 @@ export const es: Messages = {
     discordUserIdLabel: "ID de usuario de Discord",
     discordUserIdPlaceholder: "123456789012345678",
     discordUserIdHint:
-      "Activa Modo desarrollador en Discord → clic derecho en tu perfil → Copiar ID. Luego vincula tu cuenta en el panel de EyedBot para que aparezca tu estado en el perfil.",
+      "Activa Modo desarrollador en Discord → clic derecho en tu perfil → Copiar ID. Debes estar en el Discord de EyedComun para que EyedBot muestre tu estado en el perfil.",
     discordBotLink: "Abrir panel de EyedBot",
     previewSimulateEntry: "Simular pantalla de entrada",
     supportLink: "Centro de soporte",
