@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Loader2, Search, Send, CircleX, RotateCcw } from "lucide-react";
+import { Loader2, Send, CircleX, RotateCcw } from "lucide-react";
+import { AdminAlert, AdminSearchBar } from "@/components/admin/AdminUi";
 import {
   SUPPORT_STATUSES,
   supportCategoryLabel,
@@ -163,21 +164,16 @@ export default function AdminSupportQueue() {
 
   return (
     <div className="space-y-4">
-      <form
-        className="flex flex-col lg:flex-row gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setPage(1);
-          setQuery(q.trim());
-        }}
-      >
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
-          <input
+      <div className="flex flex-col gap-2 lg:flex-row">
+        <div className="flex-1">
+          <AdminSearchBar
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={setQ}
+            onSubmit={() => {
+              setPage(1);
+              setQuery(q.trim());
+            }}
             placeholder="Buscar por asunto, email o usuario…"
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm focus:outline-none focus:border-red-500/40"
           />
         </div>
         <select
@@ -186,7 +182,7 @@ export default function AdminSupportQueue() {
             setStatusFilter(e.target.value);
             setPage(1);
           }}
-          className="rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm"
+          className="rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-white focus:border-rose-500/40 focus:outline-none lg:w-56"
         >
           <option value="active">Activos (abiertos y en revisión)</option>
           <option value="all">Todos los estados</option>
@@ -196,18 +192,12 @@ export default function AdminSupportQueue() {
             </option>
           ))}
         </select>
-        <button
-          type="submit"
-          className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-sm font-medium"
-        >
-          Buscar
-        </button>
-      </form>
+      </div>
 
-      {error ? <p className="text-red-400 text-sm">{error}</p> : null}
+      {error ? <AdminAlert tone="error">{error}</AdminAlert> : null}
 
-      <div className="grid xl:grid-cols-[minmax(0,360px)_1fr] gap-4 min-h-[520px]">
-        <div className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden flex flex-col">
+      <div className="grid min-h-[520px] gap-4 xl:grid-cols-[minmax(0,360px)_1fr]">
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0c0c14]/90">
           <div className="px-4 py-3 border-b border-white/10 text-xs uppercase tracking-wider text-white/40">
             Cola de tickets
           </div>
@@ -224,8 +214,8 @@ export default function AdminSupportQueue() {
                   key={ticket.id}
                   type="button"
                   onClick={() => setSelectedId(ticket.id)}
-                  className={`w-full text-left px-4 py-3 border-b border-white/5 hover:bg-white/[0.03] ${
-                    selectedId === ticket.id ? "bg-red-500/10" : ""
+                  className={`w-full border-b border-white/[0.05] px-4 py-3 text-left transition hover:bg-white/[0.03] ${
+                    selectedId === ticket.id ? "bg-rose-500/10" : ""
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -269,7 +259,7 @@ export default function AdminSupportQueue() {
           ) : null}
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.02] flex flex-col min-h-[400px]">
+        <div className="flex min-h-[400px] flex-col rounded-2xl border border-white/[0.07] bg-[#0c0c14]/90">
           {!selectedId ? (
             <div className="flex-1 flex items-center justify-center text-white/35 text-sm p-8 text-center">
               Selecciona un ticket para responder o cambiar su estado.

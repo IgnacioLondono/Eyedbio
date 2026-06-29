@@ -216,6 +216,7 @@ export const en: Messages = {
     discordLoginNotLinked:
       "That Discord account is not linked. Sign in with email and link Discord in the dashboard.",
     discordLoginHint: "Discord sign-in only works after you link it in your profile.",
+    discordLoginDisabled: "Discord sign-in is currently disabled on the site.",
   },
   account: {
     language: "Language",

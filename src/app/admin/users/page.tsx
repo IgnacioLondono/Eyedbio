@@ -1,16 +1,16 @@
-import AdminPageHeader from "@/components/admin/AdminPageHeader";
-import AdminUsersTable from "@/components/admin/AdminUsersTable";
 import { Users } from "lucide-react";
+import { AdminPage, AdminPageHeader } from "@/components/admin/AdminUi";
+import AdminUsersTable from "@/components/admin/AdminUsersTable";
 
 export default function AdminUsersPage() {
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-7xl">
+    <AdminPage>
       <AdminPageHeader
         title="Usuarios"
         description="Gestiona cuentas, bloqueos, insignias y acceso a la plataforma."
-        icon={<Users className="w-5 h-5" />}
+        icon={<Users className="h-5 w-5" />}
       />
       <AdminUsersTable />
-    </div>
+    </AdminPage>
   );
 }

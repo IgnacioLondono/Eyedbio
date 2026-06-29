@@ -18,6 +18,7 @@ import {
   linkDiscordAccountForUser,
   syncDiscordUserIdToProfile,
 } from "@/lib/auth/discord-account";
+import { getSiteSettings } from "@/lib/site-settings";
 
 type AuthIntent = "login" | "signup" | "refresh";
 
@@ -141,6 +142,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       if (oauthAccount.provider === "discord") {
+        const site = await getSiteSettings();
+        if (!site.discordLoginEnabled) {
+          return "/login?error=discord_login_disabled";
+        }
+
         const dbUser = await signInWithLinkedOAuthAccount({
           type: oauthAccount.type,
           provider: oauthAccount.provider,

@@ -2,26 +2,45 @@
 
 import { useEffect, useState } from "react";
 import { Save, Settings2 } from "lucide-react";
-import AdminPageHeader from "@/components/admin/AdminPageHeader";
+import {
+  AdminAlert,
+  AdminPage,
+  AdminPageHeader,
+  AdminPrimaryButton,
+  AdminSection,
+  AdminSkeleton,
+  AdminToggleRow,
+} from "@/components/admin/AdminUi";
 import {
   DEFAULT_SITE_SETTINGS,
   SITE_SETTING_KEYS,
   type SiteSettingsConfig,
 } from "@/lib/config/site-settings-config";
 
+type SettingGroup = {
+  title: string;
+  description: string;
+  keys: (keyof SiteSettingsConfig)[];
+};
+
 const SETTING_META: Record<
   keyof SiteSettingsConfig,
   { label: string; description: string }
 > = {
-  showPublicUidInAccount: {
-    label: "Serial (UID) en cuenta",
+  discordLoginEnabled: {
+    label: "Login con Discord",
     description:
-      "Muestra el identificador EYE-000001 en Ajustes de cuenta del dashboard. No aparece en el perfil público.",
+      "Muestra el botón «Continúa con Discord» en login. Solo funciona para cuentas que ya vincularon Discord en el dashboard.",
   },
   allowLoginCodeByEmail: {
     label: "Código por correo al login",
     description:
       "Permite que cada usuario active el código de acceso por email en su cuenta. Si está desactivado, solo email y contraseña.",
+  },
+  showPublicUidInAccount: {
+    label: "Serial (UID) en cuenta",
+    description:
+      "Muestra el identificador EYE-000001 en Ajustes de cuenta del dashboard. No aparece en el perfil público.",
   },
   profileReviewsEnabled: {
     label: "Reseñas de perfiles",
@@ -51,10 +70,37 @@ const SETTING_META: Record<
   },
   hideAdminProfilesInDiscover: {
     label: "Ocultar admins en Descubre",
-    description:
-      "Excluye las cuentas con rol admin del podio y del listado en /discover.",
+    description: "Excluye las cuentas con rol admin del podio y del listado en /discover.",
   },
 };
+
+const SETTING_GROUPS: SettingGroup[] = [
+  {
+    title: "Acceso e identidad",
+    description: "Login, OAuth y datos visibles en la cuenta del usuario.",
+    keys: ["discordLoginEnabled", "allowLoginCodeByEmail", "showPublicUidInAccount"],
+  },
+  {
+    title: "Perfiles y contenido",
+    description: "Funciones del editor y del perfil público.",
+    keys: [
+      "profileReviewsEnabled",
+      "claimProfileCtaEnabled",
+      "profileAudioEnabled",
+      "profileAccessCodeEnabled",
+    ],
+  },
+  {
+    title: "Comunidad y descubrimiento",
+    description: "Enlaces externos y visibilidad en Descubre.",
+    keys: ["communityDiscordEnabled", "hideAdminProfilesInDiscover"],
+  },
+  {
+    title: "Soporte",
+    description: "Tickets y ayuda a usuarios.",
+    keys: ["supportEnabled"],
+  },
+];
 
 export default function AdminSiteSettings() {
   const [settings, setSettings] = useState<SiteSettingsConfig>(DEFAULT_SITE_SETTINGS);
@@ -105,72 +151,83 @@ export default function AdminSiteSettings() {
 
   if (loading) {
     return (
-      <div className="p-6 md:p-8">
-        <div className="h-40 rounded-xl bg-white/[0.03] border border-white/5 animate-pulse" />
-      </div>
+      <AdminPage>
+        <AdminSkeleton className="h-64" />
+      </AdminPage>
     );
   }
 
+  const knownKeys = new Set<keyof SiteSettingsConfig>(SITE_SETTING_KEYS);
+  const groupedKeys = new Set(SETTING_GROUPS.flatMap((g) => g.keys));
+
   return (
-    <div className="p-4 sm:p-6 md:p-8 max-w-2xl">
+    <AdminPage>
       <AdminPageHeader
-        title="Configuración del sitio"
-        description="Activa o desactiva funciones para todos los usuarios. Los cambios se aplican al guardar."
-        icon={<Settings2 className="w-5 h-5" />}
+        title="Configuración"
+        description="Controla qué funciones están activas para todos los usuarios. Los cambios se aplican al guardar."
+        icon={<Settings2 className="h-5 w-5" />}
+        actions={
+          <AdminPrimaryButton onClick={() => void save()} loading={saving} disabled={saving}>
+            <Save className="h-4 w-4" />
+            {saving ? "Guardando..." : "Guardar cambios"}
+          </AdminPrimaryButton>
+        }
       />
 
-      <div className="space-y-3">
-        {SITE_SETTING_KEYS.map((key) => {
-          const meta = SETTING_META[key];
-          return (
-            <div
-              key={key}
-              className="flex items-start justify-between gap-4 p-4 rounded-xl border border-white/10 bg-white/[0.03]"
-            >
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-white">{meta.label}</p>
-                <p className="text-xs text-white/40 mt-1 leading-relaxed">{meta.description}</p>
-              </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={settings[key]}
-                onClick={() => toggle(key)}
-                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors ${
-                  settings[key] ? "bg-red-600" : "bg-white/10"
-                }`}
-              >
-                <span
-                  className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
-                    settings[key] ? "translate-x-6" : "translate-x-1"
-                  }`}
+      <div className="space-y-6">
+        {SETTING_GROUPS.map((group) => (
+          <AdminSection key={group.title} title={group.title} description={group.description}>
+            {group.keys.map((key) => {
+              const meta = SETTING_META[key];
+              return (
+                <AdminToggleRow
+                  key={key}
+                  label={meta.label}
+                  description={meta.description}
+                  checked={settings[key]}
+                  onChange={() => toggle(key)}
                 />
-              </button>
-            </div>
-          );
-        })}
+              );
+            })}
+          </AdminSection>
+        ))}
+
+        {SITE_SETTING_KEYS.filter((key) => !groupedKeys.has(key) && knownKeys.has(key)).length >
+        0 ? (
+          <AdminSection title="Otras opciones" description="Ajustes adicionales del sitio.">
+            {SITE_SETTING_KEYS.filter((key) => !groupedKeys.has(key)).map((key) => {
+              const meta = SETTING_META[key];
+              return (
+                <AdminToggleRow
+                  key={key}
+                  label={meta.label}
+                  description={meta.description}
+                  checked={settings[key]}
+                  onChange={() => toggle(key)}
+                />
+              );
+            })}
+          </AdminSection>
+        ) : null}
       </div>
 
       {error ? (
-        <p className="mt-4 text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-2">
-          {error}
-        </p>
+        <div className="mt-6">
+          <AdminAlert tone="error">{error}</AdminAlert>
+        </div>
       ) : null}
       {success ? (
-        <p className="mt-4 text-sm text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-lg px-4 py-2">
-          {success}
-        </p>
+        <div className="mt-6">
+          <AdminAlert tone="success">{success}</AdminAlert>
+        </div>
       ) : null}
 
-      <button
-        type="button"
-        onClick={() => void save()}
-        disabled={saving}
-        className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-500 disabled:opacity-50 text-sm font-semibold transition-colors"
-      >
-        <Save className="w-4 h-4" />
-        {saving ? "Guardando..." : "Guardar cambios"}
-      </button>
-    </div>
+      <div className="mt-8 lg:hidden">
+        <AdminPrimaryButton onClick={() => void save()} loading={saving} disabled={saving}>
+          <Save className="h-4 w-4" />
+          {saving ? "Guardando..." : "Guardar cambios"}
+        </AdminPrimaryButton>
+      </div>
+    </AdminPage>
   );
 }

@@ -45,6 +45,23 @@ export function getEnabledOAuthProviderIds(): OAuthProviderId[] {
   return enabled;
 }
 
+/** Aplica toggles del sitio (p. ej. ocultar Discord en login). */
+export function filterOAuthProvidersForSite(
+  providerIds: OAuthProviderId[],
+  site: { discordLoginEnabled?: boolean }
+): OAuthProviderId[] {
+  if (site.discordLoginEnabled === false) {
+    return providerIds.filter((id) => id !== "discord");
+  }
+  return providerIds;
+}
+
+export async function getPublicOAuthProviderIds(): Promise<OAuthProviderId[]> {
+  const { getSiteSettings } = await import("@/lib/site-settings");
+  const site = await getSiteSettings();
+  return filterOAuthProvidersForSite(getEnabledOAuthProviderIds(), site);
+}
+
 export function buildOAuthProviders(): Provider[] {
   if (!isOAuthGloballyEnabled()) return [];
 

@@ -14,6 +14,7 @@ import {
   LifeBuoy,
   Menu,
   X,
+  ChevronRight,
 } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 
@@ -22,12 +23,27 @@ interface Props {
   adminEmail?: string | null;
 }
 
-const nav = [
-  { href: "/admin", label: "Panel", icon: LayoutDashboard, exact: true },
+const NAV = [
+  { href: "/admin", label: "Resumen", icon: LayoutDashboard, exact: true },
   { href: "/admin/users", label: "Usuarios", icon: Users, exact: false },
   { href: "/admin/support", label: "Soporte", icon: LifeBuoy, exact: false, badgeKey: "support" as const },
-  { href: "/admin/settings", label: "Sitio", icon: SlidersHorizontal, exact: false },
+  { href: "/admin/settings", label: "Configuración", icon: SlidersHorizontal, exact: false },
 ];
+
+const PAGE_TITLES: Record<string, string> = {
+  "/admin": "Resumen",
+  "/admin/users": "Usuarios",
+  "/admin/support": "Soporte",
+  "/admin/settings": "Configuración",
+};
+
+function resolveTitle(pathname: string): string {
+  if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname];
+  if (pathname.startsWith("/admin/users")) return "Usuarios";
+  if (pathname.startsWith("/admin/support")) return "Soporte";
+  if (pathname.startsWith("/admin/settings")) return "Configuración";
+  return "Admin";
+}
 
 export default function AdminShell({ children, adminEmail }: Props) {
   const pathname = usePathname();
@@ -49,21 +65,25 @@ export default function AdminShell({ children, adminEmail }: Props) {
       .catch(() => {});
   }, [pathname]);
 
+  const pageTitle = resolveTitle(pathname);
+
   const sidebar = (
     <>
-      <div className="shrink-0 p-5 border-b border-white/10">
+      <div className="shrink-0 border-b border-white/[0.06] p-5">
         <Logo href="/admin" size="sm" responsiveText />
-        <div className="mt-3 flex items-center gap-2 text-xs text-red-300/90">
-          <Shield className="w-3.5 h-3.5" />
-          Administración
+        <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-500/15 bg-rose-500/[0.06] px-3 py-2">
+          <Shield className="h-4 w-4 shrink-0 text-rose-300" />
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-rose-100/90">Panel admin</p>
+            {adminEmail ? (
+              <p className="truncate text-[10px] text-white/35">{adminEmail}</p>
+            ) : null}
+          </div>
         </div>
-        {adminEmail ? (
-          <p className="text-[10px] text-white/35 mt-2 truncate">{adminEmail}</p>
-        ) : null}
       </div>
 
-      <nav className="flex-1 min-h-0 p-3 space-y-1 overflow-y-auto">
-        {nav.map((item) => {
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+        {NAV.map((item) => {
           const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
           const badge = item.badgeKey === "support" && openTickets > 0 ? openTickets : 0;
 
@@ -71,40 +91,42 @@ export default function AdminShell({ children, adminEmail }: Props) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              className={`group flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-sm transition-all ${
                 active
-                  ? "bg-red-500/15 text-red-100 border border-red-500/25"
-                  : "text-white/60 hover:text-white hover:bg-white/5 border border-transparent"
+                  ? "border-rose-500/25 bg-gradient-to-r from-rose-500/15 to-orange-500/5 text-white shadow-sm shadow-rose-950/20"
+                  : "border-transparent text-white/55 hover:border-white/[0.06] hover:bg-white/[0.03] hover:text-white"
               }`}
             >
-              <span className="flex items-center gap-2.5 min-w-0">
-                <item.icon className="w-4 h-4 shrink-0" />
+              <span className="flex min-w-0 items-center gap-2.5">
+                <item.icon className={`h-4 w-4 shrink-0 ${active ? "text-rose-300" : ""}`} />
                 {item.label}
               </span>
               {badge > 0 ? (
-                <span className="min-w-[1.25rem] rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-200 text-center">
+                <span className="min-w-[1.35rem] rounded-full bg-amber-500/20 px-1.5 py-0.5 text-center text-[10px] font-bold text-amber-200">
                   {badge > 99 ? "99+" : badge}
                 </span>
+              ) : active ? (
+                <ChevronRight className="h-3.5 w-3.5 text-rose-300/60" />
               ) : null}
             </Link>
           );
         })}
       </nav>
 
-      <div className="shrink-0 mt-auto p-3 border-t border-white/10 space-y-1">
+      <div className="mt-auto shrink-0 space-y-1 border-t border-white/[0.06] p-3">
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 px-3 py-2 text-xs text-white/50 hover:text-white rounded-lg hover:bg-white/5"
+          className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs text-white/45 transition hover:bg-white/[0.03] hover:text-white"
         >
-          <ExternalLink className="w-3.5 h-3.5" />
+          <ExternalLink className="h-3.5 w-3.5" />
           Mi dashboard
         </Link>
         <button
           type="button"
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="w-full flex items-center gap-2 px-3 py-2 text-xs text-white/50 hover:text-white rounded-lg hover:bg-white/5"
+          className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs text-white/45 transition hover:bg-white/[0.03] hover:text-white"
         >
-          <LogOut className="w-3.5 h-3.5" />
+          <LogOut className="h-3.5 w-3.5" />
           Cerrar sesión
         </button>
       </div>
@@ -112,39 +134,48 @@ export default function AdminShell({ children, adminEmail }: Props) {
   );
 
   return (
-    <div className="min-h-screen bg-[#08080d] text-white">
+    <div className="min-h-screen bg-[#07070c] text-white">
       <div className="lg:flex min-h-screen">
-        <div className="lg:hidden sticky top-0 z-40 flex items-center justify-between gap-3 px-4 h-14 border-b border-white/10 bg-[#0c0c14]/95 backdrop-blur-xl">
+        <div className="sticky top-0 z-40 flex h-14 items-center justify-between gap-3 border-b border-white/[0.06] bg-[#0a0a10]/90 px-4 backdrop-blur-xl lg:hidden">
           <Logo href="/admin" size="sm" />
-          <button
-            type="button"
-            onClick={() => setMobileOpen((v) => !v)}
-            className="p-2 rounded-lg border border-white/10 text-white/70"
-            aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-white/40">{pageTitle}</span>
+            <button
+              type="button"
+              onClick={() => setMobileOpen((v) => !v)}
+              className="rounded-xl border border-white/10 p-2 text-white/70"
+              aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
         </div>
 
         {mobileOpen ? (
           <button
             type="button"
-            className="lg:hidden fixed inset-0 z-40 bg-black/60"
+            className="fixed inset-0 z-40 bg-black/70 lg:hidden"
             onClick={() => setMobileOpen(false)}
             aria-label="Cerrar menú"
           />
         ) : null}
 
         <aside
-          className={`fixed inset-y-0 lg:sticky lg:top-0 lg:h-svh lg:max-h-svh lg:inset-y-auto left-0 z-50 w-64 shrink-0 border-r border-white/10 bg-[#0c0c14] flex flex-col transform transition-transform duration-200 ${
-            mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+          className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] flex-col border-r border-white/[0.06] bg-[#0a0a10] transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-svh lg:max-h-svh lg:translate-x-0 ${
+            mobileOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           {sidebar}
         </aside>
 
-        <main className="flex-1 min-w-0 overflow-auto">
-          <div className="min-h-full bg-[radial-gradient(ellipse_at_top,_rgba(239,68,68,0.06),_transparent_50%)]">
+        <main className="min-w-0 flex-1">
+          <div className="hidden border-b border-white/[0.06] bg-[#0a0a10]/50 px-6 py-3 backdrop-blur-sm lg:block">
+            <p className="text-xs text-white/35">
+              Eyed.bio <span className="text-white/20">/</span>{" "}
+              <span className="text-white/60">{pageTitle}</span>
+            </p>
+          </div>
+          <div className="min-h-full bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(244,63,94,0.08),transparent)]">
             {children}
           </div>
         </main>

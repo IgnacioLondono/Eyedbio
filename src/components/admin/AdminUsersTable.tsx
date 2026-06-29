@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Ban, CheckCircle, Crown, Loader2, Search } from "lucide-react";
+import { Ban, CheckCircle, Crown, Loader2 } from "lucide-react";
+import { AdminAlert, AdminSearchBar, AdminTableShell } from "@/components/admin/AdminUi";
 import { AdminUserRow } from "@/types/admin";
 import { isAdminRole } from "@/lib/roles";
 
@@ -90,37 +91,21 @@ export default function AdminUsersTable() {
 
   return (
     <div className="space-y-4">
-      <form
-        className="flex flex-col sm:flex-row gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
+      <AdminSearchBar
+        value={q}
+        onChange={setQ}
+        onSubmit={() => {
           setPage(1);
           setQuery(q.trim());
         }}
-      >
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/35" />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por email, usuario o nombre..."
-            className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-sm focus:outline-none focus:border-red-500/40"
-          />
-        </div>
-        <button
-          type="submit"
-          className="px-4 py-2.5 rounded-lg bg-red-600 hover:bg-red-500 text-sm font-medium"
-        >
-          Buscar
-        </button>
-      </form>
+        placeholder="Buscar por email, usuario o nombre..."
+      />
 
-      {error ? <p className="text-red-400 text-sm">{error}</p> : null}
+      {error ? <AdminAlert tone="error">{error}</AdminAlert> : null}
 
-      <div className="rounded-xl border border-white/10 overflow-hidden">
-        <div className="overflow-x-auto">
+      <AdminTableShell>
           <table className="w-full text-sm">
-            <thead className="bg-white/[0.03] text-white/45 text-left">
+            <thead className="bg-white/[0.02] text-left text-white/45">
               <tr>
                 <th className="px-4 py-3 font-medium">Usuario</th>
                 <th className="px-4 py-3 font-medium">Email</th>
@@ -165,10 +150,10 @@ export default function AdminUsersTable() {
                       <td className="px-4 py-3 text-white/60">{user.email}</td>
                       <td className="px-4 py-3">
                         <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${
+                          className={`rounded-full px-2 py-0.5 text-xs ${
                             isAdmin
-                              ? "bg-red-500/15 text-red-300"
-                              : "bg-white/10 text-white/50"
+                              ? "bg-rose-500/15 text-rose-300"
+                              : "bg-white/[0.06] text-white/50"
                           }`}
                         >
                           {user.role}
@@ -260,8 +245,7 @@ export default function AdminUsersTable() {
               )}
             </tbody>
           </table>
-        </div>
-      </div>
+      </AdminTableShell>
 
       {totalPages > 1 ? (
         <div className="flex items-center justify-center gap-2">
@@ -269,7 +253,7 @@ export default function AdminUsersTable() {
             type="button"
             disabled={page <= 1 || loading}
             onClick={() => setPage((p) => p - 1)}
-            className="px-3 py-1.5 text-xs rounded-lg border border-white/10 disabled:opacity-40"
+            className="rounded-xl border border-white/[0.08] px-3 py-1.5 text-xs text-white/60 transition hover:border-rose-500/30 disabled:opacity-40"
           >
             Anterior
           </button>
@@ -280,7 +264,7 @@ export default function AdminUsersTable() {
             type="button"
             disabled={page >= totalPages || loading}
             onClick={() => setPage((p) => p + 1)}
-            className="px-3 py-1.5 text-xs rounded-lg border border-white/10 disabled:opacity-40"
+            className="rounded-xl border border-white/[0.08] px-3 py-1.5 text-xs text-white/60 transition hover:border-rose-500/30 disabled:opacity-40"
           >
             Siguiente
           </button>

@@ -17,6 +17,8 @@ export interface SiteSettingsConfig {
   supportEnabled: boolean;
   /** Ocultar cuentas admin en Descubre (podio y listado) */
   hideAdminProfilesInDiscover: boolean;
+  /** Botón «Continúa con Discord» en login (solo cuentas ya vinculadas) */
+  discordLoginEnabled: boolean;
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsConfig = {
@@ -29,6 +31,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsConfig = {
   profileAccessCodeEnabled: true,
   supportEnabled: true,
   hideAdminProfilesInDiscover: false,
+  discordLoginEnabled: true,
 };
 
 export function mergeSiteSettings(partial?: Partial<SiteSettingsConfig>): SiteSettingsConfig {

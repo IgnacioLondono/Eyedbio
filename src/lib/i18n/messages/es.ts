@@ -160,6 +160,7 @@ export interface Messages {
     oauthError: string;
     discordLoginNotLinked: string;
     discordLoginHint: string;
+    discordLoginDisabled: string;
   };
   account: {
     language: string;
@@ -764,6 +765,7 @@ export const es: Messages = {
     discordLoginNotLinked:
       "Esa cuenta de Discord no está vinculada. Inicia sesión con email y vincula Discord en el dashboard.",
     discordLoginHint: "Discord solo funciona si ya lo vinculaste en tu perfil.",
+    discordLoginDisabled: "El inicio de sesión con Discord está desactivado en la web.",
   },
   account: {
     language: "Idioma",
