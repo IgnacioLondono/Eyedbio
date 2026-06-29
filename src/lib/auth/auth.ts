@@ -202,12 +202,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return Boolean(dbUser);
     },
     async jwt({ token, user, account }) {
-      const restoreUserId = await consumeDiscordLinkSessionRestore();
-      if (restoreUserId) {
-        const dbUser = await prisma.user.findUnique({ where: { id: restoreUserId } });
-        if (dbUser && !isUserBlocked(dbUser)) {
-          applyAuthUserToToken(token, dbUser);
-          return token;
+      // Solo durante el sign-in OAuth (Route Handler): restaurar sesión tras vincular Discord.
+      // No tocar cookies en lecturas de sesión (RSC/middleware) — provoca JWTSessionError.
+      if (user && account?.provider === "discord") {
+        const restoreUserId = await consumeDiscordLinkSessionRestore();
+        if (restoreUserId) {
+          const dbUser = await prisma.user.findUnique({ where: { id: restoreUserId } });
+          if (dbUser && !isUserBlocked(dbUser)) {
+            applyAuthUserToToken(token, dbUser);
+            return token;
+          }
         }
       }
 

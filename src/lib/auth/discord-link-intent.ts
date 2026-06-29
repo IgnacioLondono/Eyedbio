@@ -76,6 +76,11 @@ export async function setDiscordLinkSessionRestore(userId: string): Promise<void
   });
 }
 
+export async function readDiscordLinkSessionRestore(): Promise<string | null> {
+  const jar = await cookies();
+  return unpack(jar.get(RESTORE_COOKIE)?.value);
+}
+
 export async function consumeDiscordLinkSessionRestore(): Promise<string | null> {
   const jar = await cookies();
   const value = jar.get(RESTORE_COOKIE)?.value;
