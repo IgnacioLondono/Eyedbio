@@ -15,6 +15,9 @@ import { useI18n } from "@/components/providers/LocaleProvider";
 import { getMessages } from "@/lib/i18n";
 import { APP_LOCALES, LOCALE_LABELS } from "@/lib/i18n/types";
 import type { AppLocale } from "@/lib/i18n/types";
+import type { OAuthProviderId } from "@/lib/auth/oauth-providers";
+
+const SIGNUP_OAUTH_EXCLUDE: OAuthProviderId[] = ["discord"];
 
 function SignupForm() {
   const router = useRouter();
@@ -86,7 +89,7 @@ function SignupForm() {
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        <OAuthButtons callbackUrl="/dashboard" />
+        <OAuthButtons callbackUrl="/dashboard" excludeProviders={SIGNUP_OAUTH_EXCLUDE} />
 
         <div>
           <label htmlFor="locale" className="auth-label">

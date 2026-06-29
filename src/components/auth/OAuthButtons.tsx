@@ -66,7 +66,13 @@ const PROVIDER_META: Record<
   },
 };
 
-export default function OAuthButtons({ callbackUrl = "/dashboard" }: { callbackUrl?: string }) {
+export default function OAuthButtons({
+  callbackUrl = "/dashboard",
+  excludeProviders = [],
+}: {
+  callbackUrl?: string;
+  excludeProviders?: OAuthProviderId[];
+}) {
   const { t } = useI18n();
   const [providers, setProviders] = useState<OAuthProviderId[]>([]);
   const [loadingProvider, setLoadingProvider] = useState<OAuthProviderId | null>(null);
@@ -75,12 +81,16 @@ export default function OAuthButtons({ callbackUrl = "/dashboard" }: { callbackU
     fetch("/api/auth/oauth-providers")
       .then((res) => (res.ok ? res.json() : { providers: [] }))
       .then((data: { providers?: OAuthProviderId[] }) => {
-        setProviders(Array.isArray(data.providers) ? data.providers : []);
+        const list = Array.isArray(data.providers) ? data.providers : [];
+        setProviders(list.filter((id) => !excludeProviders.includes(id)));
       })
       .catch(() => setProviders([]));
-  }, []);
+  }, [excludeProviders]);
 
-  if (providers.length === 0) return null;
+  const visibleProviders = providers;
+  const showDiscordHint = visibleProviders.includes("discord");
+
+  if (visibleProviders.length === 0) return null;
 
   const handleSignIn = async (provider: OAuthProviderId) => {
     setLoadingProvider(provider);
@@ -102,7 +112,7 @@ export default function OAuthButtons({ callbackUrl = "/dashboard" }: { callbackU
       </div>
 
       <div className="grid gap-2 sm:grid-cols-2">
-        {providers.map((provider) => {
+        {visibleProviders.map((provider) => {
           const meta = PROVIDER_META[provider];
           const busy = loadingProvider === provider;
 
@@ -120,6 +130,9 @@ export default function OAuthButtons({ callbackUrl = "/dashboard" }: { callbackU
           );
         })}
       </div>
+      {showDiscordHint ? (
+        <p className="text-center text-[11px] text-white/35">{t("auth.discordLoginHint")}</p>
+      ) : null}
     </div>
   );
 }

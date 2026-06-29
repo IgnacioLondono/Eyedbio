@@ -143,3 +143,42 @@ export async function findUserByEmailForOAuth(email: string): Promise<User | nul
   if (!user || isUserBlocked(user)) return null;
   return user;
 }
+
+/** Inicio de sesión OAuth solo si la cuenta ya está vinculada (no crea usuarios ni enlaza por email). */
+export async function signInWithLinkedOAuthAccount(
+  oauthAccount: OAuthAccountInput
+): Promise<User | null> {
+  const linked = await prisma.account.findUnique({
+    where: {
+      provider_providerAccountId: {
+        provider: oauthAccount.provider,
+        providerAccountId: oauthAccount.providerAccountId,
+      },
+    },
+    include: { user: true },
+  });
+
+  if (!linked || isUserBlocked(linked.user)) return null;
+
+  await prisma.account.update({
+    where: { id: linked.id },
+    data: accountData(oauthAccount),
+  });
+
+  return linked.user;
+}
+
+export async function findUserByOAuthAccount(
+  provider: string,
+  providerAccountId: string
+): Promise<User | null> {
+  const linked = await prisma.account.findUnique({
+    where: {
+      provider_providerAccountId: { provider, providerAccountId },
+    },
+    include: { user: true },
+  });
+
+  if (!linked || isUserBlocked(linked.user)) return null;
+  return linked.user;
+}

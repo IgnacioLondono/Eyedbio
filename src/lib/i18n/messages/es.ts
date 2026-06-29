@@ -158,6 +158,8 @@ export interface Messages {
     oauthRedirecting: string;
     oauthOnlyAccount: string;
     oauthError: string;
+    discordLoginNotLinked: string;
+    discordLoginHint: string;
   };
   account: {
     language: string;
@@ -759,6 +761,9 @@ export const es: Messages = {
     oauthRedirecting: "Redirigiendo…",
     oauthOnlyAccount: "Esta cuenta usa inicio de sesión social. Usa Google, Discord u otra plataforma vinculada.",
     oauthError: "No se pudo iniciar sesión con esa plataforma. Inténtalo de nuevo.",
+    discordLoginNotLinked:
+      "Esa cuenta de Discord no está vinculada. Inicia sesión con email y vincula Discord en el dashboard.",
+    discordLoginHint: "Discord solo funciona si ya lo vinculaste en tu perfil.",
   },
   account: {
     language: "Idioma",

@@ -8,7 +8,7 @@ import { isUserBlocked, toAuthUser } from "@/lib/auth/auth-user";
 import { isValidVerificationCode, normalizeVerificationCode } from "@/lib/auth/password-reset";
 import { normalizeEmail } from "@/lib/validation";
 import { buildOAuthProviders } from "@/lib/auth/oauth-providers";
-import { findUserByEmailForOAuth, resolveOAuthSignIn } from "@/lib/auth/oauth-user";
+import { findUserByEmailForOAuth, findUserByOAuthAccount, resolveOAuthSignIn, signInWithLinkedOAuthAccount } from "@/lib/auth/oauth-user";
 import {
   consumeDiscordLinkIntent,
   consumeDiscordLinkSessionRestore,
@@ -140,6 +140,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         return true;
       }
 
+      if (oauthAccount.provider === "discord") {
+        const dbUser = await signInWithLinkedOAuthAccount({
+          type: oauthAccount.type,
+          provider: oauthAccount.provider,
+          providerAccountId: oauthAccount.providerAccountId,
+          refresh_token: oauthAccount.refresh_token ?? null,
+          access_token: oauthAccount.access_token ?? null,
+          expires_at: oauthAccount.expires_at ?? null,
+          token_type: oauthAccount.token_type ?? null,
+          scope: oauthAccount.scope ?? null,
+          id_token: oauthAccount.id_token ?? null,
+          session_state:
+            typeof oauthAccount.session_state === "string"
+              ? oauthAccount.session_state
+              : null,
+        });
+
+        if (!dbUser) return "/login?error=discord_not_linked";
+
+        await syncDiscordUserIdToProfile(dbUser.id, oauthAccount.providerAccountId);
+        return true;
+      }
+
       const email = normalizeEmail(user.email ?? "");
       if (!email) return false;
 
@@ -170,10 +193,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
       );
 
-      if (dbUser && oauthAccount.provider === "discord") {
-        await syncDiscordUserIdToProfile(dbUser.id, oauthAccount.providerAccountId);
-      }
-
       return Boolean(dbUser);
     },
     async jwt({ token, user, account }) {
@@ -187,7 +206,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
 
       if (user && account?.provider && account.provider !== "credentials") {
-        const dbUser = await findUserByEmailForOAuth(user.email ?? String(token.email ?? ""));
+        const byAccount = await findUserByOAuthAccount(
+          account.provider,
+          account.providerAccountId
+        );
+        const dbUser =
+          byAccount ??
+          (await findUserByEmailForOAuth(user.email ?? String(token.email ?? "")));
         if (dbUser) applyAuthUserToToken(token, dbUser);
         return token;
       }

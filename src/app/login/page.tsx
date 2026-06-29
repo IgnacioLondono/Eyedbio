@@ -30,11 +30,14 @@ function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const resetSuccess = searchParams.get("reset") === "success";
   const blockedNotice = searchParams.get("error") === "blocked";
+  const discordNotLinked = searchParams.get("error") === "discord_not_linked";
   const oauthError = searchParams.get("error");
   const oauthErrorMessage =
-    oauthError && oauthError !== "blocked" && oauthError !== "CredentialsSignin"
-      ? t("auth.oauthError")
-      : "";
+    discordNotLinked
+      ? t("auth.discordLoginNotLinked")
+      : oauthError && oauthError !== "blocked" && oauthError !== "CredentialsSignin"
+        ? t("auth.oauthError")
+        : "";
 
   const redirectAfterLogin = async () => {
     const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });

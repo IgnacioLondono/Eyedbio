@@ -213,6 +213,9 @@ export const en: Messages = {
     oauthRedirecting: "Redirecting…",
     oauthOnlyAccount: "This account uses social sign-in. Use Google, Discord, or another linked platform.",
     oauthError: "Could not sign in with that platform. Please try again.",
+    discordLoginNotLinked:
+      "That Discord account is not linked. Sign in with email and link Discord in the dashboard.",
+    discordLoginHint: "Discord sign-in only works after you link it in your profile.",
   },
   account: {
     language: "Language",
