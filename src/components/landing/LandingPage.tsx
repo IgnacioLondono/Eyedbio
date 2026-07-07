@@ -14,9 +14,11 @@ import {
   Eye,
   Upload,
   Compass,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
+import Logo from "@/components/layout/Logo";
 import CommunityDiscordLink from "@/components/layout/CommunityDiscordLink";
 import LandingStyleShowcase from "@/components/landing/LandingStyleShowcase";
 import LandingGunsShowcase from "@/components/landing/LandingGunsShowcase";
@@ -70,210 +72,309 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
-      <Navbar showCommunityLink />
-
-      <section className="relative pt-32 pb-20 px-6">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px]" />
-          <div className="absolute top-1/3 left-1/3 w-[400px] h-[400px] bg-violet-500/10 rounded-full blur-[100px]" />
-        </div>
-
-        <div className="relative max-w-6xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-300 text-sm mb-8">
-              <Sparkles className="w-4 h-4" />
-              {m.heroBadge}
-            </div>
-
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6">
-              {m.heroTitle}{" "}
-              <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
-                {m.heroTitleHighlight}
-              </span>
-            </h1>
-
-            <p className="text-white/50 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-              {m.heroSubtitle}
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-              {isLoggedIn ? (
-                <Link
-                  href="/dashboard"
-                  className="px-8 py-3.5 text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5"
-                >
-                  {m.goDashboard}
-                </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/signup"
-                    className="px-8 py-3.5 text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:-translate-y-0.5"
-                  >
-                    {m.signupFree}
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="px-8 py-3.5 text-base font-medium border border-white/10 rounded-xl hover:bg-white/5 transition-all hover:-translate-y-0.5"
-                  >
-                    {t("nav.login")}
-                  </Link>
-                </>
-              )}
-            </div>
-
-            <div className="inline-flex items-center gap-0 bg-white/5 border border-white/10 rounded-xl overflow-hidden">
-              <span className="px-4 py-3 text-white/40 text-sm font-mono">eyed.bio/</span>
-              <input
-                type="text"
-                placeholder={m.usernamePlaceholder}
-                className="bg-transparent px-2 py-3 text-white placeholder-white/30 outline-none w-40 font-mono text-sm"
-                onChange={(e) => {
-                  e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, "");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    const val = (e.target as HTMLInputElement).value.trim();
-                    if (val) window.location.href = `/signup?username=${encodeURIComponent(val)}`;
-                  }
-                }}
-              />
-              <Link
-                href="/signup"
-                className="px-5 py-3 bg-purple-600 hover:bg-purple-500 text-sm font-medium transition-colors"
-              >
-                {m.claim}
-              </Link>
-            </div>
-          </motion.div>
-
-          <LandingGunsShowcase />
-        </div>
-      </section>
-
-      <section className="py-16 px-6 border-y border-white/5">
-        <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-          {statConfig.map((stat, i) => (
-            <motion.div
-              key={stat.key}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="text-center"
-            >
-              <stat.icon className="w-5 h-5 text-purple-400 mx-auto mb-2" />
-              <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                {stats ? stats[stat.key] : "—"}
-              </div>
-              <div className="text-white/40 text-sm mt-1">{stat.label}</div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
-
-      <section className="hidden py-16 px-6 border-y border-white/5" aria-hidden>
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-5">
-            <Compass className="w-6 h-6 text-purple-300" />
-          </div>
-          <h2 className="text-2xl md:text-3xl font-bold mb-3">
-            {m.profilesTitle}{" "}
-            <span className="text-purple-400">{m.profilesTitleHighlight}</span>
-          </h2>
-          <p className="text-white/50 text-sm md:text-base mb-6">{m.exploreProfilesCta}</p>
-          <Link
-            href="/discover"
-            className="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-lg shadow-purple-500/25"
-          >
-            {m.exploreProfilesButton}
-          </Link>
-        </div>
-      </section>
-
-      <div className="hidden" aria-hidden>
-        <LandingStyleShowcase />
+    <div className="relative min-h-screen bg-[#07070b] text-white overflow-x-hidden">
+      {/* Fondo global: rejilla sutil + halos */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+        <div
+          className="absolute inset-0 opacity-[0.15]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+            maskImage:
+              "radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)",
+          }}
+        />
+        <div className="absolute -top-40 left-1/2 h-[620px] w-[620px] -translate-x-1/2 rounded-full bg-purple-600/25 blur-[140px]" />
+        <div className="absolute top-1/3 -left-32 h-[420px] w-[420px] rounded-full bg-violet-500/15 blur-[130px]" />
+        <div className="absolute bottom-0 right-0 h-[460px] w-[460px] rounded-full bg-fuchsia-500/10 blur-[150px]" />
       </div>
 
-      <section id="features" className="py-24 px-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {m.featuresTitle}{" "}
-              <span className="text-purple-400">{m.featuresTitleHighlight}</span>
-            </h2>
-            <p className="text-white/50 max-w-xl mx-auto">{m.featuresSubtitle}</p>
-          </div>
+      <div className="relative z-10">
+        <Navbar showCommunityLink />
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {m.features.map((f, i) => {
-              const Icon = featureIcons[i] ?? Sparkles;
-              return (
+        {/* HERO */}
+        <section className="relative px-6 pt-36 pb-16">
+          <div className="mx-auto max-w-6xl text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-purple-500/25 bg-purple-500/10 px-4 py-1.5 text-sm text-purple-200 backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-purple-400" />
+                </span>
+                {m.heroBadge}
+              </div>
+
+              <h1 className="mx-auto max-w-4xl text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
+                {m.heroTitle}{" "}
+                <span className="relative whitespace-nowrap bg-gradient-to-r from-purple-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                  {m.heroTitleHighlight}
+                </span>
+              </h1>
+
+              <p className="mx-auto mt-6 max-w-2xl text-lg text-white/55 md:text-xl">
+                {m.heroSubtitle}
+              </p>
+
+              <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+                {isLoggedIn ? (
+                  <Link
+                    href="/dashboard"
+                    className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 px-8 py-3.5 text-base font-semibold shadow-xl shadow-purple-500/30 transition-all hover:-translate-y-0.5 hover:from-purple-500 hover:to-violet-500 hover:shadow-purple-500/50"
+                  >
+                    {m.goDashboard}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href="/signup"
+                      className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 px-8 py-3.5 text-base font-semibold shadow-xl shadow-purple-500/30 transition-all hover:-translate-y-0.5 hover:from-purple-500 hover:to-violet-500 hover:shadow-purple-500/50"
+                    >
+                      {m.signupFree}
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </Link>
+                    <Link
+                      href="/login"
+                      className="rounded-xl border border-white/10 bg-white/[0.02] px-8 py-3.5 text-base font-medium transition-all hover:-translate-y-0.5 hover:bg-white/5"
+                    >
+                      {t("nav.login")}
+                    </Link>
+                  </>
+                )}
+              </div>
+
+              <div className="mt-8 inline-flex items-center overflow-hidden rounded-xl border border-white/10 bg-white/5 shadow-lg shadow-black/20 transition-colors focus-within:border-purple-500/40">
+                <span className="py-3 pl-4 pr-1 font-mono text-sm text-white/40">
+                  eyed.bio/
+                </span>
+                <input
+                  type="text"
+                  placeholder={m.usernamePlaceholder}
+                  className="w-40 bg-transparent px-1 py-3 font-mono text-sm text-white placeholder-white/30 outline-none"
+                  onChange={(e) => {
+                    e.target.value = e.target.value
+                      .toLowerCase()
+                      .replace(/[^a-z0-9]/g, "");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const val = (e.target as HTMLInputElement).value.trim();
+                      if (val)
+                        window.location.href = `/signup?username=${encodeURIComponent(val)}`;
+                    }
+                  }}
+                />
+                <Link
+                  href="/signup"
+                  className="bg-purple-600 px-5 py-3 text-sm font-medium transition-colors hover:bg-purple-500"
+                >
+                  {m.claim}
+                </Link>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+            >
+              <LandingGunsShowcase />
+            </motion.div>
+          </div>
+        </section>
+
+        {/* STATS */}
+        <section className="px-6 py-14">
+          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 md:grid-cols-4">
+            {statConfig.map((stat, i) => (
               <motion.div
-                key={f.title}
+                key={stat.key}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.08 }}
-                className="p-6 rounded-2xl bg-white/[0.03] border border-white/5 hover:border-purple-500/20 hover:bg-white/[0.05] transition-all group"
+                className="group rounded-2xl border border-white/5 bg-white/[0.02] p-6 text-center transition-all hover:border-purple-500/20 hover:bg-white/[0.04]"
               >
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center mb-4 group-hover:bg-purple-500/20 transition-colors">
-                  <Icon className="w-5 h-5 text-purple-400" />
+                <stat.icon className="mx-auto mb-3 h-5 w-5 text-purple-400" />
+                <div className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-3xl font-bold text-transparent md:text-4xl">
+                  {stats ? stats[stat.key] : "—"}
                 </div>
-                <h3 className="font-semibold mb-2">{f.title}</h3>
-                <p className="text-white/40 text-sm leading-relaxed">{f.desc}</p>
+                <div className="mt-1 text-sm text-white/40">{stat.label}</div>
               </motion.div>
-            );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section id="faq" className="py-24 px-6">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">{m.faqTitle}</h2>
-          <div className="space-y-4">
-            {m.faqs.map((faq) => (
-              <details
-                key={faq.q}
-                className="group p-5 rounded-xl bg-white/[0.03] border border-white/5 hover:border-white/10 transition-colors"
-              >
-                <summary className="font-medium cursor-pointer list-none flex items-center justify-between">
-                  {faq.q}
-                  <span className="text-purple-400 group-open:rotate-45 transition-transform text-xl">
-                    +
-                  </span>
-                </summary>
-                <p className="text-white/50 text-sm mt-3 leading-relaxed">{faq.a}</p>
-              </details>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      <CommunityDiscordLink variant="banner" />
+        {/* SHOWCASE DE ESTILOS */}
+        <LandingStyleShowcase />
 
-      <section className="py-24 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">{m.ctaTitle}</h2>
-          <p className="text-white/50 mb-8">
-            {userCount > 0
-              ? tVars("landing.ctaJoin", { count: stats?.users ?? String(userCount) })
-              : m.ctaFirst}
-          </p>
-          <Link
-            href={isLoggedIn ? "/dashboard" : "/signup"}
-            className="inline-block px-8 py-3.5 text-base font-semibold bg-gradient-to-r from-purple-600 to-violet-600 rounded-xl hover:from-purple-500 hover:to-violet-500 transition-all shadow-xl shadow-purple-500/30"
-          >
-            {isLoggedIn ? m.ctaButtonLoggedIn : m.ctaButtonGuest}
-          </Link>
-        </div>
-      </section>
+        {/* FEATURES */}
+        <section id="features" className="px-6 py-24">
+          <div className="mx-auto max-w-5xl">
+            <div className="mb-14 text-center">
+              <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-white/60">
+                <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                {m.featuresTitleHighlight}
+              </span>
+              <h2 className="text-3xl font-bold md:text-4xl">
+                {m.featuresTitle}{" "}
+                <span className="bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent">
+                  {m.featuresTitleHighlight}
+                </span>
+              </h2>
+              <p className="mx-auto mt-4 max-w-xl text-white/50">
+                {m.featuresSubtitle}
+              </p>
+            </div>
+
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {m.features.map((f, i) => {
+                const Icon = featureIcons[i] ?? Sparkles;
+                return (
+                  <motion.div
+                    key={f.title}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.06 }}
+                    className="group relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-6 transition-all hover:border-purple-500/25 hover:bg-white/[0.04]"
+                  >
+                    <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-purple-500/10 blur-2xl opacity-0 transition-opacity group-hover:opacity-100" />
+                    <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500/20 to-violet-500/10 ring-1 ring-purple-500/20 transition-colors group-hover:from-purple-500/30">
+                      <Icon className="h-5 w-5 text-purple-300" />
+                    </div>
+                    <h3 className="mb-2 font-semibold">{f.title}</h3>
+                    <p className="text-sm leading-relaxed text-white/45">
+                      {f.desc}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* DESCUBRIR */}
+        <section className="px-6 py-20">
+          <div className="mx-auto max-w-4xl">
+            <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-purple-950/40 via-white/[0.02] to-transparent p-10 text-center md:p-14">
+              <div className="pointer-events-none absolute -left-16 top-0 h-56 w-56 rounded-full bg-purple-600/20 blur-3xl" />
+              <div className="relative">
+                <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-purple-500/20 bg-purple-500/10">
+                  <Compass className="h-6 w-6 text-purple-300" />
+                </div>
+                <h2 className="text-2xl font-bold md:text-3xl">
+                  {m.profilesTitle}{" "}
+                  <span className="text-purple-400">
+                    {m.profilesTitleHighlight}
+                  </span>
+                </h2>
+                <p className="mx-auto mt-3 max-w-md text-sm text-white/50 md:text-base">
+                  {m.exploreProfilesCta}
+                </p>
+                <Link
+                  href="/discover"
+                  className="mt-7 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 px-6 py-3 text-sm font-semibold shadow-lg shadow-purple-500/25 transition-all hover:-translate-y-0.5 hover:from-purple-500 hover:to-violet-500"
+                >
+                  {m.exploreProfilesButton}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="px-6 py-24">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="mb-12 text-center text-3xl font-bold md:text-4xl">
+              {m.faqTitle}
+            </h2>
+            <div className="space-y-3">
+              {m.faqs.map((faq) => (
+                <details
+                  key={faq.q}
+                  className="group rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-colors open:border-purple-500/20 open:bg-white/[0.04] hover:border-white/10"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between font-medium">
+                    {faq.q}
+                    <span className="ml-4 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-purple-500/10 text-lg text-purple-400 transition-transform group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-white/50">
+                    {faq.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <CommunityDiscordLink variant="banner" />
+
+        {/* CTA FINAL */}
+        <section className="px-6 py-24">
+          <div className="mx-auto max-w-4xl">
+            <div className="relative overflow-hidden rounded-3xl border border-purple-500/20 bg-gradient-to-br from-purple-600/20 via-violet-600/10 to-transparent p-12 text-center md:p-16">
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute left-1/2 top-0 h-48 w-[420px] -translate-x-1/2 rounded-full bg-purple-500/25 blur-[100px]" />
+              </div>
+              <div className="relative">
+                <h2 className="text-3xl font-bold md:text-4xl">{m.ctaTitle}</h2>
+                <p className="mx-auto mt-4 max-w-md text-white/55">
+                  {userCount > 0
+                    ? tVars("landing.ctaJoin", {
+                        count: stats?.users ?? String(userCount),
+                      })
+                    : m.ctaFirst}
+                </p>
+                <Link
+                  href={isLoggedIn ? "/dashboard" : "/signup"}
+                  className="group mt-8 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 px-8 py-3.5 text-base font-semibold shadow-xl shadow-purple-500/30 transition-all hover:-translate-y-0.5 hover:from-purple-500 hover:to-violet-500"
+                >
+                  {isLoggedIn ? m.ctaButtonLoggedIn : m.ctaButtonGuest}
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* FOOTER */}
+        <footer className="border-t border-white/5 px-6 py-12">
+          <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 md:flex-row">
+            <Logo href="/" />
+            <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/50">
+              <Link href="/discover" className="transition-colors hover:text-white">
+                {t("nav.discover")}
+              </Link>
+              <Link href="#features" className="transition-colors hover:text-white">
+                {t("nav.features")}
+              </Link>
+              <Link href="#faq" className="transition-colors hover:text-white">
+                {t("nav.faq")}
+              </Link>
+              {!isLoggedIn && (
+                <Link href="/login" className="transition-colors hover:text-white">
+                  {t("nav.login")}
+                </Link>
+              )}
+              <CommunityDiscordLink variant="header" />
+            </nav>
+            <p className="text-xs text-white/35">
+              © {new Date().getFullYear()} Eyed.bio
+            </p>
+          </div>
+        </footer>
+      </div>
     </div>
   );
 }
