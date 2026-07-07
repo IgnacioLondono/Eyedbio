@@ -57,6 +57,7 @@ import {
   DashboardField,
   DashboardSection,
   DashboardSectionLabel,
+  DashboardSubnav,
   DashboardToggle,
 } from "@/components/dashboard/DashboardUi";
 import {
@@ -121,6 +122,7 @@ function DashboardContent() {
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [simulateEntryInPreview, setSimulateEntryInPreview] = useState(false);
   const [previewMode, setPreviewMode] = useState<"mobile" | "desktop">("mobile");
+  const [subTab, setSubTab] = useState<Partial<Record<Tab, string>>>({});
 
   useEffect(() => {
     if (profile?.locale) void setLocale(profile.locale, false);
@@ -366,6 +368,31 @@ function DashboardContent() {
 
   const activeTabMeta = tabs.find((item) => item.id === tab) ?? tabs[0];
 
+  const subTabItems: Partial<Record<Tab, { id: string; label: string }[]>> = {
+    general: [
+      { id: "profile", label: t("dashboard.subtabProfile") },
+      { id: "page", label: t("dashboard.subtabPage") },
+      { id: "social", label: t("dashboard.subtabSocial") },
+    ],
+    media: [
+      { id: "background", label: t("dashboard.subtabBackground") },
+      { id: "audio", label: t("dashboard.subtabAudio") },
+      { id: "player", label: t("dashboard.subtabPlayer") },
+    ],
+    appearance: [
+      { id: "background", label: t("dashboard.subtabBackground") },
+      { id: "structure", label: t("dashboard.subtabStructure") },
+      { id: "card", label: t("dashboard.subtabCard") },
+      { id: "icons", label: t("dashboard.subtabIcons") },
+      { id: "cursor", label: t("dashboard.subtabCursor") },
+    ],
+  };
+
+  const currentSubTabs = subTabItems[tab] ?? [];
+  const activeSub = subTab[tab] ?? currentSubTabs[0]?.id ?? "";
+  const setActiveSub = (id: string) =>
+    setSubTab((prev) => ({ ...prev, [tab]: id }));
+
   return (
     <div className="min-h-screen bg-[#07070c] text-white">
       <div
@@ -432,8 +459,17 @@ function DashboardContent() {
             }`}
           >
             <div className="relative z-20 min-w-0 space-y-4">
+            {currentSubTabs.length > 0 ? (
+              <DashboardSubnav
+                items={currentSubTabs}
+                active={activeSub}
+                onChange={setActiveSub}
+              />
+            ) : null}
             {tab === "general" && (
               <>
+                {activeSub === "profile" && (
+                <>
                 <DashboardSection
                   title={t("dashboard.shareTitle")}
                   hint={t("dashboard.shareHint")}
@@ -484,7 +520,11 @@ function DashboardContent() {
                     }}
                   />
                 </DashboardSection>
+                </>
+                )}
 
+                {activeSub === "page" && (
+                <>
                 <DashboardSection
                   title={t("dashboard.entrySectionTitle")}
                   hint={t("dashboard.entrySectionHint")}
@@ -539,7 +579,11 @@ function DashboardContent() {
                     </select>
                   </DashboardField>
                 </DashboardSection>
+                </>
+                )}
 
+                {activeSub === "social" && (
+                <>
                 <DashboardSection title={t("dashboard.visibilitySectionTitle")} icon={Eye}>
                   <DashboardToggle
                     label={t("dashboard.showViewCount")}
@@ -604,6 +648,8 @@ function DashboardContent() {
                     />
                   </DashboardField>
                 </DashboardSection>
+                </>
+                )}
               </>
             )}
 
@@ -616,6 +662,8 @@ function DashboardContent() {
 
             {tab === "media" && (
               <>
+                {activeSub === "background" && (
+                <>
                 <a
                   href={COMMUNITY_MEDIA_HUB_URL}
                   target="_blank"
@@ -679,9 +727,13 @@ function DashboardContent() {
                     </div>
                   </div>
                 )}
+                </>
+                )}
 
                 {site.profileAudioEnabled ? (
                   <>
+                    {activeSub === "audio" && (
+                    <>
                     <DashboardField label={t("dashboard.audioSource")}>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <button
@@ -783,7 +835,10 @@ function DashboardContent() {
                         !getEffectiveAudioUrl(profile) && !profile.audioEnabled
                       }
                     />
+                    </>
+                    )}
 
+                    {activeSub === "player" && (
                     <DashboardSection
                       title={t("dashboard.musicPlayerTitle")}
                       hint={t("dashboard.musicPlayerHint")}
@@ -791,18 +846,23 @@ function DashboardContent() {
                     >
                       <DashboardToggle
                         label={t("dashboard.musicPlayerEnabled")}
-                        checked={Boolean(profile.settings.musicPlayerEnabled)}
+                        checked={
+                          Boolean(profile.settings.musicPlayerEnabled) &&
+                          profile.audioSource !== "background"
+                        }
                         onChange={(v) => updateSettings({ musicPlayerEnabled: v })}
+                        disabled={profile.audioSource === "background"}
                       />
 
-                      {profile.settings.musicPlayerEnabled && (
-                        <>
-                          {profile.audioSource === "background" ? (
-                            <p className="text-[11px] text-amber-300/80">
-                              {t("dashboard.musicPlayerBackgroundWarning")}
-                            </p>
-                          ) : null}
+                      {profile.audioSource === "background" ? (
+                        <p className="text-[11px] text-amber-300/80">
+                          {t("dashboard.musicPlayerBackgroundWarning")}
+                        </p>
+                      ) : null}
 
+                      {profile.settings.musicPlayerEnabled &&
+                        profile.audioSource !== "background" && (
+                        <>
                           <FileUpload
                             kind="musicCover"
                             label={t("dashboard.musicPlayerCoverLabel")}
@@ -872,6 +932,7 @@ function DashboardContent() {
                         </>
                       )}
                     </DashboardSection>
+                    )}
                   </>
                 ) : null}
               </>
@@ -879,6 +940,7 @@ function DashboardContent() {
 
             {tab === "appearance" && (
               <>
+                {activeSub === "background" && (
                 <DashboardSection title={t("dashboard.tabs.appearance")} icon={Palette}>
                   <DashboardField label={t("dashboard.backgroundEffect")}>
                     <BackgroundEffectSelect
@@ -961,7 +1023,10 @@ function DashboardContent() {
                   />
                 </DashboardField>
                 </DashboardSection>
+                )}
 
+                {activeSub === "structure" && (
+                <>
                 <DashboardSectionLabel>{t("dashboard.structureLinks")}</DashboardSectionLabel>
 
                 <CardLayoutPicker
@@ -985,7 +1050,11 @@ function DashboardContent() {
                   onLinkStyleChange={(linkStyle) => updateSettings({ linkStyle })}
                   onAvatarStyleChange={(avatarStyle) => updateSettings({ avatarStyle })}
                 />
+                </>
+                )}
 
+                {activeSub === "card" && (
+                <>
                 <DashboardSectionLabel>{t("dashboard.cardSection")}</DashboardSectionLabel>
 
                 <DashboardToggle
@@ -1072,6 +1141,17 @@ function DashboardContent() {
                   </select>
                 </DashboardField>
 
+                <DashboardToggle
+                  label={t("dashboard.gradientCard")}
+                  checked={profile.settings.gradientEnabled}
+                  onChange={(v) => updateSettings({ gradientEnabled: v })}
+                  disabled={profile.settings.transparentCard}
+                />
+                </>
+                )}
+
+                {activeSub === "icons" && (
+                <>
                 <DashboardSectionLabel>{t("dashboard.iconsSection")}</DashboardSectionLabel>
 
                 <DashboardSection>
@@ -1096,14 +1176,11 @@ function DashboardContent() {
                     onClear={() => updateSettings({ browserTabIconUrl: "" })}
                   />
                 </DashboardSection>
+                </>
+                )}
 
-                <DashboardToggle
-                  label={t("dashboard.gradientCard")}
-                  checked={profile.settings.gradientEnabled}
-                  onChange={(v) => updateSettings({ gradientEnabled: v })}
-                  disabled={profile.settings.transparentCard}
-                />
-
+                {activeSub === "cursor" && (
+                <>
                 <DashboardSectionLabel>{t("dashboard.cursorSection")}</DashboardSectionLabel>
 
                 <DashboardSection>
@@ -1152,6 +1229,8 @@ function DashboardContent() {
                     </>
                   )}
                 </DashboardSection>
+                </>
+                )}
               </>
             )}
 

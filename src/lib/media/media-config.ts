@@ -146,6 +146,8 @@ export const EXT_TO_MIME: Record<string, string> = {
   ".gif": "image/gif",
   ".avif": "image/avif",
   ".bmp": "image/bmp",
+  ".ico": "image/x-icon",
+  ".cur": "image/x-icon",
   ".mp4": "video/mp4",
   ".webm": "video/webm",
   ".mov": "video/quicktime",

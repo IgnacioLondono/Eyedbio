@@ -47,6 +47,38 @@ export function DashboardSection({
   );
 }
 
+export function DashboardSubnav({
+  items,
+  active,
+  onChange,
+}: {
+  items: { id: string; label: string }[];
+  active: string;
+  onChange: (id: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1.5">
+      {items.map((item) => {
+        const isActive = item.id === active;
+        return (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onChange(item.id)}
+            className={`rounded-xl px-3 py-1.5 text-xs font-medium transition-colors ${
+              isActive
+                ? "bg-purple-600 text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]"
+                : "text-white/55 hover:bg-white/[0.06] hover:text-white/80"
+            }`}
+          >
+            {item.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function DashboardSectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/35 pt-1">

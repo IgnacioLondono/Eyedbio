@@ -47,7 +47,8 @@ export default function ProfileMusicPlayer({
   raised = false,
 }: Props) {
   const site = useSiteSettings();
-  const enabled = isMusicPlayerEnabled(profile.settings);
+  const enabled =
+    isMusicPlayerEnabled(profile.settings) && profile.audioSource !== "background";
   const interactive = !compact && site.profileAudioEnabled && isMusicPlayerPlayable(profile);
 
   if (!enabled) return null;
@@ -93,11 +94,16 @@ function PlayerShell({
 }
 
 function Cover({ profile, size = 44 }: { profile: Profile; size?: number }) {
-  const { coverUrl, baseColor, title } = resolveMusicPlayer(profile);
-  const [broken, setBroken] = useState(false);
-  const src = coverUrl ? getMediaSrc(coverUrl) : "";
+  const { baseColor, title } = resolveMusicPlayer(profile);
+  const candidates = [
+    profile.settings.musicPlayerCoverUrl?.trim(),
+    profile.avatarUrl?.trim(),
+  ].filter((url): url is string => Boolean(url));
+  const [idx, setIdx] = useState(0);
+  const current = candidates[idx];
+  const src = current ? getMediaSrc(current) : "";
 
-  if (!src || broken) {
+  if (!src) {
     return (
       <div
         className="flex shrink-0 items-center justify-center rounded-xl"
@@ -113,7 +119,12 @@ function Cover({ profile, size = 44 }: { profile: Profile; size?: number }) {
       className="relative shrink-0 overflow-hidden rounded-xl"
       style={{ width: size, height: size }}
     >
-      <FocusedImage src={src} alt={title} onError={() => setBroken(true)} />
+      <FocusedImage
+        key={src}
+        src={src}
+        alt={title}
+        onError={() => setIdx((i) => i + 1)}
+      />
     </div>
   );
 }

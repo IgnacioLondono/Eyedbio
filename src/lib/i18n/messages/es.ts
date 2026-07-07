@@ -381,6 +381,16 @@ export interface Messages {
     musicPlayerColor: string;
     musicPlayerTextColor: string;
     musicPlayerBlur: string;
+    subtabProfile: string;
+    subtabPage: string;
+    subtabSocial: string;
+    subtabBackground: string;
+    subtabAudio: string;
+    subtabPlayer: string;
+    subtabStructure: string;
+    subtabCard: string;
+    subtabIcons: string;
+    subtabCursor: string;
     monochromeIcons: string;
     iconsSection: string;
     iconsSectionHint: string;
@@ -1025,6 +1035,16 @@ export const es: Messages = {
     musicPlayerColor: "Color del reproductor",
     musicPlayerTextColor: "Color del texto",
     musicPlayerBlur: "Desenfoque ({px}px)",
+    subtabProfile: "Perfil",
+    subtabPage: "Página",
+    subtabSocial: "Social",
+    subtabBackground: "Fondo",
+    subtabAudio: "Audio",
+    subtabPlayer: "Reproductor",
+    subtabStructure: "Estructura",
+    subtabCard: "Tarjeta",
+    subtabIcons: "Iconos",
+    subtabCursor: "Cursor",
     monochromeIcons: "Iconos monocromáticos",
     iconsSection: "Iconos",
     iconsSectionHint: "Vista previa de cómo se verán los iconos de tus enlaces.",
