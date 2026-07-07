@@ -164,7 +164,12 @@ function MediaPreview({
     );
   }
 
-  if (kind === "favicon" || kind === "profileIcon") {
+  if (
+    kind === "favicon" ||
+    kind === "profileIcon" ||
+    kind === "cursor" ||
+    kind === "musicCover"
+  ) {
     if (broken) {
       return (
         <div className="w-16 h-16 mx-auto my-3 rounded-xl bg-white/5 flex items-center justify-center">

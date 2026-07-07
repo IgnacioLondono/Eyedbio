@@ -493,6 +493,39 @@ export function setProfileAudioVolume(nextVolume: number): void {
   notify();
 }
 
+function resolveClipRange(): { start: number; end: number } {
+  const element = audio;
+  const start = clipBounds.start;
+  const total = duration || element?.duration || 0;
+  const end = Number.isFinite(clipBounds.end) ? clipBounds.end : total;
+  return { start, end };
+}
+
+/** Progreso 0–1 dentro del recorte actual, más tiempos absolutos. */
+export function getProfileAudioClipProgress(): {
+  progress: number;
+  current: number;
+  total: number;
+} {
+  const element = audio;
+  if (!element) return { progress: 0, current: 0, total: 0 };
+  const { start, end } = resolveClipRange();
+  const span = Math.max(0, end - start);
+  const current = Math.min(Math.max(0, element.currentTime - start), span);
+  return { progress: span > 0 ? current / span : 0, current, total: span };
+}
+
+/** Salta a una fracción (0–1) dentro del recorte actual. */
+export function seekProfileAudioClip(fraction: number): void {
+  const element = audio;
+  if (!element) return;
+  const { start, end } = resolveClipRange();
+  const span = Math.max(0, end - start);
+  const clamped = Math.min(1, Math.max(0, fraction));
+  element.currentTime = start + span * clamped;
+  notify();
+}
+
 export function isProfileAudioAwaitingUnlock(): boolean {
   return getProfileAudioEngineSnapshot().needsTap;
 }

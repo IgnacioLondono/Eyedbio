@@ -79,6 +79,9 @@ export type LinkStyle = "icons" | "pills" | "row" | "chips";
 
 export type AvatarStyle = "circle" | "ring" | "rounded";
 
+/** Estilos de estela/rastro del cursor en el perfil */
+export type CursorTrailEffect = "dots" | "line" | "glow" | "sparkle";
+
 export interface SocialLink {
   id: string;
   platform: SocialPlatform;
@@ -126,7 +129,14 @@ export interface ProfileSettings {
   showCardBorder: boolean;
   showCardShadow: boolean;
   borderOpacity: number;
+  /** Cursor personalizado (imagen) mostrado sobre el perfil */
   cursorUrl?: string;
+  /** Estela/rastro que sigue al cursor en el perfil */
+  cursorTrailEnabled?: boolean;
+  /** Estilo visual de la estela del cursor */
+  cursorTrailEffect?: CursorTrailEffect;
+  /** Color de la estela del cursor (por defecto usa accentColor) */
+  cursorTrailColor?: string;
   /** Imagen de cabecera cuando cardLayout es "banner" */
   bannerUrl?: string;
   /** Encuadre (posición y zoom al mostrar; no modifica el archivo) */
@@ -159,6 +169,18 @@ export interface ProfileSettings {
   /** Respaldo en settings si la columna de BD no está migrada */
   audioStartTime?: number;
   audioClipDuration?: number;
+  /** Reproductor de música visible en la tarjeta (usa el audio subido) */
+  musicPlayerEnabled?: boolean;
+  /** Portada personalizada del reproductor */
+  musicPlayerCoverUrl?: string;
+  /** Título de la canción en el reproductor */
+  musicPlayerTitle?: string;
+  /** Artista/subtítulo en el reproductor */
+  musicPlayerArtist?: string;
+  /** Color base del reproductor (por defecto usa accentColor) */
+  musicPlayerColor?: string;
+  /** Color de texto del reproductor (por defecto usa textColor) */
+  musicPlayerTextColor?: string;
 }
 
 export interface Profile {

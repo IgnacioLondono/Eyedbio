@@ -7,7 +7,9 @@ export type UploadKind =
   | "audio"
   | "linkIcon"
   | "favicon"
-  | "profileIcon";
+  | "profileIcon"
+  | "cursor"
+  | "musicCover";
 
 export const UPLOAD_LIMITS: Record<UploadKind, number> = {
   avatar: 5 * 1024 * 1024,
@@ -17,6 +19,8 @@ export const UPLOAD_LIMITS: Record<UploadKind, number> = {
   linkIcon: 2 * 1024 * 1024,
   favicon: 1 * 1024 * 1024,
   profileIcon: 2 * 1024 * 1024,
+  cursor: 1 * 1024 * 1024,
+  musicCover: 5 * 1024 * 1024,
 };
 
 export const AUDIO_MIMES = [
@@ -93,6 +97,11 @@ export const AVATAR_MIMES = [
 
 export const AVATAR_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".avif", ".bmp"] as const;
 
+/** Cursores: solo formatos que el navegador acepta como cursor (sin GIF animado). */
+export const CURSOR_MIMES = ["image/png", "image/webp", "image/x-icon", "image/vnd.microsoft.icon"] as const;
+
+export const CURSOR_EXTENSIONS = [".png", ".webp", ".cur", ".ico"] as const;
+
 export const ALLOWED_MIMES: Record<UploadKind, readonly string[]> = {
   avatar: AVATAR_MIMES,
   background: BACKGROUND_MIMES,
@@ -101,6 +110,8 @@ export const ALLOWED_MIMES: Record<UploadKind, readonly string[]> = {
   linkIcon: AVATAR_MIMES,
   favicon: AVATAR_MIMES,
   profileIcon: AVATAR_MIMES,
+  cursor: CURSOR_MIMES,
+  musicCover: AVATAR_MIMES,
 };
 
 export const ALLOWED_EXTENSIONS: Record<UploadKind, readonly string[]> = {
@@ -111,6 +122,8 @@ export const ALLOWED_EXTENSIONS: Record<UploadKind, readonly string[]> = {
   linkIcon: AVATAR_EXTENSIONS,
   favicon: AVATAR_EXTENSIONS,
   profileIcon: AVATAR_EXTENSIONS,
+  cursor: CURSOR_EXTENSIONS,
+  musicCover: AVATAR_EXTENSIONS,
 };
 
 export const ACCEPT_ATTR: Record<UploadKind, string> = {
@@ -121,6 +134,8 @@ export const ACCEPT_ATTR: Record<UploadKind, string> = {
   linkIcon: [...AVATAR_MIMES, ...AVATAR_EXTENSIONS].join(","),
   favicon: [...AVATAR_MIMES, ...AVATAR_EXTENSIONS].join(","),
   profileIcon: [...AVATAR_MIMES, ...AVATAR_EXTENSIONS].join(","),
+  cursor: [...CURSOR_MIMES, ...CURSOR_EXTENSIONS].join(","),
+  musicCover: [...AVATAR_MIMES, ...AVATAR_EXTENSIONS].join(","),
 };
 
 export const EXT_TO_MIME: Record<string, string> = {

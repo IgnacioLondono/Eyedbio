@@ -22,7 +22,14 @@ import {
   NameEffect,
   type NameAnimation,
   type AudioSource,
+  type CursorTrailEffect,
 } from "@/types/profile";
+import {
+  CURSOR_TRAIL_EFFECTS,
+  resolveCursorTrailColor,
+  resolveCursorTrailEffect,
+} from "@/lib/profile/cursor-config";
+import { resolveMusicPlayer } from "@/lib/profile/music-player-config";
 import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
 import { NAME_ANIMATION_OPTIONS } from "@/lib/name-animations";
 import { getMessages } from "@/lib/i18n";
@@ -776,6 +783,75 @@ function DashboardContent() {
                         !getEffectiveAudioUrl(profile) && !profile.audioEnabled
                       }
                     />
+
+                    <DashboardSection
+                      title={t("dashboard.musicPlayerTitle")}
+                      hint={t("dashboard.musicPlayerHint")}
+                      icon={Music}
+                    >
+                      <DashboardToggle
+                        label={t("dashboard.musicPlayerEnabled")}
+                        checked={Boolean(profile.settings.musicPlayerEnabled)}
+                        onChange={(v) => updateSettings({ musicPlayerEnabled: v })}
+                      />
+
+                      {profile.settings.musicPlayerEnabled && (
+                        <>
+                          {profile.audioSource === "background" ? (
+                            <p className="text-[11px] text-amber-300/80">
+                              {t("dashboard.musicPlayerBackgroundWarning")}
+                            </p>
+                          ) : null}
+
+                          <FileUpload
+                            kind="musicCover"
+                            label={t("dashboard.musicPlayerCoverLabel")}
+                            hint={t("dashboard.musicPlayerCoverHint")}
+                            currentUrl={profile.settings.musicPlayerCoverUrl}
+                            onUploaded={(url) =>
+                              updateSettings({ musicPlayerCoverUrl: url })
+                            }
+                            onClear={() => updateSettings({ musicPlayerCoverUrl: "" })}
+                          />
+
+                          <DashboardField label={t("dashboard.musicPlayerSongTitle")}>
+                            <input
+                              type="text"
+                              value={profile.settings.musicPlayerTitle ?? ""}
+                              onChange={(e) =>
+                                updateSettings({ musicPlayerTitle: e.target.value })
+                              }
+                              placeholder={t("dashboard.musicPlayerSongTitlePlaceholder")}
+                              className="input-field"
+                            />
+                          </DashboardField>
+
+                          <DashboardField label={t("dashboard.musicPlayerArtist")}>
+                            <input
+                              type="text"
+                              value={profile.settings.musicPlayerArtist ?? ""}
+                              onChange={(e) =>
+                                updateSettings({ musicPlayerArtist: e.target.value })
+                              }
+                              placeholder={t("dashboard.musicPlayerArtistPlaceholder")}
+                              className="input-field"
+                            />
+                          </DashboardField>
+
+                          <DashboardColorField
+                            label={t("dashboard.musicPlayerColor")}
+                            value={resolveMusicPlayer(profile).baseColor}
+                            onChange={(v) => updateSettings({ musicPlayerColor: v })}
+                          />
+
+                          <DashboardColorField
+                            label={t("dashboard.musicPlayerTextColor")}
+                            value={resolveMusicPlayer(profile).textColor}
+                            onChange={(v) => updateSettings({ musicPlayerTextColor: v })}
+                          />
+                        </>
+                      )}
+                    </DashboardSection>
                   </>
                 ) : null}
               </>
@@ -1007,6 +1083,55 @@ function DashboardContent() {
                   onChange={(v) => updateSettings({ gradientEnabled: v })}
                   disabled={profile.settings.transparentCard}
                 />
+
+                <DashboardSectionLabel>{t("dashboard.cursorSection")}</DashboardSectionLabel>
+
+                <DashboardSection>
+                  <FileUpload
+                    kind="cursor"
+                    label={t("dashboard.cursorImageLabel")}
+                    hint={t("dashboard.cursorImageHint")}
+                    currentUrl={profile.settings.cursorUrl}
+                    onUploaded={(url) => updateSettings({ cursorUrl: url })}
+                    onClear={() => updateSettings({ cursorUrl: "" })}
+                  />
+
+                  <DashboardToggle
+                    label={t("dashboard.cursorTrailEnabled")}
+                    checked={Boolean(profile.settings.cursorTrailEnabled)}
+                    onChange={(v) => updateSettings({ cursorTrailEnabled: v })}
+                  />
+
+                  {profile.settings.cursorTrailEnabled && (
+                    <>
+                      <DashboardField label={t("dashboard.cursorTrailEffect")}>
+                        <select
+                          value={resolveCursorTrailEffect(
+                            profile.settings.cursorTrailEffect
+                          )}
+                          onChange={(e) =>
+                            updateSettings({
+                              cursorTrailEffect: e.target.value as CursorTrailEffect,
+                            })
+                          }
+                          className="input-field"
+                        >
+                          {CURSOR_TRAIL_EFFECTS.map((effect) => (
+                            <option key={effect} value={effect}>
+                              {t(`dashboard.cursorTrailEffect_${effect}`)}
+                            </option>
+                          ))}
+                        </select>
+                      </DashboardField>
+
+                      <DashboardColorField
+                        label={t("dashboard.cursorTrailColor")}
+                        value={resolveCursorTrailColor(profile.settings)}
+                        onChange={(v) => updateSettings({ cursorTrailColor: v })}
+                      />
+                    </>
+                  )}
+                </DashboardSection>
               </>
             )}
 

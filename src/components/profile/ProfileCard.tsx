@@ -4,6 +4,7 @@ import { Profile } from "@/types/profile";
 import { resolveCardLayout, getCardMaxWidthClass } from "@/lib/config/card-layout-config";
 import { resolveProfileDisplay } from "@/lib/profile/profile-display-config";
 import { getEffectiveAudioUrl, getEffectiveAudioClipDuration, isBackgroundProfileAudio } from "@/lib/profile/profile-audio";
+import { isMusicPlayerPlayable } from "@/lib/profile/music-player-config";
 import {
   CARD_LAYOUT_COMPONENTS,
   ProfileCardMotionWrapper,
@@ -63,6 +64,7 @@ export default function ProfileCard({
               accentColor={profile.settings.accentColor}
               showShareButton={display.showShareButton}
               mediaActive={mediaActive}
+              hideAudioControl={isMusicPlayerPlayable(profile)}
             />
           }
         >

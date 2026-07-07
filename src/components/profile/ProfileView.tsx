@@ -11,6 +11,7 @@ import ClaimProfileCta from "@/components/landing/ClaimProfileCta";
 import ProfileQuickNavButton from "@/components/profile/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/auth/ProfileAccessGate";
 import ProfileEntryGate from "@/components/profile/ProfileEntryGate";
+import ProfileCursor from "@/components/profile/ProfileCursor";
 import ProfileTabIcon from "@/components/profile/ProfileTabIcon";
 import { profileUnlockRequestHeaders } from "@/lib/profile/profile-unlock-client";
 import { preloadBackgroundMedia } from "@/lib/media/media-url";
@@ -280,6 +281,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
             <ProfileCard profile={profile} showControls={mediaActive} mediaActive={mediaActive} />
           </div>
         </div>
+        {mediaActive ? <ProfileCursor settings={settings} /> : null}
         {needsGate ? (
           <ProfileEntryGate text={display.entryGateText} onEnter={handleEnter} />
         ) : null}

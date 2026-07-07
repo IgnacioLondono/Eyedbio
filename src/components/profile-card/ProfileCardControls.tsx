@@ -15,6 +15,8 @@ interface Props {
   accentColor?: string;
   showShareButton?: boolean;
   mediaActive?: boolean;
+  /** Oculta el control flotante cuando el reproductor de música está activo. */
+  hideAudioControl?: boolean;
 }
 
 export default function ProfileCardControls({
@@ -28,6 +30,7 @@ export default function ProfileCardControls({
   accentColor,
   showShareButton = true,
   mediaActive = true,
+  hideAudioControl = false,
 }: Props) {
   const site = useSiteSettings();
 
@@ -36,7 +39,7 @@ export default function ProfileCardControls({
       {showShareButton ? (
         <ShareProfileButton username={username} displayName={displayName} variant="card" />
       ) : null}
-      {site.profileAudioEnabled && audioEnabled && playbackUrl && mediaActive ? (
+      {!hideAudioControl && site.profileAudioEnabled && audioEnabled && playbackUrl && mediaActive ? (
         <ProfileAudio
           url={playbackUrl}
           startTime={audioStartTime}

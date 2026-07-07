@@ -358,6 +358,28 @@ export interface Messages {
     nameEffect: string;
     glowIcons: string;
     gradientCard: string;
+    cursorSection: string;
+    cursorImageLabel: string;
+    cursorImageHint: string;
+    cursorTrailEnabled: string;
+    cursorTrailEffect: string;
+    cursorTrailEffect_dots: string;
+    cursorTrailEffect_line: string;
+    cursorTrailEffect_glow: string;
+    cursorTrailEffect_sparkle: string;
+    cursorTrailColor: string;
+    musicPlayerTitle: string;
+    musicPlayerHint: string;
+    musicPlayerEnabled: string;
+    musicPlayerBackgroundWarning: string;
+    musicPlayerCoverLabel: string;
+    musicPlayerCoverHint: string;
+    musicPlayerSongTitle: string;
+    musicPlayerSongTitlePlaceholder: string;
+    musicPlayerArtist: string;
+    musicPlayerArtistPlaceholder: string;
+    musicPlayerColor: string;
+    musicPlayerTextColor: string;
     monochromeIcons: string;
     iconsSection: string;
     iconsSectionHint: string;
@@ -977,6 +999,29 @@ export const es: Messages = {
     nameEffect: "Efecto en el nombre",
     glowIcons: "Brillo en iconos",
     gradientCard: "Gradiente en tarjeta",
+    cursorSection: "Cursor y estelas",
+    cursorImageLabel: "Cursor personalizado",
+    cursorImageHint: "PNG, WebP, CUR o ICO · máx. 1 MB · recomendado 32×32 px (se reduce si es mayor)",
+    cursorTrailEnabled: "Estela del cursor",
+    cursorTrailEffect: "Estilo de la estela",
+    cursorTrailEffect_dots: "Puntos",
+    cursorTrailEffect_line: "Línea",
+    cursorTrailEffect_glow: "Resplandor",
+    cursorTrailEffect_sparkle: "Destellos",
+    cursorTrailColor: "Color de la estela",
+    musicPlayerTitle: "Reproductor de música",
+    musicPlayerHint: "Muestra un reproductor con portada, título y controles en tu tarjeta.",
+    musicPlayerEnabled: "Activar reproductor",
+    musicPlayerBackgroundWarning:
+      "El reproductor usa el audio subido. Con audio del fondo (video) no se muestra.",
+    musicPlayerCoverLabel: "Portada",
+    musicPlayerCoverHint: "PNG, JPG, WebP o GIF · máx. 5 MB · cuadrada recomendada",
+    musicPlayerSongTitle: "Título de la canción",
+    musicPlayerSongTitlePlaceholder: "Nombre de la canción",
+    musicPlayerArtist: "Artista",
+    musicPlayerArtistPlaceholder: "Nombre del artista",
+    musicPlayerColor: "Color del reproductor",
+    musicPlayerTextColor: "Color del texto",
     monochromeIcons: "Iconos monocromáticos",
     iconsSection: "Iconos",
     iconsSectionHint: "Vista previa de cómo se verán los iconos de tus enlaces.",

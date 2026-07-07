@@ -21,6 +21,7 @@ const IMAGE_KINDS = new Set<UploadKind>([
   "linkIcon",
   "favicon",
   "profileIcon",
+  "musicCover",
 ]);
 
 export function uploadKindNeedsImageModeration(kind: UploadKind): boolean {
