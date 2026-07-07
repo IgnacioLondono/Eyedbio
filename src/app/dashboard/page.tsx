@@ -72,6 +72,18 @@ type Tab = "general" | "links" | "media" | "appearance" | "account";
 
 const VALID_TABS: Tab[] = ["general", "links", "media", "appearance", "account"];
 const DASHBOARD_TAB_STORAGE_KEY = "eyed-dashboard-tab";
+const DASHBOARD_SUBTAB_STORAGE_KEY = "eyed-dashboard-subtab";
+
+function readStoredDashboardSubTabs(): Partial<Record<Tab, string>> {
+  if (typeof window === "undefined") return {};
+  try {
+    const stored = localStorage.getItem(DASHBOARD_SUBTAB_STORAGE_KEY);
+    if (stored) return JSON.parse(stored) as Partial<Record<Tab, string>>;
+  } catch {
+    /* ignore */
+  }
+  return {};
+}
 
 function parseTab(value: string | null): Tab {
   if (value && VALID_TABS.includes(value as Tab)) return value as Tab;
@@ -122,7 +134,9 @@ function DashboardContent() {
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [simulateEntryInPreview, setSimulateEntryInPreview] = useState(false);
   const [previewMode, setPreviewMode] = useState<"mobile" | "desktop">("mobile");
-  const [subTab, setSubTab] = useState<Partial<Record<Tab, string>>>({});
+  const [subTab, setSubTab] = useState<Partial<Record<Tab, string>>>(
+    readStoredDashboardSubTabs
+  );
 
   useEffect(() => {
     if (profile?.locale) void setLocale(profile.locale, false);
@@ -391,7 +405,15 @@ function DashboardContent() {
   const currentSubTabs = subTabItems[tab] ?? [];
   const activeSub = subTab[tab] ?? currentSubTabs[0]?.id ?? "";
   const setActiveSub = (id: string) =>
-    setSubTab((prev) => ({ ...prev, [tab]: id }));
+    setSubTab((prev) => {
+      const next = { ...prev, [tab]: id };
+      try {
+        localStorage.setItem(DASHBOARD_SUBTAB_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
 
   return (
     <div className="min-h-screen bg-[#07070c] text-white">
