@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import Image from "next/image";
 import { Pause, Play, Volume2, VolumeX, Music } from "lucide-react";
 import type { Profile } from "@/types/profile";
 import { hexToRgba } from "@/lib/config/color-utils";
 import { getMediaSrc } from "@/lib/media/media-url";
+import { FocusedImage } from "@/components/media/FocusedMedia";
 import { useSiteSettings } from "@/components/providers/SiteSettingsProvider";
 import {
   isMusicPlayerEnabled,
@@ -77,11 +77,15 @@ function PlayerShell({
   profile: Profile;
   children: React.ReactNode;
 }) {
-  const { baseColor } = resolveMusicPlayer(profile);
+  const { baseColor, blur } = resolveMusicPlayer(profile);
   return (
     <div
-      className="w-full rounded-2xl border bg-black/50 p-3 shadow-xl shadow-black/40 backdrop-blur-md"
-      style={{ borderColor: hexToRgba(baseColor, 0.3) }}
+      className="w-full rounded-2xl border bg-black/50 p-3 shadow-xl shadow-black/40"
+      style={{
+        borderColor: hexToRgba(baseColor, 0.3),
+        backdropFilter: blur > 0 ? `blur(${blur}px)` : undefined,
+        WebkitBackdropFilter: blur > 0 ? `blur(${blur}px)` : undefined,
+      }}
     >
       {children}
     </div>
@@ -109,15 +113,7 @@ function Cover({ profile, size = 44 }: { profile: Profile; size?: number }) {
       className="relative shrink-0 overflow-hidden rounded-xl"
       style={{ width: size, height: size }}
     >
-      <Image
-        src={src}
-        alt={title}
-        fill
-        sizes="44px"
-        className="object-cover"
-        onError={() => setBroken(true)}
-        unoptimized
-      />
+      <FocusedImage src={src} alt={title} onError={() => setBroken(true)} />
     </div>
   );
 }

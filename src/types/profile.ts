@@ -181,6 +181,8 @@ export interface ProfileSettings {
   musicPlayerColor?: string;
   /** Color de texto del reproductor (por defecto usa textColor) */
   musicPlayerTextColor?: string;
+  /** Desenfoque del fondo de la tarjeta del reproductor (px, 0-30) */
+  musicPlayerBlur?: number;
 }
 
 export interface Profile {

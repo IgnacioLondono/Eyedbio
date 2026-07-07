@@ -29,7 +29,7 @@ import {
   resolveCursorTrailColor,
   resolveCursorTrailEffect,
 } from "@/lib/profile/cursor-config";
-import { resolveMusicPlayer } from "@/lib/profile/music-player-config";
+import { resolveMusicPlayer, MUSIC_PLAYER_BLUR_MAX } from "@/lib/profile/music-player-config";
 import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
 import { NAME_ANIMATION_OPTIONS } from "@/lib/name-animations";
 import { getMessages } from "@/lib/i18n";
@@ -849,6 +849,26 @@ function DashboardContent() {
                             value={resolveMusicPlayer(profile).textColor}
                             onChange={(v) => updateSettings({ musicPlayerTextColor: v })}
                           />
+
+                          <DashboardField
+                            label={tVars("dashboard.musicPlayerBlur", {
+                              px: resolveMusicPlayer(profile).blur,
+                            })}
+                          >
+                            <input
+                              type="range"
+                              min="0"
+                              max={MUSIC_PLAYER_BLUR_MAX}
+                              step="1"
+                              value={resolveMusicPlayer(profile).blur}
+                              onChange={(e) =>
+                                updateSettings({
+                                  musicPlayerBlur: parseInt(e.target.value),
+                                })
+                              }
+                              className="w-full accent-purple-500"
+                            />
+                          </DashboardField>
                         </>
                       )}
                     </DashboardSection>

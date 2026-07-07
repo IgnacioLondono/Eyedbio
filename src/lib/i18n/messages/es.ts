@@ -380,6 +380,7 @@ export interface Messages {
     musicPlayerArtistPlaceholder: string;
     musicPlayerColor: string;
     musicPlayerTextColor: string;
+    musicPlayerBlur: string;
     monochromeIcons: string;
     iconsSection: string;
     iconsSectionHint: string;
@@ -490,6 +491,7 @@ export interface Messages {
     usernameHint: string;
     uploadIcon: string;
     changeIcon: string;
+    removeIcon: string;
     customTitle: string;
     customHint: string;
     uploadError: string;
@@ -1022,6 +1024,7 @@ export const es: Messages = {
     musicPlayerArtistPlaceholder: "Nombre del artista",
     musicPlayerColor: "Color del reproductor",
     musicPlayerTextColor: "Color del texto",
+    musicPlayerBlur: "Desenfoque ({px}px)",
     monochromeIcons: "Iconos monocromáticos",
     iconsSection: "Iconos",
     iconsSectionHint: "Vista previa de cómo se verán los iconos de tus enlaces.",
@@ -1140,6 +1143,7 @@ export const es: Messages = {
     usernameHint: "Solo el nombre de usuario (sin enlace). En el perfil se copia al pulsar.",
     uploadIcon: "Subir icono personalizado",
     changeIcon: "Cambiar icono",
+    removeIcon: "Quitar",
     customTitle: "Añadir URL personalizada",
     customHint: "Hasta {max} proyectos o webs propias, con icono a medida.",
     uploadError: "Error al subir",

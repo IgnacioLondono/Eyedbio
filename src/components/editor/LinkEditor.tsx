@@ -35,14 +35,17 @@ interface Props {
 function LinkIconPreview({
   link,
   onUploaded,
+  onClear,
 }: {
   link: SocialLink;
   onUploaded: (url: string) => void;
+  onClear: () => void;
 }) {
   const { t, tVars } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const config = PLATFORM_CONFIG[link.platform];
 
   const handleFile = async (file: File) => {
     const validation = getUploadValidationError("linkIcon", file);
@@ -98,13 +101,28 @@ function LinkIconPreview({
             color="#a855f7"
             sizeClass="w-8 h-8"
           />
+        ) : link.platform !== "custom" ? (
+          <span style={{ color: config.color }}>
+            <PlatformIcon platform={link.platform} />
+          </span>
         ) : (
           <Globe className="w-6 h-6 text-white/50" />
         )}
       </button>
-      <span className="text-[10px] text-white/35">
-        {link.iconUrl ? t("linkEditor.changeIcon") : t("linkEditor.uploadIcon")}
-      </span>
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] text-white/35">
+          {link.iconUrl ? t("linkEditor.changeIcon") : t("linkEditor.uploadIcon")}
+        </span>
+        {link.iconUrl ? (
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-[10px] text-red-400/70 hover:text-red-400 transition-colors"
+          >
+            {t("linkEditor.removeIcon")}
+          </button>
+        ) : null}
+      </div>
       <input
         ref={inputRef}
         type="file"
@@ -247,27 +265,11 @@ export default function LinkEditor({ links, onChange }: Props) {
                   </button>
                 </div>
 
-                {isCustom ? (
-                  <LinkIconPreview
-                    link={link}
-                    onUploaded={(iconUrl) => updateLink(link.id, { iconUrl })}
-                  />
-                ) : isCustom && link.iconUrl ? (
-                  <div className="flex items-center justify-center w-14 h-14 rounded-xl bg-white/5 border border-white/10 mb-3">
-                    <CustomLinkIcon
-                      iconUrl={link.iconUrl}
-                      color="#a855f7"
-                      sizeClass="w-9 h-9"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className="flex items-center justify-center w-14 h-14 rounded-xl bg-white/5 border border-white/10 mb-3"
-                    style={{ color: config.color }}
-                  >
-                    <PlatformIcon platform={link.platform} />
-                  </div>
-                )}
+                <LinkIconPreview
+                  link={link}
+                  onUploaded={(iconUrl) => updateLink(link.id, { iconUrl })}
+                  onClear={() => updateLink(link.id, { iconUrl: undefined })}
+                />
 
                 <input
                   type="text"

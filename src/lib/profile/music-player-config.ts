@@ -7,6 +7,16 @@ export interface ResolvedMusicPlayer {
   coverUrl: string;
   baseColor: string;
   textColor: string;
+  blur: number;
+}
+
+export const MUSIC_PLAYER_BLUR_DEFAULT = 12;
+export const MUSIC_PLAYER_BLUR_MAX = 30;
+
+export function resolveMusicPlayerBlur(settings: ProfileSettings): number {
+  const value = settings.musicPlayerBlur;
+  if (typeof value !== "number" || Number.isNaN(value)) return MUSIC_PLAYER_BLUR_DEFAULT;
+  return Math.min(MUSIC_PLAYER_BLUR_MAX, Math.max(0, value));
 }
 
 export function isMusicPlayerEnabled(settings: ProfileSettings): boolean {
@@ -39,5 +49,6 @@ export function resolveMusicPlayer(profile: Profile): ResolvedMusicPlayer {
       settings.accentColor?.trim() ||
       "#a855f7",
     textColor: settings.musicPlayerTextColor?.trim() || settings.textColor || "#ffffff",
+    blur: resolveMusicPlayerBlur(settings),
   };
 }
