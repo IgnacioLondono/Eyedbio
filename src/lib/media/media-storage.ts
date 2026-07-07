@@ -27,6 +27,10 @@ export function collectProfileMediaKeys(profile: Profile): Set<string> {
   addLocalMediaKey(keys, profile.avatarUrl);
   addLocalMediaKey(keys, profile.settings.backgroundUrl);
   addLocalMediaKey(keys, profile.settings.bannerUrl);
+  addLocalMediaKey(keys, profile.settings.cursorUrl);
+  addLocalMediaKey(keys, profile.settings.browserTabIconUrl);
+  addLocalMediaKey(keys, profile.settings.profileNameIconUrl);
+  addLocalMediaKey(keys, profile.settings.musicPlayerCoverUrl);
 
   if (resolveAudioSource(profile.audioSource, profile) === "upload") {
     addLocalMediaKey(keys, profile.audioUrl);
@@ -46,6 +50,10 @@ export function collectProfileMediaUrls(profile: Profile): Set<string> {
   addLocalMediaUrl(urls, profile.avatarUrl);
   addLocalMediaUrl(urls, profile.settings.backgroundUrl);
   addLocalMediaUrl(urls, profile.settings.bannerUrl);
+  addLocalMediaUrl(urls, profile.settings.cursorUrl);
+  addLocalMediaUrl(urls, profile.settings.browserTabIconUrl);
+  addLocalMediaUrl(urls, profile.settings.profileNameIconUrl);
+  addLocalMediaUrl(urls, profile.settings.musicPlayerCoverUrl);
 
   if (resolveAudioSource(profile.audioSource, profile) === "upload") {
     addLocalMediaUrl(urls, profile.audioUrl);
