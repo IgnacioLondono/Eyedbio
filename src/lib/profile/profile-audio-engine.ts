@@ -152,6 +152,16 @@ function seekToClipStart(): void {
   element.currentTime = clipBounds.start;
 }
 
+/** True si la posición actual está dentro de los límites del clip (no requiere reiniciar). */
+function isWithinClipBounds(): boolean {
+  const element = audio;
+  if (!element) return false;
+  const { start, end } = clipBounds;
+  if (element.currentTime < start) return false;
+  if (Number.isFinite(end) && element.currentTime >= end - LOOP_SEEK_MARGIN) return false;
+  return true;
+}
+
 function applyVolumeToElement(nextVolume: number): void {
   const element = audio;
   if (!element) return;
@@ -323,8 +333,7 @@ export function playProfileAudioFromUserGesture(): boolean {
   element.muted = false;
   element.volume = volume;
 
-  const { start, end } = clipBounds;
-  if (element.paused || element.ended || element.currentTime < start || element.currentTime >= end - 0.05) {
+  if (element.ended || !isWithinClipBounds()) {
     seekToClipStart();
   }
 
@@ -419,7 +428,9 @@ export function resumeProfileAudio(): void {
   userPaused = false;
   wantsPlay = true;
   applyVolumeToElement(volume);
-  seekToClipStart();
+  if (element.ended || !isWithinClipBounds()) {
+    seekToClipStart();
+  }
   void element
     .play()
     .then(() => notify())
