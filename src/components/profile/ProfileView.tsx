@@ -12,6 +12,7 @@ import ProfileQuickNavButton from "@/components/profile/ProfileQuickNavButton";
 import ProfileAccessGate from "@/components/auth/ProfileAccessGate";
 import ProfileEntryGate from "@/components/profile/ProfileEntryGate";
 import ProfileCursor from "@/components/profile/ProfileCursor";
+import ProfileMusicPlayer from "@/components/profile/ProfileMusicPlayer";
 import ProfileTabIcon from "@/components/profile/ProfileTabIcon";
 import { profileUnlockRequestHeaders } from "@/lib/profile/profile-unlock-client";
 import { preloadBackgroundMedia } from "@/lib/media/media-url";
@@ -282,6 +283,9 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
           </div>
         </div>
         {mediaActive ? <ProfileCursor settings={settings} /> : null}
+        {mediaActive ? (
+          <ProfileMusicPlayer profile={profile} raised={reserveBottomForCta} />
+        ) : null}
         {needsGate ? (
           <ProfileEntryGate text={display.entryGateText} onEnter={handleEnter} />
         ) : null}

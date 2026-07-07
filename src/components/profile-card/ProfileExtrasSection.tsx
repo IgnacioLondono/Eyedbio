@@ -10,8 +10,6 @@ import {
   isSocialLinkActive,
 } from "@/lib/social-link-utils";
 import ProfileDiscordPresence from "./ProfileDiscordPresence";
-import ProfileMusicPlayer from "@/components/profile/ProfileMusicPlayer";
-import { isMusicPlayerEnabled } from "@/lib/profile/music-player-config";
 import type { CardScale } from "./ProfileCardParts";
 
 interface Props {
@@ -43,15 +41,12 @@ export default function ProfileExtrasSection({
     display.discordPresenceEnabled &&
     (isValidDiscordUserId(discordUserId) || Boolean(fallbackUsername));
 
-  const showMusic = isMusicPlayerEnabled(settings);
-
-  if (!showLocation && !showDiscord && !showMusic) return null;
+  if (!showLocation && !showDiscord) return null;
 
   const alignClass = align === "left" ? "items-start text-left" : "items-center text-center";
 
   return (
     <div className={`flex w-full flex-col gap-2 ${alignClass} ${className}`}>
-      {showMusic ? <ProfileMusicPlayer profile={profile} compact={compact} /> : null}
       {showLocation ? (
         <div
           className={`inline-flex max-w-full items-center gap-1.5 ${scale.location}`}

@@ -5,6 +5,7 @@ import { Monitor, Smartphone } from "lucide-react";
 import type { Profile } from "@/types/profile";
 import ProfileCard from "@/components/profile/ProfileCard";
 import ProfileCursor from "@/components/profile/ProfileCursor";
+import ProfileMusicPlayer from "@/components/profile/ProfileMusicPlayer";
 import BackgroundEffects from "@/components/media/BackgroundEffects";
 import BackgroundMedia from "@/components/media/BackgroundMedia";
 import ProfilePageOverlay, { ProfileBackgroundDim } from "@/components/profile/ProfilePageOverlay";
@@ -74,6 +75,9 @@ function PreviewSurface({
         </div>
       </div>
       {!simulateEntry ? <ProfileCursor settings={profile.settings} contained /> : null}
+      {!simulateEntry ? (
+        <ProfileMusicPlayer profile={profile} compact contained />
+      ) : null}
       {simulateEntry ? (
         <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-md">
           <span className="text-[10px] lowercase tracking-[0.15em] text-white/75 sm:text-xs">

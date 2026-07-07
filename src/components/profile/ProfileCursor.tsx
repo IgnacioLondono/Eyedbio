@@ -27,7 +27,7 @@ type Particle = {
   rot: number;
 };
 
-const MAX_CURSOR_PX = 96;
+const MAX_CURSOR_PX = 32;
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } {
   const h = hex.replace("#", "").trim();

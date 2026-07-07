@@ -25,8 +25,12 @@ import {
 
 interface Props {
   profile: Profile;
-  /** Vista previa/estática (dashboard, landing): sin control real del audio. */
+  /** Vista previa/estática (dashboard): sin control real del audio. */
   compact?: boolean;
+  /** Posiciona dentro del contenedor padre (preview) en vez del viewport. */
+  contained?: boolean;
+  /** Sube el reproductor para no chocar con el CTA de reclamar perfil. */
+  raised?: boolean;
 }
 
 function formatTime(seconds: number): string {
@@ -36,7 +40,12 @@ function formatTime(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-export default function ProfileMusicPlayer({ profile, compact = false }: Props) {
+export default function ProfileMusicPlayer({
+  profile,
+  compact = false,
+  contained = false,
+  raised = false,
+}: Props) {
   const site = useSiteSettings();
   const enabled = isMusicPlayerEnabled(profile.settings);
   const interactive = !compact && site.profileAudioEnabled && isMusicPlayerPlayable(profile);
@@ -44,10 +53,20 @@ export default function ProfileMusicPlayer({ profile, compact = false }: Props) 
   if (!enabled) return null;
   if (!compact && !interactive) return null;
 
-  return interactive ? (
-    <InteractiveMusicPlayer profile={profile} />
-  ) : (
-    <StaticMusicPlayer profile={profile} />
+  const positionClass = contained
+    ? "absolute bottom-3 left-1/2 -translate-x-1/2 z-30 w-[calc(100%-1.5rem)] max-w-[260px]"
+    : `fixed left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-sm ${
+        raised ? "bottom-24" : "bottom-4"
+      }`;
+
+  return (
+    <div className={`${positionClass} pointer-events-auto`}>
+      {interactive ? (
+        <InteractiveMusicPlayer profile={profile} />
+      ) : (
+        <StaticMusicPlayer profile={profile} />
+      )}
+    </div>
   );
 }
 
@@ -61,18 +80,15 @@ function PlayerShell({
   const { baseColor } = resolveMusicPlayer(profile);
   return (
     <div
-      className="flex w-full items-center gap-3 rounded-2xl border p-2.5 backdrop-blur-sm"
-      style={{
-        background: hexToRgba(baseColor, 0.14),
-        borderColor: hexToRgba(baseColor, 0.28),
-      }}
+      className="w-full rounded-2xl border bg-black/50 p-3 shadow-xl shadow-black/40 backdrop-blur-md"
+      style={{ borderColor: hexToRgba(baseColor, 0.3) }}
     >
       {children}
     </div>
   );
 }
 
-function Cover({ profile }: { profile: Profile }) {
+function Cover({ profile, size = 44 }: { profile: Profile; size?: number }) {
   const { coverUrl, baseColor, title } = resolveMusicPlayer(profile);
   const [broken, setBroken] = useState(false);
   const src = coverUrl ? getMediaSrc(coverUrl) : "";
@@ -80,8 +96,8 @@ function Cover({ profile }: { profile: Profile }) {
   if (!src || broken) {
     return (
       <div
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
-        style={{ background: hexToRgba(baseColor, 0.3) }}
+        className="flex shrink-0 items-center justify-center rounded-xl"
+        style={{ width: size, height: size, background: hexToRgba(baseColor, 0.3) }}
       >
         <Music className="h-5 w-5" style={{ color: baseColor }} />
       </div>
@@ -89,12 +105,15 @@ function Cover({ profile }: { profile: Profile }) {
   }
 
   return (
-    <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl">
+    <div
+      className="relative shrink-0 overflow-hidden rounded-xl"
+      style={{ width: size, height: size }}
+    >
       <Image
         src={src}
         alt={title}
         fill
-        sizes="48px"
+        sizes="44px"
         className="object-cover"
         onError={() => setBroken(true)}
         unoptimized
@@ -103,40 +122,55 @@ function Cover({ profile }: { profile: Profile }) {
   );
 }
 
+function PlayerTexts({ profile }: { profile: Profile }) {
+  const { title, artist, textColor } = resolveMusicPlayer(profile);
+  return (
+    <div className="min-w-0 flex-1 text-center">
+      <p className="truncate text-sm font-semibold" style={{ color: textColor }}>
+        {title}
+      </p>
+      <p className="truncate text-xs" style={{ color: hexToRgba(textColor, 0.6) }}>
+        {artist}
+      </p>
+    </div>
+  );
+}
+
 function StaticMusicPlayer({ profile }: { profile: Profile }) {
-  const { title, artist, baseColor, textColor } = resolveMusicPlayer(profile);
+  const { baseColor, textColor } = resolveMusicPlayer(profile);
   return (
     <PlayerShell profile={profile}>
-      <Cover profile={profile} />
-      <div className="min-w-0 flex-1 text-left">
-        <p className="truncate text-sm font-semibold" style={{ color: textColor }}>
-          {title}
-        </p>
-        <p className="truncate text-xs" style={{ color: hexToRgba(textColor, 0.6) }}>
-          {artist}
-        </p>
+      <div className="flex items-center gap-3">
+        <Cover profile={profile} />
+        <PlayerTexts profile={profile} />
         <div
-          className="mt-2 h-1 w-full overflow-hidden rounded-full"
-          style={{ background: hexToRgba(textColor, 0.18) }}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+          style={{ background: baseColor }}
         >
-          <div
-            className="h-full rounded-full"
-            style={{ width: "35%", background: baseColor }}
-          />
+          <Play className="h-4 w-4 text-white" fill="currentColor" />
         </div>
       </div>
       <div
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
-        style={{ background: baseColor }}
+        className="mt-2.5 h-1 w-full overflow-hidden rounded-full"
+        style={{ background: hexToRgba(textColor, 0.18) }}
       >
-        <Play className="h-4 w-4 text-white" fill="currentColor" />
+        <div className="h-full rounded-full" style={{ width: "35%", background: baseColor }} />
+      </div>
+      <div className="mt-2 flex items-center gap-2">
+        <Volume2 className="h-3.5 w-3.5 shrink-0" style={{ color: hexToRgba(textColor, 0.6) }} />
+        <div
+          className="h-1 flex-1 overflow-hidden rounded-full"
+          style={{ background: hexToRgba(textColor, 0.18) }}
+        >
+          <div className="h-full rounded-full" style={{ width: "70%", background: baseColor }} />
+        </div>
       </div>
     </PlayerShell>
   );
 }
 
 function InteractiveMusicPlayer({ profile }: { profile: Profile }) {
-  const { title, artist, baseColor, textColor } = resolveMusicPlayer(profile);
+  const { baseColor, textColor } = resolveMusicPlayer(profile);
   const snapshot = useSyncExternalStore(
     subscribeProfileAudioEngine,
     getProfileAudioEngineSnapshot,
@@ -148,6 +182,8 @@ function InteractiveMusicPlayer({ profile }: { profile: Profile }) {
 
   const volume = snapshot.volume;
   const isPlaying = snapshot.isPlaying;
+  const muted = volume === 0;
+  const needsTap = snapshot.needsTap || snapshot.awaitingUnlock;
 
   useEffect(() => {
     setProgress(getProfileAudioClipProgress());
@@ -163,9 +199,6 @@ function InteractiveMusicPlayer({ profile }: { profile: Profile }) {
     };
   }, [isPlaying]);
 
-  const muted = volume === 0;
-  const needsTap = snapshot.needsTap || snapshot.awaitingUnlock;
-
   const handleToggle = () => {
     if (needsTap) {
       playProfileAudioFromUserGesture();
@@ -180,60 +213,18 @@ function InteractiveMusicPlayer({ profile }: { profile: Profile }) {
     seekProfileAudioClip((e.clientX - rect.left) / rect.width);
   };
 
-  const toggleMute = () => {
-    setProfileAudioVolume(muted ? 0.7 : 0);
-  };
-
   return (
     <PlayerShell profile={profile}>
-      <Cover profile={profile} />
-      <div className="min-w-0 flex-1 text-left">
-        <p className="truncate text-sm font-semibold" style={{ color: textColor }}>
-          {title}
-        </p>
-        <p className="truncate text-xs" style={{ color: hexToRgba(textColor, 0.6) }}>
-          {artist}
-        </p>
-        <div
-          className="group mt-2 cursor-pointer py-1"
-          onClick={handleSeek}
-          role="slider"
-          aria-label="Progreso"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={Math.round(progress.progress * 100)}
-          tabIndex={0}
-        >
-          <div
-            className="h-1 w-full overflow-hidden rounded-full"
-            style={{ background: hexToRgba(textColor, 0.18) }}
-          >
-            <div
-              className="h-full rounded-full"
-              style={{
-                width: `${Math.min(100, progress.progress * 100)}%`,
-                background: baseColor,
-              }}
-            />
-          </div>
-        </div>
-        <div
-          className="mt-0.5 flex justify-between text-[10px] tabular-nums"
-          style={{ color: hexToRgba(textColor, 0.5) }}
-        >
-          <span>{formatTime(progress.current)}</span>
-          <span>{formatTime(progress.total)}</span>
-        </div>
-      </div>
-
-      <div className="flex shrink-0 flex-col items-center gap-1.5">
+      <div className="flex items-center gap-3">
+        <Cover profile={profile} />
+        <PlayerTexts profile={profile} />
         <button
           type="button"
           onPointerDown={() => {
             if (needsTap) playProfileAudioFromUserGesture();
           }}
           onClick={handleToggle}
-          className={`flex h-9 w-9 items-center justify-center rounded-full transition-transform hover:scale-105 ${
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-transform hover:scale-105 ${
             needsTap ? "animate-pulse" : ""
           }`}
           style={{ background: baseColor }}
@@ -245,15 +236,60 @@ function InteractiveMusicPlayer({ profile }: { profile: Profile }) {
             <Play className="h-4 w-4 text-white" fill="currentColor" />
           )}
         </button>
+      </div>
+
+      <div
+        className="mt-2.5 cursor-pointer py-1"
+        onClick={handleSeek}
+        role="slider"
+        aria-label="Progreso"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress.progress * 100)}
+        tabIndex={0}
+      >
+        <div
+          className="h-1 w-full overflow-hidden rounded-full"
+          style={{ background: hexToRgba(textColor, 0.18) }}
+        >
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${Math.min(100, progress.progress * 100)}%`,
+              background: baseColor,
+            }}
+          />
+        </div>
+      </div>
+      <div
+        className="flex justify-between text-[10px] tabular-nums"
+        style={{ color: hexToRgba(textColor, 0.5) }}
+      >
+        <span>{formatTime(progress.current)}</span>
+        <span>{formatTime(progress.total)}</span>
+      </div>
+
+      <div className="mt-2 flex items-center gap-2">
         <button
           type="button"
-          onClick={toggleMute}
-          className="opacity-70 transition-opacity hover:opacity-100"
-          style={{ color: textColor }}
+          onClick={() => setProfileAudioVolume(muted ? 0.7 : 0)}
+          className="shrink-0 transition-opacity hover:opacity-80"
+          style={{ color: hexToRgba(textColor, 0.7) }}
           aria-label={muted ? "Activar sonido" : "Silenciar"}
         >
           {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
         </button>
+        <input
+          type="range"
+          min={0}
+          max={1}
+          step={0.01}
+          value={volume}
+          onChange={(e) => setProfileAudioVolume(parseFloat(e.target.value))}
+          className="h-1 flex-1 cursor-pointer"
+          style={{ accentColor: baseColor }}
+          aria-label="Volumen"
+        />
       </div>
     </PlayerShell>
   );
