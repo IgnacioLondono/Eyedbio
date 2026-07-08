@@ -68,6 +68,11 @@ export const en: Messages = {
     gunsShowcaseNext: "Next image",
     gunsShowcaseAria: "Platform previews",
     gunsShowcaseSlide: "Slide",
+    gunsShowcaseLabelProfile: "Profile",
+    gunsShowcaseLabelLinks: "Links",
+    gunsShowcaseLabelMedia: "Media",
+    gunsShowcaseLabelStyle: "Style",
+    gunsShowcaseLabelPublic: "Public profile",
     profilesTitle: "Discover",
     profilesTitleHighlight: "profiles",
     profilesSubtitle:

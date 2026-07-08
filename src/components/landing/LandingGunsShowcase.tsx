@@ -7,25 +7,47 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useI18n } from "@/components/providers/LocaleProvider";
 import { getMessages } from "@/lib/i18n";
 
-const DASHBOARD_SLIDES = [
-  { id: "perfil", src: "/landing/dashboard-perfil.png", label: "Perfil" },
-  { id: "enlaces", src: "/landing/dashboard-enlaces.png", label: "Enlaces" },
-  { id: "media", src: "/landing/dashboard-media.png", label: "Media" },
-  { id: "estilo", src: "/landing/dashboard-estilo.png", label: "Estilo" },
+type LandingMessages = ReturnType<typeof getMessages>["landing"];
+
+// Devuelve la ruta de la imagen según el idioma (variantes con sufijo -en).
+function localizedSrc(base: string, locale: string) {
+  return locale === "en"
+    ? `/landing/${base}-en.png`
+    : `/landing/${base}.png`;
+}
+
+const DASHBOARD_SLIDE_DEFS = [
+  { id: "perfil", base: "dashboard-perfil", labelKey: "gunsShowcaseLabelProfile" },
+  { id: "enlaces", base: "dashboard-enlaces", labelKey: "gunsShowcaseLabelLinks" },
+  { id: "media", base: "dashboard-media", labelKey: "gunsShowcaseLabelMedia" },
+  { id: "estilo", base: "dashboard-estilo", labelKey: "gunsShowcaseLabelStyle" },
 ] as const;
 
-const PROFILE_SLIDE = {
+const PROFILE_SLIDE_DEF = {
   id: "profile",
-  src: "/landing/profile-kiddis.png",
-  label: "Perfil público",
+  base: "profile-kiddis",
+  labelKey: "gunsShowcaseLabelPublic",
 } as const;
 
-const TOTAL_SLIDES = DASHBOARD_SLIDES.length + 1;
+const TOTAL_SLIDES = DASHBOARD_SLIDE_DEFS.length + 1;
 
 export default function LandingGunsShowcase() {
   const { locale } = useI18n();
-  const m = getMessages(locale).landing;
+  const m = getMessages(locale).landing as LandingMessages;
   const [index, setIndex] = useState(0);
+
+  const dashboardSlides = DASHBOARD_SLIDE_DEFS.map((slide) => ({
+    id: slide.id,
+    src: localizedSrc(slide.base, locale),
+    label: m[slide.labelKey],
+  }));
+
+  const PROFILE_SLIDE = {
+    id: PROFILE_SLIDE_DEF.id,
+    src: localizedSrc(PROFILE_SLIDE_DEF.base, locale),
+    label: m[PROFILE_SLIDE_DEF.labelKey],
+  };
+  const DASHBOARD_SLIDES = dashboardSlides;
 
   const isProfileFocus = index === DASHBOARD_SLIDES.length;
   const dashboardIndex = isProfileFocus ? DASHBOARD_SLIDES.length - 1 : index;

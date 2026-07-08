@@ -62,6 +62,11 @@ export interface Messages {
     gunsShowcaseNext: string;
     gunsShowcaseAria: string;
     gunsShowcaseSlide: string;
+    gunsShowcaseLabelProfile: string;
+    gunsShowcaseLabelLinks: string;
+    gunsShowcaseLabelMedia: string;
+    gunsShowcaseLabelStyle: string;
+    gunsShowcaseLabelPublic: string;
     profilesTitle: string;
     profilesTitleHighlight: string;
     profilesSubtitle: string;
@@ -651,6 +656,11 @@ export const es: Messages = {
     gunsShowcaseNext: "Imagen siguiente",
     gunsShowcaseAria: "Vistas de la plataforma",
     gunsShowcaseSlide: "Diapositiva",
+    gunsShowcaseLabelProfile: "Perfil",
+    gunsShowcaseLabelLinks: "Enlaces",
+    gunsShowcaseLabelMedia: "Media",
+    gunsShowcaseLabelStyle: "Estilo",
+    gunsShowcaseLabelPublic: "Perfil público",
     profilesTitle: "Descubre",
     profilesTitleHighlight: "perfiles",
     profilesSubtitle:
