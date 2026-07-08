@@ -1,6 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
+import ColorInput from "@/components/shared/ColorInput";
 
 export function DashboardSection({
   title,
@@ -109,22 +110,7 @@ export function DashboardColorField({
 }) {
   return (
     <DashboardField label={label}>
-      <div className={`flex items-center gap-3 ${disabled ? "pointer-events-none opacity-40" : ""}`}>
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-10 w-10 shrink-0 cursor-pointer rounded-xl border border-white/10 bg-transparent"
-          disabled={disabled}
-        />
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="input-field flex-1 font-mono text-sm"
-          disabled={disabled}
-        />
-      </div>
+      <ColorInput value={value} onChange={onChange} disabled={disabled} />
     </DashboardField>
   );
 }

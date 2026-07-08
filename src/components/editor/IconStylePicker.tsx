@@ -18,6 +18,7 @@ import {
 import type { ProfileSettings } from "@/types/profile";
 import { useI18n } from "@/components/providers/LocaleProvider";
 import { PlatformIcon } from "@/components/shared/PlatformIcons";
+import ColorInput from "@/components/shared/ColorInput";
 import { PLATFORM_CONFIG } from "@/lib/config/platforms";
 
 interface Props {
@@ -241,20 +242,13 @@ function ColorRow({
   return (
     <div>
       <p className="text-xs text-white/50 mb-2">{label}</p>
-      <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-9 w-12 cursor-pointer rounded-lg border border-white/10 bg-transparent shrink-0"
-        />
-        <input
-          type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="input-field flex-1 font-mono text-xs"
-        />
-      </div>
+      <ColorInput
+        value={value}
+        onChange={onChange}
+        swatchClassName="h-9 w-12 cursor-pointer rounded-lg border border-white/10 bg-transparent shrink-0"
+        textClassName="input-field flex-1 font-mono text-xs"
+        className="flex items-center gap-2"
+      />
     </div>
   );
 }
@@ -292,21 +286,15 @@ function OptionalColorRow({
           </button>
         ) : null}
       </div>
-      <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={hasValue ? value : fallback}
-          onChange={(e) => onChange(e.target.value)}
-          className="h-9 w-12 cursor-pointer rounded-lg border border-white/10 bg-transparent shrink-0"
-        />
-        <input
-          type="text"
-          value={value}
-          placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-          className="input-field flex-1 font-mono text-xs"
-        />
-      </div>
+      <ColorInput
+        value={value}
+        onChange={onChange}
+        emptyFallback={fallback}
+        placeholder={placeholder}
+        swatchClassName="h-9 w-12 cursor-pointer rounded-lg border border-white/10 bg-transparent shrink-0"
+        textClassName="input-field flex-1 font-mono text-xs"
+        className="flex items-center gap-2"
+      />
     </div>
   );
 }
