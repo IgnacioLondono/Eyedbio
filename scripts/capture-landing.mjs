@@ -163,7 +163,6 @@ async function captureDashboard(context) {
   for (const { tab, file } of DASHBOARD_SHOTS) {
     log(`Capturando dashboard tab=${tab}`);
     await page.goto(`${BASE_URL}/dashboard?tab=${tab}`, { waitUntil: "networkidle" });
-    // Esperar a que el formulario y la vista previa terminen de renderizar/animar.
     await page.waitForSelector("main", { timeout: 15000 });
     await sleep(1800);
     const dest = path.join(OUT_DIR, withSuffix(file));
@@ -172,9 +171,10 @@ async function captureDashboard(context) {
   }
 
   await page.close();
+  return context.storageState();
 }
 
-async function captureProfile(browser) {
+async function captureProfile(browser, storageState) {
   if (!PROFILE_USERNAME) {
     log("PROFILE_USERNAME vacío: se omite la captura del perfil público.");
     return;
@@ -186,14 +186,14 @@ async function captureProfile(browser) {
     hasTouch: MOBILE.hasTouch,
     locale: CONTEXT_LOCALE,
     extraHTTPHeaders: { "Accept-Language": ACCEPT_LANGUAGE },
+    storageState,
   });
   await configureLocale(context);
   const page = await context.newPage();
   const url = `${BASE_URL}/${PROFILE_USERNAME}`;
-  log(`Capturando perfil público ${url}`);
+  log(`Capturando perfil público (con sesión, sin CTA) ${url}`);
   await page.goto(url, { waitUntil: "networkidle" });
 
-  // Si hay pantalla de entrada ("pulsa para entrar..."), pulsarla.
   const gate = page.locator("button:has(span.animate-pulse)").first();
   if (await gate.count()) {
     log("  Pulsando pantalla de entrada");
@@ -203,7 +203,11 @@ async function captureProfile(browser) {
 
   await sleep(2000);
   const dest = path.join(OUT_DIR, withSuffix("profile-kiddis.png"));
-  await page.screenshot({ path: dest });
+  // Recorte superior: perfil limpio sin barra de reclamar perfil al estar logueado.
+  await page.screenshot({
+    path: dest,
+    clip: { x: 0, y: 0, width: MOBILE.width, height: 780 },
+  });
   log(`  → ${dest}`);
 
   await context.close();
@@ -224,10 +228,10 @@ async function main() {
       extraHTTPHeaders: { "Accept-Language": ACCEPT_LANGUAGE },
     });
     await configureLocale(context);
-    await captureDashboard(context);
+    const storageState = await captureDashboard(context);
     await context.close();
 
-    await captureProfile(browser);
+    await captureProfile(browser, storageState);
   } finally {
     await browser.close();
   }

@@ -10,10 +10,12 @@ import { getMessages } from "@/lib/i18n";
 type LandingMessages = ReturnType<typeof getMessages>["landing"];
 
 // Devuelve la ruta de la imagen según el idioma (variantes con sufijo -en).
+// ?v= fuerza recarga si el PNG cambia pero la ruta no (caché de next/image).
+export const LANDING_SHOWCASE_VERSION = "3";
+
 function localizedSrc(base: string, locale: string) {
-  return locale === "en"
-    ? `/landing/${base}-en.png`
-    : `/landing/${base}.png`;
+  const file = locale === "en" ? `${base}-en.png` : `${base}.png`;
+  return `/landing/${file}?v=${LANDING_SHOWCASE_VERSION}`;
 }
 
 const DASHBOARD_SLIDE_DEFS = [
@@ -107,6 +109,7 @@ export default function LandingGunsShowcase() {
                       height={720}
                       className="h-auto w-full"
                       priority={index === 0}
+                      unoptimized
                     />
                   </motion.div>
                 </AnimatePresence>
@@ -129,6 +132,7 @@ export default function LandingGunsShowcase() {
                 width={390}
                 height={780}
                 className="h-full w-full object-cover object-top"
+                unoptimized
               />
             </div>
 
@@ -143,6 +147,7 @@ export default function LandingGunsShowcase() {
                 width={390}
                 height={780}
                 className="h-full w-full object-cover object-top"
+                unoptimized
               />
             </div>
 
@@ -167,6 +172,7 @@ export default function LandingGunsShowcase() {
                   height={780}
                   className="h-full w-full object-cover object-top"
                   priority
+                  unoptimized
                 />
               </motion.div>
             </AnimatePresence>
