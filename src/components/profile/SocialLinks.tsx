@@ -8,6 +8,7 @@ import { PlatformIcon } from "@/components/shared/PlatformIcons";
 import CustomLinkIcon from "@/components/profile/CustomLinkIcon";
 import { isSocialLinkActive } from "@/lib/social-link-utils";
 import { useSocialLinkAction } from "@/components/profile-card/useSocialLinkAction";
+import { useExternalLinkConfirm } from "@/components/profile/ExternalLinkConfirmProvider";
 import {
   getIconContainerStyle,
   getIconLinkWrapperClass,
@@ -76,6 +77,7 @@ function SocialLinkButton({
   const color = getPlatformLinkColor(iconStyle, config.color);
   const iconColor = getLinkIconColor(iconStyle, config.color, Boolean(link.iconUrl));
   const { copyOnly, href, title, copied, activate } = useSocialLinkAction(link);
+  const { requestVisit } = useExternalLinkConfirm();
   const plain = isPlainLinkIcons(iconStyle.iconShape);
   const iconSize = plain
     ? compact
@@ -127,22 +129,22 @@ function SocialLinkButton({
   }
 
   return (
-    <motion.a
+    <motion.button
+      type="button"
       key={link.id}
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+      onClick={() => href && requestVisit(href)}
       initial={compact ? false : { opacity: 0, scale: 0.5 }}
       animate={compact ? undefined : { opacity: 1, scale: 1 }}
       transition={compact ? undefined : { delay: 0.3 + index * 0.08 }}
       whileHover={{ scale: 1.15, y: -2 }}
       whileTap={{ scale: 0.95 }}
       title={title}
+      aria-label={title}
       className={className}
       style={style}
     >
       <LinkIcon link={link} color={iconColor} sizeClass={linkIconSize} glowIcons={iconStyle.glowIcons} />
-    </motion.a>
+    </motion.button>
   );
 }
 

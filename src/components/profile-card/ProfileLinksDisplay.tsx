@@ -9,6 +9,7 @@ import CustomLinkIcon from "@/components/profile/CustomLinkIcon";
 import { hexToRgba } from "@/lib/config/color-utils";
 import type { LinkStyle } from "@/types/profile";
 import SocialLinks from "@/components/profile/SocialLinks";
+import { ExternalLinkConfirmProvider, useExternalLinkConfirm } from "@/components/profile/ExternalLinkConfirmProvider";
 import { t as translate } from "@/lib/i18n";
 import { getSocialLinkTitle, isSocialLinkActive } from "@/lib/social-link-utils";
 import { useSocialLinkAction } from "@/components/profile-card/useSocialLinkAction";
@@ -94,6 +95,7 @@ function ProfileLinkWrap({
 }) {
   const copyHint = translate(locale, "profile.copyUsernameHint");
   const copiedLabel = translate(locale, "profile.usernameCopied");
+  const { requestVisit } = useExternalLinkConfirm();
   const { copyOnly, href, title, copied, activate } = useSocialLinkAction(link);
   const tooltip = copyOnly
     ? copied
@@ -134,31 +136,31 @@ function ProfileLinkWrap({
 
   if (motionProps) {
     return (
-      <motion.a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
+      <motion.button
+        type="button"
+        onClick={() => href && requestVisit(href)}
         title={title}
+        aria-label={title}
         className={className}
         style={style}
         {...motionProps}
       >
         {children}
-      </motion.a>
+      </motion.button>
     );
   }
 
   return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
+    <button
+      type="button"
+      onClick={() => href && requestVisit(href)}
       title={title}
+      aria-label={title}
       className={className}
       style={style}
     >
       {children}
-    </a>
+    </button>
   );
 }
 
@@ -349,8 +351,8 @@ export default function ProfileLinksDisplay({
 }: Props) {
   const muted = mutedColor ?? hexToRgba(textColor, 0.3);
 
-  if (linkStyle === "icons") {
-    return (
+  const content =
+    linkStyle === "icons" ? (
       <SocialLinks
         links={links}
         settings={settings}
@@ -360,19 +362,33 @@ export default function ProfileLinksDisplay({
         copyHint={translate(locale, "profile.copyUsernameHint")}
         copiedLabel={translate(locale, "profile.usernameCopied")}
       />
+    ) : linkStyle === "pills" ? (
+      <PillsLinks
+        links={links}
+        settings={settings}
+        textColor={textColor}
+        compact={compact}
+        locale={locale}
+        mutedColor={muted}
+      />
+    ) : linkStyle === "row" ? (
+      <RowLinks
+        links={links}
+        settings={settings}
+        compact={compact}
+        locale={locale}
+        mutedColor={muted}
+      />
+    ) : (
+      <ChipsLinks
+        links={links}
+        settings={settings}
+        textColor={textColor}
+        compact={compact}
+        locale={locale}
+        mutedColor={muted}
+      />
     );
-  }
 
-  const shared = {
-    links,
-    settings,
-    textColor,
-    compact,
-    locale,
-    mutedColor: muted,
-  };
-
-  if (linkStyle === "pills") return <PillsLinks {...shared} />;
-  if (linkStyle === "row") return <RowLinks {...shared} />;
-  return <ChipsLinks {...shared} />;
+  return <ExternalLinkConfirmProvider locale={locale}>{content}</ExternalLinkConfirmProvider>;
 }

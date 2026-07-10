@@ -29,6 +29,7 @@ interface Props {
   kind: UploadKind;
   label: string;
   hint?: string;
+  layout?: "default" | "card";
   currentUrl?: string;
   mediaType?: BackgroundType;
   mediaFocus?: MediaFocus;
@@ -203,6 +204,7 @@ export default function FileUpload({
   onClear,
   mediaFocus,
   onMediaFocusChange,
+  layout = "default",
 }: Props) {
   const { t, tVars } = useI18n();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -419,11 +421,70 @@ export default function FileUpload({
         ? t("imageAdjust.titleBanner")
         : t("imageAdjust.titleBackground");
 
-  return (
-    <div className="space-y-2">
-      {label && <label className="block text-sm text-white/60">{label}</label>}
+  const isCard = layout === "card";
 
-      {currentUrl && isAudio && (
+  const uploadButton = (
+    <button
+      type="button"
+      disabled={uploading}
+      onClick={() => inputRef.current?.click()}
+      className={
+        isCard
+          ? `flex h-full min-h-[120px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center text-xs transition-all disabled:opacity-50 ${
+              dragOver
+                ? "border-purple-500/50 bg-purple-500/10 text-white"
+                : "border-white/10 text-white/40 hover:border-purple-500/30 hover:bg-purple-500/5 hover:text-white/70"
+            }`
+          : `w-full flex flex-col items-center justify-center gap-2 py-5 border border-dashed rounded-xl text-white/50 hover:text-white hover:border-purple-500/30 hover:bg-purple-500/5 transition-all text-sm disabled:opacity-50 ${
+              dragOver ? "border-purple-500/50 bg-purple-500/10 text-white" : "border-white/10"
+            }`
+      }
+    >
+      {uploading ? (
+        <Loader2 className="w-5 h-5 animate-spin" />
+      ) : isCard && !currentUrl && !previewUrl ? (
+        <ImageIcon className="w-6 h-6 text-white/30" />
+      ) : (
+        <Upload className="w-5 h-5" />
+      )}
+      <span className={isCard ? "px-3 leading-snug" : undefined}>
+        {uploading
+          ? progress !== null
+            ? tVars("fileUpload.uploadingPercent", { percent: progress })
+            : t("fileUpload.uploading")
+          : currentUrl
+            ? t("fileUpload.changeFile")
+            : localPreviewUrl
+              ? t("fileUpload.uploading")
+              : isCard
+                ? isAudio
+                  ? t("dashboard.uploadCardClickAudio")
+                  : t("dashboard.uploadCardClickUpload")
+                : isBanner
+                  ? t("fileUpload.uploadBanner")
+                  : isBackground
+                    ? t("fileUpload.uploadBackground")
+                    : t("fileUpload.upload")}
+      </span>
+      {!isCard && uploading && progress !== null && (
+        <div className="w-full max-w-[200px] h-1 rounded-full bg-white/10 overflow-hidden">
+          <div
+            className="h-full bg-purple-500 transition-[width] duration-150"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+      {!isCard && isBackground && !uploading && (
+        <span className="text-[11px] text-white/30">{t("fileUpload.dragHint")}</span>
+      )}
+    </button>
+  );
+
+  const content = (
+    <>
+      {!isCard && label && <label className="block text-sm text-white/60">{label}</label>}
+
+      {currentUrl && isAudio && !isCard && (
         <div className="relative flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5">
           <Music className="w-4 h-4 text-purple-400 shrink-0" />
           <span className="text-sm text-white/60 truncate flex-1">{t("fileUpload.audioUploaded")}</span>
@@ -441,14 +502,18 @@ export default function FileUpload({
       )}
 
       {previewUrl && !isAudio && (
-        <div className="space-y-2">
-          <div className="relative rounded-xl overflow-hidden border border-white/10 bg-white/5">
+        <div className={isCard ? "relative flex-1" : "space-y-2"}>
+          <div
+            className={`relative overflow-hidden border border-white/10 bg-white/5 ${
+              isCard ? "h-[120px] rounded-lg" : "rounded-xl"
+            }`}
+          >
             <MediaPreview
-            kind={kind}
-            currentUrl={previewUrl}
-            mediaType={previewMediaType}
-            mediaFocus={mediaFocus}
-          />
+              kind={kind}
+              currentUrl={previewUrl}
+              mediaType={previewMediaType}
+              mediaFocus={mediaFocus}
+            />
             {uploading && (
               <div className="absolute inset-0 z-10 flex items-end bg-gradient-to-t from-black/50 to-transparent pointer-events-none">
                 <div className="w-full px-3 pb-3">
@@ -468,14 +533,14 @@ export default function FileUpload({
                   clearLocalPreview();
                   onClear();
                 }}
-                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white/70 hover:text-white z-10"
+                className="absolute top-2 right-2 z-10 rounded-lg bg-red-500/90 p-1.5 text-white hover:bg-red-500"
                 aria-label={t("fileUpload.removeFile")}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
-          {canAdjust && currentUrl && isAdjustableMediaUrl(currentUrl, kind) && adjustPreset && (
+          {!isCard && canAdjust && currentUrl && isAdjustableMediaUrl(currentUrl, kind) && adjustPreset && (
             <button
               type="button"
               disabled={uploading}
@@ -489,58 +554,37 @@ export default function FileUpload({
         </div>
       )}
 
-      <div
-        onDragOver={(e) => {
-          if (!allowsDragDrop) return;
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={allowsDragDrop ? handleDrop : undefined}
-      >
-        <button
-          type="button"
-          disabled={uploading}
-          onClick={() => inputRef.current?.click()}
-          className={`w-full flex flex-col items-center justify-center gap-2 py-5 border border-dashed rounded-xl text-white/50 hover:text-white hover:border-purple-500/30 hover:bg-purple-500/5 transition-all text-sm disabled:opacity-50 ${
-            dragOver ? "border-purple-500/50 bg-purple-500/10 text-white" : "border-white/10"
-          }`}
+      {currentUrl && isAudio && isCard && (
+        <div className="relative flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
+          <Music className="h-6 w-6 text-purple-400" />
+          <span className="text-xs text-white/50">{t("fileUpload.audioUploaded")}</span>
+          {onClear ? (
+            <button
+              type="button"
+              onClick={onClear}
+              className="absolute top-2 right-2 rounded-lg bg-red-500/90 p-1.5 text-white hover:bg-red-500"
+              aria-label={t("fileUpload.removeAudio")}
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          ) : null}
+        </div>
+      )}
+
+      {(!previewUrl || isAudio) && !(isCard && isAudio && currentUrl) ? (
+        <div
+          onDragOver={(e) => {
+            if (!allowsDragDrop) return;
+            e.preventDefault();
+            setDragOver(true);
+          }}
+          onDragLeave={() => setDragOver(false)}
+          onDrop={allowsDragDrop ? handleDrop : undefined}
+          className={isCard && previewUrl && !isAudio ? "hidden" : isCard ? "flex-1" : undefined}
         >
-          {uploading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Upload className="w-5 h-5" />
-          )}
-          <span>
-            {uploading
-              ? progress !== null
-                ? tVars("fileUpload.uploadingPercent", { percent: progress })
-                : t("fileUpload.uploading")
-              : currentUrl
-                ? t("fileUpload.changeFile")
-                : localPreviewUrl
-                  ? t("fileUpload.uploading")
-                  : isBanner
-                  ? t("fileUpload.uploadBanner")
-                  : isBackground
-                    ? t("fileUpload.uploadBackground")
-                    : t("fileUpload.upload")}
-          </span>
-          {uploading && progress !== null && (
-            <div className="w-full max-w-[200px] h-1 rounded-full bg-white/10 overflow-hidden">
-              <div
-                className="h-full bg-purple-500 transition-[width] duration-150"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-          )}
-          {isBackground && !uploading && (
-            <span className="text-[11px] text-white/30">
-              {t("fileUpload.dragHint")}
-            </span>
-          )}
-        </button>
-      </div>
+          {uploadButton}
+        </div>
+      ) : null}
 
       <input
         ref={inputRef}
@@ -566,8 +610,19 @@ export default function FileUpload({
         />
       )}
 
-      {hint && <p className="text-xs text-white/30">{hint}</p>}
-      {error && <p className="text-xs text-red-400">{error}</p>}
-    </div>
+      {!isCard && hint ? <p className="text-xs text-white/30">{hint}</p> : null}
+      {error ? <p className="text-xs text-red-400">{error}</p> : null}
+    </>
   );
+
+  if (isCard) {
+    return (
+      <div className="flex h-full flex-col rounded-xl border border-white/[0.08] bg-[#12121a] p-3">
+        <p className="mb-3 text-sm font-medium text-white/90">{label}</p>
+        <div className="flex min-h-[140px] flex-1 flex-col gap-2">{content}</div>
+      </div>
+    );
+  }
+
+  return <div className="space-y-2">{content}</div>;
 }

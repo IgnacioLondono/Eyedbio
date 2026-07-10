@@ -15,6 +15,7 @@ import {
   Sparkles,
   Eye,
   MapPin,
+  Save,
 } from "lucide-react";
 import {
   Profile,
@@ -51,10 +52,12 @@ import IconStylePicker from "@/components/editor/IconStylePicker";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { DashboardMobileNav, DashboardSidebar } from "@/components/dashboard/DashboardNav";
 import DashboardPreview from "@/components/dashboard/DashboardPreview";
+import MediaUploadGrid from "@/components/dashboard/MediaUploadGrid";
 import UnsavedChangesModal from "@/components/dashboard/UnsavedChangesModal";
 import {
   DashboardColorField,
   DashboardField,
+  DashboardRangeSlider,
   DashboardSection,
   DashboardSectionLabel,
   DashboardSubnav,
@@ -347,6 +350,42 @@ function DashboardContent() {
     router.push(`/dashboard?tab=${id}`);
   };
 
+  const openAudioManager = () => {
+    if (tab !== "media") {
+      handleTabChange("media");
+    }
+    setSubTab((prev) => {
+      const next = { ...prev, media: "audio" };
+      try {
+        localStorage.setItem(DASHBOARD_SUBTAB_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  };
+
+  const mediaUploadGrid = (
+    <MediaUploadGrid
+      profile={profile}
+      profileAudioEnabled={site.profileAudioEnabled}
+      onBackgroundUploaded={(url, backgroundType) => updateBackground(url, backgroundType)}
+      onBackgroundClear={clearBackground}
+      onBackgroundFocusChange={(backgroundFocus) => updateSettings({ backgroundFocus })}
+      onAvatarUploaded={(url) => update({ avatarUrl: url })}
+      onAvatarClear={() => {
+        update({
+          avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`,
+        });
+        updateSettings({ avatarFocus: { x: 50, y: 50, zoom: 1 } });
+      }}
+      onAvatarFocusChange={(avatarFocus) => updateSettings({ avatarFocus })}
+      onCursorUploaded={(url) => updateSettings({ cursorUrl: url })}
+      onCursorClear={() => updateSettings({ cursorUrl: "" })}
+      onOpenAudio={openAudioManager}
+    />
+  );
+
   const tabs = [
     {
       id: "general" as Tab,
@@ -416,7 +455,7 @@ function DashboardContent() {
     });
 
   return (
-    <div className="min-h-screen bg-[#07070c] text-white">
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
       <div
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(168,85,247,0.12),transparent)]"
         aria-hidden
@@ -452,10 +491,45 @@ function DashboardContent() {
       />
 
       <div className="relative mx-auto flex max-w-[1600px]">
-        <DashboardSidebar tabs={tabs} activeTab={tab} onTabChange={handleTabChange} />
+        <DashboardSidebar
+          tabs={tabs}
+          activeTab={tab}
+          onTabChange={handleTabChange}
+          username={profile.username}
+          displayName={profile.displayName}
+          supportEnabled={site.supportEnabled}
+        />
 
         <main className="min-w-0 flex-1 px-3 py-5 sm:px-5 sm:py-6 lg:px-8">
-          <DashboardMobileNav tabs={tabs} activeTab={tab} onTabChange={handleTabChange} />
+          <div className="mb-6 hidden items-center justify-end gap-2 lg:flex">
+            {isDirty ? (
+              <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-200/90">
+                {t("dashboard.unsavedBadge")}
+              </span>
+            ) : justSaved ? (
+              <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-300/90">
+                {t("dashboard.saved")}
+              </span>
+            ) : null}
+            <button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-purple-600/25 transition-colors hover:bg-purple-500 disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" />
+              {justSaved ? t("dashboard.saved") : saving ? t("dashboard.saving") : t("dashboard.save")}
+            </button>
+          </div>
+
+          <DashboardMobileNav
+            tabs={tabs}
+            activeTab={tab}
+            onTabChange={handleTabChange}
+            username={profile.username}
+            displayName={profile.displayName}
+            supportEnabled={site.supportEnabled}
+          />
 
           <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -684,6 +758,7 @@ function DashboardContent() {
 
             {tab === "media" && (
               <>
+                {mediaUploadGrid}
                 {activeSub === "background" && (
                 <>
                 <a
@@ -962,7 +1037,10 @@ function DashboardContent() {
 
             {tab === "appearance" && (
               <>
+                {mediaUploadGrid}
                 {activeSub === "background" && (
+                <>
+                <DashboardSectionLabel>{t("dashboard.generalCustomization")}</DashboardSectionLabel>
                 <DashboardSection title={t("dashboard.tabs.appearance")} icon={Palette}>
                   <DashboardField label={t("dashboard.backgroundEffect")}>
                     <BackgroundEffectSelect
@@ -971,23 +1049,22 @@ function DashboardContent() {
                     />
                   </DashboardField>
 
-                <DashboardField
+                <DashboardRangeSlider
                   label={tVars("dashboard.backgroundDimLabel", {
                     percent: Math.round(resolveBackgroundDim(profile.settings) * 100),
                   })}
-                >
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.05"
-                    value={resolveBackgroundDim(profile.settings)}
-                    onChange={(e) =>
-                      updateSettings({ backgroundDim: parseFloat(e.target.value) })
-                    }
-                    className="w-full accent-purple-500"
-                  />
-                </DashboardField>
+                  value={resolveBackgroundDim(profile.settings)}
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  formatValue={(v) => `${Math.round(v * 100)}%`}
+                  markers={[
+                    { value: 0.2, label: "20%" },
+                    { value: 0.5, label: "50%" },
+                    { value: 0.8, label: "80%" },
+                  ]}
+                  onChange={(backgroundDim) => updateSettings({ backgroundDim })}
+                />
 
                 <DashboardField label={t("dashboard.pageOverlay")}>
                   <select
@@ -1005,46 +1082,45 @@ function DashboardContent() {
                   </select>
                 </DashboardField>
 
-                <DashboardField
+                <DashboardRangeSlider
                   label={tVars("dashboard.opacityLabel", {
                     percent: Math.round(profile.settings.profileOpacity * 100),
                   })}
-                >
-                  <input
-                    type="range"
-                    min="0"
-                    max="1"
-                    step="0.01"
-                    value={profile.settings.profileOpacity}
-                    onChange={(e) =>
-                      updateSettings({ profileOpacity: parseFloat(e.target.value) })
-                    }
-                    className="w-full accent-purple-500"
-                    disabled={profile.settings.transparentCard}
-                  />
+                  value={profile.settings.profileOpacity}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  formatValue={(v) => `${Math.round(v * 100)}%`}
+                  markers={[
+                    { value: 0.2, label: "20%" },
+                    { value: 0.5, label: "50%" },
+                    { value: 0.8, label: "80%" },
+                  ]}
+                  onChange={(profileOpacity) => updateSettings({ profileOpacity })}
+                  disabled={profile.settings.transparentCard}
+                />
                   {profile.settings.transparentCard && (
-                    <p className="text-[11px] text-white/30 mt-1.5">
+                    <p className="text-[11px] text-white/30 -mt-2">
                       {t("dashboard.opacityDisabled")}
                     </p>
                   )}
-                </DashboardField>
 
-                <DashboardField
+                <DashboardRangeSlider
                   label={tVars("dashboard.blurLabel", { px: profile.settings.profileBlur })}
-                >
-                  <input
-                    type="range"
-                    min="0"
-                    max="40"
-                    step="1"
-                    value={profile.settings.profileBlur}
-                    onChange={(e) =>
-                      updateSettings({ profileBlur: parseInt(e.target.value) })
-                    }
-                    className="w-full accent-purple-500"
-                  />
-                </DashboardField>
+                  value={profile.settings.profileBlur}
+                  min={0}
+                  max={40}
+                  step={1}
+                  formatValue={(v) => `${v}px`}
+                  markers={[
+                    { value: 8, label: "20px" },
+                    { value: 20, label: "50px" },
+                    { value: 32, label: "80px" },
+                  ]}
+                  onChange={(profileBlur) => updateSettings({ profileBlur })}
+                />
                 </DashboardSection>
+                </>
                 )}
 
                 {activeSub === "structure" && (

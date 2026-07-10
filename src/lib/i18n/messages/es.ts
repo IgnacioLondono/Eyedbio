@@ -223,6 +223,9 @@ export interface Messages {
     pageTitleNotFound: string;
     tapForSound: string;
     discordLanyardHint: string;
+    externalLinkTitle: string;
+    externalLinkMessage: string;
+    externalLinkVisit: string;
   };
   accessGate: {
     protected: string;
@@ -279,6 +282,20 @@ export interface Messages {
       account: string;
     };
     editorNav: string;
+    searchPlaceholder: string;
+    searchShortcut: string;
+    searchEmpty: string;
+    helpCenter: string;
+    myPage: string;
+    shareProfileSidebar: string;
+    fileUploader: string;
+    generalCustomization: string;
+    uploadCardBackground: string;
+    uploadCardAudio: string;
+    uploadCardAvatar: string;
+    uploadCardCursor: string;
+    uploadCardClickUpload: string;
+    uploadCardClickAudio: string;
     unsavedBadge: string;
     previewHint: string;
     previewHintMobile: string;
@@ -491,6 +508,10 @@ export interface Messages {
     backDashboard: string;
   };
   linkEditor: {
+    pickerTitle: string;
+    pickerSubtitle: string;
+    addedLinksTitle: string;
+    customUrlDescription: string;
     platformCount: string;
     customCount: string;
     totalCount: string;
@@ -873,6 +894,9 @@ export const es: Messages = {
     pageTitleNotFound: "Perfil no encontrado — Eyed.bio",
     tapForSound: "Pulsar para activar el sonido",
     discordLanyardHint: "Únete a EyedComun en Discord y añade tu ID aquí",
+    externalLinkTitle: "¿Estás seguro?",
+    externalLinkMessage: "Vas a visitar",
+    externalLinkVisit: "Visitar",
   },
   accessGate: {
     protected: "Perfil protegido",
@@ -919,17 +943,31 @@ export const es: Messages = {
       general: "Perfil",
       links: "Enlaces",
       media: "Media",
-      appearance: "Estilo",
+      appearance: "Personalizar",
       account: "Cuenta",
     },
     tabDescriptions: {
       general: "Nombre, bio, avatar y visibilidad",
       links: "Redes sociales y botones",
       media: "Fondo, audio y banner",
-      appearance: "Colores, tarjeta y efectos",
+      appearance: "Colores, fondo, audio y efectos visuales",
       account: "Usuario, contraseña e idioma",
     },
     editorNav: "Editor",
+    searchPlaceholder: "Buscar funciones...",
+    searchShortcut: "Ctrl K",
+    searchEmpty: "Ninguna sección coincide.",
+    helpCenter: "Centro de ayuda",
+    myPage: "Mi página",
+    shareProfileSidebar: "Comparte tu perfil",
+    fileUploader: "Cargador de archivos",
+    generalCustomization: "Personalización general",
+    uploadCardBackground: "Fondo",
+    uploadCardAudio: "Audio",
+    uploadCardAvatar: "Avatar del perfil",
+    uploadCardCursor: "Cursor personalizado",
+    uploadCardClickUpload: "Haz clic para subir un archivo",
+    uploadCardClickAudio: "Haz clic para abrir el gestor de audio",
     unsavedBadge: "Sin guardar",
     previewHint: "Así se verá tu perfil público",
     previewHintMobile: "Así se verá en móvil",
@@ -1158,6 +1196,10 @@ export const es: Messages = {
     backDashboard: "Volver al dashboard",
   },
   linkEditor: {
+    pickerTitle: "Vincula tus perfiles de redes sociales.",
+    pickerSubtitle: "Elige una red social para añadir a tu perfil.",
+    addedLinksTitle: "Enlaces añadidos",
+    customUrlDescription: "Usa tu propia URL y elige un icono que encaje.",
     platformCount: "{count}/{max} redes y plataformas",
     customCount: " · {count}/{max} URLs personalizadas",
     totalCount: " · {count}/{max} en total",

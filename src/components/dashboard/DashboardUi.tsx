@@ -22,8 +22,8 @@ export function DashboardSection({
     <section
       className={`rounded-2xl border overflow-hidden transition-colors ${
         accent
-          ? "border-purple-500/20 bg-gradient-to-b from-purple-500/[0.08] to-purple-500/[0.02]"
-          : "border-white/[0.06] bg-gradient-to-b from-white/[0.035] to-transparent"
+          ? "border-purple-500/20 bg-[#12121a]"
+          : "border-white/[0.06] bg-[#12121a]"
       } ${className}`}
     >
       {title ? (
@@ -112,6 +112,60 @@ export function DashboardColorField({
     <DashboardField label={label}>
       <ColorInput value={value} onChange={onChange} disabled={disabled} />
     </DashboardField>
+  );
+}
+
+export function DashboardRangeSlider({
+  label,
+  value,
+  min,
+  max,
+  step,
+  formatValue,
+  markers,
+  onChange,
+  disabled = false,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  formatValue: (value: number) => string;
+  markers?: { value: number; label: string }[];
+  onChange: (value: number) => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className={disabled ? "pointer-events-none opacity-40" : ""}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <label className="text-sm text-white/75">{label}</label>
+        <span className="text-xs font-mono text-white/40">{formatValue(value)}</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="dashboard-range w-full"
+      />
+      {markers && markers.length > 0 ? (
+        <div className="mt-2 flex justify-between text-[10px] text-white/30">
+          {markers.map((marker) => (
+            <button
+              key={marker.value}
+              type="button"
+              onClick={() => onChange(marker.value)}
+              className="transition-colors hover:text-purple-300"
+            >
+              {marker.label}
+            </button>
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 

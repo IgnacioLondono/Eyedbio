@@ -16,7 +16,7 @@ import { getMessages } from "@/lib/i18n";
 interface Props {
   username: string;
   displayName?: string;
-  variant?: "floating" | "inline" | "card";
+  variant?: "floating" | "inline" | "card" | "sidebar";
 }
 
 type ShareChannel = "whatsapp" | "twitter" | "telegram" | "facebook" | "story";
@@ -207,7 +207,9 @@ export default function ShareProfileButton({
   }, [open]);
 
   const triggerClass =
-    variant === "inline"
+    variant === "sidebar"
+      ? "flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-600/25 transition-colors hover:bg-purple-500"
+      : variant === "inline"
       ? "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-sm font-medium transition-colors"
       : variant === "card"
         ? "p-2 rounded-lg bg-black/35 backdrop-blur-md border border-white/10 text-white/75 hover:text-white hover:bg-black/50 transition-colors"
@@ -247,7 +249,11 @@ export default function ShareProfileButton({
           aria-label={t("share.shareProfile")}
         >
           <Share2 className="w-4 h-4" />
-          {variant === "floating" ? t("share.share") : null}
+          {variant === "floating"
+            ? t("share.share")
+            : variant === "sidebar"
+              ? t("dashboard.shareProfileSidebar")
+              : null}
         </button>
       )}
 

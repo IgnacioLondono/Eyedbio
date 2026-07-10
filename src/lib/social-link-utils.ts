@@ -36,6 +36,29 @@ export function getSocialLinkHref(link: SocialLink): string | undefined {
   return url || undefined;
 }
 
+/** URL lista para abrir en nueva pestaña (añade https si falta). */
+export function resolveExternalHref(href: string): string {
+  const trimmed = href.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed.replace(/^\/+/, "")}`;
+}
+
+/** Texto amigable para el modal de confirmación (sin protocolo). */
+export function getExternalLinkDisplayUrl(href: string): string {
+  try {
+    const url = new URL(resolveExternalHref(href));
+    const path =
+      url.pathname === "/" || url.pathname === ""
+        ? "/"
+        : url.pathname.endsWith("/")
+          ? url.pathname
+          : `${url.pathname}/`;
+    return `${url.hostname}${path === "/" ? "/" : path}`;
+  } catch {
+    return href.replace(/^https?:\/\//i, "").replace(/^\/*/, "") || href;
+  }
+}
+
 export function getSocialLinkCopyValue(link: SocialLink): string | null {
   if (!isCopyOnlySocialLink(link.platform)) return null;
   const user = normalizePlatformUsername(link.url);
