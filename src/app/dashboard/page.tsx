@@ -50,7 +50,10 @@ import CardLayoutPicker from "@/components/editor/CardLayoutPicker";
 import IconStylePicker from "@/components/editor/IconStylePicker";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { DashboardMobileNav, DashboardSidebar, type DashboardView } from "@/components/dashboard/DashboardNav";
-import DashboardAccountAnalytics, { type AccountSub } from "@/components/dashboard/DashboardAccountAnalytics";
+import DashboardAccountAnalytics, {
+  type AccountSub,
+  accountSubLabelKey,
+} from "@/components/dashboard/DashboardAccountAnalytics";
 import DashboardPreview from "@/components/dashboard/DashboardPreview";
 import MediaUploadGrid from "@/components/dashboard/MediaUploadGrid";
 import UnsavedChangesModal from "@/components/dashboard/UnsavedChangesModal";
@@ -491,7 +494,7 @@ function DashboardContent() {
   const activeTabMeta =
     view === "account"
       ? {
-          label: t(`dashboard.accountSub.${accountSub}`),
+          label: t(accountSubLabelKey(accountSub)),
           description: t("dashboard.tabDescriptions.account"),
         }
       : view === "customize"

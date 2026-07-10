@@ -461,6 +461,12 @@ export interface Messages {
       visitsSection: string;
       linksSection: string;
       completenessDone: string;
+      clickThroughRate: string;
+      visitorBreakdown: string;
+      trafficTrend: string;
+      metricsComparison: string;
+      avgClicksPerLink: string;
+      completenessChart: string;
     };
     monochromeIcons: string;
     iconsSection: string;
@@ -1188,6 +1194,12 @@ export const es: Messages = {
       visitsSection: "Estadísticas de visitas",
       linksSection: "Toques por enlace",
       completenessDone: "{done} de {total} pasos completados",
+      clickThroughRate: "Tasa de toques (toques / visitas)",
+      visitorBreakdown: "Desglose de visitantes",
+      trafficTrend: "Tendencia de tráfico",
+      metricsComparison: "Comparativa de métricas",
+      avgClicksPerLink: "Media de toques por enlace activo",
+      completenessChart: "Progreso por sección",
     },
     monochromeIcons: "Iconos monocromáticos",
     iconsSection: "Iconos",
