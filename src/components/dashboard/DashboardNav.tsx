@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   ChevronDown,
-  Compass,
   ExternalLink,
   HelpCircle,
   LifeBuoy,
@@ -201,13 +200,6 @@ export function DashboardSidebar({
       </nav>
 
       <div className="shrink-0 space-y-2 border-t border-white/[0.06] px-4 py-4">
-        <Link
-          href="/discover"
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
-        >
-          <Compass className="h-4 w-4" />
-          {t("nav.discover")}
-        </Link>
         {supportEnabled ? (
           <Link
             href="/support"
