@@ -39,6 +39,7 @@ interface Props {
     | "linkHidden"
   >;
   textColor: string;
+  username: string;
   compact?: boolean;
   locale?: "es" | "en";
   mutedColor?: string;
@@ -82,6 +83,7 @@ function EmptyLinks({ mutedColor, locale = "es" }: { mutedColor: string; locale?
 function ProfileLinkWrap({
   link,
   locale,
+  username,
   className,
   style,
   motionProps,
@@ -89,6 +91,7 @@ function ProfileLinkWrap({
 }: {
   link: SocialLink;
   locale: "es" | "en";
+  username: string;
   className: string;
   style?: React.CSSProperties;
   motionProps?: MotionProps;
@@ -139,7 +142,7 @@ function ProfileLinkWrap({
     return (
       <motion.button
         type="button"
-        onClick={() => href && requestVisit(href)}
+        onClick={() => href && requestVisit(href, { linkId: link.id, profileUsername: username })}
         title={title}
         aria-label={title}
         className={className}
@@ -154,7 +157,7 @@ function ProfileLinkWrap({
   return (
     <button
       type="button"
-      onClick={() => href && requestVisit(href)}
+      onClick={() => href && requestVisit(href, { linkId: link.id, profileUsername: username })}
       title={title}
       aria-label={title}
       className={className}
@@ -169,6 +172,7 @@ function PillsLinks({
   links,
   settings,
   textColor,
+  username,
   compact,
   locale = "es",
   mutedColor,
@@ -195,6 +199,7 @@ function PillsLinks({
             key={link.id}
             link={link}
             locale={locale}
+            username={username}
             motionProps={
               compact
                 ? undefined
@@ -246,6 +251,7 @@ function PillsLinks({
 function RowLinks({
   links,
   settings,
+  username,
   compact,
   locale = "es",
   mutedColor,
@@ -271,6 +277,7 @@ function RowLinks({
             key={link.id}
             link={link}
             locale={locale}
+            username={username}
             className={getIconLinkWrapperClass(iconStyle, btn, "row")}
             style={{
               color: link.iconUrl ? undefined : color,
@@ -295,6 +302,7 @@ function ChipsLinks({
   links,
   settings,
   textColor,
+  username,
   compact,
   locale = "es",
   mutedColor,
@@ -317,6 +325,7 @@ function ChipsLinks({
             key={link.id}
             link={link}
             locale={locale}
+            username={username}
             className={`inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 hover:bg-white/10 ${
               compact ? "px-2.5 py-1 text-[10px]" : "px-3 py-1.5 text-xs"
             }`}
@@ -346,6 +355,7 @@ export default function ProfileLinksDisplay({
   linkStyle,
   settings,
   textColor,
+  username,
   compact = false,
   locale = "es",
   mutedColor,
@@ -357,6 +367,7 @@ export default function ProfileLinksDisplay({
       <SocialLinks
         links={links}
         settings={settings}
+        username={username}
         compact={compact}
         mutedColor={muted}
         emptyLabel={translate(locale, "profile.noLinks")}
@@ -369,6 +380,7 @@ export default function ProfileLinksDisplay({
         links={links}
         settings={settings}
         textColor={textColor}
+        username={username}
         compact={compact}
         locale={locale}
         mutedColor={muted}
@@ -377,6 +389,7 @@ export default function ProfileLinksDisplay({
       <RowLinks
         links={links}
         settings={settings}
+        username={username}
         compact={compact}
         locale={locale}
         mutedColor={muted}
@@ -386,6 +399,7 @@ export default function ProfileLinksDisplay({
         links={links}
         settings={settings}
         textColor={textColor}
+        username={username}
         compact={compact}
         locale={locale}
         mutedColor={muted}

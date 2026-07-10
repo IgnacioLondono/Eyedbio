@@ -418,6 +418,40 @@ export interface Messages {
     subtabCard: string;
     subtabIcons: string;
     subtabCursor: string;
+    subtabMedia: string;
+    subtabStyle: string;
+    subtabNetworks: string;
+    subtabAddedLinks: string;
+    accountSub: {
+      summary: string;
+      analysis: string;
+      visits: string;
+      linkClicks: string;
+      settings: string;
+    };
+    analytics: {
+      profileViews: string;
+      uniqueVisitors: string;
+      newVisitors3d: string;
+      linkClicks: string;
+      activeLinks: string;
+      reviews: string;
+      profileAnalysis: string;
+      profileProgress: string;
+      checkAvatar: string;
+      checkBio: string;
+      checkLinks: string;
+      checkBackground: string;
+      checkDiscord: string;
+      totalViews: string;
+      uniqueLoggedIn: string;
+      uniqueGuests: string;
+      newVisitors7d: string;
+      visitsHint: string;
+      noLinkClicks: string;
+      clickCount: string;
+      loadError: string;
+    };
     monochromeIcons: string;
     iconsSection: string;
     iconsSectionHint: string;
@@ -957,7 +991,7 @@ export const es: Messages = {
       profile: "Nombre, bio, avatar y visibilidad",
       links: "Redes sociales y botones",
       customize: "Fondo, audio, colores y estilo",
-      account: "Usuario, contraseña e idioma",
+      account: "Resumen, estadísticas y ajustes de cuenta",
     },
     accountSettings: "Ajustes de cuenta",
     editorNav: "Editor",
@@ -1100,6 +1134,41 @@ export const es: Messages = {
     subtabCard: "Tarjeta",
     subtabIcons: "Iconos",
     subtabCursor: "Cursor",
+    subtabMedia: "Medios",
+    subtabStyle: "Estilo",
+    subtabNetworks: "Redes",
+    subtabAddedLinks: "Enlaces añadidos",
+    accountSub: {
+      summary: "Resumen",
+      analysis: "Análisis de perfil",
+      visits: "Visitas",
+      linkClicks: "Toques en enlaces",
+      settings: "Ajustes",
+    },
+    analytics: {
+      profileViews: "Visitas al perfil",
+      uniqueVisitors: "Visitantes únicos",
+      newVisitors3d: "Nuevos (3 días)",
+      linkClicks: "Toques en enlaces",
+      activeLinks: "Enlaces activos",
+      reviews: "Reseñas",
+      profileAnalysis: "Análisis de perfil",
+      profileProgress: "Completitud del perfil",
+      checkAvatar: "Avatar personalizado",
+      checkBio: "Biografía",
+      checkLinks: "Al menos un enlace",
+      checkBackground: "Fondo personalizado",
+      checkDiscord: "Discord vinculado",
+      totalViews: "Visitas totales",
+      uniqueLoggedIn: "Usuarios registrados",
+      uniqueGuests: "Visitantes invitados",
+      newVisitors7d: "Nuevos (7 días)",
+      visitsHint:
+        "Las visitas totales incluyen todas las vistas del perfil. Los visitantes únicos cuentan sesiones distintas.",
+      noLinkClicks: "Aún no hay toques en tus enlaces. Comparte tu perfil para empezar a recopilar datos.",
+      clickCount: "{count} toques",
+      loadError: "No se pudieron cargar las estadísticas.",
+    },
     monochromeIcons: "Iconos monocromáticos",
     iconsSection: "Iconos",
     iconsSectionHint: "Vista previa de cómo se verán los iconos de tus enlaces.",

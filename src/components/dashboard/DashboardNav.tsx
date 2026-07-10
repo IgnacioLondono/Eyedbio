@@ -17,6 +17,8 @@ import Logo from "@/components/layout/Logo";
 import ShareProfileButton from "@/components/profile/ShareProfileButton";
 import { useI18n } from "@/components/providers/LocaleProvider";
 
+import type { AccountSub } from "@/components/dashboard/DashboardAccountAnalytics";
+
 export type DashboardView = "profile" | "links" | "customize" | "account";
 
 export interface DashboardTabItem {
@@ -29,8 +31,9 @@ export interface DashboardTabItem {
 interface Props {
   tabs: DashboardTabItem[];
   activeView: DashboardView;
+  accountSub?: AccountSub;
   onTabChange: (id: DashboardView) => void;
-  onAccountSelect: () => void;
+  onAccountSubSelect: (sub: AccountSub) => void;
   username: string;
   displayName?: string;
   supportEnabled?: boolean;
@@ -71,8 +74,9 @@ function SidebarNavItem({
 export function DashboardSidebar({
   tabs,
   activeView,
+  accountSub = "summary",
   onTabChange,
-  onAccountSelect,
+  onAccountSubSelect,
   username,
   displayName,
   supportEnabled,
@@ -104,6 +108,14 @@ export function DashboardSidebar({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  const accountItems: { id: AccountSub; label: string }[] = [
+    { id: "summary", label: t("dashboard.accountSub.summary") },
+    { id: "analysis", label: t("dashboard.accountSub.analysis") },
+    { id: "visits", label: t("dashboard.accountSub.visits") },
+    { id: "links", label: t("dashboard.accountSub.linkClicks") },
+    { id: "settings", label: t("dashboard.accountSub.settings") },
+  ];
 
   const isAccountActive = activeView === "account";
 
@@ -161,17 +173,20 @@ export function DashboardSidebar({
           </button>
           {accountOpen ? (
             <div className="mt-1 space-y-0.5 pl-3">
-              <button
-                type="button"
-                onClick={onAccountSelect}
-                className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
-                  isAccountActive
-                    ? "bg-white/10 text-white"
-                    : "text-white/50 hover:bg-white/[0.04] hover:text-white/80"
-                }`}
-              >
-                {t("dashboard.accountSettings")}
-              </button>
+              {accountItems.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => onAccountSubSelect(item.id)}
+                  className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                    isAccountActive && accountSub === item.id
+                      ? "bg-white/10 text-white"
+                      : "text-white/50 hover:bg-white/[0.04] hover:text-white/80"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           ) : null}
         </div>
@@ -217,11 +232,19 @@ export function DashboardSidebar({
 export function DashboardMobileNav({
   tabs,
   activeView,
+  accountSub = "summary",
   onTabChange,
-  onAccountSelect,
-}: Pick<Props, "tabs" | "activeView" | "onTabChange" | "onAccountSelect">) {
+  onAccountSubSelect,
+}: Pick<Props, "tabs" | "activeView" | "accountSub" | "onTabChange" | "onAccountSubSelect">) {
   const { t } = useI18n();
   const router = useRouter();
+  const accountItems: { id: AccountSub; label: string }[] = [
+    { id: "summary", label: t("dashboard.accountSub.summary") },
+    { id: "analysis", label: t("dashboard.accountSub.analysis") },
+    { id: "visits", label: t("dashboard.accountSub.visits") },
+    { id: "links", label: t("dashboard.accountSub.linkClicks") },
+    { id: "settings", label: t("dashboard.accountSub.settings") },
+  ];
 
   return (
     <div className="mb-5 space-y-2 lg:hidden">
@@ -252,18 +275,33 @@ export function DashboardMobileNav({
           );
         })}
       </nav>
-      <button
-        type="button"
-        onClick={onAccountSelect}
-        className={`flex w-full items-center gap-2 rounded-xl border px-3.5 py-2 text-left text-xs transition-all ${
-          activeView === "account"
-            ? "border-purple-500/40 bg-purple-600 text-white"
-            : "border-white/[0.08] bg-[#12121a] text-white/55"
-        }`}
-      >
-        <Settings className="h-4 w-4" />
-        {t("dashboard.tabs.account")}
-      </button>
+      {activeView === "account" ? (
+        <div className="flex flex-wrap gap-1.5">
+          {accountItems.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onAccountSubSelect(item.id)}
+              className={`rounded-lg px-2.5 py-1.5 text-[11px] transition-colors ${
+                accountSub === item.id
+                  ? "bg-purple-600 text-white"
+                  : "bg-[#12121a] text-white/50 border border-white/[0.08]"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => onAccountSubSelect("summary")}
+          className="flex w-full items-center gap-2 rounded-xl border border-white/[0.08] bg-[#12121a] px-3.5 py-2 text-left text-xs text-white/55"
+        >
+          <Settings className="h-4 w-4" />
+          {t("dashboard.tabs.account")}
+        </button>
+      )}
     </div>
   );
 }

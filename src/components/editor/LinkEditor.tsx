@@ -39,6 +39,7 @@ import { useI18n } from "@/components/providers/LocaleProvider";
 interface Props {
   links: SocialLink[];
   linkHidden?: Record<string, boolean>;
+  section?: "networks" | "added" | "all";
   onChange: (links: SocialLink[]) => void;
   onLinkHiddenChange: (linkHidden: Record<string, boolean>) => void;
 }
@@ -220,7 +221,13 @@ function LinkCard({
   );
 }
 
-export default function LinkEditor({ links, linkHidden = {}, onChange, onLinkHiddenChange }: Props) {
+export default function LinkEditor({
+  links,
+  linkHidden = {},
+  section = "all",
+  onChange,
+  onLinkHiddenChange,
+}: Props) {
   const { t, tVars } = useI18n();
   const usedPlatforms = new Set(
     links.filter((l) => l.platform !== "custom").map((l) => l.platform)
@@ -267,8 +274,12 @@ export default function LinkEditor({ links, linkHidden = {}, onChange, onLinkHid
 
   const showPlatformPicker = !atPlatformLimit && availablePlatforms.length > 0;
 
+  const showNetworks = section === "all" || section === "networks";
+  const showAdded = section === "all" || section === "added";
+
   return (
     <div className="space-y-5">
+      {showNetworks || showAdded ? (
       <p className="text-xs">
         <span className={atPlatformCountLimit ? "text-amber-300/90" : "text-white/40"}>
           {tVars("linkEditor.platformCount", {
@@ -294,32 +305,9 @@ export default function LinkEditor({ links, linkHidden = {}, onChange, onLinkHid
           <span className="text-white/30">{tVars("linkEditor.draftHint", { drafts: draftCount })}</span>
         )}
       </p>
+      ) : null}
 
-      {links.length > 0 ? (
-        <section className="space-y-2.5">
-          <h3 className="text-sm font-medium text-white/70">{t("linkEditor.addedLinksTitle")}</h3>
-          <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
-            {links.map((link) => (
-              <LinkCard
-                key={link.id}
-                link={link}
-                hidden={Boolean(linkHidden[link.id])}
-                onUpdate={(partial) =>
-                  onChange(links.map((l) => (l.id === link.id ? { ...l, ...partial } : l)))
-                }
-                onRemove={() => onChange(links.filter((l) => l.id !== link.id))}
-                onToggleHidden={() => toggleHidden(link.id)}
-              />
-            ))}
-          </div>
-        </section>
-      ) : (
-        <p className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-6 text-center text-sm text-white/40">
-          {t("linkEditor.empty")}
-        </p>
-      )}
-
-      {showPlatformPicker || !atCustomLimit ? (
+      {showNetworks && (showPlatformPicker || !atCustomLimit) ? (
         <section className="rounded-2xl border border-white/[0.08] bg-[#12121a] p-4">
           <div className="mb-1 flex items-center gap-2">
             <Link2 className="h-4 w-4 text-purple-400" />
@@ -352,6 +340,30 @@ export default function LinkEditor({ links, linkHidden = {}, onChange, onLinkHid
             </div>
           ) : null}
         </section>
+      ) : null}
+
+      {showAdded && links.length > 0 ? (
+        <section className="space-y-2.5">
+          <h3 className="text-sm font-medium text-white/70">{t("linkEditor.addedLinksTitle")}</h3>
+          <div className="grid grid-cols-1 gap-2.5 xl:grid-cols-2">
+            {links.map((link) => (
+              <LinkCard
+                key={link.id}
+                link={link}
+                hidden={Boolean(linkHidden[link.id])}
+                onUpdate={(partial) =>
+                  onChange(links.map((l) => (l.id === link.id ? { ...l, ...partial } : l)))
+                }
+                onRemove={() => onChange(links.filter((l) => l.id !== link.id))}
+                onToggleHidden={() => toggleHidden(link.id)}
+              />
+            ))}
+          </div>
+        </section>
+      ) : showAdded ? (
+        <p className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-6 text-center text-sm text-white/40">
+          {t("linkEditor.empty")}
+        </p>
       ) : null}
     </div>
   );

@@ -69,6 +69,7 @@ function LinksBlock({
       linkStyle={linkStyle}
       settings={settings}
       textColor={settings.textColor}
+      username={profile.username}
       compact={compact}
       locale={profile.locale}
       mutedColor={hexToRgba(settings.textColor, 0.3)}

@@ -50,6 +50,7 @@ import CardLayoutPicker from "@/components/editor/CardLayoutPicker";
 import IconStylePicker from "@/components/editor/IconStylePicker";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { DashboardMobileNav, DashboardSidebar, type DashboardView } from "@/components/dashboard/DashboardNav";
+import DashboardAccountAnalytics, { type AccountSub } from "@/components/dashboard/DashboardAccountAnalytics";
 import DashboardPreview from "@/components/dashboard/DashboardPreview";
 import MediaUploadGrid from "@/components/dashboard/MediaUploadGrid";
 import UnsavedChangesModal from "@/components/dashboard/UnsavedChangesModal";
@@ -59,6 +60,7 @@ import {
   DashboardRangeSlider,
   DashboardSection,
   DashboardSectionLabel,
+  DashboardSubnav,
   DashboardToggle,
 } from "@/components/dashboard/DashboardUi";
 import {
@@ -97,6 +99,34 @@ function readStoredDashboardTab(): DashboardView | null {
   return null;
 }
 
+function parseAccountSub(value: string | null): AccountSub {
+  if (value === "analysis" || value === "visits" || value === "links" || value === "settings") {
+    return value;
+  }
+  return "summary";
+}
+
+function parseProfileSub(value: string | null): string {
+  if (value === "page" || value === "social") return value;
+  return "info";
+}
+
+function parseLinksSub(value: string | null): string {
+  return value === "added" ? "added" : "networks";
+}
+
+function parseCustomizeSub(value: string | null): string {
+  return value === "style" ? "style" : "media";
+}
+
+function defaultSubForView(view: DashboardView): string {
+  if (view === "profile") return "info";
+  if (view === "links") return "networks";
+  if (view === "customize") return "media";
+  if (view === "account") return "summary";
+  return "";
+}
+
 function DashboardLoading() {
   return (
     <div className="min-h-screen bg-[#07070c] flex items-center justify-center">
@@ -123,6 +153,21 @@ function DashboardContent() {
   const profileRef = useRef<Profile | null>(null);
   const tabParam = searchParams.get("tab");
   const view: DashboardView = tabParam ? parseView(tabParam) : "profile";
+  const subParam = searchParams.get("sub");
+  const accountSub = parseAccountSub(view === "account" ? subParam : null);
+  const profileSub = parseProfileSub(view === "profile" ? subParam : null);
+  const linksSub = parseLinksSub(view === "links" ? subParam : null);
+  const customizeSub = parseCustomizeSub(view === "customize" ? subParam : null);
+  const activeSub =
+    view === "profile"
+      ? profileSub
+      : view === "links"
+        ? linksSub
+        : view === "customize"
+          ? customizeSub
+          : view === "account"
+            ? accountSub
+            : "";
   const [isDirty, setIsDirty] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -198,11 +243,17 @@ function DashboardContent() {
 
   const handleViewChange = (id: DashboardView) => {
     persistTab(id);
-    router.push(`/dashboard?tab=${id}`);
+    const sub = defaultSubForView(id);
+    router.push(sub ? `/dashboard?tab=${id}&sub=${sub}` : `/dashboard?tab=${id}`);
   };
 
-  const handleAccountSelect = () => {
-    handleViewChange("account");
+  const setActiveSub = (sub: string) => {
+    router.replace(`/dashboard?tab=${view}&sub=${sub}`, { scroll: false });
+  };
+
+  const handleAccountSubSelect = (sub: AccountSub) => {
+    persistTab("account");
+    router.push(`/dashboard?tab=account&sub=${sub}`);
   };
 
   const patchProfile = (updater: (current: Profile) => Profile) => {
@@ -398,10 +449,35 @@ function DashboardContent() {
   const activeTabMeta =
     view === "account"
       ? {
-          label: t("dashboard.tabs.account"),
+          label: t(`dashboard.accountSub.${accountSub}`),
           description: t("dashboard.tabDescriptions.account"),
         }
       : (tabs.find((item) => item.id === view) ?? tabs[0]);
+
+  const subTabItems: Partial<Record<DashboardView, { id: string; label: string }[]>> = {
+    profile: [
+      { id: "info", label: t("dashboard.subtabProfile") },
+      { id: "page", label: t("dashboard.subtabPage") },
+      { id: "social", label: t("dashboard.subtabSocial") },
+    ],
+    links: [
+      { id: "networks", label: t("dashboard.subtabNetworks") },
+      { id: "added", label: t("dashboard.subtabAddedLinks") },
+    ],
+    customize: [
+      { id: "media", label: t("dashboard.subtabMedia") },
+      { id: "style", label: t("dashboard.subtabStyle") },
+    ],
+    account: [
+      { id: "summary", label: t("dashboard.accountSub.summary") },
+      { id: "analysis", label: t("dashboard.accountSub.analysis") },
+      { id: "visits", label: t("dashboard.accountSub.visits") },
+      { id: "links", label: t("dashboard.accountSub.linkClicks") },
+      { id: "settings", label: t("dashboard.accountSub.settings") },
+    ],
+  };
+
+  const currentSubTabs = subTabItems[view] ?? [];
 
   return (
     <div className="flex min-h-dvh flex-col bg-[#0a0a0f] text-white lg:h-dvh lg:overflow-hidden">
@@ -435,8 +511,9 @@ function DashboardContent() {
         <DashboardSidebar
           tabs={tabs}
           activeView={view}
+          accountSub={accountSub}
           onTabChange={handleViewChange}
-          onAccountSelect={handleAccountSelect}
+          onAccountSubSelect={handleAccountSubSelect}
           username={profile.username}
           displayName={profile.displayName}
           supportEnabled={site.supportEnabled}
@@ -472,8 +549,9 @@ function DashboardContent() {
           <DashboardMobileNav
             tabs={tabs}
             activeView={view}
+            accountSub={accountSub}
             onTabChange={handleViewChange}
-            onAccountSelect={handleAccountSelect}
+            onAccountSubSelect={handleAccountSubSelect}
           />
 
           <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -500,8 +578,13 @@ function DashboardContent() {
             }`}
           >
             <div className="relative z-20 min-w-0 space-y-4">
+            {currentSubTabs.length > 0 ? (
+              <DashboardSubnav items={currentSubTabs} active={activeSub} onChange={setActiveSub} />
+            ) : null}
             {view === "profile" && (
               <>
+                {activeSub === "info" && (
+                <>
                 <DashboardSection
                   title={t("dashboard.shareTitle")}
                   hint={t("dashboard.shareHint")}
@@ -552,7 +635,11 @@ function DashboardContent() {
                     }}
                   />
                 </DashboardSection>
+                </>
+                )}
 
+                {activeSub === "page" && (
+                <>
                 <DashboardSection
                   title={t("dashboard.entrySectionTitle")}
                   hint={t("dashboard.entrySectionHint")}
@@ -607,7 +694,11 @@ function DashboardContent() {
                     </select>
                   </DashboardField>
                 </DashboardSection>
+                </>
+                )}
 
+                {activeSub === "social" && (
+                <>
                 <DashboardSection title={t("dashboard.visibilitySectionTitle")} icon={Eye}>
                   <DashboardToggle
                     label={t("dashboard.showViewCount")}
@@ -672,11 +763,14 @@ function DashboardContent() {
                     />
                   </DashboardField>
                 </DashboardSection>
+                </>
+                )}
               </>
             )}
 
             {view === "links" && (
               <LinkEditor
+                section={linksSub === "added" ? "added" : "networks"}
                 links={profile.links}
                 linkHidden={profile.settings.linkHidden}
                 onChange={(links) => update({ links })}
@@ -686,6 +780,8 @@ function DashboardContent() {
 
             {view === "customize" && (
               <>
+                {activeSub === "media" && (
+                <>
                 {mediaUploadGrid}
                 <a
                   href={COMMUNITY_MEDIA_HUB_URL}
@@ -952,7 +1048,11 @@ function DashboardContent() {
                   </>
                 ) : null}
                 </div>
+                </>
+                )}
 
+                {activeSub === "style" && (
+                <>
                 <DashboardSectionLabel>{t("dashboard.generalCustomization")}</DashboardSectionLabel>
                 <DashboardSection title={t("dashboard.tabs.customize")} icon={Palette}>
                   <DashboardField label={t("dashboard.backgroundEffect")}>
@@ -1224,14 +1324,22 @@ function DashboardContent() {
                     </>
                   )}
                 </DashboardSection>
+                </>
+                )}
               </>
             )}
 
             {view === "account" && (
-              <AccountSettings
-                profileUsername={profile.username}
-                onUsernameUpdated={(username) => update({ username })}
-              />
+              <>
+                {accountSub === "settings" ? (
+                  <AccountSettings
+                    profileUsername={profile.username}
+                    onUsernameUpdated={(username) => update({ username })}
+                  />
+                ) : (
+                  <DashboardAccountAnalytics sub={accountSub} />
+                )}
+              </>
             )}
             </div>
 

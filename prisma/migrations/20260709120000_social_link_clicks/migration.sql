@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "SocialLink" ADD COLUMN "clicks" INTEGER NOT NULL DEFAULT 0;

@@ -21,6 +21,7 @@ import {
 interface Props {
   links: SocialLink[];
   settings: Pick<ProfileSettings, "accentColor" | "glowIcons" | "monochromeIcons" | "iconColorMode" | "iconColor" | "customLinkIconColor" | "iconBackgroundColor" | "iconShape">;
+  username: string;
   compact?: boolean;
   mutedColor?: string;
   emptyLabel?: string;
@@ -61,6 +62,7 @@ function LinkIcon({
 function SocialLinkButton({
   link,
   settings,
+  username,
   compact,
   copyHint,
   copiedLabel,
@@ -68,6 +70,7 @@ function SocialLinkButton({
 }: {
   link: SocialLink;
   settings: Props["settings"];
+  username: string;
   compact: boolean;
   copyHint?: string;
   copiedLabel?: string;
@@ -133,7 +136,7 @@ function SocialLinkButton({
     <motion.button
       type="button"
       key={link.id}
-      onClick={() => href && requestVisit(href)}
+      onClick={() => href && requestVisit(href, { linkId: link.id, profileUsername: username })}
       initial={compact ? false : { opacity: 0, scale: 0.5 }}
       animate={compact ? undefined : { opacity: 1, scale: 1 }}
       transition={compact ? undefined : { delay: 0.3 + index * 0.08 }}
@@ -152,6 +155,7 @@ function SocialLinkButton({
 export default function SocialLinks({
   links,
   settings,
+  username,
   compact = false,
   mutedColor = "rgba(255,255,255,0.3)",
   emptyLabel = "Sin enlaces aún",
@@ -186,6 +190,7 @@ export default function SocialLinks({
           key={link.id}
           link={link}
           settings={settings}
+          username={username}
           compact={compact}
           copyHint={copyHint}
           copiedLabel={copiedLabel}

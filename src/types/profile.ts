@@ -88,6 +88,7 @@ export interface SocialLink {
   url: string;
   label?: string;
   iconUrl?: string;
+  clicks?: number;
 }
 
 export interface ProfileSettings {

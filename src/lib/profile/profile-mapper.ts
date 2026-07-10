@@ -148,6 +148,7 @@ export function userToProfile(user: UserWithLinks): Profile {
         url: link.url,
         label: link.label ?? undefined,
         iconUrl: link.iconUrl ?? undefined,
+        clicks: link.clicks ?? 0,
       })),
     settings: merged,
     locale: parseLocale((user as User & { locale?: string }).locale),
