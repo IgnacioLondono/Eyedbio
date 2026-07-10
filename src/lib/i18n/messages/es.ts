@@ -468,6 +468,9 @@ export interface Messages {
       metricsComparison: string;
       avgClicksPerLink: string;
       completenessChart: string;
+      visitorsTrend14d: string;
+      timelineHint: string;
+      clicksByLinkTrend: string;
     };
     monochromeIcons: string;
     iconsSection: string;
@@ -1203,6 +1206,10 @@ export const es: Messages = {
       metricsComparison: "Comparativa de métricas",
       avgClicksPerLink: "Media de toques por enlace activo",
       completenessChart: "Progreso por sección",
+      visitorsTrend14d: "Tendencia de visitantes (14 días)",
+      timelineHint:
+        "Nuevos visitantes únicos por día (registrados e invitados). Se basa en la primera visita de cada persona.",
+      clicksByLinkTrend: "Toques por enlace",
     },
     monochromeIcons: "Iconos monocromáticos",
     iconsSection: "Iconos",

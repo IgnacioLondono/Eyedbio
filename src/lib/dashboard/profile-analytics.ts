@@ -36,6 +36,14 @@ export type DashboardAnalytics = {
     url: string;
     clicks: number;
   }[];
+  /** Últimos 14 días (incluye hoy), orden cronológico. */
+  timeline: {
+    date: string;
+    label: string;
+    loggedIn: number;
+    guests: number;
+    total: number;
+  }[];
 };
 
 function isDefaultAvatar(url: string, username: string): boolean {
@@ -79,12 +87,40 @@ export function computeProfileCompleteness(profile: Profile): {
   return { percent, items };
 }
 
+function dayKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function buildEmptyTimeline(days: number): Map<string, { loggedIn: number; guests: number }> {
+  const map = new Map<string, { loggedIn: number; guests: number }>();
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    map.set(dayKey(d), { loggedIn: 0, guests: 0 });
+  }
+  return map;
+}
+
+function formatDayLabel(isoDate: string, locale: string): string {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString(locale === "en" ? "en-US" : "es-ES", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
 export async function fetchDashboardAnalytics(
   userId: string,
-  profile: Profile
+  profile: Profile,
+  locale = "es"
 ): Promise<DashboardAnalytics> {
   const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 
   const [
     uniqueLoggedIn,
@@ -95,6 +131,8 @@ export async function fetchDashboardAnalytics(
     newLoggedIn7d,
     reviewsCount,
     dbLinks,
+    recentLoggedIn,
+    recentGuests,
   ] = await Promise.all([
     prisma.profileView.count({ where: { profileUserId: userId } }),
     prisma.profileViewGuest.count({ where: { profileUserId: userId } }),
@@ -116,6 +154,14 @@ export async function fetchDashboardAnalytics(
       orderBy: { sortOrder: "asc" },
       select: { id: true, platform: true, url: true, label: true, clicks: true, archived: true },
     }),
+    prisma.profileView.findMany({
+      where: { profileUserId: userId, createdAt: { gte: fourteenDaysAgo } },
+      select: { createdAt: true },
+    }),
+    prisma.profileViewGuest.findMany({
+      where: { profileUserId: userId, createdAt: { gte: fourteenDaysAgo } },
+      select: { createdAt: true },
+    }),
   ]);
 
   const uniqueVisitors = uniqueLoggedIn + uniqueGuests;
@@ -123,6 +169,26 @@ export async function fetchDashboardAnalytics(
   const totalLinkClicks = dbLinks.reduce((sum, link) => sum + link.clicks, 0);
   const activeLinks = profile.links.filter((link) => isSocialLinkActive(link)).length;
   const completeness = computeProfileCompleteness(profile);
+
+  const dayMap = buildEmptyTimeline(14);
+  for (const row of recentLoggedIn) {
+    const key = dayKey(row.createdAt);
+    const bucket = dayMap.get(key);
+    if (bucket) bucket.loggedIn += 1;
+  }
+  for (const row of recentGuests) {
+    const key = dayKey(row.createdAt);
+    const bucket = dayMap.get(key);
+    if (bucket) bucket.guests += 1;
+  }
+
+  const timeline = Array.from(dayMap.entries()).map(([date, counts]) => ({
+    date,
+    label: formatDayLabel(date, locale),
+    loggedIn: counts.loggedIn,
+    guests: counts.guests,
+    total: counts.loggedIn + counts.guests,
+  }));
 
   const linkClicks = dbLinks
     .filter((link) => !link.archived && link.url.trim().length > 0)
@@ -156,5 +222,6 @@ export async function fetchDashboardAnalytics(
       newLast7Days: newGuests7d + newLoggedIn7d,
     },
     linkClicks,
+    timeline,
   };
 }

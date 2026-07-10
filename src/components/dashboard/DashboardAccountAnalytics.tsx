@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import {
-  BarChart3,
   CheckCircle2,
   Circle,
   Eye,
@@ -32,6 +31,13 @@ const ACCOUNT_SUB_LABEL_KEYS: Record<AccountSub, string> = {
 export function accountSubLabelKey(sub: AccountSub): string {
   return ACCOUNT_SUB_LABEL_KEYS[sub];
 }
+
+type LineSeries = {
+  id: string;
+  label: string;
+  color: string;
+  values: number[];
+};
 
 function StatCard({
   label,
@@ -66,79 +72,148 @@ function StatCard({
   );
 }
 
-function HorizontalBarChart({
-  items,
-  maxValue,
-  heightClass = "h-2.5",
-  tallBars = false,
+function LineChart({
+  labels,
+  series,
+  height = 220,
 }: {
-  items: { label: string; value: number; color?: string }[];
-  maxValue?: number;
-  heightClass?: string;
-  tallBars?: boolean;
+  labels: string[];
+  series: LineSeries[];
+  height?: number;
 }) {
-  const max = maxValue ?? Math.max(...items.map((item) => item.value), 1);
-  const barHeight = tallBars ? "h-3" : heightClass;
+  const gradId = useId().replace(/:/g, "");
+  const width = 640;
+  const pad = { top: 16, right: 16, bottom: 36, left: 36 };
+  const innerW = width - pad.left - pad.right;
+  const innerH = height - pad.top - pad.bottom;
+  const maxY = Math.max(...series.flatMap((s) => s.values), 1);
+  const n = Math.max(labels.length - 1, 1);
+
+  const pointsFor = (values: number[]) =>
+    values
+      .map((v, i) => {
+        const x = pad.left + (i / n) * innerW;
+        const y = pad.top + innerH - (v / maxY) * innerH;
+        return `${x},${y}`;
+      })
+      .join(" ");
+
+  const areaFor = (values: number[]) => {
+    if (values.length === 0) return "";
+    const pts = values.map((v, i) => {
+      const x = pad.left + (i / n) * innerW;
+      const y = pad.top + innerH - (v / maxY) * innerH;
+      return [x, y] as const;
+    });
+    const first = pts[0];
+    const last = pts[pts.length - 1];
+    return [
+      `M ${first[0]} ${pad.top + innerH}`,
+      ...pts.map(([x, y]) => `L ${x} ${y}`),
+      `L ${last[0]} ${pad.top + innerH}`,
+      "Z",
+    ].join(" ");
+  };
+
+  const yTicks = [0, 0.5, 1].map((t) => Math.round(maxY * t));
 
   return (
-    <div className="space-y-3">
-      {items.map((item) => {
-        const width = Math.max((item.value / max) * 100, item.value > 0 ? 4 : 0);
-        return (
-          <div key={item.label}>
-            <div className="mb-1 flex items-center justify-between gap-2 text-xs">
-              <span className="truncate text-white/60">{item.label}</span>
-              <span className="shrink-0 font-medium tabular-nums text-white">{item.value}</span>
-            </div>
-            <div className={`overflow-hidden rounded-full bg-white/10 ${barHeight}`}>
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${width}%`,
-                  background: item.color ?? "linear-gradient(90deg, #7c3aed, #a855f7)",
-                }}
+    <div className="w-full">
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="h-auto w-full"
+        role="img"
+        aria-label="line chart"
+      >
+        {yTicks.map((tick) => {
+          const y = pad.top + innerH - (tick / maxY) * innerH;
+          return (
+            <g key={`y-${tick}`}>
+              <line
+                x1={pad.left}
+                x2={width - pad.right}
+                y1={y}
+                y2={y}
+                stroke="rgba(255,255,255,0.06)"
+                strokeWidth="1"
               />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+              <text
+                x={pad.left - 8}
+                y={y + 3}
+                textAnchor="end"
+                fill="rgba(255,255,255,0.35)"
+                fontSize="10"
+              >
+                {tick}
+              </text>
+            </g>
+          );
+        })}
 
-function StackedBar({
-  segments,
-}: {
-  segments: { label: string; value: number; color: string }[];
-}) {
-  const total = segments.reduce((sum, segment) => sum + segment.value, 0) || 1;
+        {labels.map((label, i) => {
+          if (labels.length > 8 && i % 2 !== 0 && i !== labels.length - 1) return null;
+          const x = pad.left + (i / n) * innerW;
+          return (
+            <text
+              key={`x-${label}-${i}`}
+              x={x}
+              y={height - 10}
+              textAnchor="middle"
+              fill="rgba(255,255,255,0.4)"
+              fontSize="10"
+            >
+              {label}
+            </text>
+          );
+        })}
 
-  return (
-    <div>
-      <div className="flex h-4 overflow-hidden rounded-full bg-white/10">
-        {segments.map((segment) =>
-          segment.value > 0 ? (
-            <div
-              key={segment.label}
-              className="h-full transition-all duration-500"
-              style={{
-                width: `${(segment.value / total) * 100}%`,
-                backgroundColor: segment.color,
-              }}
-              title={`${segment.label}: ${segment.value}`}
+        {series.map((s, idx) => (
+          <g key={s.id}>
+            {idx === 0 ? (
+              <>
+                <defs>
+                  <linearGradient id={`${gradId}-${s.id}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={s.color} stopOpacity="0.28" />
+                    <stop offset="100%" stopColor={s.color} stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+                <path d={areaFor(s.values)} fill={`url(#${gradId}-${s.id})`} />
+              </>
+            ) : null}
+            <polyline
+              fill="none"
+              stroke={s.color}
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              points={pointsFor(s.values)}
             />
-          ) : null
-        )}
-      </div>
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-        {segments.map((segment) => (
-          <div key={segment.label} className="flex items-center gap-1.5 text-xs text-white/55">
-            <span
-              className="h-2.5 w-2.5 rounded-sm"
-              style={{ backgroundColor: segment.color }}
-            />
-            <span>{segment.label}</span>
-            <span className="font-medium tabular-nums text-white/80">{segment.value}</span>
+            {s.values.map((v, i) => {
+              const x = pad.left + (i / n) * innerW;
+              const y = pad.top + innerH - (v / maxY) * innerH;
+              return (
+                <circle
+                  key={`${s.id}-dot-${i}`}
+                  cx={x}
+                  cy={y}
+                  r="3"
+                  fill="#0a0a10"
+                  stroke={s.color}
+                  strokeWidth="2"
+                >
+                  <title>{`${labels[i]} · ${s.label}: ${v}`}</title>
+                </circle>
+              );
+            })}
+          </g>
+        ))}
+      </svg>
+
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 px-1">
+        {series.map((s) => (
+          <div key={s.id} className="flex items-center gap-1.5 text-xs text-white/55">
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.color }} />
+            <span>{s.label}</span>
           </div>
         ))}
       </div>
@@ -146,7 +221,7 @@ function StackedBar({
   );
 }
 
-function CompletenessBlock({ data, showItemBars = false }: { data: DashboardAnalytics; showItemBars?: boolean }) {
+function CompletenessBlock({ data }: { data: DashboardAnalytics }) {
   const { t, tVars } = useI18n();
   const done = data.completeness.items.filter((item) => item.done).length;
   const total = data.completeness.items.length;
@@ -168,35 +243,23 @@ function CompletenessBlock({ data, showItemBars = false }: { data: DashboardAnal
           {tVars("dashboard.analytics.completenessDone", { done, total })}
         </p>
       </div>
-
-      {showItemBars ? (
-        <HorizontalBarChart
-          heightClass="h-2"
-          items={data.completeness.items.map((item) => ({
-            label: t(item.labelKey),
-            value: item.done ? 100 : 0,
-            color: item.done ? "#34d399" : "#3f3f46",
-          }))}
-        />
-      ) : (
-        <ul className="space-y-2">
-          {data.completeness.items.map((item) => (
-            <li
-              key={item.id}
-              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
-                item.done ? "bg-emerald-500/10 text-emerald-200/90" : "bg-white/[0.03] text-white/55"
-              }`}
-            >
-              {item.done ? (
-                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
-              ) : (
-                <Circle className="h-4 w-4 shrink-0 text-white/25" />
-              )}
-              {t(item.labelKey)}
-            </li>
-          ))}
-        </ul>
-      )}
+      <ul className="space-y-2">
+        {data.completeness.items.map((item) => (
+          <li
+            key={item.id}
+            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm ${
+              item.done ? "bg-emerald-500/10 text-emerald-200/90" : "bg-white/[0.03] text-white/55"
+            }`}
+          >
+            {item.done ? (
+              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
+            ) : (
+              <Circle className="h-4 w-4 shrink-0 text-white/25" />
+            )}
+            {t(item.labelKey)}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -204,11 +267,9 @@ function CompletenessBlock({ data, showItemBars = false }: { data: DashboardAnal
 function LinkClicksList({
   links,
   limit,
-  tallBars = false,
 }: {
   links: DashboardAnalytics["linkClicks"];
   limit?: number;
-  tallBars?: boolean;
 }) {
   const { t, tVars } = useI18n();
   const items = limit ? links.slice(0, limit) : links;
@@ -252,9 +313,7 @@ function LinkClicksList({
                 {tVars("dashboard.analytics.clickCount", { count: link.clicks })}
               </span>
             </div>
-            <div
-              className={`overflow-hidden rounded-full bg-white/10 ${tallBars ? "h-3" : "h-2"}`}
-            >
+            <div className="h-2 overflow-hidden rounded-full bg-white/10">
               <div
                 className="h-full rounded-full transition-all duration-500"
                 style={{ width, backgroundColor: barColor }}
@@ -279,119 +338,102 @@ function AnalyticsBody({ sub, data }: { sub: AccountSub; data: DashboardAnalytic
       ? (data.summary.totalLinkClicks / data.summary.activeLinks).toFixed(1)
       : "0";
 
+  const timelineLabels = useMemo(() => data.timeline.map((d) => d.label), [data.timeline]);
+  const visitorsSeries = useMemo<LineSeries[]>(
+    () => [
+      {
+        id: "total",
+        label: t("dashboard.analytics.uniqueVisitors"),
+        color: "#a855f7",
+        values: data.timeline.map((d) => d.total),
+      },
+    ],
+    [data.timeline, t]
+  );
+  const breakdownSeries = useMemo<LineSeries[]>(
+    () => [
+      {
+        id: "loggedIn",
+        label: t("dashboard.analytics.uniqueLoggedIn"),
+        color: "#8b5cf6",
+        values: data.timeline.map((d) => d.loggedIn),
+      },
+      {
+        id: "guests",
+        label: t("dashboard.analytics.uniqueGuests"),
+        color: "#06b6d4",
+        values: data.timeline.map((d) => d.guests),
+      },
+    ],
+    [data.timeline, t]
+  );
+  const linkSeries = useMemo<LineSeries[]>(() => {
+    const top = data.linkClicks.slice(0, 8);
+    return [
+      {
+        id: "clicks",
+        label: t("dashboard.analytics.linkClicks"),
+        color: "#ec4899",
+        values: top.map((l) => l.clicks),
+      },
+    ];
+  }, [data.linkClicks, t]);
+  const linkLabels = useMemo(
+    () => data.linkClicks.slice(0, 8).map((l) => l.label.slice(0, 10)),
+    [data.linkClicks]
+  );
+
   if (sub === "summary") {
     return (
       <div className="space-y-4">
-        <DashboardSection title={t("dashboard.analytics.summaryOverview")} icon={BarChart3} accent>
-          <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
-            <StatCard
-              label={t("dashboard.analytics.profileViews")}
-              value={fmt(data.summary.profileViews)}
-              icon={Eye}
-              accent
-            />
-            <StatCard
-              label={t("dashboard.analytics.uniqueVisitors")}
-              value={fmt(data.summary.uniqueVisitors)}
-              icon={Users}
-            />
-            <StatCard
-              label={t("dashboard.analytics.newVisitors3d")}
-              value={fmt(data.summary.newVisitorsLast3Days)}
-              icon={TrendingUp}
-            />
-            <StatCard
-              label={t("dashboard.analytics.linkClicks")}
-              value={fmt(data.summary.totalLinkClicks)}
-              icon={MousePointerClick}
-            />
-            <StatCard
-              label={t("dashboard.analytics.activeLinks")}
-              value={fmt(data.summary.activeLinks)}
-              icon={Link2}
-            />
-            <StatCard
-              label={t("dashboard.analytics.reviews")}
-              value={fmt(data.summary.reviewsCount)}
-              icon={Star}
-            />
-          </div>
-        </DashboardSection>
-
-        <DashboardSection title={t("dashboard.analytics.metricsComparison")} icon={BarChart3}>
-          <HorizontalBarChart
-            tallBars
-            items={[
-              {
-                label: t("dashboard.analytics.profileViews"),
-                value: data.summary.profileViews,
-                color: "#a855f7",
-              },
-              {
-                label: t("dashboard.analytics.uniqueVisitors"),
-                value: data.summary.uniqueVisitors,
-                color: "#6366f1",
-              },
-              {
-                label: t("dashboard.analytics.linkClicks"),
-                value: data.summary.totalLinkClicks,
-                color: "#ec4899",
-              },
-              {
-                label: t("dashboard.analytics.newVisitors3d"),
-                value: data.summary.newVisitorsLast3Days,
-                color: "#14b8a6",
-              },
-            ]}
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard
+            label={t("dashboard.analytics.profileViews")}
+            value={fmt(data.summary.profileViews)}
+            icon={Eye}
+            accent
           />
-        </DashboardSection>
-
-        <DashboardSection title={t("dashboard.analytics.profileAnalysis")} icon={CheckCircle2}>
-          <CompletenessBlock data={data} />
-        </DashboardSection>
-
-        <DashboardSection title={t("dashboard.analytics.summaryTopLinks")} icon={MousePointerClick}>
-          <LinkClicksList links={data.linkClicks} limit={3} tallBars />
-        </DashboardSection>
-
-        <DashboardSection title={t("dashboard.analytics.summaryVisitsSnapshot")} icon={Eye}>
-          <StackedBar
-            segments={[
-              {
-                label: t("dashboard.analytics.uniqueLoggedIn"),
-                value: data.visits.uniqueLoggedIn,
-                color: "#8b5cf6",
-              },
-              {
-                label: t("dashboard.analytics.uniqueGuests"),
-                value: data.visits.uniqueGuests,
-                color: "#06b6d4",
-              },
-            ]}
+          <StatCard
+            label={t("dashboard.analytics.uniqueVisitors")}
+            value={fmt(data.summary.uniqueVisitors)}
+            icon={Users}
           />
-          <div className="mt-4">
-            <HorizontalBarChart
-              items={[
-                {
-                  label: t("dashboard.analytics.newVisitors3d"),
-                  value: data.visits.newLast3Days,
-                  color: "#a855f7",
-                },
-                {
-                  label: t("dashboard.analytics.newVisitors7d"),
-                  value: data.visits.newLast7Days,
-                  color: "#22c55e",
-                },
-              ]}
-            />
-          </div>
-        </DashboardSection>
+          <StatCard
+            label={t("dashboard.analytics.linkClicks")}
+            value={fmt(data.summary.totalLinkClicks)}
+            icon={MousePointerClick}
+          />
+          <StatCard
+            label={t("dashboard.analytics.newVisitors3d")}
+            value={fmt(data.summary.newVisitorsLast3Days)}
+            icon={TrendingUp}
+          />
+        </div>
+
+        <div className="grid gap-4 xl:grid-cols-[1.6fr_1fr]">
+          <DashboardSection title={t("dashboard.analytics.visitorsTrend14d")} icon={TrendingUp} accent>
+            <LineChart labels={timelineLabels} series={visitorsSeries} />
+            <p className="mt-2 text-xs text-white/35">{t("dashboard.analytics.timelineHint")}</p>
+          </DashboardSection>
+
+          <DashboardSection title={t("dashboard.analytics.profileAnalysis")} icon={CheckCircle2}>
+            <CompletenessBlock data={data} />
+          </DashboardSection>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <DashboardSection title={t("dashboard.analytics.visitorBreakdown")} icon={Users}>
+            <LineChart labels={timelineLabels} series={breakdownSeries} height={200} />
+          </DashboardSection>
+          <DashboardSection title={t("dashboard.analytics.summaryTopLinks")} icon={MousePointerClick}>
+            <LinkClicksList links={data.linkClicks} limit={4} />
+          </DashboardSection>
+        </div>
       </div>
     );
   }
 
   if (sub === "analysis") {
-    const done = data.completeness.items.filter((item) => item.done).length;
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -413,27 +455,14 @@ function AnalyticsBody({ sub, data }: { sub: AccountSub; data: DashboardAnalytic
           />
         </div>
 
-        <DashboardSection title={t("dashboard.analytics.profileAnalysis")} icon={BarChart3}>
-          <CompletenessBlock data={data} showItemBars />
-        </DashboardSection>
-
-        <DashboardSection title={t("dashboard.analytics.completenessChart")} icon={CheckCircle2}>
-          <p className="mb-3 text-xs text-white/40">
-            {tVars("dashboard.analytics.completenessDone", {
-              done,
-              total: data.completeness.items.length,
-            })}
-          </p>
-          <HorizontalBarChart
-            heightClass="h-3"
-            items={data.completeness.items.map((item) => ({
-              label: t(item.labelKey),
-              value: item.done ? 1 : 0,
-              color: item.done ? "#34d399" : "#52525b",
-            }))}
-            maxValue={1}
-          />
-        </DashboardSection>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <DashboardSection title={t("dashboard.analytics.profileAnalysis")} icon={CheckCircle2}>
+            <CompletenessBlock data={data} />
+          </DashboardSection>
+          <DashboardSection title={t("dashboard.analytics.visitorsTrend14d")} icon={TrendingUp}>
+            <LineChart labels={timelineLabels} series={visitorsSeries} height={200} />
+          </DashboardSection>
+        </div>
       </div>
     );
   }
@@ -441,19 +470,38 @@ function AnalyticsBody({ sub, data }: { sub: AccountSub; data: DashboardAnalytic
   if (sub === "visits") {
     return (
       <div className="space-y-4">
-        <DashboardSection title={t("dashboard.analytics.visitsSection")} icon={Eye} accent>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <StatCard
-              label={t("dashboard.analytics.totalViews")}
-              value={fmt(data.visits.total)}
-              icon={Eye}
-              accent
-            />
-            <StatCard
-              label={t("dashboard.analytics.uniqueVisitors")}
-              value={fmt(data.summary.uniqueVisitors)}
-              icon={Users}
-            />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard
+            label={t("dashboard.analytics.totalViews")}
+            value={fmt(data.visits.total)}
+            icon={Eye}
+            accent
+          />
+          <StatCard
+            label={t("dashboard.analytics.uniqueVisitors")}
+            value={fmt(data.summary.uniqueVisitors)}
+            icon={Users}
+          />
+          <StatCard
+            label={t("dashboard.analytics.newVisitors3d")}
+            value={fmt(data.visits.newLast3Days)}
+            icon={TrendingUp}
+          />
+          <StatCard
+            label={t("dashboard.analytics.newVisitors7d")}
+            value={fmt(data.visits.newLast7Days)}
+            icon={TrendingUp}
+          />
+        </div>
+
+        <DashboardSection title={t("dashboard.analytics.trafficTrend")} icon={TrendingUp} accent>
+          <LineChart labels={timelineLabels} series={visitorsSeries} />
+          <p className="mt-2 text-xs text-white/35">{t("dashboard.analytics.timelineHint")}</p>
+        </DashboardSection>
+
+        <DashboardSection title={t("dashboard.analytics.visitorBreakdown")} icon={Users}>
+          <LineChart labels={timelineLabels} series={breakdownSeries} />
+          <div className="mt-4 grid grid-cols-2 gap-3">
             <StatCard
               label={t("dashboard.analytics.uniqueLoggedIn")}
               value={fmt(data.visits.uniqueLoggedIn)}
@@ -465,52 +513,6 @@ function AnalyticsBody({ sub, data }: { sub: AccountSub; data: DashboardAnalytic
               icon={Users}
             />
           </div>
-        </DashboardSection>
-
-        <DashboardSection title={t("dashboard.analytics.visitorBreakdown")} icon={Users}>
-          <StackedBar
-            segments={[
-              {
-                label: t("dashboard.analytics.uniqueLoggedIn"),
-                value: data.visits.uniqueLoggedIn,
-                color: "#8b5cf6",
-              },
-              {
-                label: t("dashboard.analytics.uniqueGuests"),
-                value: data.visits.uniqueGuests,
-                color: "#06b6d4",
-              },
-            ]}
-          />
-        </DashboardSection>
-
-        <DashboardSection title={t("dashboard.analytics.trafficTrend")} icon={TrendingUp}>
-          <HorizontalBarChart
-            tallBars
-            items={[
-              {
-                label: t("dashboard.analytics.totalViews"),
-                value: data.visits.total,
-                color: "#a855f7",
-              },
-              {
-                label: t("dashboard.analytics.uniqueVisitors"),
-                value: data.summary.uniqueVisitors,
-                color: "#6366f1",
-              },
-              {
-                label: t("dashboard.analytics.newVisitors3d"),
-                value: data.visits.newLast3Days,
-                color: "#f59e0b",
-              },
-              {
-                label: t("dashboard.analytics.newVisitors7d"),
-                value: data.visits.newLast7Days,
-                color: "#22c55e",
-              },
-            ]}
-          />
-          <p className="mt-4 text-xs text-white/35">{t("dashboard.analytics.visitsHint")}</p>
         </DashboardSection>
       </div>
     );
@@ -542,23 +544,18 @@ function AnalyticsBody({ sub, data }: { sub: AccountSub; data: DashboardAnalytic
           <StatCard
             label={t("dashboard.analytics.avgClicksPerLink")}
             value={avgClicks}
-            icon={BarChart3}
+            icon={Star}
           />
         </div>
 
-        <DashboardSection title={t("dashboard.analytics.metricsComparison")} icon={BarChart3}>
-          <HorizontalBarChart
-            tallBars
-            items={data.linkClicks.map((link) => ({
-              label: link.label,
-              value: link.clicks,
-              color: PLATFORM_CONFIG[link.platform as SocialPlatform]?.color ?? "#a855f7",
-            }))}
-          />
-        </DashboardSection>
+        {linkLabels.length > 0 ? (
+          <DashboardSection title={t("dashboard.analytics.clicksByLinkTrend")} icon={TrendingUp} accent>
+            <LineChart labels={linkLabels} series={linkSeries} />
+          </DashboardSection>
+        ) : null}
 
         <DashboardSection title={t("dashboard.analytics.linksSection")} icon={Link2}>
-          <LinkClicksList links={data.linkClicks} tallBars />
+          <LinkClicksList links={data.linkClicks} />
         </DashboardSection>
       </div>
     );

@@ -534,6 +534,10 @@ export const en: Messages = {
       metricsComparison: "Metrics comparison",
       avgClicksPerLink: "Average clicks per active link",
       completenessChart: "Progress by section",
+      visitorsTrend14d: "Visitor trend (14 days)",
+      timelineHint:
+        "New unique visitors per day (logged-in and guests). Based on each person's first visit.",
+      clicksByLinkTrend: "Clicks by link",
     },
     monochromeIcons: "Monochrome icons",
     iconsSection: "Icons",

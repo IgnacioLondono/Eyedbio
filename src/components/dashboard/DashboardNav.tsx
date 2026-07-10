@@ -6,14 +6,15 @@ import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   ChevronDown,
+  Compass,
   ExternalLink,
   HelpCircle,
   LifeBuoy,
   Search,
   Settings,
-  Share2,
 } from "lucide-react";
 import Logo from "@/components/layout/Logo";
+import AppAreaNav from "@/components/layout/AppAreaNav";
 import ShareProfileButton from "@/components/profile/ShareProfileButton";
 import { useI18n } from "@/components/providers/LocaleProvider";
 
@@ -122,7 +123,10 @@ export function DashboardSidebar({
   return (
     <aside className="hidden lg:flex h-full w-[260px] shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#0a0a10]">
       <div className="shrink-0 px-4 pt-5">
-        <Logo href="/" size="sm" className="mb-5 px-1" />
+        <Logo href="/" size="sm" className="mb-4 px-1" />
+        <div className="mb-4">
+          <AppAreaNav active="dashboard" />
+        </div>
 
         <div className="relative mb-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/30" />
@@ -197,6 +201,13 @@ export function DashboardSidebar({
       </nav>
 
       <div className="shrink-0 space-y-2 border-t border-white/[0.06] px-4 py-4">
+        <Link
+          href="/discover"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm font-medium text-white/70 transition-colors hover:bg-white/[0.06] hover:text-white"
+        >
+          <Compass className="h-4 w-4" />
+          {t("nav.discover")}
+        </Link>
         {supportEnabled ? (
           <Link
             href="/support"
