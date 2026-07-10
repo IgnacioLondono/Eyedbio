@@ -275,7 +275,7 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
         <ClaimProfileCta />
         <div
           className={`absolute inset-0 z-20 flex items-center justify-center overflow-y-auto px-6 py-6 ${
-            reserveBottomForCta ? "pb-28" : ""
+            reserveBottomForCta ? "pb-36 md:pb-40" : ""
           } ${needsGate ? "pointer-events-none" : ""}`}
         >
           <div className="mx-auto w-full max-w-md flex justify-center">

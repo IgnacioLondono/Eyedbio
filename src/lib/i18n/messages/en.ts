@@ -339,7 +339,7 @@ export const en: Messages = {
     tabDescriptions: {
       profile: "Name, bio, avatar and visibility",
       links: "Social links and buttons",
-      customize: "Background, audio, colors and style",
+      customize: "Profile, bio, media, audio and visual style",
       account: "Summary, stats and account settings",
     },
     accountSettings: "Account settings",
@@ -487,6 +487,10 @@ export const en: Messages = {
     subtabStyle: "Style",
     subtabNetworks: "Networks",
     subtabAddedLinks: "Added links",
+    audioConfigureLink: "Clip & player →",
+    audioUploadHint: "Upload the audio file in the Media tab (Audio card).",
+    avatarUploadHint: "Upload or change the avatar in the Media tab (Profile avatar card).",
+    cursorUploadHint: "Upload the cursor image in the Media tab (Cursor card).",
     accountSub: {
       summary: "Summary",
       analysis: "Profile analysis",

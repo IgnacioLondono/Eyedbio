@@ -58,7 +58,7 @@ export function DashboardSubnav({
   onChange: (id: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-1.5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1.5">
+    <div className="inline-flex w-fit max-w-full flex-wrap gap-1.5 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1.5">
       {items.map((item) => {
         const isActive = item.id === active;
         return (

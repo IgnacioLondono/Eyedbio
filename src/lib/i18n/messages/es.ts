@@ -422,6 +422,10 @@ export interface Messages {
     subtabStyle: string;
     subtabNetworks: string;
     subtabAddedLinks: string;
+    audioConfigureLink: string;
+    audioUploadHint: string;
+    avatarUploadHint: string;
+    cursorUploadHint: string;
     accountSub: {
       summary: string;
       analysis: string;
@@ -990,7 +994,7 @@ export const es: Messages = {
     tabDescriptions: {
       profile: "Nombre, bio, avatar y visibilidad",
       links: "Redes sociales y botones",
-      customize: "Fondo, audio, colores y estilo",
+      customize: "Perfil, bio, medios, audio y estilo visual",
       account: "Resumen, estadísticas y ajustes de cuenta",
     },
     accountSettings: "Ajustes de cuenta",
@@ -1138,6 +1142,10 @@ export const es: Messages = {
     subtabStyle: "Estilo",
     subtabNetworks: "Redes",
     subtabAddedLinks: "Enlaces añadidos",
+    audioConfigureLink: "Clip y reproductor →",
+    audioUploadHint: "Sube el archivo de audio en la pestaña Medios (tarjeta Audio).",
+    avatarUploadHint: "Sube o cambia el avatar en la pestaña Medios (tarjeta Avatar del perfil).",
+    cursorUploadHint: "Sube la imagen del cursor en la pestaña Medios (tarjeta Cursor).",
     accountSub: {
       summary: "Resumen",
       analysis: "Análisis de perfil",

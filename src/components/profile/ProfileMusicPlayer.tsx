@@ -55,9 +55,9 @@ export default function ProfileMusicPlayer({
   if (!compact && !interactive) return null;
 
   const positionClass = contained
-    ? "absolute bottom-3 left-1/2 -translate-x-1/2 z-30 w-[calc(100%-1.5rem)] max-w-[260px]"
-    : `fixed left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-sm ${
-        raised ? "bottom-24" : "bottom-4"
+    ? "absolute bottom-3 left-1/2 z-30 w-[calc(100%-1.5rem)] max-w-[260px] -translate-x-1/2"
+    : `fixed left-1/2 z-40 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 ${
+        raised ? "bottom-[11.5rem] md:bottom-[12.5rem]" : "bottom-4"
       }`;
 
   return (

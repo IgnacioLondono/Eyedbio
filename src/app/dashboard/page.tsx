@@ -33,7 +33,7 @@ import { resolveMusicPlayer, MUSIC_PLAYER_BLUR_MAX } from "@/lib/profile/music-p
 import { NAME_EFFECT_OPTIONS } from "@/lib/name-effects";
 import { NAME_ANIMATION_OPTIONS } from "@/lib/name-animations";
 import { getMessages } from "@/lib/i18n";
-import { resolveBackgroundType, getUploadLimitMb } from "@/lib/media/media-config";
+import { resolveBackgroundType } from "@/lib/media/media-config";
 import { backgroundHasAudio, getEffectiveAudioUrl, isBackgroundProfileAudio } from "@/lib/profile/profile-audio";
 import { resolveProfileDisplay } from "@/lib/profile/profile-display-config";
 import { useI18n } from "@/components/providers/LocaleProvider";
@@ -73,19 +73,20 @@ import type { PageOverlay } from "@/lib/profile/profile-overlay-config";
 
 const DASHBOARD_TAB_STORAGE_KEY = "eyed-dashboard-tab";
 
-const MAIN_VIEWS: DashboardView[] = ["profile", "links", "customize"];
+const MAIN_VIEWS: DashboardView[] = ["links", "customize"];
 const VALID_VIEWS: DashboardView[] = [...MAIN_VIEWS, "account"];
 
 function migrateLegacyTab(value: string): DashboardView | null {
-  if (value === "general") return "profile";
+  if (value === "general" || value === "profile") return "customize";
   if (value === "media" || value === "appearance") return "customize";
   if (VALID_VIEWS.includes(value as DashboardView)) return value as DashboardView;
   return null;
 }
 
 function parseView(value: string | null): DashboardView {
-  if (!value) return "profile";
-  return migrateLegacyTab(value) ?? "profile";
+  if (!value) return "customize";
+  if (value === "profile") return "customize";
+  return migrateLegacyTab(value) ?? "customize";
 }
 
 function readStoredDashboardTab(): DashboardView | null {
@@ -106,23 +107,37 @@ function parseAccountSub(value: string | null): AccountSub {
   return "summary";
 }
 
-function parseProfileSub(value: string | null): string {
-  if (value === "page" || value === "social") return value;
-  return "info";
-}
-
 function parseLinksSub(value: string | null): string {
   return value === "added" ? "added" : "networks";
 }
 
 function parseCustomizeSub(value: string | null): string {
-  return value === "style" ? "style" : "media";
+  if (
+    value === "profile" ||
+    value === "info" ||
+    value === "page" ||
+    value === "social"
+  ) {
+    return "profile";
+  }
+  if (
+    value === "media" ||
+    value === "audio" ||
+    value === "background" ||
+    value === "structure" ||
+    value === "card" ||
+    value === "icons" ||
+    value === "cursor"
+  ) {
+    return value;
+  }
+  if (value === "style") return "background";
+  return "profile";
 }
 
 function defaultSubForView(view: DashboardView): string {
-  if (view === "profile") return "info";
   if (view === "links") return "networks";
-  if (view === "customize") return "media";
+  if (view === "customize") return "profile";
   if (view === "account") return "summary";
   return "";
 }
@@ -152,22 +167,19 @@ function DashboardContent() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const profileRef = useRef<Profile | null>(null);
   const tabParam = searchParams.get("tab");
-  const view: DashboardView = tabParam ? parseView(tabParam) : "profile";
+  const view: DashboardView = tabParam ? parseView(tabParam) : "customize";
   const subParam = searchParams.get("sub");
   const accountSub = parseAccountSub(view === "account" ? subParam : null);
-  const profileSub = parseProfileSub(view === "profile" ? subParam : null);
   const linksSub = parseLinksSub(view === "links" ? subParam : null);
   const customizeSub = parseCustomizeSub(view === "customize" ? subParam : null);
   const activeSub =
-    view === "profile"
-      ? profileSub
-      : view === "links"
-        ? linksSub
-        : view === "customize"
-          ? customizeSub
-          : view === "account"
-            ? accountSub
-            : "";
+    view === "links"
+      ? linksSub
+      : view === "customize"
+        ? customizeSub
+        : view === "account"
+          ? accountSub
+          : "";
   const [isDirty, setIsDirty] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -226,10 +238,22 @@ function DashboardContent() {
   }, [pathname, router, searchParams]);
 
   useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "profile") {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("tab", "customize");
+      params.set("sub", "profile");
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      return;
+    }
     if (searchParams.get("tab")) return;
     const stored = readStoredDashboardTab();
-    if (stored && stored !== "profile") {
-      router.replace(`${pathname}?tab=${stored}`, { scroll: false });
+    if (stored) {
+      const sub = stored === "customize" ? defaultSubForView("customize") : defaultSubForView(stored);
+      router.replace(
+        sub ? `${pathname}?tab=${stored}&sub=${sub}` : `${pathname}?tab=${stored}`,
+        { scroll: false }
+      );
     }
   }, [pathname, router, searchParams]);
 
@@ -396,12 +420,8 @@ function DashboardContent() {
   const nameAnimationLabels = getMessages(locale).nameAnimations;
 
   const openAudioManager = () => {
-    if (view !== "customize") {
-      handleViewChange("customize");
-    }
-    window.setTimeout(() => {
-      document.getElementById("dashboard-audio")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 150);
+    persistTab("customize");
+    router.push("/dashboard?tab=customize&sub=audio");
   };
 
   const mediaUploadGrid = (
@@ -421,17 +441,28 @@ function DashboardContent() {
       onAvatarFocusChange={(avatarFocus) => updateSettings({ avatarFocus })}
       onCursorUploaded={(url) => updateSettings({ cursorUrl: url })}
       onCursorClear={() => updateSettings({ cursorUrl: "" })}
-      onOpenAudio={openAudioManager}
+      onAudioUploaded={(url) =>
+        update({
+          audioUrl: url,
+          audioSource: "upload",
+          audioEnabled: true,
+          audioStartTime: 0,
+          audioClipDuration: 30,
+        })
+      }
+      onAudioClear={() =>
+        update({
+          audioUrl: undefined,
+          audioEnabled: profile.audioSource === "background",
+          audioStartTime: 0,
+          audioClipDuration: 30,
+        })
+      }
+      onConfigureAudio={openAudioManager}
     />
   );
 
   const tabs = [
-    {
-      id: "profile" as DashboardView,
-      label: t("dashboard.tabs.profile"),
-      description: t("dashboard.tabDescriptions.profile"),
-      icon: UserRound,
-    },
     {
       id: "links" as DashboardView,
       label: t("dashboard.tabs.links"),
@@ -446,27 +477,44 @@ function DashboardContent() {
     },
   ];
 
+  const customizeSubLabels: Record<string, string> = {
+    profile: t("dashboard.subtabProfile"),
+    media: t("dashboard.subtabMedia"),
+    audio: t("dashboard.subtabAudio"),
+    background: t("dashboard.subtabBackground"),
+    structure: t("dashboard.subtabStructure"),
+    card: t("dashboard.subtabCard"),
+    icons: t("dashboard.subtabIcons"),
+    cursor: t("dashboard.subtabCursor"),
+  };
+
   const activeTabMeta =
     view === "account"
       ? {
           label: t(`dashboard.accountSub.${accountSub}`),
           description: t("dashboard.tabDescriptions.account"),
         }
-      : (tabs.find((item) => item.id === view) ?? tabs[0]);
+      : view === "customize"
+        ? {
+            label: customizeSubLabels[customizeSub] ?? tabs[1].label,
+            description: t("dashboard.tabDescriptions.customize"),
+          }
+        : (tabs.find((item) => item.id === view) ?? tabs[0]);
 
   const subTabItems: Partial<Record<DashboardView, { id: string; label: string }[]>> = {
-    profile: [
-      { id: "info", label: t("dashboard.subtabProfile") },
-      { id: "page", label: t("dashboard.subtabPage") },
-      { id: "social", label: t("dashboard.subtabSocial") },
-    ],
     links: [
       { id: "networks", label: t("dashboard.subtabNetworks") },
       { id: "added", label: t("dashboard.subtabAddedLinks") },
     ],
     customize: [
+      { id: "profile", label: t("dashboard.subtabProfile") },
       { id: "media", label: t("dashboard.subtabMedia") },
-      { id: "style", label: t("dashboard.subtabStyle") },
+      { id: "audio", label: t("dashboard.subtabAudio") },
+      { id: "background", label: t("dashboard.subtabBackground") },
+      { id: "structure", label: t("dashboard.subtabStructure") },
+      { id: "card", label: t("dashboard.subtabCard") },
+      { id: "icons", label: t("dashboard.subtabIcons") },
+      { id: "cursor", label: t("dashboard.subtabCursor") },
     ],
     account: [
       { id: "summary", label: t("dashboard.accountSub.summary") },
@@ -581,17 +629,15 @@ function DashboardContent() {
             {currentSubTabs.length > 0 ? (
               <DashboardSubnav items={currentSubTabs} active={activeSub} onChange={setActiveSub} />
             ) : null}
-            {view === "profile" && (
+            {view === "customize" && activeSub === "profile" && (
               <>
-                {activeSub === "info" && (
-                <>
                 <DashboardSection
                   title={t("dashboard.shareTitle")}
                   hint={t("dashboard.shareHint")}
                   icon={Share2}
                   accent
                 >
-                  <p className="rounded-xl border border-purple-500/15 bg-purple-500/5 px-3 py-2 text-xs font-mono text-purple-300/90 break-all">
+                  <p className="break-all rounded-xl border border-purple-500/15 bg-purple-500/5 px-3 py-2 font-mono text-xs text-purple-300/90">
                     eyed.bio/{profile.username}
                   </p>
                   <ShareProfileButton
@@ -601,7 +647,7 @@ function DashboardContent() {
                   />
                 </DashboardSection>
 
-                <DashboardSection title={t("dashboard.tabs.profile")} icon={UserRound}>
+                <DashboardSection title={t("dashboard.subtabProfile")} icon={UserRound}>
                   <DashboardField label={t("dashboard.displayName")}>
                     <input
                       type="text"
@@ -619,27 +665,9 @@ function DashboardContent() {
                       placeholder={t("dashboard.bioPlaceholder")}
                     />
                   </DashboardField>
-                  <FileUpload
-                    kind="avatar"
-                    label={t("dashboard.avatarLabel")}
-                    hint={t("dashboard.avatarHint")}
-                    currentUrl={profile.avatarUrl}
-                    mediaFocus={profile.settings.avatarFocus}
-                    onMediaFocusChange={(avatarFocus) => updateSettings({ avatarFocus })}
-                    onUploaded={(url) => update({ avatarUrl: url })}
-                    onClear={() => {
-                      update({
-                        avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.username}`,
-                      });
-                      updateSettings({ avatarFocus: { x: 50, y: 50, zoom: 1 } });
-                    }}
-                  />
+                  <p className="text-xs text-white/40">{t("dashboard.avatarUploadHint")}</p>
                 </DashboardSection>
-                </>
-                )}
 
-                {activeSub === "page" && (
-                <>
                 <DashboardSection
                   title={t("dashboard.entrySectionTitle")}
                   hint={t("dashboard.entrySectionHint")}
@@ -694,11 +722,7 @@ function DashboardContent() {
                     </select>
                   </DashboardField>
                 </DashboardSection>
-                </>
-                )}
 
-                {activeSub === "social" && (
-                <>
                 <DashboardSection title={t("dashboard.visibilitySectionTitle")} icon={Eye}>
                   <DashboardToggle
                     label={t("dashboard.showViewCount")}
@@ -763,8 +787,6 @@ function DashboardContent() {
                     />
                   </DashboardField>
                 </DashboardSection>
-                </>
-                )}
               </>
             )}
 
@@ -787,69 +809,40 @@ function DashboardContent() {
                   href={COMMUNITY_MEDIA_HUB_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block p-4 rounded-xl border border-purple-500/25 bg-purple-500/10 hover:bg-purple-500/15 transition-colors"
+                  className="block rounded-xl border border-purple-500/25 bg-purple-500/10 p-3 transition-colors hover:bg-purple-500/15"
                 >
                   <p className="text-sm font-medium text-white">{t("dashboard.mediaResourcesTitle")}</p>
-                  <p className="text-xs text-white/45 mt-1">{t("dashboard.mediaResourcesHint")}</p>
-                  <span className="inline-flex items-center gap-1 mt-2 text-xs text-purple-400">
+                  <p className="mt-1 text-xs text-white/45">{t("dashboard.mediaResourcesHint")}</p>
+                  <span className="mt-2 inline-flex items-center gap-1 text-xs text-purple-400">
                     {t("dashboard.mediaResourcesLink")}
-                    <ExternalLink className="w-3 h-3 shrink-0" />
+                    <ExternalLink className="h-3 w-3 shrink-0" />
                   </span>
                 </a>
 
-                <div className="p-4 rounded-xl bg-white/[0.03] border border-white/5 space-y-4">
-                  <div>
-                    <h3 className="text-sm font-medium text-white">{t("dashboard.backgroundTitle")}</h3>
-                    <p className="text-xs text-white/40 mt-1 mb-3">
-                      {t("dashboard.backgroundHint")}
-                    </p>
+                {resolveCardLayout(profile.settings) === "banner" ? (
+                  <DashboardSection title={t("dashboard.bannerTitle")} hint={t("dashboard.bannerHint")}>
                     <FileUpload
-                      kind="background"
+                      kind="banner"
                       label=""
-                      hint={tVars("dashboard.backgroundHintSave", {
-                        limit: getUploadLimitMb("background"),
-                      })}
-                      currentUrl={profile.settings.backgroundUrl}
-                      mediaType={profile.backgroundType}
-                      mediaFocus={profile.settings.backgroundFocus}
-                      onMediaFocusChange={(backgroundFocus) =>
-                        updateSettings({ backgroundFocus })
+                      hint={t("dashboard.bannerFileHint")}
+                      currentUrl={profile.settings.bannerUrl}
+                      mediaFocus={profile.settings.bannerFocus}
+                      onMediaFocusChange={(bannerFocus) => updateSettings({ bannerFocus })}
+                      onUploaded={(url) => updateSettings({ bannerUrl: url })}
+                      onClear={() =>
+                        updateSettings({
+                          bannerUrl: "",
+                          bannerFocus: { x: 50, y: 50, zoom: 1 },
+                        })
                       }
-                      onUploaded={(url, backgroundType) => updateBackground(url, backgroundType)}
-                      onClear={clearBackground}
                     />
-                  </div>
-                </div>
-
-                {resolveCardLayout(profile.settings) === "banner" && (
-                  <div className="p-4 rounded-xl bg-white/[0.03] border border-purple-500/20 space-y-3">
-                    <div>
-                      <h3 className="text-sm font-medium text-white">{t("dashboard.bannerTitle")}</h3>
-                      <p className="text-xs text-white/40 mt-1 mb-3">
-                        {t("dashboard.bannerHint")}
-                      </p>
-                      <FileUpload
-                        kind="banner"
-                        label=""
-                        hint={t("dashboard.bannerFileHint")}
-                        currentUrl={profile.settings.bannerUrl}
-                        mediaFocus={profile.settings.bannerFocus}
-                        onMediaFocusChange={(bannerFocus) => updateSettings({ bannerFocus })}
-                        onUploaded={(url) => updateSettings({ bannerUrl: url })}
-                        onClear={() =>
-                          updateSettings({
-                            bannerUrl: "",
-                            bannerFocus: { x: 50, y: 50, zoom: 1 },
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
+                  </DashboardSection>
+                ) : null}
+                </>
                 )}
 
-                <div id="dashboard-audio" className="scroll-mt-6 space-y-4">
-                {site.profileAudioEnabled ? (
-                  <>
+                {activeSub === "audio" && site.profileAudioEnabled && (
+                <>
                     <DashboardField label={t("dashboard.audioSource")}>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <button
@@ -896,33 +889,14 @@ function DashboardContent() {
                     </DashboardField>
 
                     {profile.audioSource === "background" ? (
-                      <p className="text-[11px] text-white/40 -mt-2">
+                      <p className="-mt-2 text-[11px] text-white/40">
                         {t("dashboard.audioSourceBackgroundActive")}
                       </p>
-                    ) : (
-                      <FileUpload
-                        kind="audio"
-                        label={t("dashboard.audioLabel")}
-                        hint={t("dashboard.audioHint")}
-                        currentUrl={profile.audioUrl}
-                        onUploaded={(url) =>
-                          update({
-                            audioUrl: url,
-                            audioEnabled: true,
-                            audioStartTime: 0,
-                            audioClipDuration: 30,
-                          })
-                        }
-                        onClear={() =>
-                          update({
-                            audioUrl: undefined,
-                            audioEnabled: profile.audioSource === "background",
-                            audioStartTime: 0,
-                            audioClipDuration: 30,
-                          })
-                        }
-                      />
-                    )}
+                    ) : !profile.audioUrl ? (
+                      <p className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-3 py-2.5 text-xs text-white/45">
+                        {t("dashboard.audioUploadHint")}
+                      </p>
+                    ) : null}
 
                     {profile.audioSource !== "background" && profile.audioUrl ? (
                       <AudioClipSelector
@@ -1045,16 +1019,12 @@ function DashboardContent() {
                         </>
                       )}
                     </DashboardSection>
-                  </>
-                ) : null}
-                </div>
                 </>
                 )}
 
-                {activeSub === "style" && (
+                {activeSub === "background" && (
                 <>
-                <DashboardSectionLabel>{t("dashboard.generalCustomization")}</DashboardSectionLabel>
-                <DashboardSection title={t("dashboard.tabs.customize")} icon={Palette}>
+                <DashboardSection title={t("dashboard.subtabBackground")} icon={Palette}>
                   <DashboardField label={t("dashboard.backgroundEffect")}>
                     <BackgroundEffectSelect
                       value={profile.settings.backgroundEffect}
@@ -1133,7 +1103,11 @@ function DashboardContent() {
                   onChange={(profileBlur) => updateSettings({ profileBlur })}
                 />
                 </DashboardSection>
+                </>
+                )}
 
+                {activeSub === "structure" && (
+                <>
                 <DashboardSectionLabel>{t("dashboard.structureLinks")}</DashboardSectionLabel>
 
                 <CardLayoutPicker
@@ -1157,7 +1131,11 @@ function DashboardContent() {
                   onLinkStyleChange={(linkStyle) => updateSettings({ linkStyle })}
                   onAvatarStyleChange={(avatarStyle) => updateSettings({ avatarStyle })}
                 />
+                </>
+                )}
 
+                {activeSub === "card" && (
+                <>
                 <DashboardSectionLabel>{t("dashboard.cardSection")}</DashboardSectionLabel>
 
                 <DashboardToggle
@@ -1251,6 +1229,11 @@ function DashboardContent() {
                   disabled={profile.settings.transparentCard}
                 />
 
+                </>
+                )}
+
+                {activeSub === "icons" && (
+                <>
                 <DashboardSectionLabel>{t("dashboard.iconsSection")}</DashboardSectionLabel>
 
                 <DashboardSection>
@@ -1275,18 +1258,15 @@ function DashboardContent() {
                     onClear={() => updateSettings({ browserTabIconUrl: "" })}
                   />
                 </DashboardSection>
+                </>
+                )}
 
+                {activeSub === "cursor" && (
+                <>
                 <DashboardSectionLabel>{t("dashboard.cursorSection")}</DashboardSectionLabel>
 
                 <DashboardSection>
-                  <FileUpload
-                    kind="cursor"
-                    label={t("dashboard.cursorImageLabel")}
-                    hint={t("dashboard.cursorImageHint")}
-                    currentUrl={profile.settings.cursorUrl}
-                    onUploaded={(url) => updateSettings({ cursorUrl: url })}
-                    onClear={() => updateSettings({ cursorUrl: "" })}
-                  />
+                  <p className="text-xs text-white/40">{t("dashboard.cursorUploadHint")}</p>
 
                   <DashboardToggle
                     label={t("dashboard.cursorTrailEnabled")}

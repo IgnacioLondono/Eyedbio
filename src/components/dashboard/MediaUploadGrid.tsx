@@ -3,7 +3,6 @@
 import type { BackgroundType, Profile } from "@/types/profile";
 import type { MediaFocus } from "@/lib/media/media-focus";
 import FileUpload from "@/components/media/FileUpload";
-import { Music } from "lucide-react";
 import { useI18n } from "@/components/providers/LocaleProvider";
 
 interface Props {
@@ -17,7 +16,9 @@ interface Props {
   onAvatarFocusChange: (focus: MediaFocus) => void;
   onCursorUploaded: (url: string) => void;
   onCursorClear: () => void;
-  onOpenAudio: () => void;
+  onAudioUploaded: (url: string) => void;
+  onAudioClear: () => void;
+  onConfigureAudio?: () => void;
 }
 
 export default function MediaUploadGrid({
@@ -31,14 +32,18 @@ export default function MediaUploadGrid({
   onAvatarFocusChange,
   onCursorUploaded,
   onCursorClear,
-  onOpenAudio,
+  onAudioUploaded,
+  onAudioClear,
+  onConfigureAudio,
 }: Props) {
   const { t } = useI18n();
   const hasAudio = Boolean(profile.audioUrl) || profile.audioSource === "background";
+  const hasCustomAvatar =
+    Boolean(profile.avatarUrl) && !profile.avatarUrl.includes("dicebear.com");
 
   return (
-    <section className="space-y-4">
-      <h2 className="text-lg font-semibold text-white">{t("dashboard.fileUploader")}</h2>
+    <section className="space-y-3">
+      <h2 className="text-base font-semibold text-white">{t("dashboard.fileUploader")}</h2>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <FileUpload
           kind="background"
@@ -53,30 +58,24 @@ export default function MediaUploadGrid({
         />
 
         {profileAudioEnabled ? (
-          <div className="flex h-full flex-col rounded-xl border border-white/[0.08] bg-[#12121a] p-3">
-            <p className="mb-3 text-sm font-medium text-white/90">{t("dashboard.uploadCardAudio")}</p>
-            <div className="flex min-h-[140px] flex-1 flex-col">
-              {hasAudio ? (
-                <button
-                  type="button"
-                  onClick={onOpenAudio}
-                  className="relative flex h-full min-h-[120px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] text-xs text-white/50 transition-colors hover:border-purple-500/30 hover:bg-purple-500/5"
-                >
-                  <Music className="h-6 w-6 text-purple-400" />
-                  <span>{t("fileUpload.audioUploaded")}</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={onOpenAudio}
-                  className="flex h-full min-h-[120px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-white/10 text-xs text-white/40 transition-colors hover:border-purple-500/30 hover:bg-purple-500/5 hover:text-white/70"
-                >
-                  <span className="px-3 text-center leading-snug">
-                    {t("dashboard.uploadCardClickAudio")}
-                  </span>
-                </button>
-              )}
-            </div>
+          <div className="flex h-full flex-col">
+            <FileUpload
+              kind="audio"
+              layout="card"
+              label={t("dashboard.uploadCardAudio")}
+              currentUrl={profile.audioSource === "background" ? undefined : profile.audioUrl}
+              onUploaded={onAudioUploaded}
+              onClear={onAudioClear}
+            />
+            {hasAudio && onConfigureAudio ? (
+              <button
+                type="button"
+                onClick={onConfigureAudio}
+                className="mt-1.5 w-full text-center text-[10px] text-purple-400/90 transition-colors hover:text-purple-300"
+              >
+                {t("dashboard.audioConfigureLink")}
+              </button>
+            ) : null}
           </div>
         ) : null}
 
@@ -84,7 +83,7 @@ export default function MediaUploadGrid({
           kind="avatar"
           layout="card"
           label={t("dashboard.uploadCardAvatar")}
-          currentUrl={profile.avatarUrl}
+          currentUrl={hasCustomAvatar ? profile.avatarUrl : undefined}
           mediaFocus={profile.settings.avatarFocus}
           onMediaFocusChange={onAvatarFocusChange}
           onUploaded={onAvatarUploaded}

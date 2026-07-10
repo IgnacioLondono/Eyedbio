@@ -19,7 +19,7 @@ import { useI18n } from "@/components/providers/LocaleProvider";
 
 import type { AccountSub } from "@/components/dashboard/DashboardAccountAnalytics";
 
-export type DashboardView = "profile" | "links" | "customize" | "account";
+export type DashboardView = "links" | "customize" | "account";
 
 export interface DashboardTabItem {
   id: DashboardView;
