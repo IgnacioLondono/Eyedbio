@@ -38,6 +38,7 @@ export function getPlatformTileStyles(color: string) {
 type Props = {
   platform: SocialPlatform;
   size?: keyof typeof TILE_SIZES;
+  fill?: boolean;
   title?: string;
   onClick?: () => void;
   className?: string;
@@ -47,6 +48,7 @@ type Props = {
 export default function PlatformBrandTile({
   platform,
   size = "md",
+  fill = false,
   title,
   onClick,
   className = "",
@@ -55,7 +57,9 @@ export default function PlatformBrandTile({
   const config = PLATFORM_CONFIG[platform];
   const styles = tileStyles(config.color);
   const sizeClass = TILE_SIZES[size];
-  const sharedClassName = `inline-flex shrink-0 items-center justify-center border transition-all ${sizeClass.box} ${sizeClass.icon} ${className}`;
+  const sharedClassName = fill
+    ? `flex aspect-square w-full items-center justify-center rounded-xl border transition-all ${sizeClass.icon} ${className}`
+    : `inline-flex shrink-0 items-center justify-center border transition-all ${sizeClass.box} ${sizeClass.icon} ${className}`;
 
   if (as === "div") {
     return (

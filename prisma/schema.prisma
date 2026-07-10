@@ -172,5 +172,6 @@ model SocialLink {
   label     String?
   iconUrl   String?
   clicks    Int     @default(0)
+  archived  Boolean @default(false)
   sortOrder Int     @default(0)
 }

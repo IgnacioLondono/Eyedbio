@@ -455,6 +455,12 @@ export interface Messages {
       noLinkClicks: string;
       clickCount: string;
       loadError: string;
+      summaryOverview: string;
+      summaryTopLinks: string;
+      summaryVisitsSnapshot: string;
+      visitsSection: string;
+      linksSection: string;
+      completenessDone: string;
     };
     monochromeIcons: string;
     iconsSection: string;
@@ -1176,6 +1182,12 @@ export const es: Messages = {
       noLinkClicks: "Aún no hay toques en tus enlaces. Comparte tu perfil para empezar a recopilar datos.",
       clickCount: "{count} toques",
       loadError: "No se pudieron cargar las estadísticas.",
+      summaryOverview: "Vista general",
+      summaryTopLinks: "Enlaces más tocados",
+      summaryVisitsSnapshot: "Actividad de visitas",
+      visitsSection: "Estadísticas de visitas",
+      linksSection: "Toques por enlace",
+      completenessDone: "{done} de {total} pasos completados",
     },
     monochromeIcons: "Iconos monocromáticos",
     iconsSection: "Iconos",

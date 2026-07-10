@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { SocialLink, SocialPlatform } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/config/platforms";
-import { PLATFORM_CATEGORIES, getPlatformUrlPlaceholder } from "@/lib/config/platform-categories";
+import { LINK_PICKER_PLATFORMS, getPlatformUrlPlaceholder } from "@/lib/config/platform-categories";
 import { isPlatformUsernameField, sanitizeSocialLinkInput } from "@/lib/social-link-utils";
 import CustomLinkIcon from "@/components/profile/CustomLinkIcon";
 import { PlatformIcon } from "@/components/shared/PlatformIcons";
@@ -243,7 +243,7 @@ export default function LinkEditor({
   const atPlatformCountLimit = activePlatformCount >= MAX_PLATFORM_LINKS;
   const atCustomCountLimit = activeCustomCount >= MAX_CUSTOM_LINKS;
 
-  const availablePlatforms = PLATFORM_CATEGORIES.flatMap((category) => category.platforms).filter(
+  const availablePlatforms = LINK_PICKER_PLATFORMS.filter(
     (platform) => !usedPlatforms.has(platform)
   );
 
@@ -316,28 +316,33 @@ export default function LinkEditor({
           <p className="mb-3 text-xs text-white/45">{t("linkEditor.pickerSubtitle")}</p>
 
           {showPlatformPicker ? (
-            <div className="grid grid-cols-5 gap-2 sm:grid-cols-6 md:grid-cols-8">
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12">
               {availablePlatforms.map((platform) => (
                 <PlatformBrandTile
                   key={platform}
                   platform={platform}
                   size="sm"
+                  fill
                   onClick={() => addLink(platform)}
                 />
               ))}
-              {!atCustomLimit ? (
-                <button
-                  type="button"
-                  onClick={() => insertLink("custom")}
-                  className="col-span-2 flex min-h-[72px] flex-col items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-2 py-2 transition-all hover:border-purple-500/35 hover:bg-purple-500/10"
-                >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-white/55">
-                    <Globe className="h-5 w-5" />
-                  </span>
-                  <span className="text-[10px] font-medium text-white">{t("linkEditor.customTitle")}</span>
-                </button>
-              ) : null}
             </div>
+          ) : null}
+
+          {!atCustomLimit ? (
+            <button
+              type="button"
+              onClick={() => insertLink("custom")}
+              className="mt-3 flex w-full items-center gap-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-3 py-3 text-left transition-all hover:border-purple-500/35 hover:bg-purple-500/10 sm:max-w-md"
+            >
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-white/55">
+                <Globe className="h-5 w-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-medium text-white">{t("linkEditor.customTitle")}</span>
+                <span className="mt-0.5 block text-xs text-white/40">{t("linkEditor.customUrlDescription")}</span>
+              </span>
+            </button>
           ) : null}
         </section>
       ) : null}

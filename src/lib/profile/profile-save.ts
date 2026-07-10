@@ -51,8 +51,9 @@ export async function saveUserProfile(
         .map((link) => link.id);
 
       if (toDelete.length > 0) {
-        await tx.socialLink.deleteMany({
+        await tx.socialLink.updateMany({
           where: { id: { in: toDelete }, userId },
+          data: { archived: true, url: "", sortOrder: 9999 },
         });
       }
 
@@ -60,7 +61,7 @@ export async function saveUserProfile(
         const link = profile.links[index];
         const owned = await tx.socialLink.findUnique({
           where: { id: link.id },
-          select: { userId: true },
+          select: { userId: true, archived: true },
         });
 
         if (owned && owned.userId !== userId) {
@@ -76,20 +77,44 @@ export async function saveUserProfile(
               label: link.label ?? null,
               iconUrl: link.iconUrl ?? null,
               sortOrder: index,
+              archived: false,
             },
           });
         } else {
-          await tx.socialLink.create({
-            data: {
-              id: link.id,
-              userId,
-              platform: link.platform,
-              url: link.url,
-              label: link.label ?? null,
-              iconUrl: link.iconUrl ?? null,
-              sortOrder: index,
-            },
-          });
+          const archivedReuse =
+            link.platform !== "custom"
+              ? await tx.socialLink.findFirst({
+                  where: { userId, platform: link.platform, archived: true },
+                  orderBy: { clicks: "desc" },
+                })
+              : null;
+
+          if (archivedReuse) {
+            await tx.socialLink.update({
+              where: { id: archivedReuse.id },
+              data: {
+                platform: link.platform,
+                url: link.url,
+                label: link.label ?? null,
+                iconUrl: link.iconUrl ?? null,
+                sortOrder: index,
+                archived: false,
+              },
+            });
+          } else {
+            await tx.socialLink.create({
+              data: {
+                id: link.id,
+                userId,
+                platform: link.platform,
+                url: link.url,
+                label: link.label ?? null,
+                iconUrl: link.iconUrl ?? null,
+                sortOrder: index,
+                archived: false,
+              },
+            });
+          }
         }
       }
 

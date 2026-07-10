@@ -12,6 +12,7 @@ export async function POST(_request: Request, { params }: Props) {
   const link = await prisma.socialLink.findFirst({
     where: {
       id: linkId,
+      archived: false,
       user: { username: normalizedUsername },
     },
     select: { id: true },

@@ -430,7 +430,7 @@ export default function FileUpload({
       onClick={() => inputRef.current?.click()}
       className={
         isCard
-          ? `flex h-full min-h-[120px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center text-xs transition-all disabled:opacity-50 ${
+          ? `flex h-[124px] w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center text-xs transition-all disabled:opacity-50 ${
               dragOver
                 ? "border-purple-500/50 bg-purple-500/10 text-white"
                 : "border-white/10 text-white/40 hover:border-purple-500/30 hover:bg-purple-500/5 hover:text-white/70"
@@ -502,10 +502,10 @@ export default function FileUpload({
       )}
 
       {previewUrl && !isAudio && (
-        <div className={isCard ? "relative flex-1" : "space-y-2"}>
+        <div className={isCard ? "relative h-[124px] shrink-0" : "space-y-2"}>
           <div
-            className={`relative overflow-hidden border border-white/10 bg-white/5 ${
-              isCard ? "h-[120px] rounded-lg" : "rounded-xl"
+            className={`relative h-full overflow-hidden border border-white/10 bg-white/5 ${
+              isCard ? "rounded-lg" : "rounded-xl"
             }`}
           >
             <MediaPreview
@@ -555,7 +555,7 @@ export default function FileUpload({
       )}
 
       {currentUrl && isAudio && isCard && (
-        <div className="relative flex min-h-[120px] flex-col items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
+        <div className="relative flex h-[124px] shrink-0 flex-col items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
           <Music className="h-6 w-6 text-purple-400" />
           <span className="text-xs text-white/50">{t("fileUpload.audioUploaded")}</span>
           {onClear ? (
@@ -617,9 +617,9 @@ export default function FileUpload({
 
   if (isCard) {
     return (
-      <div className="flex h-full flex-col rounded-xl border border-white/[0.08] bg-[#12121a] p-3">
-        <p className="mb-3 text-sm font-medium text-white/90">{label}</p>
-        <div className="flex min-h-[140px] flex-1 flex-col gap-2">{content}</div>
+      <div className="flex h-full min-h-[200px] flex-col rounded-xl border border-white/[0.08] bg-[#12121a] p-3">
+        <p className="mb-2 shrink-0 text-sm font-medium text-white/90">{label}</p>
+        <div className="flex min-h-[124px] flex-1 flex-col gap-2">{content}</div>
       </div>
     );
   }

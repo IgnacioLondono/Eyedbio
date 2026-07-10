@@ -114,7 +114,7 @@ export async function fetchDashboardAnalytics(
     prisma.socialLink.findMany({
       where: { userId },
       orderBy: { sortOrder: "asc" },
-      select: { id: true, platform: true, url: true, label: true, clicks: true },
+      select: { id: true, platform: true, url: true, label: true, clicks: true, archived: true },
     }),
   ]);
 
@@ -125,7 +125,7 @@ export async function fetchDashboardAnalytics(
   const completeness = computeProfileCompleteness(profile);
 
   const linkClicks = dbLinks
-    .filter((link) => link.url.trim().length > 0)
+    .filter((link) => !link.archived && link.url.trim().length > 0)
     .map((link) => {
       const config = PLATFORM_CONFIG[link.platform as keyof typeof PLATFORM_CONFIG];
       return {

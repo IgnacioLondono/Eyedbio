@@ -141,6 +141,7 @@ export function userToProfile(user: UserWithLinks): Profile {
     views: user.views,
     badges: parseBadges(user.badges),
     links: user.links
+      .filter((link) => !link.archived)
       .sort((a, b) => a.sortOrder - b.sortOrder)
       .map((link) => ({
         id: link.id,

@@ -44,7 +44,8 @@ export default function MediaUploadGrid({
   return (
     <section className="space-y-3">
       <h2 className="text-base font-semibold text-white">{t("dashboard.fileUploader")}</h2>
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid auto-rows-fr gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="min-h-[200px]">
         <FileUpload
           kind="background"
           layout="card"
@@ -56,9 +57,10 @@ export default function MediaUploadGrid({
           onUploaded={onBackgroundUploaded}
           onClear={onBackgroundClear}
         />
+        </div>
 
         {profileAudioEnabled ? (
-          <div className="flex h-full flex-col">
+          <div className="flex min-h-[200px] flex-col [&>div]:h-full">
             <FileUpload
               kind="audio"
               layout="card"
@@ -79,6 +81,7 @@ export default function MediaUploadGrid({
           </div>
         ) : null}
 
+        <div className="min-h-[200px]">
         <FileUpload
           kind="avatar"
           layout="card"
@@ -89,7 +92,9 @@ export default function MediaUploadGrid({
           onUploaded={onAvatarUploaded}
           onClear={onAvatarClear}
         />
+        </div>
 
+        <div className="min-h-[200px]">
         <FileUpload
           kind="cursor"
           layout="card"
@@ -98,6 +103,7 @@ export default function MediaUploadGrid({
           onUploaded={onCursorUploaded}
           onClear={onCursorClear}
         />
+        </div>
       </div>
     </section>
   );

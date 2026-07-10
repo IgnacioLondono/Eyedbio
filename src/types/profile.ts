@@ -32,6 +32,13 @@ export type SocialPlatform =
   | "minecraft"
   | "battlenet"
   | "riotgames"
+  | "paypal"
+  | "gitlab"
+  | "bluesky"
+  | "patreon"
+  | "kofi"
+  | "signal"
+  | "vk"
   | "email"
   | "website"
   | "custom";
