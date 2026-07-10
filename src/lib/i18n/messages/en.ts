@@ -14,6 +14,7 @@ export const en: Messages = {
     bio: "Bio",
     showPassword: "Show password",
     hidePassword: "Hide password",
+    holdHintRelease: "Release to close",
   },
   nav: {
     features: "Features",
@@ -663,6 +664,7 @@ export const en: Messages = {
     hideLink: "Hide on profile",
     showLink: "Show on profile",
     uploadError: "Upload error",
+    holdTapToAdd: "Tap quickly to add",
   },
   fileUpload: {
     upload: "Upload file",

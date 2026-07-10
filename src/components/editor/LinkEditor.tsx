@@ -18,6 +18,7 @@ import { isPlatformUsernameField, sanitizeSocialLinkInput } from "@/lib/social-l
 import CustomLinkIcon from "@/components/profile/CustomLinkIcon";
 import { PlatformIcon } from "@/components/shared/PlatformIcons";
 import PlatformBrandTile, { getPlatformTileStyles } from "@/components/editor/PlatformBrandTile";
+import { HoldHint } from "@/components/shared/HoldHint";
 import { createEmptyLink } from "@/lib/profile/profile-mapper";
 import {
   MAX_CUSTOM_LINKS,
@@ -84,26 +85,28 @@ function LinkIconButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={uploading}
-        className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-[#0a0a10]"
-        style={tileStyle}
-        aria-label={t("linkEditor.changeIcon")}
-      >
-        {uploading ? (
-          <Loader2 className="h-3.5 w-3.5 animate-spin text-white/50" />
-        ) : link.iconUrl ? (
-          <CustomLinkIcon iconUrl={link.iconUrl} color="#a855f7" sizeClass="h-6 w-6" />
-        ) : isCustom ? (
-          <Globe className="h-4 w-4 text-white/55" />
-        ) : (
-          <span className="[&_svg]:h-4 [&_svg]:w-4" style={{ color: config.color }}>
-            <PlatformIcon platform={link.platform} />
-          </span>
-        )}
-      </button>
+      <HoldHint label={t("linkEditor.changeIcon")}>
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-[#0a0a10]"
+          style={tileStyle}
+          aria-label={t("linkEditor.changeIcon")}
+        >
+          {uploading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-white/50" />
+          ) : link.iconUrl ? (
+            <CustomLinkIcon iconUrl={link.iconUrl} color="#a855f7" sizeClass="h-6 w-6" />
+          ) : isCustom ? (
+            <Globe className="h-4 w-4 text-white/55" />
+          ) : (
+            <span className="flex h-4 w-4 items-center justify-center [&_svg]:h-full [&_svg]:w-full">
+              <PlatformIcon platform={link.platform} />
+            </span>
+          )}
+        </button>
+      </HoldHint>
       <input
         ref={inputRef}
         type="file"
@@ -147,37 +150,41 @@ function LinkCard({
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="truncate text-sm font-medium text-white">{displayLabel}</p>
         <div className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setEditing((v) => !v)}
-            className={`rounded-lg p-1.5 transition-colors ${
-              editing
-                ? "bg-white/10 text-white"
-                : "text-white/45 hover:bg-white/5 hover:text-white"
-            }`}
-            aria-label={t("linkEditor.editLink")}
-            title={t("linkEditor.editLink")}
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={onToggleHidden}
-            disabled={!hasUrl}
-            className="rounded-lg p-1.5 text-white/45 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-30"
-            aria-label={hidden ? t("linkEditor.showLink") : t("linkEditor.hideLink")}
-            title={hidden ? t("linkEditor.showLink") : t("linkEditor.hideLink")}
-          >
-            {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-          </button>
-          <button
-            type="button"
-            onClick={onRemove}
-            className="rounded-lg bg-red-500/15 p-1.5 text-red-400/80 transition-colors hover:bg-red-500/25 hover:text-red-400"
-            aria-label={tVars("linkEditor.remove", { label: config.label })}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          <HoldHint label={t("linkEditor.editLink")}>
+            <button
+              type="button"
+              onClick={() => setEditing((v) => !v)}
+              className={`rounded-lg p-1.5 transition-colors ${
+                editing
+                  ? "bg-white/10 text-white"
+                  : "text-white/45 hover:bg-white/5 hover:text-white"
+              }`}
+              aria-label={t("linkEditor.editLink")}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          </HoldHint>
+          <HoldHint label={hidden ? t("linkEditor.showLink") : t("linkEditor.hideLink")}>
+            <button
+              type="button"
+              onClick={onToggleHidden}
+              disabled={!hasUrl}
+              className="rounded-lg p-1.5 text-white/45 transition-colors hover:bg-white/5 hover:text-white disabled:opacity-30"
+              aria-label={hidden ? t("linkEditor.showLink") : t("linkEditor.hideLink")}
+            >
+              {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </HoldHint>
+          <HoldHint label={tVars("linkEditor.remove", { label: config.label })}>
+            <button
+              type="button"
+              onClick={onRemove}
+              className="rounded-lg bg-red-500/15 p-1.5 text-red-400/80 transition-colors hover:bg-red-500/25 hover:text-red-400"
+              aria-label={tVars("linkEditor.remove", { label: config.label })}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </HoldHint>
         </div>
       </div>
 
@@ -323,6 +330,7 @@ export default function LinkEditor({
                   platform={platform}
                   size="sm"
                   fill
+                  hintDescription={`${t("linkEditor.holdTapToAdd")} · ${t("common.holdHintRelease")}`}
                   onClick={() => addLink(platform)}
                 />
               ))}
@@ -330,19 +338,24 @@ export default function LinkEditor({
           ) : null}
 
           {!atCustomLimit ? (
-            <button
-              type="button"
-              onClick={() => insertLink("custom")}
-              className="mt-3 flex w-full items-center gap-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-3 py-3 text-left transition-all hover:border-purple-500/35 hover:bg-purple-500/10 sm:max-w-md"
+            <HoldHint
+              label={t("linkEditor.customTitle")}
+              description={t("linkEditor.customUrlDescription")}
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-white/55">
-                <Globe className="h-5 w-5" />
-              </span>
-              <span className="min-w-0">
-                <span className="block text-sm font-medium text-white">{t("linkEditor.customTitle")}</span>
-                <span className="mt-0.5 block text-xs text-white/40">{t("linkEditor.customUrlDescription")}</span>
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => insertLink("custom")}
+                className="mt-3 flex w-full items-center gap-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] px-3 py-3 text-left transition-all hover:border-purple-500/35 hover:bg-purple-500/10 sm:max-w-md"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/[0.05] text-white/55">
+                  <Globe className="h-5 w-5" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium text-white">{t("linkEditor.customTitle")}</span>
+                  <span className="mt-0.5 block text-xs text-white/40">{t("linkEditor.customUrlDescription")}</span>
+                </span>
+              </button>
+            </HoldHint>
           ) : null}
         </section>
       ) : null}

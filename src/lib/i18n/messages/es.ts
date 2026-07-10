@@ -12,6 +12,7 @@ export interface Messages {
     bio: string;
     showPassword: string;
     hidePassword: string;
+    holdHintRelease: string;
   };
   nav: {
     features: string;
@@ -589,6 +590,7 @@ export interface Messages {
     hideLink: string;
     showLink: string;
     uploadError: string;
+    holdTapToAdd: string;
   };
   fileUpload: {
     upload: string;
@@ -681,6 +683,7 @@ export const es: Messages = {
     bio: "Bio",
     showPassword: "Mostrar contraseña",
     hidePassword: "Ocultar contraseña",
+    holdHintRelease: "Suelta para cerrar",
   },
   nav: {
     features: "Características",
@@ -1330,6 +1333,7 @@ export const es: Messages = {
     hideLink: "Ocultar en el perfil",
     showLink: "Mostrar en el perfil",
     uploadError: "Error al subir",
+    holdTapToAdd: "Pulsa rápido para añadir",
   },
   fileUpload: {
     upload: "Subir archivo",
