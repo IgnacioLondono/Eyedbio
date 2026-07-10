@@ -10,14 +10,17 @@ import {
   HelpCircle,
   LifeBuoy,
   Search,
+  Settings,
   Share2,
 } from "lucide-react";
 import Logo from "@/components/layout/Logo";
 import ShareProfileButton from "@/components/profile/ShareProfileButton";
 import { useI18n } from "@/components/providers/LocaleProvider";
 
+export type DashboardView = "profile" | "links" | "customize" | "account";
+
 export interface DashboardTabItem {
-  id: string;
+  id: DashboardView;
   label: string;
   description: string;
   icon: LucideIcon;
@@ -25,8 +28,9 @@ export interface DashboardTabItem {
 
 interface Props {
   tabs: DashboardTabItem[];
-  activeTab: string;
-  onTabChange: (id: string) => void;
+  activeView: DashboardView;
+  onTabChange: (id: DashboardView) => void;
+  onAccountSelect: () => void;
   username: string;
   displayName?: string;
   supportEnabled?: boolean;
@@ -42,7 +46,6 @@ function SidebarNavItem({
   onSelect: () => void;
 }) {
   const Icon = tab.icon;
-  const isAccount = tab.id === "account";
 
   return (
     <Link
@@ -61,23 +64,26 @@ function SidebarNavItem({
     >
       <Icon className={`h-[18px] w-[18px] shrink-0 ${isActive ? "text-white" : "text-white/45"}`} />
       <span className="flex-1 text-sm font-medium">{tab.label}</span>
-      {isAccount ? (
-        <ChevronDown className={`h-4 w-4 shrink-0 ${isActive ? "text-white/80" : "text-white/30"}`} />
-      ) : null}
     </Link>
   );
 }
 
 export function DashboardSidebar({
   tabs,
-  activeTab,
+  activeView,
   onTabChange,
+  onAccountSelect,
   username,
   displayName,
   supportEnabled,
 }: Props) {
   const { t } = useI18n();
   const [query, setQuery] = useState("");
+  const [accountOpen, setAccountOpen] = useState(activeView === "account");
+
+  useEffect(() => {
+    if (activeView === "account") setAccountOpen(true);
+  }, [activeView]);
 
   const filteredTabs = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -99,9 +105,11 @@ export function DashboardSidebar({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  const isAccountActive = activeView === "account";
+
   return (
-    <aside className="hidden lg:flex w-[260px] shrink-0 flex-col border-r border-white/[0.06] bg-[#0a0a10]">
-      <div className="flex min-h-0 flex-1 flex-col px-4 py-5">
+    <aside className="hidden lg:flex h-full w-[260px] shrink-0 flex-col overflow-hidden border-r border-white/[0.06] bg-[#0a0a10]">
+      <div className="shrink-0 px-4 pt-5">
         <Logo href="/" size="sm" className="mb-5 px-1" />
 
         <div className="relative mb-4">
@@ -118,92 +126,144 @@ export function DashboardSidebar({
             {t("dashboard.searchShortcut")}
           </kbd>
         </div>
+      </div>
 
-        <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto pr-0.5">
-          {filteredTabs.map((tab) => (
-            <SidebarNavItem
-              key={tab.id}
-              tab={tab}
-              isActive={activeTab === tab.id}
-              onSelect={() => onTabChange(tab.id)}
+      <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-y-contain px-4 pr-3.5 [scrollbar-width:thin]">
+        {filteredTabs.map((tab) => (
+          <SidebarNavItem
+            key={tab.id}
+            tab={tab}
+            isActive={activeView === tab.id}
+            onSelect={() => onTabChange(tab.id)}
+          />
+        ))}
+
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => setAccountOpen((open) => !open)}
+            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
+              isAccountActive
+                ? "bg-purple-600 text-white shadow-lg shadow-purple-600/25"
+                : "text-white/55 hover:bg-white/[0.04] hover:text-white"
+            }`}
+            aria-expanded={accountOpen}
+          >
+            <Settings
+              className={`h-[18px] w-[18px] shrink-0 ${isAccountActive ? "text-white" : "text-white/45"}`}
             />
-          ))}
-          {filteredTabs.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-white/35">{t("dashboard.searchEmpty")}</p>
+            <span className="flex-1 text-sm font-medium">{t("dashboard.tabs.account")}</span>
+            <ChevronDown
+              className={`h-4 w-4 shrink-0 transition-transform ${accountOpen ? "rotate-180" : ""} ${
+                isAccountActive ? "text-white/80" : "text-white/30"
+              }`}
+            />
+          </button>
+          {accountOpen ? (
+            <div className="mt-1 space-y-0.5 pl-3">
+              <button
+                type="button"
+                onClick={onAccountSelect}
+                className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
+                  isAccountActive
+                    ? "bg-white/10 text-white"
+                    : "text-white/50 hover:bg-white/[0.04] hover:text-white/80"
+                }`}
+              >
+                {t("dashboard.accountSettings")}
+              </button>
+            </div>
           ) : null}
-        </nav>
+        </div>
 
-        <div className="mt-4 space-y-2 border-t border-white/[0.06] pt-4">
-          {supportEnabled ? (
-            <Link
-              href="/support"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2.5 text-sm font-medium text-purple-200 transition-colors hover:bg-purple-500/15"
-            >
-              <LifeBuoy className="h-4 w-4" />
-              {t("dashboard.helpCenter")}
-            </Link>
-          ) : (
-            <Link
-              href="#faq"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2.5 text-sm font-medium text-purple-200 transition-colors hover:bg-purple-500/15"
-            >
-              <HelpCircle className="h-4 w-4" />
-              {t("dashboard.helpCenter")}
-            </Link>
-          )}
+        {filteredTabs.length === 0 ? (
+          <p className="px-3 py-2 text-xs text-white/35">{t("dashboard.searchEmpty")}</p>
+        ) : null}
+      </nav>
+
+      <div className="shrink-0 space-y-2 border-t border-white/[0.06] px-4 py-4">
+        {supportEnabled ? (
           <Link
-            href={`/${username}`}
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/support"
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2.5 text-sm font-medium text-purple-200 transition-colors hover:bg-purple-500/15"
           >
-            <ExternalLink className="h-4 w-4" />
-            {t("dashboard.myPage")}
+            <LifeBuoy className="h-4 w-4" />
+            {t("dashboard.helpCenter")}
           </Link>
-          <ShareProfileButton
-            username={username}
-            displayName={displayName}
-            variant="sidebar"
-          />
-        </div>
+        ) : (
+          <Link
+            href="#faq"
+            className="flex w-full items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2.5 text-sm font-medium text-purple-200 transition-colors hover:bg-purple-500/15"
+          >
+            <HelpCircle className="h-4 w-4" />
+            {t("dashboard.helpCenter")}
+          </Link>
+        )}
+        <Link
+          href={`/${username}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-purple-500/25 bg-purple-500/10 px-3 py-2.5 text-sm font-medium text-purple-200 transition-colors hover:bg-purple-500/15"
+        >
+          <ExternalLink className="h-4 w-4" />
+          {t("dashboard.myPage")}
+        </Link>
+        <ShareProfileButton username={username} displayName={displayName} variant="sidebar" />
       </div>
     </aside>
   );
 }
 
-export function DashboardMobileNav({ tabs, activeTab, onTabChange }: Props) {
+export function DashboardMobileNav({
+  tabs,
+  activeView,
+  onTabChange,
+  onAccountSelect,
+}: Pick<Props, "tabs" | "activeView" | "onTabChange" | "onAccountSelect">) {
+  const { t } = useI18n();
   const router = useRouter();
 
   return (
-    <nav
-      className="lg:hidden -mx-1 mb-5 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none"
-      aria-label="Editor tabs"
-    >
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = activeTab === tab.id;
-        return (
-          <Link
-            key={tab.id}
-            href={`/dashboard?tab=${tab.id}`}
-            replace
-            scroll={false}
-            onClick={(e) => {
-              e.preventDefault();
-              onTabChange(tab.id);
-              router.push(`/dashboard?tab=${tab.id}`);
-            }}
-            className={`flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 transition-all ${
-              isActive
-                ? "bg-purple-600 text-white shadow-lg shadow-purple-500/25"
-                : "border border-white/[0.08] bg-[#12121a] text-white/50"
-            }`}
-          >
-            <Icon className="h-4 w-4" />
-            <span className="text-xs font-medium">{tab.label}</span>
-          </Link>
-        );
-      })}
-    </nav>
+    <div className="mb-5 space-y-2 lg:hidden">
+      <nav className="-mx-1 flex gap-1.5 overflow-x-auto pb-1 scrollbar-none" aria-label="Editor tabs">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeView === tab.id;
+          return (
+            <Link
+              key={tab.id}
+              href={`/dashboard?tab=${tab.id}`}
+              replace
+              scroll={false}
+              onClick={(e) => {
+                e.preventDefault();
+                onTabChange(tab.id);
+                router.push(`/dashboard?tab=${tab.id}`);
+              }}
+              className={`flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 transition-all ${
+                isActive
+                  ? "bg-purple-600 text-white shadow-lg shadow-purple-500/25"
+                  : "border border-white/[0.08] bg-[#12121a] text-white/50"
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              <span className="text-xs font-medium">{tab.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+      <button
+        type="button"
+        onClick={onAccountSelect}
+        className={`flex w-full items-center gap-2 rounded-xl border px-3.5 py-2 text-left text-xs transition-all ${
+          activeView === "account"
+            ? "border-purple-500/40 bg-purple-600 text-white"
+            : "border-white/[0.08] bg-[#12121a] text-white/55"
+        }`}
+      >
+        <Settings className="h-4 w-4" />
+        {t("dashboard.tabs.account")}
+      </button>
+    </div>
   );
 }

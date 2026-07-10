@@ -183,6 +183,8 @@ export interface ProfileSettings {
   musicPlayerTextColor?: string;
   /** Desenfoque del fondo de la tarjeta del reproductor (px, 0-30) */
   musicPlayerBlur?: number;
+  /** Enlaces ocultos en el perfil público (id → true) */
+  linkHidden?: Record<string, boolean>;
 }
 
 export interface Profile {

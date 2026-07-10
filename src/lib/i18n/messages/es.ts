@@ -268,19 +268,24 @@ export interface Messages {
   };
   dashboard: {
     tabs: {
-      general: string;
+      profile: string;
       links: string;
-      media: string;
-      appearance: string;
+      customize: string;
       account: string;
+      general?: string;
+      media?: string;
+      appearance?: string;
     };
     tabDescriptions: {
-      general: string;
+      profile: string;
       links: string;
-      media: string;
-      appearance: string;
+      customize: string;
       account: string;
+      general?: string;
+      media?: string;
+      appearance?: string;
     };
+    accountSettings: string;
     editorNav: string;
     searchPlaceholder: string;
     searchShortcut: string;
@@ -530,6 +535,9 @@ export interface Messages {
     removeIcon: string;
     customTitle: string;
     customHint: string;
+    editLink: string;
+    hideLink: string;
+    showLink: string;
     uploadError: string;
   };
   fileUpload: {
@@ -940,19 +948,18 @@ export const es: Messages = {
   },
   dashboard: {
     tabs: {
-      general: "Perfil",
+      profile: "Perfil",
       links: "Enlaces",
-      media: "Media",
-      appearance: "Personalizar",
+      customize: "Personalizar",
       account: "Cuenta",
     },
     tabDescriptions: {
-      general: "Nombre, bio, avatar y visibilidad",
+      profile: "Nombre, bio, avatar y visibilidad",
       links: "Redes sociales y botones",
-      media: "Fondo, audio y banner",
-      appearance: "Colores, fondo, audio y efectos visuales",
+      customize: "Fondo, audio, colores y estilo",
       account: "Usuario, contraseña e idioma",
     },
+    accountSettings: "Ajustes de cuenta",
     editorNav: "Editor",
     searchPlaceholder: "Buscar funciones...",
     searchShortcut: "Ctrl K",
@@ -1218,6 +1225,9 @@ export const es: Messages = {
     removeIcon: "Quitar",
     customTitle: "Añadir URL personalizada",
     customHint: "Hasta {max} proyectos o webs propias, con icono a medida.",
+    editLink: "Editar enlace",
+    hideLink: "Ocultar en el perfil",
+    showLink: "Mostrar en el perfil",
     uploadError: "Error al subir",
   },
   fileUpload: {

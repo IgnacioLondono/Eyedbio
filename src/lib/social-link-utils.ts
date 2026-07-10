@@ -81,3 +81,11 @@ export function isSocialLinkActive(link: Pick<SocialLink, "url" | "platform">): 
   }
   return link.url.trim().length > 0;
 }
+
+export function isSocialLinkVisible(
+  link: Pick<SocialLink, "url" | "platform" | "id">,
+  linkHidden?: Record<string, boolean>
+): boolean {
+  if (linkHidden?.[link.id]) return false;
+  return isSocialLinkActive(link);
+}

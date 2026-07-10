@@ -6,7 +6,7 @@ import { SocialLink, SocialPlatform, ProfileSettings } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/config/platforms";
 import { PlatformIcon } from "@/components/shared/PlatformIcons";
 import CustomLinkIcon from "@/components/profile/CustomLinkIcon";
-import { isSocialLinkActive } from "@/lib/social-link-utils";
+import { isSocialLinkActive, isSocialLinkVisible } from "@/lib/social-link-utils";
 import { useSocialLinkAction } from "@/components/profile-card/useSocialLinkAction";
 import { useExternalLinkConfirm } from "@/components/profile/ExternalLinkConfirmProvider";
 import {
@@ -26,6 +26,7 @@ interface Props {
   emptyLabel?: string;
   copyHint?: string;
   copiedLabel?: string;
+  linkHidden?: Record<string, boolean>;
 }
 
 function LinkIcon({
@@ -156,6 +157,7 @@ export default function SocialLinks({
   emptyLabel = "Sin enlaces aún",
   copyHint,
   copiedLabel,
+  linkHidden,
 }: Props) {
   if (links.length === 0) {
     return (
@@ -165,7 +167,7 @@ export default function SocialLinks({
     );
   }
 
-  const visibleLinks = links.filter(isSocialLinkActive);
+  const visibleLinks = links.filter((link) => isSocialLinkVisible(link, linkHidden));
 
   if (visibleLinks.length === 0) {
     return (

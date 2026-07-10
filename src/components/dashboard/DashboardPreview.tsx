@@ -107,7 +107,7 @@ export default function DashboardPreview({
 
   return (
     <aside
-      className={`lg:sticky lg:top-[4.5rem] lg:self-start w-full mx-auto lg:mx-0 transition-[max-width] duration-300 ${
+      className={`lg:sticky lg:top-6 lg:self-start w-full mx-auto lg:mx-0 transition-[max-width] duration-300 ${
         isMobile ? "max-w-[340px]" : "max-w-[420px]"
       }`}
     >

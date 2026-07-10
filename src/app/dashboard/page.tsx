@@ -8,7 +8,6 @@ import {
   UserRound,
   Palette,
   Link2,
-  Settings,
   Music,
   Share2,
   Globe,
@@ -50,7 +49,7 @@ import { COMMUNITY_MEDIA_HUB_URL } from "@/lib/config/community";
 import CardLayoutPicker from "@/components/editor/CardLayoutPicker";
 import IconStylePicker from "@/components/editor/IconStylePicker";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import { DashboardMobileNav, DashboardSidebar } from "@/components/dashboard/DashboardNav";
+import { DashboardMobileNav, DashboardSidebar, type DashboardView } from "@/components/dashboard/DashboardNav";
 import DashboardPreview from "@/components/dashboard/DashboardPreview";
 import MediaUploadGrid from "@/components/dashboard/MediaUploadGrid";
 import UnsavedChangesModal from "@/components/dashboard/UnsavedChangesModal";
@@ -60,7 +59,6 @@ import {
   DashboardRangeSlider,
   DashboardSection,
   DashboardSectionLabel,
-  DashboardSubnav,
   DashboardToggle,
 } from "@/components/dashboard/DashboardUi";
 import {
@@ -71,33 +69,28 @@ import {
 import { resolveBackgroundDim, resolvePageOverlay, PAGE_OVERLAY_OPTIONS } from "@/lib/profile/profile-overlay-config";
 import type { PageOverlay } from "@/lib/profile/profile-overlay-config";
 
-type Tab = "general" | "links" | "media" | "appearance" | "account";
-
-const VALID_TABS: Tab[] = ["general", "links", "media", "appearance", "account"];
 const DASHBOARD_TAB_STORAGE_KEY = "eyed-dashboard-tab";
-const DASHBOARD_SUBTAB_STORAGE_KEY = "eyed-dashboard-subtab";
 
-function readStoredDashboardSubTabs(): Partial<Record<Tab, string>> {
-  if (typeof window === "undefined") return {};
-  try {
-    const stored = localStorage.getItem(DASHBOARD_SUBTAB_STORAGE_KEY);
-    if (stored) return JSON.parse(stored) as Partial<Record<Tab, string>>;
-  } catch {
-    /* ignore */
-  }
-  return {};
+const MAIN_VIEWS: DashboardView[] = ["profile", "links", "customize"];
+const VALID_VIEWS: DashboardView[] = [...MAIN_VIEWS, "account"];
+
+function migrateLegacyTab(value: string): DashboardView | null {
+  if (value === "general") return "profile";
+  if (value === "media" || value === "appearance") return "customize";
+  if (VALID_VIEWS.includes(value as DashboardView)) return value as DashboardView;
+  return null;
 }
 
-function parseTab(value: string | null): Tab {
-  if (value && VALID_TABS.includes(value as Tab)) return value as Tab;
-  return "general";
+function parseView(value: string | null): DashboardView {
+  if (!value) return "profile";
+  return migrateLegacyTab(value) ?? "profile";
 }
 
-function readStoredDashboardTab(): Tab | null {
+function readStoredDashboardTab(): DashboardView | null {
   if (typeof window === "undefined") return null;
   try {
     const stored = localStorage.getItem(DASHBOARD_TAB_STORAGE_KEY);
-    if (stored && VALID_TABS.includes(stored as Tab)) return stored as Tab;
+    if (stored) return migrateLegacyTab(stored);
   } catch {
     /* ignore */
   }
@@ -129,7 +122,7 @@ function DashboardContent() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const profileRef = useRef<Profile | null>(null);
   const tabParam = searchParams.get("tab");
-  const tab: Tab = tabParam ? parseTab(tabParam) : "general";
+  const view: DashboardView = tabParam ? parseView(tabParam) : "profile";
   const [isDirty, setIsDirty] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -137,9 +130,6 @@ function DashboardContent() {
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [simulateEntryInPreview, setSimulateEntryInPreview] = useState(false);
   const [previewMode, setPreviewMode] = useState<"mobile" | "desktop">("mobile");
-  const [subTab, setSubTab] = useState<Partial<Record<Tab, string>>>(
-    readStoredDashboardSubTabs
-  );
 
   useEffect(() => {
     if (profile?.locale) void setLocale(profile.locale, false);
@@ -193,17 +183,26 @@ function DashboardContent() {
   useEffect(() => {
     if (searchParams.get("tab")) return;
     const stored = readStoredDashboardTab();
-    if (stored && stored !== "general") {
+    if (stored && stored !== "profile") {
       router.replace(`${pathname}?tab=${stored}`, { scroll: false });
     }
   }, [pathname, router, searchParams]);
 
-  const persistTab = (nextTab: Tab) => {
+  const persistTab = (nextView: DashboardView) => {
     try {
-      localStorage.setItem(DASHBOARD_TAB_STORAGE_KEY, nextTab);
+      localStorage.setItem(DASHBOARD_TAB_STORAGE_KEY, nextView);
     } catch {
       /* ignore */
     }
+  };
+
+  const handleViewChange = (id: DashboardView) => {
+    persistTab(id);
+    router.push(`/dashboard?tab=${id}`);
+  };
+
+  const handleAccountSelect = () => {
+    handleViewChange("account");
   };
 
   const patchProfile = (updater: (current: Profile) => Profile) => {
@@ -345,24 +344,13 @@ function DashboardContent() {
   const nameEffectLabels = getMessages(locale).nameEffects;
   const nameAnimationLabels = getMessages(locale).nameAnimations;
 
-  const handleTabChange = (id: string) => {
-    persistTab(parseTab(id));
-    router.push(`/dashboard?tab=${id}`);
-  };
-
   const openAudioManager = () => {
-    if (tab !== "media") {
-      handleTabChange("media");
+    if (view !== "customize") {
+      handleViewChange("customize");
     }
-    setSubTab((prev) => {
-      const next = { ...prev, media: "audio" };
-      try {
-        localStorage.setItem(DASHBOARD_SUBTAB_STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+    window.setTimeout(() => {
+      document.getElementById("dashboard-audio")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
   };
 
   const mediaUploadGrid = (
@@ -388,74 +376,35 @@ function DashboardContent() {
 
   const tabs = [
     {
-      id: "general" as Tab,
-      label: t("dashboard.tabs.general"),
-      description: t("dashboard.tabDescriptions.general"),
+      id: "profile" as DashboardView,
+      label: t("dashboard.tabs.profile"),
+      description: t("dashboard.tabDescriptions.profile"),
       icon: UserRound,
     },
     {
-      id: "links" as Tab,
+      id: "links" as DashboardView,
       label: t("dashboard.tabs.links"),
       description: t("dashboard.tabDescriptions.links"),
       icon: Link2,
     },
     {
-      id: "media" as Tab,
-      label: t("dashboard.tabs.media"),
-      description: t("dashboard.tabDescriptions.media"),
-      icon: Music,
-    },
-    {
-      id: "appearance" as Tab,
-      label: t("dashboard.tabs.appearance"),
-      description: t("dashboard.tabDescriptions.appearance"),
+      id: "customize" as DashboardView,
+      label: t("dashboard.tabs.customize"),
+      description: t("dashboard.tabDescriptions.customize"),
       icon: Palette,
-    },
-    {
-      id: "account" as Tab,
-      label: t("dashboard.tabs.account"),
-      description: t("dashboard.tabDescriptions.account"),
-      icon: Settings,
     },
   ];
 
-  const activeTabMeta = tabs.find((item) => item.id === tab) ?? tabs[0];
-
-  const subTabItems: Partial<Record<Tab, { id: string; label: string }[]>> = {
-    general: [
-      { id: "profile", label: t("dashboard.subtabProfile") },
-      { id: "page", label: t("dashboard.subtabPage") },
-      { id: "social", label: t("dashboard.subtabSocial") },
-    ],
-    media: [
-      { id: "background", label: t("dashboard.subtabBackground") },
-      { id: "audio", label: t("dashboard.subtabAudio") },
-      { id: "player", label: t("dashboard.subtabPlayer") },
-    ],
-    appearance: [
-      { id: "background", label: t("dashboard.subtabBackground") },
-      { id: "structure", label: t("dashboard.subtabStructure") },
-      { id: "card", label: t("dashboard.subtabCard") },
-      { id: "icons", label: t("dashboard.subtabIcons") },
-      { id: "cursor", label: t("dashboard.subtabCursor") },
-    ],
-  };
-
-  const currentSubTabs = subTabItems[tab] ?? [];
-  const activeSub = subTab[tab] ?? currentSubTabs[0]?.id ?? "";
-  const setActiveSub = (id: string) =>
-    setSubTab((prev) => {
-      const next = { ...prev, [tab]: id };
-      try {
-        localStorage.setItem(DASHBOARD_SUBTAB_STORAGE_KEY, JSON.stringify(next));
-      } catch {
-        /* ignore */
-      }
-      return next;
-    });
+  const activeTabMeta =
+    view === "account"
+      ? {
+          label: t("dashboard.tabs.account"),
+          description: t("dashboard.tabDescriptions.account"),
+        }
+      : (tabs.find((item) => item.id === view) ?? tabs[0]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white">
+    <div className="flex min-h-dvh flex-col bg-[#0a0a0f] text-white lg:h-dvh lg:overflow-hidden">
       <div
         className="pointer-events-none fixed inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(168,85,247,0.12),transparent)]"
         aria-hidden
@@ -471,14 +420,6 @@ function DashboardContent() {
         onViewProfile={handleViewProfileClick}
       />
 
-      {error ? (
-        <div className="relative mx-auto max-w-[1600px] px-3 pt-4 sm:px-5">
-          <p className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-2 text-sm text-red-400">
-            {error}
-          </p>
-        </div>
-      ) : null}
-
       <UnsavedChangesModal
         open={showUnsavedModal}
         saving={saving}
@@ -490,17 +431,23 @@ function DashboardContent() {
         onSaveAndView={() => void handleSaveAndViewProfile()}
       />
 
-      <div className="relative mx-auto flex max-w-[1600px]">
+      <div className="relative flex min-h-0 flex-1 lg:overflow-hidden">
         <DashboardSidebar
           tabs={tabs}
-          activeTab={tab}
-          onTabChange={handleTabChange}
+          activeView={view}
+          onTabChange={handleViewChange}
+          onAccountSelect={handleAccountSelect}
           username={profile.username}
           displayName={profile.displayName}
           supportEnabled={site.supportEnabled}
         />
 
-        <main className="min-w-0 flex-1 px-3 py-5 sm:px-5 sm:py-6 lg:px-8">
+        <main className="relative min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain px-3 py-5 sm:px-5 sm:py-6 lg:px-8 [scrollbar-width:thin]">
+          {error ? (
+            <p className="mb-4 rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-2 text-sm text-red-400">
+              {error}
+            </p>
+          ) : null}
           <div className="mb-6 hidden items-center justify-end gap-2 lg:flex">
             {isDirty ? (
               <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium text-amber-200/90">
@@ -524,11 +471,9 @@ function DashboardContent() {
 
           <DashboardMobileNav
             tabs={tabs}
-            activeTab={tab}
-            onTabChange={handleTabChange}
-            username={profile.username}
-            displayName={profile.displayName}
-            supportEnabled={site.supportEnabled}
+            activeView={view}
+            onTabChange={handleViewChange}
+            onAccountSelect={handleAccountSelect}
           />
 
           <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -547,7 +492,7 @@ function DashboardContent() {
 
           <div
             className={`grid items-start gap-8 ${
-              tab === "account"
+              view === "account"
                 ? "grid-cols-1"
                 : previewMode === "desktop"
                   ? "grid-cols-1 xl:grid-cols-[minmax(0,1fr)_420px]"
@@ -555,17 +500,8 @@ function DashboardContent() {
             }`}
           >
             <div className="relative z-20 min-w-0 space-y-4">
-            {currentSubTabs.length > 0 ? (
-              <DashboardSubnav
-                items={currentSubTabs}
-                active={activeSub}
-                onChange={setActiveSub}
-              />
-            ) : null}
-            {tab === "general" && (
+            {view === "profile" && (
               <>
-                {activeSub === "profile" && (
-                <>
                 <DashboardSection
                   title={t("dashboard.shareTitle")}
                   hint={t("dashboard.shareHint")}
@@ -582,7 +518,7 @@ function DashboardContent() {
                   />
                 </DashboardSection>
 
-                <DashboardSection title={t("dashboard.tabs.general")} icon={UserRound}>
+                <DashboardSection title={t("dashboard.tabs.profile")} icon={UserRound}>
                   <DashboardField label={t("dashboard.displayName")}>
                     <input
                       type="text"
@@ -616,11 +552,7 @@ function DashboardContent() {
                     }}
                   />
                 </DashboardSection>
-                </>
-                )}
 
-                {activeSub === "page" && (
-                <>
                 <DashboardSection
                   title={t("dashboard.entrySectionTitle")}
                   hint={t("dashboard.entrySectionHint")}
@@ -675,11 +607,7 @@ function DashboardContent() {
                     </select>
                   </DashboardField>
                 </DashboardSection>
-                </>
-                )}
 
-                {activeSub === "social" && (
-                <>
                 <DashboardSection title={t("dashboard.visibilitySectionTitle")} icon={Eye}>
                   <DashboardToggle
                     label={t("dashboard.showViewCount")}
@@ -744,23 +672,21 @@ function DashboardContent() {
                     />
                   </DashboardField>
                 </DashboardSection>
-                </>
-                )}
               </>
             )}
 
-            {tab === "links" && (
+            {view === "links" && (
               <LinkEditor
                 links={profile.links}
+                linkHidden={profile.settings.linkHidden}
                 onChange={(links) => update({ links })}
+                onLinkHiddenChange={(linkHidden) => updateSettings({ linkHidden })}
               />
             )}
 
-            {tab === "media" && (
+            {view === "customize" && (
               <>
                 {mediaUploadGrid}
-                {activeSub === "background" && (
-                <>
                 <a
                   href={COMMUNITY_MEDIA_HUB_URL}
                   target="_blank"
@@ -824,13 +750,10 @@ function DashboardContent() {
                     </div>
                   </div>
                 )}
-                </>
-                )}
 
+                <div id="dashboard-audio" className="scroll-mt-6 space-y-4">
                 {site.profileAudioEnabled ? (
                   <>
-                    {activeSub === "audio" && (
-                    <>
                     <DashboardField label={t("dashboard.audioSource")}>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <button
@@ -932,10 +855,7 @@ function DashboardContent() {
                         !getEffectiveAudioUrl(profile) && !profile.audioEnabled
                       }
                     />
-                    </>
-                    )}
 
-                    {activeSub === "player" && (
                     <DashboardSection
                       title={t("dashboard.musicPlayerTitle")}
                       hint={t("dashboard.musicPlayerHint")}
@@ -1029,19 +949,12 @@ function DashboardContent() {
                         </>
                       )}
                     </DashboardSection>
-                    )}
                   </>
                 ) : null}
-              </>
-            )}
+                </div>
 
-            {tab === "appearance" && (
-              <>
-                {mediaUploadGrid}
-                {activeSub === "background" && (
-                <>
                 <DashboardSectionLabel>{t("dashboard.generalCustomization")}</DashboardSectionLabel>
-                <DashboardSection title={t("dashboard.tabs.appearance")} icon={Palette}>
+                <DashboardSection title={t("dashboard.tabs.customize")} icon={Palette}>
                   <DashboardField label={t("dashboard.backgroundEffect")}>
                     <BackgroundEffectSelect
                       value={profile.settings.backgroundEffect}
@@ -1120,11 +1033,7 @@ function DashboardContent() {
                   onChange={(profileBlur) => updateSettings({ profileBlur })}
                 />
                 </DashboardSection>
-                </>
-                )}
 
-                {activeSub === "structure" && (
-                <>
                 <DashboardSectionLabel>{t("dashboard.structureLinks")}</DashboardSectionLabel>
 
                 <CardLayoutPicker
@@ -1148,11 +1057,7 @@ function DashboardContent() {
                   onLinkStyleChange={(linkStyle) => updateSettings({ linkStyle })}
                   onAvatarStyleChange={(avatarStyle) => updateSettings({ avatarStyle })}
                 />
-                </>
-                )}
 
-                {activeSub === "card" && (
-                <>
                 <DashboardSectionLabel>{t("dashboard.cardSection")}</DashboardSectionLabel>
 
                 <DashboardToggle
@@ -1245,11 +1150,7 @@ function DashboardContent() {
                   onChange={(v) => updateSettings({ gradientEnabled: v })}
                   disabled={profile.settings.transparentCard}
                 />
-                </>
-                )}
 
-                {activeSub === "icons" && (
-                <>
                 <DashboardSectionLabel>{t("dashboard.iconsSection")}</DashboardSectionLabel>
 
                 <DashboardSection>
@@ -1274,11 +1175,7 @@ function DashboardContent() {
                     onClear={() => updateSettings({ browserTabIconUrl: "" })}
                   />
                 </DashboardSection>
-                </>
-                )}
 
-                {activeSub === "cursor" && (
-                <>
                 <DashboardSectionLabel>{t("dashboard.cursorSection")}</DashboardSectionLabel>
 
                 <DashboardSection>
@@ -1327,12 +1224,10 @@ function DashboardContent() {
                     </>
                   )}
                 </DashboardSection>
-                </>
-                )}
               </>
             )}
 
-            {tab === "account" && (
+            {view === "account" && (
               <AccountSettings
                 profileUsername={profile.username}
                 onUsernameUpdated={(username) => update({ username })}
@@ -1340,7 +1235,7 @@ function DashboardContent() {
             )}
             </div>
 
-            {tab !== "account" ? (
+            {view !== "account" ? (
               <DashboardPreview
                 profile={profile}
                 profileAudioEnabled={site.profileAudioEnabled}

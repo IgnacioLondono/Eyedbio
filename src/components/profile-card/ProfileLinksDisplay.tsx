@@ -11,7 +11,7 @@ import type { LinkStyle } from "@/types/profile";
 import SocialLinks from "@/components/profile/SocialLinks";
 import { ExternalLinkConfirmProvider, useExternalLinkConfirm } from "@/components/profile/ExternalLinkConfirmProvider";
 import { t as translate } from "@/lib/i18n";
-import { getSocialLinkTitle, isSocialLinkActive } from "@/lib/social-link-utils";
+import { getSocialLinkTitle, isSocialLinkActive, isSocialLinkVisible } from "@/lib/social-link-utils";
 import { useSocialLinkAction } from "@/components/profile-card/useSocialLinkAction";
 import {
   getIconContainerStyle,
@@ -36,6 +36,7 @@ interface Props {
     | "customLinkIconColor"
     | "iconBackgroundColor"
     | "iconShape"
+    | "linkHidden"
   >;
   textColor: string;
   compact?: boolean;
@@ -173,7 +174,7 @@ function PillsLinks({
   mutedColor,
 }: Omit<Props, "linkStyle">) {
   const iconStyle = resolveIconStyle(settings as ProfileSettings);
-  const visible = links.filter(isSocialLinkActive);
+  const visible = links.filter((link) => isSocialLinkVisible(link, settings.linkHidden));
   if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
 
   const iconShapeClass = getIconShapeClass(iconStyle.iconShape);
@@ -250,7 +251,7 @@ function RowLinks({
   mutedColor,
 }: Omit<Props, "linkStyle" | "textColor">) {
   const iconStyle = resolveIconStyle(settings as ProfileSettings);
-  const visible = links.filter(isSocialLinkActive);
+  const visible = links.filter((link) => isSocialLinkVisible(link, settings.linkHidden));
   if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
 
   const btn = compact ? "w-8 h-8" : "w-10 h-10";
@@ -299,7 +300,7 @@ function ChipsLinks({
   mutedColor,
 }: Omit<Props, "linkStyle">) {
   const iconStyle = resolveIconStyle(settings as ProfileSettings);
-  const visible = links.filter(isSocialLinkActive);
+  const visible = links.filter((link) => isSocialLinkVisible(link, settings.linkHidden));
   if (visible.length === 0) return <EmptyLinks mutedColor={mutedColor ?? "rgba(255,255,255,0.3)"} locale={locale} />;
 
   return (
@@ -361,6 +362,7 @@ export default function ProfileLinksDisplay({
         emptyLabel={translate(locale, "profile.noLinks")}
         copyHint={translate(locale, "profile.copyUsernameHint")}
         copiedLabel={translate(locale, "profile.usernameCopied")}
+        linkHidden={settings.linkHidden}
       />
     ) : linkStyle === "pills" ? (
       <PillsLinks
