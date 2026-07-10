@@ -18,7 +18,7 @@ import { isPlatformUsernameField, sanitizeSocialLinkInput } from "@/lib/social-l
 import CustomLinkIcon from "@/components/profile/CustomLinkIcon";
 import { PlatformIcon } from "@/components/shared/PlatformIcons";
 import PlatformBrandTile, { getPlatformTileStyles } from "@/components/editor/PlatformBrandTile";
-import { HoldHint } from "@/components/shared/HoldHint";
+import { HintTooltip } from "@/components/shared/HintTooltip";
 import { createEmptyLink } from "@/lib/profile/profile-mapper";
 import {
   MAX_CUSTOM_LINKS,
@@ -85,7 +85,7 @@ function LinkIconButton({
 
   return (
     <>
-      <HoldHint label={t("linkEditor.changeIcon")}>
+      <HintTooltip label={t("linkEditor.changeIcon")}>
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
@@ -106,7 +106,7 @@ function LinkIconButton({
             </span>
           )}
         </button>
-      </HoldHint>
+      </HintTooltip>
       <input
         ref={inputRef}
         type="file"
@@ -150,7 +150,7 @@ function LinkCard({
       <div className="mb-2 flex items-center justify-between gap-2">
         <p className="truncate text-sm font-medium text-white">{displayLabel}</p>
         <div className="flex shrink-0 items-center gap-1">
-          <HoldHint label={t("linkEditor.editLink")}>
+          <HintTooltip label={t("linkEditor.editLink")}>
             <button
               type="button"
               onClick={() => setEditing((v) => !v)}
@@ -163,8 +163,8 @@ function LinkCard({
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
-          </HoldHint>
-          <HoldHint label={hidden ? t("linkEditor.showLink") : t("linkEditor.hideLink")}>
+          </HintTooltip>
+          <HintTooltip label={hidden ? t("linkEditor.showLink") : t("linkEditor.hideLink")}>
             <button
               type="button"
               onClick={onToggleHidden}
@@ -174,8 +174,8 @@ function LinkCard({
             >
               {hidden ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
-          </HoldHint>
-          <HoldHint label={tVars("linkEditor.remove", { label: config.label })}>
+          </HintTooltip>
+          <HintTooltip label={tVars("linkEditor.remove", { label: config.label })}>
             <button
               type="button"
               onClick={onRemove}
@@ -184,7 +184,7 @@ function LinkCard({
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
-          </HoldHint>
+          </HintTooltip>
         </div>
       </div>
 
@@ -330,7 +330,7 @@ export default function LinkEditor({
                   platform={platform}
                   size="sm"
                   fill
-                  hintDescription={`${t("linkEditor.holdTapToAdd")} · ${t("common.holdHintRelease")}`}
+                  hintDescription={t("linkEditor.holdTapToAdd")}
                   onClick={() => addLink(platform)}
                 />
               ))}
@@ -338,7 +338,7 @@ export default function LinkEditor({
           ) : null}
 
           {!atCustomLimit ? (
-            <HoldHint
+            <HintTooltip
               label={t("linkEditor.customTitle")}
               description={t("linkEditor.customUrlDescription")}
             >
@@ -355,7 +355,7 @@ export default function LinkEditor({
                   <span className="mt-0.5 block text-xs text-white/40">{t("linkEditor.customUrlDescription")}</span>
                 </span>
               </button>
-            </HoldHint>
+            </HintTooltip>
           ) : null}
         </section>
       ) : null}

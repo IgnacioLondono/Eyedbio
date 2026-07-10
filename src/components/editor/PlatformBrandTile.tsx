@@ -3,7 +3,7 @@
 import type { SocialPlatform } from "@/types/profile";
 import { PLATFORM_CONFIG } from "@/lib/config/platforms";
 import { PlatformIcon } from "@/components/shared/PlatformIcons";
-import { HoldHint } from "@/components/shared/HoldHint";
+import { HintTooltip } from "@/components/shared/HintTooltip";
 
 const LIGHT_BRAND_COLORS = new Set(["#ffffff", "#fffc00", "#53fc18"]);
 
@@ -114,7 +114,7 @@ export default function PlatformBrandTile({
 
   if (as === "div") {
     return (
-      <HoldHint label={hintLabel} description={hintDescription} showReleaseHint={!hintDescription}>
+      <HintTooltip label={hintLabel} description={hintDescription}>
         <div
           className={sharedClassName}
           style={{
@@ -125,12 +125,12 @@ export default function PlatformBrandTile({
         >
           {iconNode}
         </div>
-      </HoldHint>
+      </HintTooltip>
     );
   }
 
   return (
-    <HoldHint label={hintLabel} description={hintDescription} showReleaseHint={!hintDescription}>
+    <HintTooltip label={hintLabel} description={hintDescription}>
       <button
         type="button"
         onClick={onClick}
@@ -143,6 +143,6 @@ export default function PlatformBrandTile({
       >
         {iconNode}
       </button>
-    </HoldHint>
+    </HintTooltip>
   );
 }

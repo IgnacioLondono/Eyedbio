@@ -12,9 +12,8 @@ import {
   type Ref,
 } from "react";
 import { createPortal } from "react-dom";
-import { useI18n } from "@/components/providers/LocaleProvider";
 
-const HOLD_MS = 420;
+const HOVER_DELAY_MS = 80;
 
 type HintState = {
   label: string;
@@ -24,10 +23,9 @@ type HintState = {
   anchorBottom: number;
 };
 
-type HoldHintProps = {
+type HintTooltipProps = {
   label: string;
   description?: string;
-  showReleaseHint?: boolean;
   disabled?: boolean;
   children: ReactElement;
 };
@@ -37,7 +35,7 @@ function mergeRef<T>(node: T, ref: Ref<T> | undefined) {
   else if (ref) (ref as MutableRefObject<T | null>).current = node;
 }
 
-function HoldHintBubble({
+function HintTooltipBubble({
   label,
   description,
   x,
@@ -55,7 +53,7 @@ function HoldHintBubble({
 
   return (
     <div
-      className="pointer-events-none fixed z-[220] flex flex-col items-center"
+      className="pointer-events-none fixed z-[220] flex flex-col items-center animate-in fade-in zoom-in-95 duration-100"
       style={{
         left,
         top: showBelow ? anchorBottom + 10 : y - 10,
@@ -82,23 +80,16 @@ function HoldHintBubble({
   );
 }
 
-export function HoldHint({
+export function HintTooltip({
   label,
   description,
-  showReleaseHint = true,
   disabled = false,
   children,
-}: HoldHintProps) {
-  const { t } = useI18n();
+}: HintTooltipProps) {
   const [hint, setHint] = useState<HintState | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const blockClickRef = useRef(false);
-  const hintVisibleRef = useRef(false);
 
-  const resolvedDescription =
-    description ?? (showReleaseHint ? t("common.holdHintRelease") : undefined);
-
-  const clearHoldTimer = useCallback(() => {
+  const clearShowTimer = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
@@ -106,78 +97,61 @@ export function HoldHint({
   }, []);
 
   const hideHint = useCallback(() => {
-    hintVisibleRef.current = false;
     setHint(null);
   }, []);
 
-  useEffect(() => () => clearHoldTimer(), [clearHoldTimer]);
+  const openHint = useCallback(
+    (target: HTMLElement) => {
+      const rect = target.getBoundingClientRect();
+      setHint({
+        label,
+        description,
+        x: rect.left + rect.width / 2,
+        y: rect.top,
+        anchorBottom: rect.bottom,
+      });
+    },
+    [description, label]
+  );
+
+  const scheduleHint = useCallback(
+    (target: HTMLElement) => {
+      clearShowTimer();
+      timerRef.current = setTimeout(() => openHint(target), HOVER_DELAY_MS);
+    },
+    [clearShowTimer, openHint]
+  );
+
+  useEffect(() => () => clearShowTimer(), [clearShowTimer]);
 
   const child = children as ReactElement<{
-    onPointerDown?: (event: React.PointerEvent<HTMLElement>) => void;
-    onPointerUp?: (event: React.PointerEvent<HTMLElement>) => void;
-    onPointerLeave?: (event: React.PointerEvent<HTMLElement>) => void;
-    onPointerCancel?: (event: React.PointerEvent<HTMLElement>) => void;
-    onClick?: (event: React.MouseEvent<HTMLElement>) => void;
-    onContextMenu?: (event: React.MouseEvent<HTMLElement>) => void;
-    ref?: React.Ref<HTMLElement>;
+    onMouseEnter?: (event: React.MouseEvent<HTMLElement>) => void;
+    onMouseLeave?: (event: React.MouseEvent<HTMLElement>) => void;
+    onFocus?: (event: React.FocusEvent<HTMLElement>) => void;
+    onBlur?: (event: React.FocusEvent<HTMLElement>) => void;
+    ref?: Ref<HTMLElement>;
   }>;
 
   return (
     <>
       {cloneElement(child, {
-        onPointerDown: (event) => {
-          child.props.onPointerDown?.(event);
-          if (disabled || event.button !== 0) return;
-
-          const target = event.currentTarget;
-          const rect = target.getBoundingClientRect();
-          clearHoldTimer();
-          blockClickRef.current = false;
-
-          timerRef.current = setTimeout(() => {
-            hintVisibleRef.current = true;
-            setHint({
-              label,
-              description: resolvedDescription,
-              x: rect.left + rect.width / 2,
-              y: rect.top,
-              anchorBottom: rect.bottom,
-            });
-            if (typeof navigator !== "undefined" && "vibrate" in navigator) {
-              navigator.vibrate(12);
-            }
-          }, HOLD_MS);
+        onMouseEnter: (event) => {
+          child.props.onMouseEnter?.(event);
+          if (!disabled) scheduleHint(event.currentTarget);
         },
-        onPointerUp: (event) => {
-          child.props.onPointerUp?.(event);
-          clearHoldTimer();
-          if (hintVisibleRef.current) {
-            blockClickRef.current = true;
-          }
+        onMouseLeave: (event) => {
+          child.props.onMouseLeave?.(event);
+          clearShowTimer();
           hideHint();
         },
-        onPointerLeave: (event) => {
-          child.props.onPointerLeave?.(event);
-          clearHoldTimer();
+        onFocus: (event) => {
+          child.props.onFocus?.(event);
+          if (!disabled) openHint(event.currentTarget);
+        },
+        onBlur: (event) => {
+          child.props.onBlur?.(event);
+          clearShowTimer();
           hideHint();
-        },
-        onPointerCancel: (event) => {
-          child.props.onPointerCancel?.(event);
-          clearHoldTimer();
-          hideHint();
-        },
-        onClick: (event) => {
-          if (blockClickRef.current) {
-            blockClickRef.current = false;
-            event.preventDefault();
-            event.stopPropagation();
-            return;
-          }
-          child.props.onClick?.(event);
-        },
-        onContextMenu: (event) => {
-          event.preventDefault();
-          child.props.onContextMenu?.(event);
         },
         ref: (node: HTMLElement | null) => {
           mergeRef(node, (child as { ref?: Ref<HTMLElement> }).ref);
@@ -185,7 +159,7 @@ export function HoldHint({
       })}
       {hint && typeof document !== "undefined"
         ? createPortal(
-            <HoldHintBubble
+            <HintTooltipBubble
               label={hint.label}
               description={hint.description}
               x={hint.x}
@@ -199,29 +173,22 @@ export function HoldHint({
   );
 }
 
-export function HoldHintTarget({
+export function HintTooltipTarget({
   label,
   description,
-  showReleaseHint,
   disabled,
   className = "",
   children,
 }: {
   label: string;
   description?: string;
-  showReleaseHint?: boolean;
   disabled?: boolean;
   className?: string;
   children: ReactNode;
 }) {
   return (
-    <HoldHint
-      label={label}
-      description={description}
-      showReleaseHint={showReleaseHint}
-      disabled={disabled}
-    >
+    <HintTooltip label={label} description={description} disabled={disabled}>
       <span className={`inline-flex ${className}`}>{children}</span>
-    </HoldHint>
+    </HintTooltip>
   );
 }
