@@ -637,6 +637,18 @@ export interface Messages {
     bannerPreviewHint: string;
     zoomOutHint: string;
     applyFocus: string;
+    removeBg: string;
+    restoreBg: string;
+    removeBgHint: string;
+    removeBgWorking: string;
+    removeBgError: string;
+    grid: string;
+    toggleGrid: string;
+    center: string;
+    centerFocus: string;
+    zoomIn: string;
+    zoomOut: string;
+    cropToolsHint: string;
   };
   cardPicker: {
     structure: string;
@@ -1386,6 +1398,18 @@ export const es: Messages = {
       "El recuadro tiene la misma proporción que el banner en tu tarjeta (franja ancha).",
     zoomOutHint: "Menos de 1× aleja y muestra más imagen (útil en pantallas anchas).",
     applyFocus: "Guardar encuadre",
+    removeBg: "Quitar fondo",
+    restoreBg: "Restaurar original",
+    removeBgHint: "Opcional. Ideal para avatares: deja el sujeto y elimina el fondo.",
+    removeBgWorking: "Quitando el fondo… puede tardar unos segundos",
+    removeBgError: "No se pudo quitar el fondo. Prueba con otra imagen.",
+    grid: "Cuadrícula",
+    toggleGrid: "Mostrar u ocultar cuadrícula (G)",
+    center: "Centrar",
+    centerFocus: "Centrar el punto focal (C)",
+    zoomIn: "Acercar",
+    zoomOut: "Alejar",
+    cropToolsHint: "Arrastra · rueda para zoom · flechas para afinar · G cuadrícula",
   },
   cardPicker: {
     structure: "Estructura",

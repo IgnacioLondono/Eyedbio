@@ -392,14 +392,14 @@ export default function FileUpload({
     }
   };
 
-  const handleAdjustConfirm = async (result: { focus: MediaFocus }) => {
+  const handleAdjustConfirm = async (result: { focus: MediaFocus; processedFile?: File }) => {
     if (onMediaFocusChange) {
       onMediaFocusChange(result.focus);
     }
 
-    const pending = pendingFileRef.current;
-    if (pending) {
-      await handleFile(pending);
+    const toUpload = result.processedFile ?? pendingFileRef.current;
+    if (toUpload) {
+      await handleFile(toUpload);
       pendingFileRef.current = null;
     }
   };
@@ -443,7 +443,11 @@ export default function FileUpload({
       {uploading ? (
         <Loader2 className="w-5 h-5 animate-spin" />
       ) : isCard && !currentUrl && !previewUrl ? (
-        <ImageIcon className="w-6 h-6 text-white/30" />
+        isAudio ? (
+          <Music className="w-6 h-6 text-white/30" />
+        ) : (
+          <ImageIcon className="w-6 h-6 text-white/30" />
+        )
       ) : (
         <Upload className="w-5 h-5" />
       )}
@@ -604,6 +608,7 @@ export default function FileUpload({
           mediaKind={adjustMediaKind}
           preset={adjustPreset}
           title={adjustTitle}
+          fileName={adjustFileName}
           initialFocus={mediaFocus}
           onClose={closeAdjust}
           onConfirm={handleAdjustConfirm}
