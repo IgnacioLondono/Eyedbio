@@ -453,10 +453,6 @@ export default function ImageAdjustModal({
                 {t("imageAdjust.bannerVisibleArea")}
               </div>
             ) : null}
-
-            <div className="pointer-events-none absolute bottom-1.5 right-1.5 z-20 rounded bg-black/60 px-1.5 py-0.5 text-[10px] tabular-nums text-white/70">
-              {zoomPercent}% · {Math.round(focus.x)}/{Math.round(focus.y)}
-            </div>
           </div>
 
           <div className="space-y-1.5">
