@@ -10,6 +10,7 @@ import {
   Image as ImageLucide,
   Music,
   Crop,
+  Download,
 } from "lucide-react";
 import { BackgroundType } from "@/types/profile";
 import { ACCEPT_ATTR, UploadKind, getUploadLimitMb, getUploadValidationError, resolveBackgroundType } from "@/lib/media/media-config";
@@ -213,6 +214,7 @@ export default function FileUpload({
   const [progress, setProgress] = useState<number | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [error, setError] = useState("");
+  const [downloading, setDownloading] = useState(false);
   const isBackground = kind === "background";
   const isBanner = kind === "banner";
   const allowsDragDrop = isBackground || isBanner;
@@ -404,6 +406,41 @@ export default function FileUpload({
     }
   };
 
+  const downloadCurrent = async () => {
+    if (!currentUrl || downloading) return;
+    setDownloading(true);
+    setError("");
+    try {
+      const res = await fetch(getMediaSrc(currentUrl));
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const fallback =
+        kind === "audio"
+          ? "audio.mp3"
+          : kind === "avatar"
+            ? "avatar.png"
+            : kind === "banner"
+              ? "banner.jpg"
+              : kind === "background"
+                ? "background"
+                : "media";
+      const name =
+        decodeURIComponent(currentUrl.split("/").pop()?.split("?")[0] || fallback) || fallback;
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = objectUrl;
+      a.download = name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch {
+      setError(t("fileUpload.downloadError"));
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const onFilePicked = (file: File) => {
     if (rejectInvalidFile(file)) return;
 
@@ -492,6 +529,20 @@ export default function FileUpload({
         <div className="relative flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/10 bg-white/5">
           <Music className="w-4 h-4 text-purple-400 shrink-0" />
           <span className="text-sm text-white/60 truncate flex-1">{t("fileUpload.audioUploaded")}</span>
+          <button
+            type="button"
+            onClick={() => void downloadCurrent()}
+            disabled={downloading}
+            className="p-1.5 rounded-lg bg-black/40 text-white/70 hover:text-white shrink-0 disabled:opacity-50"
+            aria-label={t("fileUpload.downloadFile")}
+            title={t("fileUpload.downloadFile")}
+          >
+            {downloading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Download className="w-3.5 h-3.5" />
+            )}
+          </button>
           {onClear && (
             <button
               type="button"
@@ -530,6 +581,22 @@ export default function FileUpload({
                 </div>
               </div>
             )}
+            {currentUrl && !uploading && (
+              <button
+                type="button"
+                onClick={() => void downloadCurrent()}
+                disabled={downloading}
+                className="absolute top-2 left-2 z-10 rounded-lg bg-black/55 p-1.5 text-white/80 hover:bg-black/75 hover:text-white disabled:opacity-50"
+                aria-label={t("fileUpload.downloadFile")}
+                title={t("fileUpload.downloadFile")}
+              >
+                {downloading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Download className="w-3.5 h-3.5" />
+                )}
+              </button>
+            )}
             {onClear && !uploading && (
               <button
                 type="button"
@@ -562,6 +629,20 @@ export default function FileUpload({
         <div className="relative flex h-[124px] shrink-0 flex-col items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] p-3">
           <Music className="h-6 w-6 text-purple-400" />
           <span className="text-xs text-white/50">{t("fileUpload.audioUploaded")}</span>
+          <button
+            type="button"
+            onClick={() => void downloadCurrent()}
+            disabled={downloading}
+            className="absolute top-2 left-2 rounded-lg bg-black/55 p-1.5 text-white/80 hover:bg-black/75 hover:text-white disabled:opacity-50"
+            aria-label={t("fileUpload.downloadFile")}
+            title={t("fileUpload.downloadFile")}
+          >
+            {downloading ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Download className="w-3.5 h-3.5" />
+            )}
+          </button>
           {onClear ? (
             <button
               type="button"

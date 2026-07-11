@@ -686,6 +686,8 @@ export const en: Messages = {
     audioUploaded: "Audio uploaded",
     removeAudio: "Remove audio",
     removeFile: "Remove file",
+    downloadFile: "Download",
+    downloadError: "Could not download the file",
     changeFile: "Change file",
     uploadBanner: "Upload banner image",
     uploadBackground: "Upload image, GIF, or video",

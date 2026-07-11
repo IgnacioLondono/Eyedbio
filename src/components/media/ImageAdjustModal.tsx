@@ -5,7 +5,6 @@ import {
   Eraser,
   Grid3x3,
   Loader2,
-  Move,
   RotateCcw,
   Scan,
   X,
@@ -319,50 +318,48 @@ export default function ImageAdjustModal({
     : {
         aspectRatio: preset.aspect,
         width: "100%",
-        maxHeight: isBannerStrip ? "min(28vh, 180px)" : "min(46vh, 360px)",
+        maxHeight: isBannerStrip ? "min(22vh, 140px)" : "min(32vh, 240px)",
       };
 
   const frameClass = preset.circular
-    ? "aspect-square max-h-[min(56vh,380px)] w-full max-w-[min(56vh,380px)] mx-auto rounded-full"
+    ? "aspect-square max-h-[min(34vh,240px)] w-full max-w-[min(34vh,240px)] mx-auto rounded-full"
     : "w-full mx-auto rounded-xl";
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="image-adjust-title"
     >
-      <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-[#12121a] shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+      <div className="flex w-full max-w-lg max-h-[calc(100dvh-1.5rem)] flex-col rounded-2xl border border-white/10 bg-[#12121a] shadow-2xl overflow-hidden">
+        <div className="flex shrink-0 items-center justify-between gap-3 px-3 py-2 border-b border-white/10">
           <div className="min-w-0">
-            <h2 id="image-adjust-title" className="text-sm font-medium text-white">
+            <h2 id="image-adjust-title" className="text-sm font-medium text-white truncate">
               {title}
             </h2>
-            <p className="mt-0.5 text-[11px] text-white/40">{t("imageAdjust.cropToolsHint")}</p>
+            <p className="mt-0.5 text-[10px] text-white/40 truncate">
+              {isBannerStrip ? t("imageAdjust.bannerFocusHint") : t("imageAdjust.cropToolsHint")}
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10"
+            className="p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/10 shrink-0"
             aria-label={t("imageAdjust.close")}
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-4 space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="mr-auto flex items-center gap-1.5 text-xs text-white/45">
-              <Move className="h-3.5 w-3.5 shrink-0" />
-              {isBannerStrip ? t("imageAdjust.bannerFocusHint") : t("imageAdjust.focusHint")}
-            </p>
+        <div className="min-h-0 flex-1 overflow-y-auto p-3 space-y-2.5">
+          <div className="flex items-center justify-end gap-1.5">
             <button
               type="button"
               disabled={busy}
               onClick={() => setShowGrid((v) => !v)}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] transition-colors ${
+              className={`inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] transition-colors ${
                 showGrid
                   ? "border-purple-500/40 bg-purple-500/15 text-purple-200"
                   : "border-white/10 bg-white/[0.03] text-white/55 hover:text-white"
@@ -378,7 +375,7 @@ export default function ImageAdjustModal({
               onClick={() =>
                 setFocus((f) => clampFocus({ ...f, x: 50, y: 50 }, { minZoom, maxZoom }))
               }
-              className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-1.5 text-[11px] text-white/55 transition-colors hover:text-white"
+              className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-[11px] text-white/55 transition-colors hover:text-white"
               title={t("imageAdjust.centerFocus")}
             >
               <Scan className="h-3.5 w-3.5" />
@@ -432,7 +429,6 @@ export default function ImageAdjustModal({
               dragging={dragging}
             />
 
-            {/* Soft vignette to emphasize crop area */}
             <div
               className="pointer-events-none absolute inset-0 z-[9] rounded-[inherit]"
               style={{
@@ -444,9 +440,11 @@ export default function ImageAdjustModal({
             />
 
             {removingBg ? (
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2 bg-black/55 backdrop-blur-[2px]">
-                <Loader2 className="h-6 w-6 animate-spin text-purple-300" />
-                <p className="px-4 text-center text-xs text-white/70">{t("imageAdjust.removeBgWorking")}</p>
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-1.5 bg-black/55 backdrop-blur-[2px]">
+                <Loader2 className="h-5 w-5 animate-spin text-purple-300" />
+                <p className="px-3 text-center text-[11px] text-white/70">
+                  {t("imageAdjust.removeBgWorking")}
+                </p>
               </div>
             ) : null}
 
@@ -461,20 +459,14 @@ export default function ImageAdjustModal({
             </div>
           </div>
 
-          {isBannerStrip ? (
-            <p className="text-[10px] text-white/35 leading-relaxed">
-              {t("imageAdjust.bannerPreviewHint")}
-            </p>
-          ) : null}
-
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between gap-2">
               <label className="flex items-center gap-1 text-xs text-white/50">
                 <ZoomIn className="w-3.5 h-3.5" />
                 {t("imageAdjust.zoom")}
                 <span className="ml-1 tabular-nums text-white/35">{zoomPercent}%</span>
               </label>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-0.5">
                 <button
                   type="button"
                   disabled={busy || focus.zoom <= minZoom}
@@ -497,7 +489,7 @@ export default function ImageAdjustModal({
                   type="button"
                   disabled={busy}
                   onClick={() => setFocus({ ...DEFAULT_MEDIA_FOCUS })}
-                  className="ml-1 flex items-center gap-1 text-[11px] text-white/45 hover:text-white"
+                  className="ml-0.5 flex items-center gap-1 text-[11px] text-white/45 hover:text-white"
                 >
                   <RotateCcw className="w-3 h-3" />
                   {t("imageAdjust.reset")}
@@ -518,49 +510,47 @@ export default function ImageAdjustModal({
               }
               className="w-full accent-purple-500"
             />
-            <p className="text-[10px] text-white/35">{t("imageAdjust.zoomOutHint")}</p>
           </div>
 
           {canRemoveBackground ? (
-            <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3">
-              <div className="flex flex-wrap items-center gap-2">
-                {!hasRemovedBg ? (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void handleRemoveBackground()}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
-                  >
-                    <Eraser className="h-3.5 w-3.5" />
-                    {t("imageAdjust.removeBg")}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={handleRestoreOriginal}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs font-medium text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    {t("imageAdjust.restoreBg")}
-                  </button>
-                )}
-                <p className="text-[11px] leading-relaxed text-white/40">
-                  {t("imageAdjust.removeBgHint")}
-                </p>
-              </div>
+            <div className="flex items-center gap-2">
+              {!hasRemovedBg ? (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void handleRemoveBackground()}
+                  title={t("imageAdjust.removeBgHint")}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] font-medium text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
+                >
+                  <Eraser className="h-3.5 w-3.5" />
+                  {t("imageAdjust.removeBg")}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={handleRestoreOriginal}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[11px] font-medium text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white disabled:opacity-50"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  {t("imageAdjust.restoreBg")}
+                </button>
+              )}
+              <p className="min-w-0 flex-1 truncate text-[10px] text-white/35">
+                {t("imageAdjust.removeBgHint")}
+              </p>
             </div>
           ) : null}
 
           {error && <p className="text-xs text-red-400">{error}</p>}
         </div>
 
-        <div className="flex gap-2 px-4 py-3 border-t border-white/10 bg-white/[0.02]">
+        <div className="flex shrink-0 gap-2 px-3 py-2.5 border-t border-white/10 bg-white/[0.02]">
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="flex-1 py-2.5 rounded-xl border border-white/10 text-sm text-white/70 hover:bg-white/5"
+            className="flex-1 py-2 rounded-xl border border-white/10 text-sm text-white/70 hover:bg-white/5"
           >
             {t("imageAdjust.cancel")}
           </button>
@@ -568,7 +558,7 @@ export default function ImageAdjustModal({
             type="button"
             onClick={() => void handleConfirm()}
             disabled={busy}
-            className="flex-1 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+            className="flex-1 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-sm font-medium flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {exporting ? (
               <>

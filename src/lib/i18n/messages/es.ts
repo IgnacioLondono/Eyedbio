@@ -611,6 +611,8 @@ export interface Messages {
     audioUploaded: string;
     removeAudio: string;
     removeFile: string;
+    downloadFile: string;
+    downloadError: string;
     changeFile: string;
     uploadBanner: string;
     uploadBackground: string;
@@ -1370,6 +1372,8 @@ export const es: Messages = {
     audioUploaded: "Audio subido",
     removeAudio: "Quitar audio",
     removeFile: "Quitar archivo",
+    downloadFile: "Descargar",
+    downloadError: "No se pudo descargar el archivo",
     changeFile: "Cambiar archivo",
     uploadBanner: "Subir imagen de banner",
     uploadBackground: "Subir imagen, GIF o video",
