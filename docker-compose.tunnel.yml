@@ -1,0 +1,3 @@
+# Compatibilidad Portainer / raíz del repo.
+include:
+  - docker/compose/docker-compose.tunnel.yml

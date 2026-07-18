@@ -1,0 +1,25 @@
+# Túnel Cloudflare en la misma red que nginx (evita 502 por IP LAN inalcanzable).
+#
+# Uso CLI:
+#   docker compose -f docker/compose/docker-compose.ghcr.yml \
+#     -f docker/compose/docker-compose.tunnel.yml up -d
+#
+# Portainer: añade este archivo como segundo compose del stack, o no lo uses
+# y conecta tu cloudflared existente: docker network connect eyed-bio-net <contenedor>
+#
+# Zero Trust → Public Hostname eyedbio → Service URL: http://nginx:9090
+# (NO uses 192.168.x.x)
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: eyed-bio-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      nginx:
+        condition: service_started
+    networks:
+      - eyed-net

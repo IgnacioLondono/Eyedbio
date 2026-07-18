@@ -50,14 +50,14 @@ docker compose -f docker/compose/docker-compose.ghcr.yml up -d
 
 ### Cloudflare Tunnel (opcional)
 
-Si Cloudflare da **502** porque `cloudflared` no alcanza la IP LAN del host, levanta el conector **en la misma red** que nginx:
+Si Cloudflare da **502** porque `cloudflared` no alcanza la IP LAN del host:
+
+**Rápido:** une tu túnel existente a la red de Eyed.bio y apunta el hostname a nginx:
 
 ```bash
-# En el .env / Portainer:
-# COMPOSE_PROFILES=tunnel
-# CLOUDFLARE_TUNNEL_TOKEN=eyJ...
-
-docker compose -f docker/compose/docker-compose.ghcr.yml --profile tunnel up -d
+docker network connect eyed-bio-net cloudflare3-cloudflared-2-1
 ```
 
-En Zero Trust → Public Hostname de `eyedbio` → Service: `http://nginx:9090` (no `192.168.x.x`).
+En Zero Trust → Public Hostname → Service: `http://eyed-bio-nginx:9090`.
+
+**Opcional en este repo:** segundo compose `docker/compose/docker-compose.tunnel.yml` + `CLOUDFLARE_TUNNEL_TOKEN`, Service: `http://nginx:9090`.

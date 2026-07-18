@@ -103,24 +103,8 @@ services:
     networks:
       - eyed-net
 
-  # Túnel Cloudflare en la misma red que nginx (evita 502 por IP LAN inalcanzable).
-  # Activar: COMPOSE_PROFILES=tunnel + CLOUDFLARE_TUNNEL_TOKEN
-  # En Zero Trust → Public Hostname eyedbio → Service: http://nginx:9090
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    container_name: eyed-bio-cloudflared
-    profiles: ["tunnel"]
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run
-    environment:
-      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?Set CLOUDFLARE_TUNNEL_TOKEN when using profile tunnel}
-    depends_on:
-      nginx:
-        condition: service_started
-    networks:
-      - eyed-net
-
 networks:
   eyed-net:
     name: eyed-bio-net
-    # Otras stacks (p. ej. cloudflare3) pueden hacer: docker network connect eyed-bio-net <contenedor>
+    # Otras stacks pueden unirse: docker network connect eyed-bio-net <contenedor>
+    # Túnel Cloudflare opcional: docker/compose/docker-compose.tunnel.yml
