@@ -47,3 +47,17 @@ Imagen GHCR (sin compilar en servidor):
 ```bash
 docker compose -f docker/compose/docker-compose.ghcr.yml up -d
 ```
+
+### Cloudflare Tunnel (opcional)
+
+Si Cloudflare da **502** porque `cloudflared` no alcanza la IP LAN del host, levanta el conector **en la misma red** que nginx:
+
+```bash
+# En el .env / Portainer:
+# COMPOSE_PROFILES=tunnel
+# CLOUDFLARE_TUNNEL_TOKEN=eyJ...
+
+docker compose -f docker/compose/docker-compose.ghcr.yml --profile tunnel up -d
+```
+
+En Zero Trust → Public Hostname de `eyedbio` → Service: `http://nginx:9090` (no `192.168.x.x`).
