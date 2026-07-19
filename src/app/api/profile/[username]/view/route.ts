@@ -43,9 +43,18 @@ export async function POST(request: Request, { params }: Props) {
 
   const viewerId = session?.user?.id;
 
-  if (viewerId) {
+  // Sesión JWT con userId borrado / de otra DB → no usar como viewer (evita P2003).
+  const viewer =
+    viewerId != null
+      ? await prisma.user.findUnique({
+          where: { id: viewerId },
+          select: { id: true },
+        })
+      : null;
+
+  if (viewer) {
     const created = await prisma.profileView.createMany({
-      data: [{ viewerId, profileUserId: existing.id }],
+      data: [{ viewerId: viewer.id, profileUserId: existing.id }],
       skipDuplicates: true,
     });
 
