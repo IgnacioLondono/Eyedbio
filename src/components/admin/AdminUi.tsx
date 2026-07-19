@@ -5,7 +5,11 @@ import Link from "next/link";
 import { ArrowRight, Loader2 } from "lucide-react";
 
 export function AdminPage({ children }: { children: ReactNode }) {
-  return <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-10">{children}</div>;
+  return (
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 pb-10 sm:px-6 sm:py-8 sm:pb-12 lg:px-10">
+      {children}
+    </div>
+  );
 }
 
 export function AdminPageHeader({

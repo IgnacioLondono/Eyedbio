@@ -161,8 +161,8 @@ export default function AdminShell({ children, adminEmail }: Props) {
         ) : null}
 
         <aside
-          className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] flex-col border-r border-white/[0.06] bg-[#0a0a10] transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-svh lg:max-h-svh lg:translate-x-0 ${
-            mobileOpen ? "translate-x-0" : "-translate-x-full"
+          className={`fixed inset-y-0 left-0 z-50 flex w-[17.5rem] flex-col border-r border-white/[0.06] bg-[#0a0a10] transition-transform duration-200 lg:sticky lg:top-0 lg:z-auto lg:h-svh lg:max-h-svh lg:[transform:none] ${
+            mobileOpen ? "max-lg:translate-x-0" : "max-lg:-translate-x-full"
           }`}
         >
           {sidebar}
