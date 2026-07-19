@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -9,6 +10,7 @@ import {
   ExternalLink,
   HelpCircle,
   LifeBuoy,
+  LogOut,
   Search,
   Settings,
 } from "lucide-react";
@@ -227,6 +229,14 @@ export function DashboardSidebar({
           {t("dashboard.myPage")}
         </Link>
         <ShareProfileButton username={username} displayName={displayName} variant="sidebar" />
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/" })}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm font-medium text-white/60 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-200"
+        >
+          <LogOut className="h-4 w-4" />
+          {t("dashboard.signOut")}
+        </button>
       </div>
     </aside>
   );

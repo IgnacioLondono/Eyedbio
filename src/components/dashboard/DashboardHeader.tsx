@@ -100,11 +100,12 @@ export default function DashboardHeader({
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="rounded-xl p-2 text-white/35 transition-colors hover:bg-white/[0.04] hover:text-white"
+            className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-white/[0.08] p-2 text-white/55 transition-colors hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-200 sm:px-3 sm:py-1.5"
             title={t("dashboard.signOut")}
             aria-label={t("dashboard.signOut")}
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-3.5 w-3.5 shrink-0" />
+            <span className="hidden text-xs sm:inline">{t("dashboard.signOut")}</span>
           </button>
         </div>
       </div>
