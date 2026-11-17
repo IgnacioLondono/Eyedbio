@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useSyncExternalStore, useState } from "react";
-import { Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { useEffect, useRef, useSyncExternalStore, useState } from "react";
+import { Pause, Play, Volume1, Volume2, VolumeX } from "lucide-react";
 import { DEFAULT_CLIP_DURATION } from "@/lib/config/audio-config";
 import {
   getBackgroundVideoAudioServerSnapshot,
@@ -32,12 +32,19 @@ interface Props {
   variant?: "floating" | "card";
 }
 
+function VolumeIcon({ volume, muted }: { volume: number; muted: boolean }) {
+  if (muted || volume <= 0.001) return <VolumeX className="h-4 w-4" />;
+  if (volume < 0.45) return <Volume1 className="h-4 w-4" />;
+  return <Volume2 className="h-4 w-4" />;
+}
+
 export default function ProfileAudio({
   url,
   startTime = 0,
   clipDuration = DEFAULT_CLIP_DURATION,
   volumeOnly = false,
   enabled,
+  accentColor = "#a855f7",
   variant = "floating",
 }: Props) {
   const uploadSnapshot = useSyncExternalStore(
@@ -52,8 +59,9 @@ export default function ProfileAudio({
     getBackgroundVideoAudioServerSnapshot
   );
 
-  const [showVolume, setShowVolume] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!enabled || volumeOnly || !url) return;
@@ -82,6 +90,17 @@ export default function ProfileAudio({
     setIsTouchDevice(coarse || touchCapable);
   }, []);
 
+  useEffect(() => {
+    if (!expanded) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setExpanded(false);
+      }
+    };
+    window.addEventListener("pointerdown", onPointerDown);
+    return () => window.removeEventListener("pointerdown", onPointerDown);
+  }, [expanded]);
+
   if (!enabled || !url) return null;
 
   const volume = volumeOnly ? videoSnapshot.volume : uploadSnapshot.volume;
@@ -100,7 +119,7 @@ export default function ProfileAudio({
     setProfileAudioVolume(value);
   };
 
-  const handleVolumePointerDown = () => {
+  const unlockAudio = () => {
     if (volumeOnly) {
       unmuteBackgroundVideoFromUserGesture();
       return;
@@ -110,52 +129,69 @@ export default function ProfileAudio({
     }
   };
 
-  const handleVolumeButtonClick = () => {
-    if (volumeOnly) {
-      if (muted) {
-        const restored = getBackgroundVideoVolumeBeforeMute();
-        handleVolumeChange(restored > 0 ? restored : isTouchDevice ? 1 : 0.7);
-      } else {
-        handleVolumeChange(0);
-      }
+  const toggleMute = () => {
+    unlockAudio();
+    if (muted || volume <= 0.001) {
+      const restored = volumeOnly ? getBackgroundVideoVolumeBeforeMute() : 0.7;
+      handleVolumeChange(restored > 0.05 ? restored : isTouchDevice ? 1 : 0.7);
       return;
     }
-
-    if (isTouchDevice) {
-      setShowVolume((prev) => !prev);
-      return;
-    }
-    setShowVolume(true);
+    handleVolumeChange(0);
   };
 
+  const handleSpeakerClick = () => {
+    if (isTouchDevice) {
+      if (!expanded) {
+        setExpanded(true);
+        unlockAudio();
+        return;
+      }
+      toggleMute();
+      return;
+    }
+    toggleMute();
+  };
+
+  // Card: icon compacto; slider al hover (desktop) o 1er tap (móvil)
   const controlsShell =
     variant === "card"
-      ? "group flex items-center rounded-lg bg-black/35 backdrop-blur-md border border-white/10 text-white/75 hover:text-white transition-all duration-300 ease-out overflow-hidden"
-      : `group flex items-center rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/70 hover:text-white transition-all duration-300 ease-out overflow-hidden ${
-          isTouchDevice && showVolume ? "pr-3" : ""
+      ? "group/audio relative flex items-center overflow-hidden rounded-xl text-white/85 transition-colors"
+      : `group flex items-center rounded-full bg-black/45 backdrop-blur-xl border border-white/12 text-white/80 hover:text-white transition-all duration-300 ease-out overflow-hidden shadow-lg shadow-black/30 ${
+          isTouchDevice && expanded ? "pr-3" : ""
         }`;
 
-  const sliderReveal =
-    volumeOnly && variant === "card"
-      ? "w-[88px] opacity-100 pr-2"
-      : variant === "card"
-        ? isTouchDevice
-          ? showVolume
-            ? "w-[88px] opacity-100"
-            : "w-0 opacity-0"
-          : "w-0 opacity-0 group-hover:w-[88px] group-hover:opacity-100 group-hover:pr-2"
-        : isTouchDevice
-          ? showVolume
-            ? "w-[130px] opacity-100"
-            : "w-0 opacity-0"
-          : "w-0 opacity-0 group-hover:w-[130px] group-hover:opacity-100 group-hover:pr-3";
+  const sliderWidth =
+    variant === "card"
+      ? isTouchDevice
+        ? expanded
+          ? "w-[92px] opacity-100 pr-2"
+          : "w-0 opacity-0"
+        : "w-0 opacity-0 group-hover/audio:w-[92px] group-hover/audio:opacity-100 group-hover/audio:pr-2 group-focus-within/audio:w-[92px] group-focus-within/audio:opacity-100 group-focus-within/audio:pr-2"
+      : isTouchDevice
+        ? expanded
+          ? "w-[120px] opacity-100"
+          : "w-0 opacity-0"
+        : "w-0 opacity-0 group-hover:w-[120px] group-hover:opacity-100 group-hover:pr-3";
 
   const wrapperClass = variant === "card" ? "" : "fixed bottom-6 right-6 z-30";
-  const buttonPadding = variant === "card" ? "p-2 shrink-0" : "p-3 sm:p-2.5 shrink-0";
+  const iconBtn =
+    variant === "card"
+      ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white/85 transition hover:bg-white/10 hover:text-white active:scale-95"
+      : "p-3 sm:p-2.5 shrink-0";
+
+  const percent = Math.round(Math.min(1, Math.max(0, volume)) * 100);
 
   return (
-    <div className={wrapperClass}>
-      <div className={controlsShell}>
+    <div className={wrapperClass} ref={rootRef}>
+      <div
+        className={controlsShell}
+        onMouseEnter={() => {
+          if (!isTouchDevice && variant === "card") setExpanded(true);
+        }}
+        onMouseLeave={() => {
+          if (!isTouchDevice && variant === "card") setExpanded(false);
+        }}
+      >
         {!volumeOnly ? (
           <button
             type="button"
@@ -165,33 +201,33 @@ export default function ProfileAudio({
               }
             }}
             onClick={toggleProfileAudioPlayPause}
-            className={`${buttonPadding} ${
-              waitingForTap
-                ? "animate-pulse ring-2 ring-purple-400/60 ring-offset-1 ring-offset-transparent rounded-lg"
-                : ""
+            className={`${iconBtn} ${
+              waitingForTap ? "animate-pulse ring-2 ring-white/30 ring-offset-1 ring-offset-transparent" : ""
             }`}
             aria-label={isPlaying ? "Pausar música" : "Reproducir música"}
           >
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
           </button>
         ) : null}
 
         <button
           type="button"
-          onPointerDown={handleVolumePointerDown}
-          onClick={handleVolumeButtonClick}
-          className={`${buttonPadding} ${
+          onPointerDown={unlockAudio}
+          onClick={handleSpeakerClick}
+          className={`${iconBtn} ${
             waitingForTap && volumeOnly
-              ? "animate-pulse ring-2 ring-purple-400/60 ring-offset-1 ring-offset-transparent rounded-lg"
+              ? "animate-pulse ring-2 ring-white/30 ring-offset-1 ring-offset-transparent"
               : ""
           }`}
-          aria-label={muted ? "Activar sonido" : "Ajustar volumen"}
+          aria-label={muted ? "Activar sonido" : "Silenciar o ajustar volumen"}
+          aria-expanded={expanded}
+          title={muted ? "Sonido off — toca para activar" : "Volumen"}
         >
-          {muted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          <VolumeIcon volume={volume} muted={muted} />
         </button>
 
         <div
-          className={`flex items-center gap-1.5 transition-all duration-300 ease-out overflow-hidden ${sliderReveal}`}
+          className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ease-out ${sliderWidth}`}
         >
           <input
             type="range"
@@ -199,13 +235,20 @@ export default function ProfileAudio({
             max="1"
             step="0.01"
             value={volume}
+            onPointerDown={unlockAudio}
             onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
-            className="flex-1 min-w-0 h-1 accent-purple-500 cursor-pointer"
+            className="profile-volume-slider min-w-0 flex-1 cursor-pointer"
+            style={
+              {
+                "--volume-accent": accentColor,
+                "--volume-pct": `${percent}%`,
+              } as React.CSSProperties
+            }
             aria-label="Volumen"
           />
           {variant !== "card" && (
-            <span className="text-[10px] text-white/50 w-7 text-right tabular-nums shrink-0">
-              {Math.round(volume * 100)}
+            <span className="w-7 shrink-0 text-right text-[10px] tabular-nums text-white/50">
+              {percent}
             </span>
           )}
         </div>

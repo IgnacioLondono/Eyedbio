@@ -70,6 +70,48 @@ body {
   -webkit-backdrop-filter: blur(10px);
 }
 
+.profile-volume-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    to right,
+    var(--volume-accent, #a855f7) 0%,
+    var(--volume-accent, #a855f7) var(--volume-pct, 0%),
+    rgba(255, 255, 255, 0.18) var(--volume-pct, 0%),
+    rgba(255, 255, 255, 0.18) 100%
+  );
+  outline: none;
+}
+
+.profile-volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 2px solid color-mix(in srgb, var(--volume-accent, #a855f7) 70%, white);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.profile-volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 2px solid color-mix(in srgb, var(--volume-accent, #a855f7) 70%, white);
+  cursor: pointer;
+}
+
+.profile-volume-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
 ::selection {
   background: rgba(168, 85, 247, 0.3);
   color: white;

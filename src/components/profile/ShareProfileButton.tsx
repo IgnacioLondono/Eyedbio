@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ComponentType } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import { Check, Download, Link2, Share2, Smartphone, X, type LucideIcon } from "lucide-react";
 import {
   FacebookIcon,
@@ -72,6 +72,8 @@ export default function ShareProfileButton({
   const [copied, setCopied] = useState(false);
   const [storyHint, setStoryHint] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressTriggered = useRef(false);
 
   const profileUrl =
     typeof window !== "undefined"
@@ -206,14 +208,46 @@ export default function ShareProfileButton({
     };
   }, [open]);
 
+  const clearLongPress = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handleCardPointerDown = () => {
+    longPressTriggered.current = false;
+    clearLongPress();
+    longPressTimer.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      void copyLink();
+    }, 420);
+  };
+
+  const handleCardClick = async () => {
+    if (longPressTriggered.current) {
+      longPressTriggered.current = false;
+      return;
+    }
+    // Móvil: sheet nativo primero; escritorio: panel completo
+    const coarse =
+      typeof window !== "undefined" &&
+      (window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0);
+    if (coarse && typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      await nativeShare();
+      return;
+    }
+    setOpen(true);
+  };
+
   const triggerClass =
     variant === "sidebar"
       ? "flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-600/25 transition-colors hover:bg-purple-500"
       : variant === "inline"
       ? "inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-sm font-medium transition-colors"
       : variant === "card"
-        ? "p-2 rounded-lg bg-black/35 backdrop-blur-md border border-white/10 text-white/75 hover:text-white hover:bg-black/50 transition-colors"
-        : "fixed top-6 left-6 z-30 flex items-center gap-2 px-3 py-2.5 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-white/80 hover:text-white transition-all text-xs font-medium";
+        ? "inline-flex h-9 w-9 items-center justify-center rounded-xl text-white/85 transition hover:bg-white/10 hover:text-white active:scale-95"
+        : "fixed top-6 left-6 z-30 flex items-center gap-2 px-3 py-2.5 rounded-full bg-black/45 backdrop-blur-xl border border-white/12 text-white/80 hover:text-white transition-all text-xs font-medium shadow-lg shadow-black/30";
 
   return (
     <>
@@ -244,11 +278,26 @@ export default function ShareProfileButton({
       ) : (
         <button
           type="button"
-          onClick={() => setOpen(true)}
+          onClick={variant === "card" ? () => void handleCardClick() : () => setOpen(true)}
+          onPointerDown={variant === "card" ? handleCardPointerDown : undefined}
+          onPointerUp={variant === "card" ? clearLongPress : undefined}
+          onPointerLeave={variant === "card" ? clearLongPress : undefined}
+          onPointerCancel={variant === "card" ? clearLongPress : undefined}
           className={triggerClass}
           aria-label={t("share.shareProfile")}
+          title={
+            variant === "card"
+              ? copied
+                ? t("share.linkCopied")
+                : `${t("share.shareProfile")} · ${t("share.copyLink")}`
+              : undefined
+          }
         >
-          <Share2 className="w-4 h-4" />
+          {variant === "card" && copied ? (
+            <Check className="h-4 w-4 text-emerald-400" />
+          ) : (
+            <Share2 className="h-4 w-4" />
+          )}
           {variant === "floating"
             ? t("share.share")
             : variant === "sidebar"

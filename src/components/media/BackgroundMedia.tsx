@@ -115,7 +115,7 @@ export default function BackgroundMedia({
             instanceKey={videoInstanceKey}
             src={displayUrl}
             focus={mediaFocus}
-            priority
+            priority={false}
             autoPlay={shouldPlay}
             muted
             videoRef={attachVideoRef}
