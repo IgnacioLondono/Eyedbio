@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
+import LandingStickyBar from "@/components/layout/LandingStickyBar";
 import Logo from "@/components/layout/Logo";
 import CommunityDiscordLink from "@/components/layout/CommunityDiscordLink";
 import LandingStyleShowcase from "@/components/landing/LandingStyleShowcase";
@@ -93,10 +94,10 @@ export default function LandingPage() {
       </div>
 
       <div className="relative z-10">
-        <Navbar showCommunityLink />
+        <Navbar showCommunityLink variant="landing" />
 
         {/* HERO */}
-        <section className="relative px-6 pt-36 pb-16">
+        <section className="relative px-6 pt-32 pb-16 md:pt-36">
           <div className="mx-auto max-w-6xl text-center">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
@@ -189,6 +190,8 @@ export default function LandingPage() {
             </motion.div>
           </div>
         </section>
+
+        <LandingStickyBar />
 
         {/* STATS */}
         <section className="px-6 py-14">

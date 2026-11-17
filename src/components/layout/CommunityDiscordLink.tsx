@@ -13,7 +13,7 @@ interface Props {
 }
 
 const headerLinkClass =
-  "inline-flex items-center justify-center gap-1.5 p-1.5 sm:px-3 sm:py-1.5 text-xs text-white/60 hover:text-white border border-white/10 rounded-lg transition-colors shrink-0";
+  "inline-flex items-center justify-center gap-1.5 text-[15px] font-normal text-white/90 hover:text-white transition-colors shrink-0";
 
 export default function CommunityDiscordLink({
   variant = "button",
@@ -31,9 +31,9 @@ export default function CommunityDiscordLink({
           rel="noopener noreferrer"
           title={COMMUNITY_BOT_LABEL}
           aria-label={COMMUNITY_BOT_LABEL}
-          className={`${headerLinkClass} hidden md:inline-flex hover:bg-purple-500/10 hover:border-purple-500/30`}
+          className={`${headerLinkClass} hidden md:inline-flex`}
         >
-          <span className="font-medium text-purple-300/90">{COMMUNITY_BOT_LABEL}</span>
+          <span>{COMMUNITY_BOT_LABEL}</span>
         </a>
         <a
           href={COMMUNITY_DISCORD_URL}
@@ -41,7 +41,7 @@ export default function CommunityDiscordLink({
           rel="noopener noreferrer"
           title="Discord"
           aria-label="Discord"
-          className={`${headerLinkClass} hover:bg-[#5865F2]/10 hover:border-[#5865F2]/30`}
+          className={headerLinkClass}
         >
           <DiscordIcon />
           <span className="hidden sm:inline">Discord</span>

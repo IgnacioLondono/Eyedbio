@@ -59,7 +59,7 @@ export default function DiscoverPageClient() {
           </div>
         </header>
       ) : (
-        <Navbar />
+        <Navbar variant="app" />
       )}
 
       <main className={isLoggedIn ? "" : "pt-16"}>
