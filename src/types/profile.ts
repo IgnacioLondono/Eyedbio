@@ -219,7 +219,7 @@ export interface Profile {
 export const DEFAULT_SETTINGS: ProfileSettings = {
   backgroundUrl: "",
   backgroundEffect: "stars",
-  backgroundDim: 0.5,
+  backgroundDim: 0.58,
   pageOverlay: "none",
   accentColor: "#a855f7",
   cardColor: "#ffffff",

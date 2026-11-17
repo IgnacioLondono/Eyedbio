@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans, Syne } from "next/font/google";
 import Providers from "@/components/auth/Providers";
 import { resolveServerLocale } from "@/lib/i18n/server-locale";
 import { getSiteSettings } from "@/lib/site-settings";
 import "./globals.css";
 
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-dm-sans",
+});
+
+const syne = Syne({
+  subsets: ["latin"],
+  variable: "--font-syne",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +32,10 @@ export default async function RootLayout({
   ]);
 
   return (
-    <html lang={initialLocale} className={`${inter.variable} h-full antialiased`}>
+    <html
+      lang={initialLocale}
+      className={`${dmSans.variable} ${syne.variable} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col font-sans">
         <Providers initialLocale={initialLocale} initialSiteSettings={initialSiteSettings}>
           {children}

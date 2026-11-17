@@ -47,6 +47,50 @@ model User {
   reviewsWritten              ProfileReview[] @relation("ReviewsWritten")
   reviewsReceived             ProfileReview[] @relation("ReviewsReceived")
   supportTickets              SupportTicket[]
+  templatesAuthored           ProfileTemplate[] @relation("TemplateAuthor")
+  templateInstalls            TemplateInstall[]
+}
+
+model ProfileTemplate {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  description  String   @default("")
+  previewUrl   String?
+  authorId     String?
+  author       User?    @relation("TemplateAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  settingsJson String   @db.Text
+  layout       String   @default("classic")
+  category     String   @default("general")
+  tags         String   @default("[]")
+  published    Boolean  @default(false)
+  featured     Boolean  @default(false)
+  official     Boolean  @default(false)
+  /// Reserved for future paid marketplace (0 = free)
+  priceCents   Int      @default(0)
+  currency     String?
+  isPaid       Boolean  @default(false)
+  installs     Int      @default(0)
+  likes        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  installRecords TemplateInstall[]
+
+  @@index([published, featured, createdAt(sort: Desc)])
+  @@index([authorId])
+  @@index([category])
+}
+
+model TemplateInstall {
+  id         String          @id @default(cuid())
+  userId     String
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId String
+  template   ProfileTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  installedAt DateTime       @default(now())
+
+  @@unique([userId, templateId])
+  @@index([templateId])
 }
 
 model SupportTicket {

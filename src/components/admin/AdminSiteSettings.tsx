@@ -72,6 +72,11 @@ const SETTING_META: Record<
     label: "Ocultar admins en Descubre",
     description: "Excluye las cuentas con rol admin del podio y del listado en /discover.",
   },
+  marketplaceEnabled: {
+    label: "Marketplace de plantillas",
+    description:
+      "Activa /marketplace, plantillas oficiales y la pestaña Plantillas del dashboard. Hoy es gratis; a futuro puede haber funciones de pago.",
+  },
 };
 
 const SETTING_GROUPS: SettingGroup[] = [
@@ -93,7 +98,7 @@ const SETTING_GROUPS: SettingGroup[] = [
   {
     title: "Comunidad y descubrimiento",
     description: "Enlaces externos y visibilidad en Descubre.",
-    keys: ["communityDiscordEnabled", "hideAdminProfilesInDiscover"],
+    keys: ["communityDiscordEnabled", "hideAdminProfilesInDiscover", "marketplaceEnabled"],
   },
   {
     title: "Soporte",

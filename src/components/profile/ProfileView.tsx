@@ -274,14 +274,19 @@ export default function ProfileView({ username, viewerIsOwner }: Props) {
         />
         <ClaimProfileCta />
         <div
-          className={`absolute inset-0 z-20 flex items-center justify-center overflow-y-auto px-6 py-6 ${
-            reserveBottomForCta ? "pb-36 md:pb-40" : ""
+          className={`absolute inset-0 z-20 flex items-center justify-center overflow-y-auto px-5 py-8 sm:px-6 ${
+            reserveBottomForCta ? "pb-36 md:pb-40" : "pb-16"
           } ${needsGate ? "pointer-events-none" : ""}`}
         >
-          <div className="mx-auto w-full max-w-md flex justify-center">
+          <div className="mx-auto flex w-full max-w-lg justify-center">
             <ProfileCard profile={profile} showControls={mediaActive} mediaActive={mediaActive} />
           </div>
         </div>
+        {/* Soft bottom vignette for readable brand / controls */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-[15] h-36 bg-gradient-to-t from-black/55 via-black/20 to-transparent"
+        />
         {mediaActive ? <ProfileCursor settings={settings} /> : null}
         {mediaActive ? (
           <ProfileMusicPlayer profile={profile} raised={reserveBottomForCta} />

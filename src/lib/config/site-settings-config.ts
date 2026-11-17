@@ -19,6 +19,8 @@ export interface SiteSettingsConfig {
   hideAdminProfilesInDiscover: boolean;
   /** Botón «Continúa con Discord» en login (solo cuentas ya vinculadas) */
   discordLoginEnabled: boolean;
+  /** Galería de plantillas y marketplace de estilos */
+  marketplaceEnabled: boolean;
 }
 
 export const DEFAULT_SITE_SETTINGS: SiteSettingsConfig = {
@@ -32,6 +34,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsConfig = {
   supportEnabled: true,
   hideAdminProfilesInDiscover: false,
   discordLoginEnabled: true,
+  marketplaceEnabled: true,
 };
 
 export function mergeSiteSettings(partial?: Partial<SiteSettingsConfig>): SiteSettingsConfig {

@@ -40,10 +40,10 @@ function CardShell({
   noPadding?: boolean;
 }) {
   const cardStyle = getCardSurfaceStyle(profile.settings);
-  const pad = noPadding ? "" : compact ? "p-3" : "p-5";
+  const pad = noPadding ? "" : compact ? "p-3.5" : "p-6";
   return (
     <div
-      className={`relative w-full rounded-2xl border shadow-2xl ${pad} ${className}`}
+      className={`profile-card-shell relative w-full overflow-hidden rounded-[1.35rem] border shadow-2xl ${pad} ${className}`}
       style={cardStyle}
     >
       {children}
@@ -86,11 +86,17 @@ export function LayoutClassic({ profile, compact }: LayoutProps) {
   return (
     <CardShell profile={profile} compact={compact}>
       <div className="flex w-full flex-col items-center text-center">
-        <ProfileAvatar profile={profile} scale={scale} className="mb-3" />
+        <ProfileAvatar profile={profile} scale={scale} className="mb-4 shadow-lg shadow-black/30" />
         <ProfileNameBlock profile={profile} scale={scale} />
-        <ProfileBio profile={profile} scale={scale} className="mt-1.5 mb-2" />
-        <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-2" />
-        <ProfileViews profile={profile} scale={scale} className="mb-2" />
+        <ProfileBio profile={profile} scale={scale} className="mt-2 mb-3" />
+        <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-3" />
+        <div
+          className={`mb-3 flex w-full items-center justify-center gap-3 border-y border-white/10 ${
+            compact ? "py-1.5" : "py-2.5"
+          }`}
+        >
+          <ProfileViews profile={profile} scale={scale} className="mb-0" />
+        </div>
         <LinksBlock profile={profile} compact={compact} />
       </div>
     </CardShell>
@@ -99,7 +105,7 @@ export function LayoutClassic({ profile, compact }: LayoutProps) {
 
 export function LayoutHero({ profile, compact }: LayoutProps) {
   const scale = getCardScale(!!compact);
-  const heroAvatar = compact ? "w-20 h-20" : "w-28 h-28";
+  const heroAvatar = compact ? "w-20 h-20" : "w-32 h-32";
   return (
     <CardShell profile={profile} compact={compact}>
       <div className="flex w-full flex-col items-center text-center">
@@ -107,12 +113,12 @@ export function LayoutHero({ profile, compact }: LayoutProps) {
           profile={profile}
           scale={scale}
           sizeOverride={heroAvatar}
-          className="mb-4"
+          className="mb-5 shadow-xl shadow-black/40"
         />
         <ProfileNameBlock profile={profile} scale={scale} />
-        <ProfileBio profile={profile} scale={scale} className="mt-2 mb-2" />
-        <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-2" />
-        <ProfileViews profile={profile} scale={scale} className="mb-4" />
+        <ProfileBio profile={profile} scale={scale} className="mt-2.5 mb-3" />
+        <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-3" />
+        <ProfileViews profile={profile} scale={scale} className="mb-5" />
         <LinksBlock profile={profile} compact={compact} />
       </div>
     </CardShell>
@@ -236,13 +242,15 @@ export function LayoutMinimal({ profile, compact }: LayoutProps) {
 
   if (!compact) {
     return (
-      <div className="relative flex w-full flex-col items-center gap-4 px-2 text-center">
-        <div className="flex w-full flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-5 sm:text-left">
+      <div className="relative flex w-full flex-col items-center gap-5 px-2 text-center">
+        <div
+          className="flex w-full max-w-md flex-col items-center gap-4 rounded-[1.5rem] border border-white/15 bg-black/35 px-5 py-6 shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl sm:flex-row sm:justify-center sm:gap-5 sm:text-left"
+        >
           <ProfileAvatar
             profile={profile}
             scale={scale}
             sizeOverride={avatarSize}
-            className="shrink-0"
+            className="shrink-0 shadow-lg shadow-black/40"
           />
           <div className="min-w-0 flex flex-col items-center sm:items-start">
             <ProfileNameBlock profile={profile} scale={scale} align="center" />
@@ -251,12 +259,12 @@ export function LayoutMinimal({ profile, compact }: LayoutProps) {
         <ProfileBio profile={profile} scale={scale} className="max-w-sm" />
         <ProfileExtrasSection profile={profile} scale={scale} compact={compact} className="mb-1" />
         <LinksBlock profile={profile} compact={compact} />
-        <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3 rounded-full border border-white/10 bg-black/30 px-3 py-1.5 backdrop-blur-md">
           <ProfileViews profile={profile} scale={scale} />
           {showLocation ? (
             <div
               className={`inline-flex items-center gap-1.5 ${scale.location}`}
-              style={{ color: hexToRgba(settings.textColor, 0.45) }}
+              style={{ color: hexToRgba(settings.textColor, 0.55) }}
             >
               <MapPin className={scale.locationIcon} style={{ color: hexToRgba(settings.accentColor, 0.85) }} />
               <span>{location}</span>

@@ -114,11 +114,11 @@ export interface CardScale {
 export function getCardScale(compact: boolean): CardScale {
   return {
     compact,
-    avatar: compact ? "w-16 h-16" : "w-20 h-20",
-    name: compact ? "text-lg" : "text-xl",
+    avatar: compact ? "w-[4.25rem] h-[4.25rem]" : "w-24 h-24",
+    name: compact ? "text-lg" : "text-2xl",
     badge: compact ? "w-4 h-4" : "w-5 h-5",
-    bio: compact ? "text-xs line-clamp-3" : "text-sm max-w-xs line-clamp-4",
-    views: compact ? "text-[10px]" : "text-[11px]",
+    bio: compact ? "text-xs line-clamp-3" : "text-sm max-w-sm line-clamp-4",
+    views: compact ? "text-[10px]" : "text-xs",
     eye: compact ? "w-3 h-3" : "w-3.5 h-3.5",
     location: compact ? "text-[10px]" : "text-xs",
     locationIcon: compact ? "w-3 h-3" : "w-3.5 h-3.5",
@@ -201,7 +201,7 @@ export function ProfileNameBlock({
           />
         ) : null}
         <h1
-          className={`${scale.name} font-bold break-words ${textAlign} ${nameEffectClass ?? ""} min-w-0`}
+          className={`profile-identity-name ${scale.name} font-bold break-words ${textAlign} ${nameEffectClass ?? ""} min-w-0`}
           style={{
             color: nameEffect === "gradient" ? undefined : textColor,
             ...nameEffectStyle,
@@ -241,13 +241,13 @@ export function ProfileNameBlock({
         </div>
       ) : null}
       <p
-        className={`mt-1 w-full ${scale.compact ? "text-xs" : "text-sm"} ${textAlign} ${
+        className={`profile-identity-handle mt-1.5 w-full ${scale.compact ? "text-xs" : "text-sm"} ${textAlign} ${
           nameEffect !== "none" && nameEffect !== "gradient" ? nameEffectClass ?? "" : ""
         }`}
         style={{
-          color: hexToRgba(textColor, 0.6),
+          color: hexToRgba(textColor, 0.72),
           ...(nameEffect !== "none" && nameEffect !== "gradient"
-            ? getNameEffectStyle(nameEffect, settings.accentColor, hexToRgba(textColor, 0.6))
+            ? getNameEffectStyle(nameEffect, settings.accentColor, hexToRgba(textColor, 0.72))
             : {})
         }}
       >
@@ -320,8 +320,8 @@ export function ProfileFooterBrand({
   if (compact) return null;
   return (
     <p
-      className="text-center text-xs mt-6"
-      style={{ color: hexToRgba(profile.settings.textColor, 0.2) }}
+      className="profile-footer-brand mx-auto mt-5 w-fit rounded-full border border-white/10 bg-black/35 px-3 py-1 text-center text-[11px] tracking-wide"
+      style={{ color: hexToRgba(profile.settings.textColor, 0.55) }}
     >
       eyed.bio/{profile.username}
     </p>

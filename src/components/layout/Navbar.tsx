@@ -120,6 +120,9 @@ export default function Navbar({
             <Link href="/discover" className={linkClass}>
               {t("nav.discover")}
             </Link>
+            <Link href="/marketplace" className={linkClass}>
+              {t("nav.marketplace")}
+            </Link>
             {isLanding && (
               <>
                 <Link href="#features" className={linkClass}>
@@ -186,6 +189,13 @@ export default function Navbar({
               onClick={() => setOpen(false)}
             >
               {t("nav.discover")}
+            </Link>
+            <Link
+              href="/marketplace"
+              className="rounded-lg px-3 py-3 text-base text-white/90 hover:bg-purple-500/10"
+              onClick={() => setOpen(false)}
+            >
+              {t("nav.marketplace")}
             </Link>
             {isLanding && (
               <>

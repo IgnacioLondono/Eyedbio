@@ -9,7 +9,8 @@ export type UploadKind =
   | "favicon"
   | "profileIcon"
   | "cursor"
-  | "musicCover";
+  | "musicCover"
+  | "templatePreview";
 
 export const UPLOAD_LIMITS: Record<UploadKind, number> = {
   avatar: 5 * 1024 * 1024,
@@ -21,6 +22,7 @@ export const UPLOAD_LIMITS: Record<UploadKind, number> = {
   profileIcon: 2 * 1024 * 1024,
   cursor: 1 * 1024 * 1024,
   musicCover: 5 * 1024 * 1024,
+  templatePreview: 5 * 1024 * 1024,
 };
 
 export const AUDIO_MIMES = [
@@ -112,6 +114,7 @@ export const ALLOWED_MIMES: Record<UploadKind, readonly string[]> = {
   profileIcon: AVATAR_MIMES,
   cursor: CURSOR_MIMES,
   musicCover: AVATAR_MIMES,
+  templatePreview: AVATAR_MIMES,
 };
 
 export const ALLOWED_EXTENSIONS: Record<UploadKind, readonly string[]> = {
@@ -124,6 +127,7 @@ export const ALLOWED_EXTENSIONS: Record<UploadKind, readonly string[]> = {
   profileIcon: AVATAR_EXTENSIONS,
   cursor: CURSOR_EXTENSIONS,
   musicCover: AVATAR_EXTENSIONS,
+  templatePreview: AVATAR_EXTENSIONS,
 };
 
 export const ACCEPT_ATTR: Record<UploadKind, string> = {
@@ -136,6 +140,7 @@ export const ACCEPT_ATTR: Record<UploadKind, string> = {
   profileIcon: [...AVATAR_MIMES, ...AVATAR_EXTENSIONS].join(","),
   cursor: [...CURSOR_MIMES, ...CURSOR_EXTENSIONS].join(","),
   musicCover: [...AVATAR_MIMES, ...AVATAR_EXTENSIONS].join(","),
+  templatePreview: [...AVATAR_MIMES, ...AVATAR_EXTENSIONS].join(","),
 };
 
 export const EXT_TO_MIME: Record<string, string> = {

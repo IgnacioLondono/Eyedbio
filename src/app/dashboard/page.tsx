@@ -48,6 +48,7 @@ import DiscordAccountLink from "@/components/auth/DiscordAccountLink";
 import { COMMUNITY_MEDIA_HUB_URL } from "@/lib/config/community";
 import CardLayoutPicker from "@/components/editor/CardLayoutPicker";
 import IconStylePicker from "@/components/editor/IconStylePicker";
+import TemplatesDashboardPanel from "@/components/dashboard/TemplatesDashboardPanel";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { DashboardMobileNav, DashboardSidebar, type DashboardView } from "@/components/dashboard/DashboardNav";
 import DashboardAccountAnalytics, {
@@ -130,7 +131,8 @@ function parseCustomizeSub(value: string | null): string {
     value === "structure" ||
     value === "card" ||
     value === "icons" ||
-    value === "cursor"
+    value === "cursor" ||
+    value === "templates"
   ) {
     return value;
   }
@@ -489,6 +491,7 @@ function DashboardContent() {
     card: t("dashboard.subtabCard"),
     icons: t("dashboard.subtabIcons"),
     cursor: t("dashboard.subtabCursor"),
+    templates: t("dashboard.subtabTemplates"),
   };
 
   const activeTabMeta =
@@ -518,6 +521,7 @@ function DashboardContent() {
       { id: "card", label: t("dashboard.subtabCard") },
       { id: "icons", label: t("dashboard.subtabIcons") },
       { id: "cursor", label: t("dashboard.subtabCursor") },
+      { id: "templates", label: t("dashboard.subtabTemplates") },
     ],
     account: [
       { id: "summary", label: t("dashboard.accountSub.summary") },
@@ -1308,6 +1312,10 @@ function DashboardContent() {
                   )}
                 </DashboardSection>
                 </>
+                )}
+
+                {activeSub === "templates" && site.marketplaceEnabled && (
+                  <TemplatesDashboardPanel profile={profile} />
                 )}
               </>
             )}

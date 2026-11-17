@@ -23,6 +23,7 @@ export interface Messages {
     dashboard: string;
     editProfile: string;
     discover: string;
+    marketplace: string;
     appAreas: string;
     menu: string;
     support: string;
@@ -419,6 +420,7 @@ export interface Messages {
     subtabCard: string;
     subtabIcons: string;
     subtabCursor: string;
+    subtabTemplates: string;
     subtabMedia: string;
     subtabStyle: string;
     subtabNetworks: string;
@@ -684,6 +686,52 @@ export interface Messages {
     removeOwner: string;
     badges: string;
   };
+  marketplace: {
+    paymentsNotice: string;
+    badge: string;
+    title: string;
+    subtitle: string;
+    searchPlaceholder: string;
+    uploadCta: string;
+    loading: string;
+    loadError: string;
+    empty: string;
+    apply: string;
+    applying: string;
+    applySuccess: string;
+    applyError: string;
+    official: string;
+    featured: string;
+    free: string;
+    installs: string;
+    catAll: string;
+    catDark: string;
+    catGlass: string;
+    catBold: string;
+    catLinks: string;
+    catCompact: string;
+    catClassic: string;
+    catCommunity: string;
+    saveCurrentTitle: string;
+    saveCurrentHint: string;
+    openMarket: string;
+    formTitle: string;
+    formDescription: string;
+    formPreview: string;
+    publishNow: string;
+    previewReady: string;
+    saveButton: string;
+    saving: string;
+    saveSuccess: string;
+    saveError: string;
+    uploadPreviewError: string;
+    myTemplates: string;
+    myTemplatesEmpty: string;
+    published: string;
+    draft: string;
+    publish: string;
+    unpublish: string;
+  };
 }
 
 export const es: Messages = {
@@ -711,6 +759,7 @@ export const es: Messages = {
     dashboard: "Dashboard",
     editProfile: "Editar perfil",
     discover: "Descubre",
+    marketplace: "Marketplace",
     appAreas: "Secciones de la app",
     menu: "Menú",
     support: "Soporte",
@@ -1170,6 +1219,7 @@ export const es: Messages = {
     subtabCard: "Tarjeta",
     subtabIcons: "Iconos",
     subtabCursor: "Cursor",
+    subtabTemplates: "Plantillas",
     subtabMedia: "Medios",
     subtabStyle: "Estilo",
     subtabNetworks: "Redes",
@@ -1472,5 +1522,54 @@ export const es: Messages = {
     setOwner: "Corona owner",
     removeOwner: "Quitar owner",
     badges: "Insignias",
+  },
+  marketplace: {
+    paymentsNotice:
+      "Aviso: en el futuro Eyed.bio incorporará métodos de pago en algunas funciones. El marketplace de plantillas es gratis por ahora.",
+    badge: "Estilos comunitarios",
+    title: "Marketplace de plantillas",
+    subtitle:
+      "Aplica packs de estilo a tu perfil o publica el tuyo. Las plantillas no reemplazan tu avatar, bio ni enlaces.",
+    searchPlaceholder: "Buscar plantillas…",
+    uploadCta: "Subir mi estilo",
+    loading: "Cargando plantillas…",
+    loadError: "No se pudieron cargar las plantillas",
+    empty: "No hay plantillas en esta categoría",
+    apply: "Aplicar",
+    applying: "Aplicando…",
+    applySuccess: "Plantilla aplicada a tu perfil",
+    applyError: "No se pudo aplicar la plantilla",
+    official: "Oficial",
+    featured: "Destacada",
+    free: "Gratis",
+    installs: "usos",
+    catAll: "Todas",
+    catDark: "Oscuras",
+    catGlass: "Cristal",
+    catBold: "Bold",
+    catLinks: "Enlaces",
+    catCompact: "Compactas",
+    catClassic: "Clásicas",
+    catCommunity: "Comunidad",
+    saveCurrentTitle: "Guardar estilo actual como plantilla",
+    saveCurrentHint:
+      "Se guarda un snapshot de colores, layout y efectos. No incluye tu fondo personal ni medios privados.",
+    openMarket: "Ver marketplace",
+    formTitle: "Título",
+    formDescription: "Descripción",
+    formPreview: "Vista previa (opcional)",
+    publishNow: "Publicar en el marketplace",
+    previewReady: "Vista previa lista",
+    saveButton: "Crear plantilla",
+    saving: "Guardando…",
+    saveSuccess: "Plantilla creada",
+    saveError: "No se pudo guardar la plantilla",
+    uploadPreviewError: "Error al subir la vista previa",
+    myTemplates: "Mis plantillas",
+    myTemplatesEmpty: "Aún no has creado plantillas",
+    published: "Publicada",
+    draft: "Borrador",
+    publish: "Publicar",
+    unpublish: "Despublicar",
   },
 };

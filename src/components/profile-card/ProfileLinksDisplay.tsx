@@ -266,7 +266,11 @@ function RowLinks({
   const containerStyle = getIconContainerStyle(iconStyle);
 
   return (
-    <div className={`flex flex-wrap justify-center gap-2 ${compact ? "" : "gap-2.5"}`}>
+    <div
+      className={`flex flex-wrap justify-center rounded-full border border-white/10 bg-black/20 px-2.5 py-2 backdrop-blur-md ${
+        compact ? "gap-2" : "gap-2.5"
+      }`}
+    >
       {visible.map((link) => {
         const config = PLATFORM_CONFIG[link.platform];
         const color = getPlatformLinkColor(iconStyle, config.color);

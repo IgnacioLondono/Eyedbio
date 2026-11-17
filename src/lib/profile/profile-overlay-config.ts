@@ -26,9 +26,9 @@ export function resolvePageOverlay(settings: Partial<ProfileSettings>): PageOver
   return "none";
 }
 
-/** Oscurecimiento del fondo (0 = sin overlay, 0.5 = default anterior). */
+/** Oscurecimiento del fondo (0 = sin overlay, 0.58 = default para legibilidad). */
 export function resolveBackgroundDim(settings: Partial<ProfileSettings>): number {
   const raw = settings.backgroundDim;
-  if (typeof raw !== "number" || Number.isNaN(raw)) return 0.5;
+  if (typeof raw !== "number" || Number.isNaN(raw)) return 0.58;
   return Math.min(1, Math.max(0, raw));
 }
